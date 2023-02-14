@@ -14,7 +14,7 @@ export const resetApp = () => ({
 });
 
 const rootReducer = (state, action) => {
-    if (action.type == RESET_APP) {
+    if (action.type === RESET_APP) {
         return appReducer(undefined, action);
     }
     return appReducer(state, action);
