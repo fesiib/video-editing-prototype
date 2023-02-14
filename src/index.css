@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap');
+
+:root {
+  /* Color palette */
+  --gray-0: #E9ECEF;
+  --gray-20: #CED4DA;
+  --gray-40: #ADB5BD;
+  --gray-60: #6C757D;
+  --gray-80: #495057;
+  --gray-100: #212529;
+  --dark-blue-60: #1082A8;
+  --dark-blue-80: #0A5770;
+  --dark-blue-100: #073B4C;
+  --blue-60: #7CD5F3;
+  --blue-80: #15ADE0;
+  --blue-100: #118AB2;
+  --green-60: #88FCDD;
+  --green-80: #10F9BB;
+  --green-100: #06D6A0;
+  --yellow-60: #FFEDC2;
+  --yellow-80: #FFE099;
+  --yellow-100: #FFD166;
+  --red-60: #F7A1B5;
+  --red-80: #F47C98;
+  --red-100: #EE6352;
+}
+
+@layer base {
+  html {
+    letter-spacing: -0.02em;
+    font-family: 'Work Sans', sans-serif;
+  }
+
+  body {
+    background-color: var(--gray-0);
+    font-size: 16px;
+  }
+
+  h1 h2 h3 h4 h5 h6 p button {
+    @apply font-sans;
+  }
+
+  h1 {
+    color: black;
+    font-size: 34px;
+    font-weight: bold;
+    line-height: 40px;
+  }
+
+  h2 {
+    color: var(--blue-100);
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 23px;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  .h1 {
+    color: black;
+    font-size: 34px;
+    font-weight: bold;
+    line-height: 40px;
+  }
+
+  .h2 {
+    color: var(--blue-100);
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 23px;
+  }
+
+  .h3 {
+    @apply text-lg;
+  }
+
+  a {
+    @apply text-blue-500;
+  }
+
+  p {
+    @apply text-base;
+  }
+
+  button {
+    @apply whitespace-nowrap inline-flex items-center justify-center px-4 py-2;
+    @apply border border-transparent rounded-md shadow-sm text-base font-medium text-white;
+  }
+
+  
+
+  .green {
+    @apply bg-green-400 hover:bg-green-500;
+  }
+
+  .red {
+    @apply bg-red-400 hover:bg-red-500;
+  }
+
+  .gray {
+    @apply bg-gray-400 hover:bg-gray-500;
+  }
+
+
+  .notification-red {
+    @apply bg-red-500;
+  }
+
+  .text-blue-h2 {
+    color: var(--blue-100);
+  }
+  /* input {
+    @apply focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md;
+  }
+  .search {
+    
+  } */
+  
+  .thumbnail {
+    @apply object-cover;
+    @apply relative overflow-hidden shadow-md rounded-2xl;
+    border: solid 1px var(--gray-40);
+  }
+
+  .card {
+    @apply rounded-2xl;
+    border: solid 1px var(--gray-40);
+    background-color: white;
+  }
+
+  /* shitty fix for note taking widget */
+  .fixed-height {
+    height: 305px;
+  }
+
+  /* size classes for gallery images */
+  /* WARNING! THINGS INSIDE GALLERY MIGHT DO RANDOM THINGS, MAKE SURE TO ADD ONLY IMG */
+  /* ASK BAHA BEFORE ANY CHANGES :D */
+
+  .gallery-xxsmall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 5rem);
+    justify-content: space-between;
+    grid-gap: 1rem;
+    @apply pr-8;
+  }
+  .gallery-xxsmall button {
+    @apply h-20 w-20;
+  }
+  .gallery-xxsmall img {
+    @apply h-20 w-20;
+  }
+
+  .gallery-xsmall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 7rem);
+    justify-content: space-between;
+    grid-gap: 1rem;
+    @apply pr-8;
+  }
+  .gallery-xsmall button {
+    @apply h-28 w-28;
+  }
+  .gallery-xsmall img {
+    @apply h-28 w-28;
+  }
+
+  .gallery-small {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 9rem);
+    justify-content: space-between;
+    grid-gap: 2rem;
+    @apply pr-8;
+  }
+  .gallery-small button {
+    @apply h-36 w-36;
+  }
+  
+  .gallery-small img {
+    @apply h-36 w-36;
+  }
+
+  .gallery-medium {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 12rem);
+    justify-content: space-between;
+    grid-gap: 2rem;
+    @apply pr-8;
+  }
+  .gallery-medium button {
+    @apply h-48 w-48;
+  }
+  .gallery-medium img {
+    @apply h-48 w-48;
+  }
+
+  .gallery-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 15rem);
+    justify-content: space-between;
+    grid-gap: 2rem;
+    @apply pr-8;
+  }
+  .gallery-large button {
+    @apply h-60 w-60;
+  }
+  .gallery-large img {
+    @apply h-60 w-60;
+  }
+
+  .gallery-xlarge {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 18rem);
+    justify-content: space-between;
+    grid-gap: 2rem;
+    @apply pr-8;
+  }
+  .gallery-xlarge button {
+    @apply h-72 w-72;
+  }
+  .gallery-xlarge img {
+    @apply h-72 w-72;
+  }
+
+  .order-reports {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 24rem);
+    justify-content: space-between;
+    grid-gap: 1rem;
+    @apply pr-8;
+  }
+}
