@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import videojs from "video.js";
 import 'video.js/dist/video-js.css';
+import './VideoPlayer.css';
 
 function VideoPlayer(props) {
     const videoRef = useRef(null);
@@ -36,7 +37,7 @@ function VideoPlayer(props) {
         };
     }, [playerRef]);
 
-    return (<div data-vjs-player>
+    return (<div data-vjs-player className={"video_player_wrapper"}>
         <div ref={videoRef} />
     </div>);
 }

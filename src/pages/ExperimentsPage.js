@@ -73,8 +73,9 @@ function ExperimentsPage() {
         responsive: true,
         fluid: true,
         sources: [{
-            src: getVideoUrlFromVideoId(videoId),
-            //src: "http://localhost:7777/video/slime.mp4.mp4",
+            //src: getVideoUrlFromVideoId(videoId),
+            src: "http://localhost:7777/video/slime.mp4",
+            //src: "https://youtu.be/kOIj7AgonHM"
         }]
     }
 
@@ -101,6 +102,11 @@ function ExperimentsPage() {
         <div>
             <VideoPlayer options={playerOptions} onReady={handlePlayerReady}/>
         </div>
+
+        <div>
+            <Timeline />
+        </div>
+
         <div className='script_wrapper'>
           <Script 
             script={script}
