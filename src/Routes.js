@@ -7,6 +7,7 @@ import {
 
 import App from "./App";
 import ExperimentsPage from './pages/ExperimentsPage';
+import InBrowser from './pages/InBrowser';
 import ResetPage from './pages/ResetPage';
 
 class Routes extends React.Component {
@@ -17,6 +18,7 @@ class Routes extends React.Component {
                     <Route exact path="/" component={App}/>
                     <Route exact path="/reset" component={ResetPage}/>
                     <Route exact path="/experiments" component={ExperimentsPage}/>
+                    <Route exact path="/ffmpeg" component={InBrowser}/>
                 </Switch>
             </Router>
         )

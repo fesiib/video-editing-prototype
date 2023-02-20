@@ -4,6 +4,7 @@ import videojs from "video.js";
 import 'video.js/dist/video-js.css';
 
 import { colorPalette } from "../colors";
+import EditTimeline from "../components/EditTimeline";
 
 import Script from "../components/Script";
 import VideoPlayer from "../components/VideoPlayer";
@@ -104,7 +105,7 @@ function ExperimentsPage() {
         </div>
 
         <div>
-            <Timeline />
+            <EditTimeline />
         </div>
 
         <div className='script_wrapper'>

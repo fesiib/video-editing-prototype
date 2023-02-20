@@ -10,6 +10,8 @@ import Routes from './Routes';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
+import * as serviceWorker from './services/serviceWorker';
+
 // import {db, storage, auth, analytics, firebaseApp, firebase} from './services/firebase';
 
 const {store, persistor} = configureStore();
@@ -28,4 +30,5 @@ root.render(
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+serviceWorker.unregister();
 reportWebVitals();
