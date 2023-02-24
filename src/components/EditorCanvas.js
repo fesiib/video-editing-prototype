@@ -1,12 +1,18 @@
 import { Animation } from "konva/lib/Animation";
+import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Layer, Rect, Stage, Transformer } from "react-konva";
 
-const DraggableVideo = observer(function DraggableVideo({ domainStore }) {
+const DraggableVideo = observer(function DraggableVideo({
+    uiStore,
+    domainStore,
+    curVideo,
+    transformerRef,
+}) {
     const imageRef = useRef(null);
-    const trRef = useRef(null);
-    const curVideo = domainStore.videos[0];
+    const [isSelected, setIsSelected] = useState(false);
+
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
         element.src = curVideo.source;
@@ -47,79 +53,110 @@ const DraggableVideo = observer(function DraggableVideo({ domainStore }) {
     }, [videoElement]);
 
     useEffect(() => {
-        trRef.current.nodes([imageRef.current]);
-        trRef.current.getLayer().batchDraw();
-    }, []);
+        if (!isSelected) {
+            transformerRef.current.nodes([]);
+        } else {
+            transformerRef.current.nodes([imageRef.current]);
+        }
+        transformerRef.current.getLayer().batchDraw();
+    }, [isSelected]);
 
     return (
-        <>
-            <Image
-                ref={imageRef}
-                image={videoElement}
-                stroke="black"
-                width={curVideo.width}
-                height={curVideo.height}
-                draggable
-            />
-            <Transformer
-                ref={trRef}
-                rotateAnchorOffset={60}
-                enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
-            />
-        </>
+        <Image
+            ref={imageRef}
+            image={videoElement}
+            stroke="black"
+            x={uiStore.canvasSize.width / 2}
+            y={uiStore.canvasSize.height / 2}
+            width={curVideo.width}
+            height={curVideo.height}
+            offsetX={curVideo.width / 2}
+            offsetY={curVideo.height / 2}
+            scaleX={uiStore.canvasScale}
+            scaleY={uiStore.canvasScale}
+            draggable
+            onDblClick={() => setIsSelected(!isSelected)}
+        />
     );
 });
 
-const EditorCanvas = observer(function EditorCanvas({ className = "", uiStore, domainStore }) {
-    const windowWidth = uiStore.canvasSize.width;
-    const windowHeight = uiStore.canvasSize.height;
+const EditorCanvas = observer(function EditorCanvas({ uiStore, domainStore }) {
+    const transformerRef = useRef(null);
 
-    let projectWidth = (domainStore.projectMetadata.width * uiStore.zoomPercentage) / 100;
-    let projectHeight = (domainStore.projectMetadata.height * uiStore.zoomPercentage) / 100;
+    const projectWidth = domainStore.projectMetadata.width;
+    const projectHeight = domainStore.projectMetadata.height;
 
-    let relativeX = windowWidth / 2 - projectWidth / 2;
-    let relativeY = windowHeight / 2 - projectHeight / 2;
+    const onZoomChange = action((event) => {
+        uiStore.canvasControls.scalePos = event.target.value;
+    });
 
-    const onZoomChange = (event) => {
-        uiStore.canvasControls.zoom = event.target.value;
-        projectWidth = (domainStore.projectMetadata.width * uiStore.zoomPercentage) / 100;
-        projectHeight = (domainStore.projectMetadata.height * uiStore.zoomPercentage) / 100;
-        relativeX = windowWidth / 2 - projectWidth / 2;
-        relativeY = windowHeight / 2 - projectHeight / 2;
+    const onBackgroundClick = () => {
+        transformerRef.current.nodes([]);
     };
 
+    useEffect(
+        action(() => {
+            const minWindowHeight = uiStore.canvasSize.height - uiStore.canvasConst.margin;
+            const minWindowWidth = uiStore.canvasSize.width - uiStore.canvasConst.margin;
+            while (
+                (projectHeight * uiStore.canvasScale > minWindowHeight ||
+                    projectWidth * uiStore.canvasScale > minWindowWidth) &&
+                uiStore.canvasControls.scalePos > 0
+            ) {
+                uiStore.canvasControls.scalePos--;
+            }
+        }),
+        [projectHeight, projectWidth]
+    );
+
     return (
-        <div className={className}>
+        <>
             <div>
-                <label htmlFor="project_zoom"> Zoom </label>
+                <label htmlFor="canvas_zoom"> Zoom {uiStore.canvasZoom} </label>
                 <input
-                    id="project_zoom"
+                    id="canvas_zoom"
                     type={"range"}
                     min={0}
                     max={10}
-                    value={uiStore.canvasControls.zoom}
+                    value={uiStore.canvasControls.scalePos}
                     onChange={onZoomChange}
                 />
             </div>
-            <Stage width={windowWidth} height={windowHeight}>
+            <Stage width={uiStore.canvasSize.width} height={uiStore.canvasSize.height}>
                 <Layer>
                     <Rect
-                        className="fill-red"
-                        width={windowWidth}
-                        height={windowHeight}
+                        x={0}
+                        y={0}
+                        width={uiStore.canvasSize.width}
+                        height={uiStore.canvasSize.height}
                         fill="red"
+                        onClick={onBackgroundClick}
                     />
                     <Rect
-                        x={relativeX}
-                        y={relativeY}
+                        x={uiStore.canvasSize.width / 2}
+                        y={uiStore.canvasSize.height / 2}
                         width={projectWidth}
                         height={projectHeight}
-                        fill="white"
+                        offsetX={projectWidth / 2}
+                        offsetY={projectHeight / 2}
+                        fill="black"
+                        scaleX={uiStore.canvasScale}
+                        scaleY={uiStore.canvasScale}
                     />
-                    <DraggableVideo domainStore={domainStore} />
+                    <DraggableVideo
+                        uiStore={uiStore}
+                        domainStore={domainStore}
+                        curVideo={domainStore.videos[0]}
+                        transformerRef={transformerRef}
+                    />
+                    <Transformer
+                        ref={transformerRef}
+                        rotateAnchorOffset={60}
+                        enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+                    />
                 </Layer>
             </Stage>
-        </div>
+        </>
     );
 });
 

@@ -13,11 +13,9 @@ const App = observer(function App() {
         <div className="App">
             <h1 className="text-3xl font-bold underline">Hello !</h1>
             <div className="grid m-10 grid-cols-3 grid-rows-3">
-                <EditorCanvas
-                    className={"col-start-2 col-span-2 row-span-2 overflow-hidden"}
-                    uiStore={uiStore}
-                    domainStore={domainStore}
-                />
+                <div className={"col-start-2 col-span-2 row-span-2 overflow-hidden"}>
+                    <EditorCanvas uiStore={uiStore} domainStore={domainStore} />
+                </div>
             </div>
         </div>
     );

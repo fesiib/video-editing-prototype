@@ -17,7 +17,10 @@ class UIStore {
     };
 
     canvasControls = {
-        zoom: 4,
+        scalePos: 4,
+    };
+    canvasConst = {
+        margin: 10,
     };
     // timelineSize = {};
     // panelSize = {};
@@ -27,8 +30,11 @@ class UIStore {
         this.rootStore = rootStore;
     }
 
-    get zoomPercentage() {
-        return ZOOM_PERCENTAGES[this.canvasControls.zoom];
+    get canvasScale() {
+        return ZOOM_PERCENTAGES[this.canvasControls.scalePos] / 100;
+    }
+    get canvasZoom() {
+        return ZOOM_PERCENTAGES[this.canvasControls.scalePos];
     }
 
     setWindowSize({ width, height }) {
