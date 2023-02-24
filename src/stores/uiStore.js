@@ -12,17 +12,34 @@ class UIStore {
     };
 
     canvasSize = {
-        width: (window.innerWidth / 3) * 2,
-        height: (window.innerHeight / 3) * 2,
+        width: (window.innerWidth / 3) * 2, // 2/3
+        height: (window.innerHeight / 3) * 2, // 2/3
     };
-
     canvasControls = {
         scalePos: 4,
     };
     canvasConst = {
         margin: 10,
     };
-    // timelineSize = {};
+
+    timelineSize = {
+		width: (window.innerWidth / 3) * 2, // 2/3
+		height: (window.innerWidth / 3), // 1/3 
+	};
+	timelineControls = {
+		numberOfRows: 3,
+		scalePos: 4,
+		playPosition: 0, //secs
+	};
+	timelineConst = {
+		labelHeight: 10,
+		linePadding: 1,
+		positionIndicatorWidth: 8,
+		labelStep: 5, //seconds
+
+		timelineMaxWidth: 3000,
+		timelineMaxHeight: 3000,
+	};
     // panelSize = {};
 
     constructor(rootStore) {
@@ -37,12 +54,26 @@ class UIStore {
         return ZOOM_PERCENTAGES[this.canvasControls.scalePos];
     }
 
+	get timelineScale() {
+		return ZOOM_PERCENTAGES[[this.timelineControls.scalePos]] / 100;
+	}
+	get timelineZoom() {
+		return ZOOM_PERCENTAGES[[this.timelineControls.scalePos]];
+	}
+	get timelineSingleLineHeight() {
+		return this.timelineSize.height / this.timelineControls.numberOfRows;
+	}
+
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
         this.canvasSize = {
             width: (width / 3) * 2,
             height: (height / 3) * 2,
         };
+		this.timelineSize = {
+            width: (width / 3) * 2,
+            height: (height / 3),
+		}
     }
 }
 

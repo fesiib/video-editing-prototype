@@ -59,7 +59,7 @@ const DraggableVideo = observer(function DraggableVideo({
             transformerRef.current.nodes([imageRef.current]);
         }
         transformerRef.current.getLayer().batchDraw();
-    }, [isSelected]);
+    }, [isSelected, transformerRef]);
 
     return (
         <Image
