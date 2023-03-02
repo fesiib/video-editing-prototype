@@ -3,30 +3,36 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Layer, Rect, Stage, Transformer } from "react-konva";
+import useRootContext from "../hooks/useRootContext";
 
 const DraggableVideo = observer(function DraggableVideo({
-    uiStore,
-    domainStore,
     curVideo,
     transformerRef,
 }) {
+	const {
+		uiStore,
+	} = useRootContext();
+
     const imageRef = useRef(null);
     const [isSelected, setIsSelected] = useState(false);
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
         element.src = curVideo.source;
+		element.loop = true;
         return element;
     }, [curVideo.source]);
 
-    const onLoadedMetadata = () => {
+    const onLoadedMetadata = action(() => {
         const metadata = {
             duration: videoElement.duration,
             videoWidth: videoElement.videoWidth,
             videoHeight: videoElement.videoHeight,
+			scaleX: uiStore.canvasScale,
+			scaleY: uiStore.canvasScale,
         };
         curVideo.setMetadata(metadata);
-    };
+    });
 
     useEffect(() => {
         videoElement.addEventListener("loadedmetadata", onLoadedMetadata);
@@ -45,6 +51,18 @@ const DraggableVideo = observer(function DraggableVideo({
         return () => anim.stop();
     };
 
+	const onVideoDragEnd = action((event) => {
+		curVideo.x = event.target.x();
+		curVideo.y = event.target.y();
+	});
+
+	const onTransformerEnd = action((event) => {
+		curVideo.scaleX = event.target.scaleX();
+		curVideo.scaleY = event.target.scaleY();
+		curVideo.x = event.target.x();
+		curVideo.y = event.target.y();
+	});
+
     useEffect(() => {
         videoElement.addEventListener("canplay", onCanPlay);
         return () => {
@@ -54,9 +72,11 @@ const DraggableVideo = observer(function DraggableVideo({
 
     useEffect(() => {
         if (!isSelected) {
-            transformerRef.current.nodes([]);
+            transformerRef.current.detach();
+			transformerRef.current.off("transformend");
         } else {
             transformerRef.current.nodes([imageRef.current]);
+			transformerRef.current.on("transformend", onTransformerEnd);
         }
         transformerRef.current.getLayer().batchDraw();
     }, [isSelected, transformerRef]);
@@ -72,16 +92,22 @@ const DraggableVideo = observer(function DraggableVideo({
             height={curVideo.height}
             offsetX={curVideo.width / 2}
             offsetY={curVideo.height / 2}
-            scaleX={uiStore.canvasScale}
-            scaleY={uiStore.canvasScale}
-            draggable
+            scaleX={curVideo.scaleX}
+            scaleY={curVideo.scaleY}
+            draggable={isSelected}
             onDblClick={() => setIsSelected(!isSelected)}
+			onDragEnd={onVideoDragEnd}
         />
     );
 });
 
-const EditorCanvas = observer(function EditorCanvas({ uiStore, domainStore }) {
+const EditorCanvas = observer(function EditorCanvas() {
     const transformerRef = useRef(null);
+
+	const {
+		uiStore,
+		domainStore
+	} = useRootContext();
 
     const projectWidth = domainStore.projectMetadata.width;
     const projectHeight = domainStore.projectMetadata.height;
@@ -144,8 +170,6 @@ const EditorCanvas = observer(function EditorCanvas({ uiStore, domainStore }) {
                         scaleY={uiStore.canvasScale}
                     />
                     <DraggableVideo
-                        uiStore={uiStore}
-                        domainStore={domainStore}
                         curVideo={domainStore.videos[0]}
                         transformerRef={transformerRef}
                     />

@@ -42,7 +42,8 @@ class Video {
     // height = 720;
     width = 200;
     height = 200;
-    scale = 1;
+    scaleX = 1;
+	scaleY = 1;
     rotation = 0; //deg
 
     animation = {};
@@ -72,7 +73,8 @@ class Video {
         this.z = metadata.z ? metadata.z : 0;
         this.width = metadata.videoWidth;
         this.height = metadata.videoHeight;
-        this.scale = metadata.scale ? metadata.scale : 1;
+        this.scaleX = metadata.scaleX ? metadata.scaleX : 1;
+		this.scaleY = metadata.scaleY ? metadata.scaleY : 1;
         this.rotation = metadata.rotation ? metadata.rotation : 0;
 
         this.animation = metadata.animation ? metadata.animation : {};
