@@ -13,13 +13,18 @@ class DomainStore {
         width: 1280,
         height: 720, //720p
         duration: 10, // seconds
+		trackCnt: 3,
     };
 
     constructor(rootStore) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.rootStore = rootStore;
 
-        this.videos = [new Video(this, "http://localhost:3000/demo-3.webm")];
+        this.videos = [
+			new Video(this, "http://localhost:3000/demo-3.webm", "video-1", 0),
+			new Video(this, "http://localhost:3000/demo-3.webm", "video-2", 1),
+			new Video(this, "http://localhost:3000/demo-3.webm", "video-3", 2)
+		];
     }
 }
 
@@ -52,13 +57,18 @@ class Video {
     transitionStart = {};
     transitionEnd = {};
 
-    constructor(domainStore, source, id = "test") {
+	trackInfo = {
+		trackId: 0,
+	};
+
+    constructor(domainStore, source, id, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
 
         this.id = id;
         this.source = source;
         this.processing = true;
+		this.trackInfo.trackId = trackId;
     }
 
     setMetadata(metadata) {
@@ -82,6 +92,8 @@ class Video {
 
         this.transitionStart = {};
         this.transitionEnd = {};
+
+		this.trackInfo.trackId = metadata.trackId ? metadata.trackId : 0;
 
         this.processing = false;
     }
