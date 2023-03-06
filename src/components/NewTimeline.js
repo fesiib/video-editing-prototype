@@ -1,12 +1,11 @@
-import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
-import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis, restrictToParentElement, restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { arrayMove, horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
+import { closestCenter, closestCorners, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
+import { createSnapModifier, restrictToFirstScrollableAncestor, restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { createRef, forwardRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useRootContext from "../hooks/useRootContext";
-import TimelineItemWrapper from "./TimelineItem";
+import DraggableTimelineItem, { TimelineItem } from "./TimelineItem";
 
 const TimelinePositionIndicator = observer(function TimelinePositionIndicator({ id
 }) {
@@ -71,13 +70,27 @@ const TimelineTrack = observer(function TimelineTrack({
 		uiStore,
 		domainStore
 	} = useRootContext();
-
 	const width = uiStore.timelineConst.timelineMaxWidth;
 
+	const [activeItem, setActiveItem] = useState(null);
+
 	const {
-		setNodeRef
+		setNodeRef,
+		isOver,
 	} = useDroppable({
-		id: "droppable" + id,
+		id: "droppable" + toString(id),
+		disabled: false,
+	});
+
+	const onSceneDragStart = action((event) => {
+		const { active } = event;
+		setActiveItem(active);
+		console.log(active);
+	});
+
+	const onSceneDragOver = action((event) => {
+		console.log("here")
+		console.log(event);
 	});
 
 	const onSceneDragEnd = action((event) => {
@@ -91,29 +104,55 @@ const TimelineTrack = observer(function TimelineTrack({
 		scene.y += delta.y;
 	});
 
+	const snapToGridModifier = createSnapModifier(20);
+
 	return (<DndContext
 		modifiers={[]}
+		collisionDetection={closestCorners}
+		onDragStart={onSceneDragStart}
+		onDragOver={onSceneDragOver}
 		onDragEnd={onSceneDragEnd}
 	>
 		<div
-			className="bg-slate-600 my-1 relative h-10"
+			className={`bg-slate-${!isOver ? "600" : "400"} my-1 relative h-10`}
 			style={{
 				width: width,
 			}}
 			ref={setNodeRef}
+			aria-label={"Droppable region"}
 		>
 			<div className="absolute inset-y-0 left-0">
 				{title}
 			</div>
 			{
 				scenes.map((scene) => (
-					<TimelineItemWrapper
+					<DraggableTimelineItem
 						key={scene.id}
 						scene={scene}
 					/>
 				))
 			}
 		</div>
+		<DragOverlay
+			modifiers={[
+				restrictToFirstScrollableAncestor, 
+				snapToGridModifier,
+			]}
+			dropAnimation={null}
+		>
+		{
+			activeItem ? 
+			<TimelineItem
+				key={"item_overlay"}
+				scene={activeItem.data.current.scene}
+				transform={null}
+				isOverlay={true}
+				id={activeItem.id}
+			/>
+			:
+			null
+		}
+		</DragOverlay>
 	</DndContext>);
 });
 

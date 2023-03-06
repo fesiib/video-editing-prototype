@@ -1,11 +1,8 @@
-import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
-import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis, restrictToParentElement, restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { arrayMove, horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
+import { DndContext, useDraggable} from "@dnd-kit/core";
+import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { createRef, forwardRef, useEffect, useState } from "react";
-import useRootContext from "../hooks/useRootContext";
+import { forwardRef } from "react";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({
 	id, handleName
@@ -73,29 +70,32 @@ const ResizeWrapper = observer(function ResizeWrapper({
 	</>);
 });
 
-const TimelineItem = observer(forwardRef(function TimelineItem({
-	scene, style, isOverlay, ...props
+export const TimelineItem = observer(forwardRef(function TimelineItem({
+	scene, transform, isOverlay, ...props
 }, ref) {
 
+	const style = {
+		...scene.timelineTransform(transform),
+	};
 	return (<div 
-		className={"bg-indigo-400 w-20"}
+		className={ `bg-indigo-${!isOverlay ? "400" : "100"} w-20 absolute z-10`}
 		ref={ref}
 		style={style}
 		{...props}
 	>
-		{scene.id}
+		{isOverlay ? "overlay" : scene.id}
 	</div>
 	);
 }));
 
-const TimelineItemWrapper = observer(function TimelineItemWrapper({
+const DraggableTimelineItem = observer(function TimelineItemWrapper({
 	scene
 }) {
 	const {
 		attributes,
 		listeners,
 		setNodeRef,
-		transform,
+		transform
 	} = useDraggable({
 		id: scene.id,
 		data: {
@@ -103,19 +103,11 @@ const TimelineItemWrapper = observer(function TimelineItemWrapper({
 		},
 	});
 
-	const style = transform ? {
-		transform: `translate3d(${scene.x + transform.x}px, ${scene.y + transform.y}px, ${scene.z}px)`,
-	} : {
-		transform: `translate3d(${scene.x}px, ${scene.y}px, ${scene.z}px)`,
-	}
-
-	console.log(transform)
-
 	return (
 		<TimelineItem
 			ref={setNodeRef}
 			scene={scene}
-			style={style}
+			transform={null}
 			isOverlay={false}
 			{...attributes}
 			{...listeners}
@@ -124,4 +116,4 @@ const TimelineItemWrapper = observer(function TimelineItemWrapper({
 
 });
 
-export default TimelineItemWrapper;
+export default DraggableTimelineItem;

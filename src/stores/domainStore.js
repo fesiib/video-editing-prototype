@@ -97,6 +97,15 @@ class Video {
 
         this.processing = false;
     }
+
+	timelineTransform(transform) {
+		const retTransform = transform ? {
+			transform: `translate3d(${this.x + transform.x}px, ${this.y + transform.y}px, ${this.z}px)`,
+		} : {
+			transform: `translate3d(${this.x}px, ${this.y}px, ${this.z}px)`,
+		}
+		return retTransform;
+	}
 }
 
 export default DomainStore;
