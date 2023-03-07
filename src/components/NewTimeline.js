@@ -1,13 +1,15 @@
 import { closestCenter, closestCorners, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { createSnapModifier, restrictToFirstScrollableAncestor, restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import useRootContext from "../hooks/useRootContext";
 import DraggableTimelineItem, { TimelineItem } from "./TimelineItem";
 
-const TimelinePositionIndicator = observer(function TimelinePositionIndicator({ id
+const TimelinePositionIndicator = observer(function TimelinePositionIndicator({
+	id
 }) {
 
 	const {
@@ -33,9 +35,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({ 
 	</div>)
 });
 
-const TimelineLabels = observer(function TimelineLabels({
-
-}) {
+const TimelineLabels = observer(function TimelineLabels() {
 	const {
 		uiStore,
 		domainStore
@@ -63,9 +63,9 @@ const TimelineLabels = observer(function TimelineLabels({
 });
 
 
-const TimelineTrack = observer(function TimelineTrack({
-	id, isOverlay, title, scenes
-}){
+const TimelineTrack = observer(forwardRef(function TimelineTrack({
+	style, id, title, scenes, isOverlay, ...props
+}, ref) {
 	const {
 		uiStore,
 		domainStore
@@ -106,58 +106,110 @@ const TimelineTrack = observer(function TimelineTrack({
 
 	const snapToGridModifier = createSnapModifier(20);
 
-	return (<DndContext
-		modifiers={[]}
-		collisionDetection={closestCorners}
-		onDragStart={onSceneDragStart}
-		onDragOver={onSceneDragOver}
-		onDragEnd={onSceneDragEnd}
+	if (isOverlay) {
+		console.log("HERE")
+	}
+
+	return (<div
+		{...props}
+		ref={ref}
 	>
-		<div
-			className={`bg-slate-${!isOver ? "600" : "400"} my-1 relative h-10`}
-			style={{
-				width: width,
-			}}
-			ref={setNodeRef}
-			aria-label={"Droppable region"}
-		>
-			<div className="absolute inset-y-0 left-0">
-				{title}
-			</div>
-			{
-				scenes.map((scene) => (
-					<DraggableTimelineItem
-						key={scene.id}
-						scene={scene}
-					/>
-				))
-			}
-		</div>
-		<DragOverlay
+		<DndContext
 			modifiers={[
-				restrictToFirstScrollableAncestor, 
-				snapToGridModifier,
+				restrictToParentElement
 			]}
-			dropAnimation={null}
+			collisionDetection={closestCorners}
+			onDragStart={onSceneDragStart}
+			onDragOver={onSceneDragOver}
+			onDragEnd={onSceneDragEnd}
 		>
-		{
-			activeItem ? 
-			<TimelineItem
-				key={"item_overlay"}
-				scene={activeItem.data.current.scene}
-				transform={null}
-				isOverlay={true}
-				id={activeItem.id}
-			/>
-			:
-			null
+			<div
+				className={ isOverlay ?
+					"bg-slate-600 my-1 relative h-10" :
+					(
+						isOver ?
+						"bg-slate-500 my-1 relative h-10" :
+						"bg-slate-400 my-1 relative h-10"
+					)
+				}
+				style={{
+					width: width,
+				}}
+				ref={setNodeRef}
+				aria-label={"Droppable region"}
+			>
+				<div className="absolute inset-y-0 left-0">
+					{title}
+				</div>
+				{
+					scenes.map((scene) => (
+						<DraggableTimelineItem
+							key={scene.id}
+							scene={scene}
+						/>
+					))
+				}
+			</div>
+			<DragOverlay
+				modifiers={[ 
+					snapToGridModifier,
+				]}
+				dropAnimation={null}
+			>
+			{
+				activeItem ? 
+				<TimelineItem
+					key={"item_overlay"}
+					scene={activeItem.data.current.scene}
+					transform={null}
+					isOverlay={true}
+					id={activeItem.id}
+				/>
+				:
+				null
+			}
+			</DragOverlay>
+		</DndContext>
+	</div>);
+}));
+
+const DraggableTimelineTrack = observer(function DraggableTimelineTrack({
+	trackId, title, scenes
+}) {
+	const id = "track" + trackId;
+
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+	} = useSortable({
+		id: id,
+		data: {
+			trackId,
 		}
-		</DragOverlay>
-	</DndContext>);
+	});
+
+	const style = {
+		trasnform: CSS.Transform.toString(transform),
+		transition,
+	};
+	return (<TimelineTrack
+		ref={setNodeRef}
+		style={style}
+		
+		id={id}
+		title={title}
+		scenes={scenes}
+		isOverlay={false}
+
+		{...attributes}
+		{...listeners}
+	/>);
 });
 
-const TimelineTracks = observer(function TimelineTracks({
-}) {
+const TimelineTracks = observer(function TimelineTracks() {
 	const {
 		uiStore,
 		domainStore
@@ -167,67 +219,85 @@ const TimelineTracks = observer(function TimelineTracks({
 	const trackCnt = domainStore.projectMetadata.trackCnt;
 
 	const [tracks, setTracks] = useState([]);
-	const [activeItemId, setActiveItemId] = useState(null);
+	const [activeTrackId, setActiveTrackId] = useState(null);
 
-	const sensors = useSensors(
-		useSensor(PointerSensor),
-		useSensor(KeyboardSensor)
-	);
-
-	const onTimelineItemDragStart = (event) => {
+	const onTimelineTrackDragStart = (event) => {
+		const { active } = event;
+		setActiveTrackId(active.id);
 	}
 
-	const onTimelineItemDragEnd = action((event) => {
+	const onTimelineTrackDragEnd = action((event) => {
+		const {active, over} = event;
+		console.log(active.id, over.id);
+		if (active.id !== over.id) {
+			const activeTrackId = active.data.current.trackId;
+			const overTrackId = over.data.current.trackId;
+			setTracks((tracks) => {
+				const oldIndex = tracks.findIndex((value) => (value.trackId === activeTrackId));
+				const newIndex = tracks.findIndex((value) => (value.trackId === overTrackId));
+				return arrayMove(tracks, oldIndex, newIndex);
+			});
+		}
+		setActiveTrackId(null);
 	});
 
 	useEffect(() => {
 		let newTracks = [];
 		for (let i = 0; i < trackCnt; i++) {
-			newTracks.push([]);
+			newTracks.push({
+				trackId: i,
+				scenes: []
+			});
 		}
 		for (let video of domainStore.videos) {
 			const id = video.trackInfo.trackId;
-			newTracks[id].push(video);
+			newTracks[id].scenes.push(video);
 		}
 		setTracks(newTracks);
 	}, [domainStore.videos, trackCnt]);
 		
-	return (<div className="bg-slate-400 m-5 flex-column overflow-scroll"
+	return (<div 
+		className="bg-slate-300 m-5 flex-column overflow-scroll"
 		style={{
 			width: width
 		}}
 	>
 		<TimelineLabels/>
 		<DndContext
-			sensors={sensors}
-			collisionDetection={closestCenter}
-			onDragStart={onTimelineItemDragStart}
-			onDragEnd={onTimelineItemDragEnd}
+			sensors={ useSensors(
+				useSensor(PointerSensor),
+				useSensor(KeyboardSensor)
+			)}
+			modifiers={[
+				restrictToFirstScrollableAncestor
+			]}
+			collisionDetection={closestCorners}
+			onDragStart={onTimelineTrackDragStart}
+			onDragEnd={onTimelineTrackDragEnd}
 		>
-			{
-				tracks.map(( (scenes, id) => (
-					<TimelineTrack
-						key={"track" + id}
-						id={id}
-						title={"track" + id}
-						scenes={scenes}
-						isOverlay={false}
-					/>
-				)))
-			}
-			<DragOverlay
-				className="bg-slate-500"
-				modifiers={[
-					restrictToHorizontalAxis,
-					restrictToFirstScrollableAncestor
-				]}
+			<SortableContext
+				items={tracks}
+				strategy={verticalListSortingStrategy}
 			>
+			{
+				tracks.map(({ trackId, scenes }) => {
+					const id = "track" + trackId;
+					return (<DraggableTimelineTrack
+						key={id}
+						trackId={trackId}
+						title={id}
+						scenes={scenes}
+					/>);
+				})
+			}
+			</SortableContext>
+			<DragOverlay>
 				{
-					activeItemId ? 
+					activeTrackId ? 
 					<TimelineTrack
 						key={"track_overlay"}
-						id={activeItemId}
-						title={""}
+						id={activeTrackId}
+						title={"overlay"}
 						scenes={[]}
 						isOverlay={true}
 					/>
@@ -241,7 +311,7 @@ const TimelineTracks = observer(function TimelineTracks({
 
 const NewTimeline = observer(function NewTimeline() {
 	
-	return (<div className="bg-slate-200">
+	return (<div className="bg-slate-100">
 		<TimelineTracks />
 	</div>);
 });

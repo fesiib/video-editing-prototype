@@ -78,7 +78,10 @@ export const TimelineItem = observer(forwardRef(function TimelineItem({
 		...scene.timelineTransform(transform),
 	};
 	return (<div 
-		className={ `bg-indigo-${!isOverlay ? "400" : "100"} w-20 absolute z-10`}
+		className={ isOverlay ?
+			"bg-yellow-600 w-20 absolute z-10" :
+			"bg-yellow-400 w-20 absolute z-10"
+		}
 		ref={ref}
 		style={style}
 		{...props}

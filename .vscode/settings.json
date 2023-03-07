@@ -1,6 +1,6 @@
 {
     "editor.tabSize": 4,
     "editor.insertSpaces": false,
-    "editor.wordWrap": "bounded",
+    "editor.wordWrap": "off",
     "editor.detectIndentation": false
 }
