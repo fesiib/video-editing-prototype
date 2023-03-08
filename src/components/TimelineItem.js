@@ -98,24 +98,22 @@ const DraggableTimelineItem = observer(function TimelineItemWrapper({
 		attributes,
 		listeners,
 		setNodeRef,
-		transform
 	} = useDraggable({
 		id: scene.id,
 		data: {
+			type: "scene",
 			scene
 		},
 	});
 
-	return (
-		<TimelineItem
-			ref={setNodeRef}
-			scene={scene}
-			transform={null}
-			isOverlay={false}
-			{...attributes}
-			{...listeners}
-		/>
-	);
+	return (<TimelineItem
+		ref={setNodeRef}
+		scene={scene}
+		transform={null}
+		isOverlay={false}
+		{...attributes}
+		{...listeners}
+	/>);
 
 });
 
