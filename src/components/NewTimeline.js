@@ -74,17 +74,17 @@ const TimelineTrack = observer(forwardRef(function TimelineTrack({
 	const width = uiStore.timelineConst.timelineMaxWidth;
 
 	return (<div
-		className={ isOverlay ?
-			"bg-slate-600 my-1 relative h-10" :
-			( isOver ?
-				"bg-slate-500 my-1 relative h-10" :
-				"bg-slate-400 my-1 relative h-10"
-			)
-		}
 		{...props}
 		ref={ref}
 	>
 		<div
+			className={ isOverlay ?
+				"bg-slate-600 my-1 relative h-10" :
+				( isOver ?
+					"bg-slate-500 my-1 relative h-10" :
+					"bg-slate-400 my-1 relative h-10"
+				)
+			}
 			style={{
 				width: width,
 			}}

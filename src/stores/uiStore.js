@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
-const ZOOM_PERCENTAGES = [15, 30, 50, 80, 100, 125, 150, 200, 300, 400, 500];
+const ZOOM_PERCENTAGES = [15, 25, 30, 50, 60, 70, 80, 100, 125, 150, 200];
 
 class UIStore {
     // Session Info

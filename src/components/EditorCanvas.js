@@ -28,8 +28,10 @@ const DraggableVideo = observer(function DraggableVideo({
             duration: videoElement.duration,
             videoWidth: videoElement.videoWidth,
             videoHeight: videoElement.videoHeight,
-			scaleX: uiStore.canvasScale,
-			scaleY: uiStore.canvasScale,
+			scaleX: 1,
+			scaleY: 1,
+			x: uiStore.canvasSize.width / 2,
+			y: uiStore.canvasSize.height / 2,
         };
         curVideo.setMetadata(metadata);
     });
@@ -81,13 +83,16 @@ const DraggableVideo = observer(function DraggableVideo({
         transformerRef.current.getLayer().batchDraw();
     }, [isSelected, transformerRef]);
 
+	const adjustedX = curVideo.x;
+	const adjustedY = curVideo.y;
+
     return (
         <Image
             ref={imageRef}
             image={videoElement}
             stroke="black"
-            x={uiStore.canvasSize.width / 2}
-            y={uiStore.canvasSize.height / 2}
+            x={adjustedX}
+            y={adjustedY}
             width={curVideo.width}
             height={curVideo.height}
             offsetX={curVideo.width / 2}
@@ -148,38 +153,50 @@ const EditorCanvas = observer(function EditorCanvas() {
                     onChange={onZoomChange}
                 />
             </div>
-            <Stage width={uiStore.canvasSize.width} height={uiStore.canvasSize.height}>
-                <Layer>
-                    <Rect
-                        x={0}
-                        y={0}
-                        width={uiStore.canvasSize.width}
-                        height={uiStore.canvasSize.height}
-                        fill="red"
-                        onClick={onBackgroundClick}
-                    />
-                    <Rect
-                        x={uiStore.canvasSize.width / 2}
-                        y={uiStore.canvasSize.height / 2}
-                        width={projectWidth}
-                        height={projectHeight}
-                        offsetX={projectWidth / 2}
-                        offsetY={projectHeight / 2}
-                        fill="black"
-                        scaleX={uiStore.canvasScale}
-                        scaleY={uiStore.canvasScale}
-                    />
-                    <DraggableVideo
-                        curVideo={domainStore.videos[0]}
-                        transformerRef={transformerRef}
-                    />
-                    <Transformer
-                        ref={transformerRef}
-                        rotateAnchorOffset={60}
-                        enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
-                    />
-                </Layer>
-            </Stage>
+			<Stage
+				width={uiStore.canvasSize.width}
+				height={uiStore.canvasSize.height}
+			>
+				<Layer>
+					<Rect
+						x={0}
+						y={0}
+						width={uiStore.canvasSize.width }
+						height={uiStore.canvasSize.height }
+						fill="red"
+						onClick={onBackgroundClick}
+					/>
+				</Layer>
+				<Layer 
+					scaleX={uiStore.canvasScale}
+					scaleY={uiStore.canvasScale}
+					offsetX={uiStore.canvasSize.width / 2}
+					offsetY={uiStore.canvasSize.height / 2}
+					x={uiStore.canvasSize.width / 2}
+					y={uiStore.canvasSize.height / 2}
+				>
+					<Rect
+						x={uiStore.canvasSize.width / 2}
+						y={uiStore.canvasSize.height / 2}
+						width={projectWidth}
+						height={projectHeight}
+						offsetX={projectWidth / 2}
+						offsetY={projectHeight / 2}
+						fill="black"
+						scaleX={1}
+						scaleY={1}
+					/>
+					<DraggableVideo
+						curVideo={domainStore.videos[0]}
+						transformerRef={transformerRef}
+					/>
+					<Transformer
+						ref={transformerRef}
+						rotateAnchorOffset={60}
+						enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+					/>
+				</Layer>
+			</Stage>
         </>
     );
 });
