@@ -82,16 +82,25 @@ const EditorCanvas = observer(function EditorCanvas() {
                         scaleX={1}
                         scaleY={1}
                     />
-                    <DraggableVideo
-                        curVideo={domainStore.videos[0]}
-                        transformerRef={transformerRef}
-                    />
                     <Transformer
                         ref={transformerRef}
                         rotateAnchorOffset={60}
                         enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
                     />
                 </Layer>
+				<Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
+					<DraggableVideo
+                        curVideo={domainStore.videos[0]}
+                        transformerRef={transformerRef}
+                    />
+				</Layer>
             </Stage>
         </>
     );

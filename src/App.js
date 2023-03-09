@@ -9,7 +9,7 @@ import Timeline from "./views/Timeline";
 import useRootContext from "./hooks/useRootContext";
 
 const App = observer(function App() {
-    const { uiStore, domainStore } = useRootContext();
+    const { uiStore } = useRootContext();
 
     useEffect(
         action(() => {

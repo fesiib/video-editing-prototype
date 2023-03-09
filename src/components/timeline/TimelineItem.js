@@ -11,11 +11,11 @@ export const TimelineItem = observer(
         const { uiStore } = useRootContext();
 
         const style = {
-            transform: transform
-                ? `translate3d(${uiStore.secToPx(scene.start) + transform.x}px, ${
-                      0 + transform.y
-                  }px, ${0}px)`
-                : `translate3d(${uiStore.secToPx(scene.start)}px, ${0}px, ${0}px)`,
+            transform: (transform ? 
+				`translate3d(${
+					uiStore.secToPx(scene.start) + transform.x
+				}px, ${0 + transform.y}px, ${0}px)`
+                : `translate3d(${uiStore.secToPx(scene.start)}px, ${0}px, ${0}px)`),
             width: uiStore.secToPx(scene.duration),
         };
 

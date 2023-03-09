@@ -13,7 +13,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerR
 
     const imageRef = useRef(null);
     const [isSelected, setIsSelected] = useState(false);
-    const [brightness, setBrightness] = useState(1);
 
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
@@ -86,13 +85,15 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerR
     }, [isSelected, transformerRef]);
 
     useEffect(() => {
-        const opacity = 0.8;
+        const opacity = 0.5;
         const blur = 20;
+		const brightness = 2;
         const canvas = imageRef.current.getLayer().getCanvas()._canvas;
-        canvas.style.filter = `brightness(${brightness * 100}%), opacity(${
-            opacity * 100
-        }%), blur(${blur}px);`;
-    }, [brightness]);
+		const filterBrightness = `brightness(${brightness * 100}%)`;
+		const filterOpacity = `opacity(${opacity * 100}%)`;
+		const filterBlur = `blur(${blur}px)`;
+		canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
+    }, []);
 
     return (
         <Image
