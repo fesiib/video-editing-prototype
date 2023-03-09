@@ -23,23 +23,23 @@ class UIStore {
     };
 
     timelineSize = {
-		width: (window.innerWidth / 3) * 2, // 2/3
-		height: (window.innerWidth / 3), // 1/3 
-	};
-	timelineControls = {
-		numberOfRows: 3,
-		pxPerSec: 10,
-		playPosition: 0, //secs
-	};
-	timelineConst = {
-		labelHeight: 20,
-		linePadding: 1,
-		
-		positionIndicatorWidth: 8,
-		labelIntervalPx: 100, //px
+        width: (window.innerWidth / 3) * 2, // 2/3
+        height: window.innerWidth / 3, // 1/3
+    };
+    timelineControls = {
+        numberOfRows: 3,
+        pxPerSec: 10,
+        playPosition: 0, //secs
+    };
+    timelineConst = {
+        labelHeight: 20,
+        linePadding: 1,
 
-		trackMaxDuration: 60*20, //seconds
-	};
+        positionIndicatorWidth: 8,
+        labelIntervalPx: 100, //px
+
+        trackMaxDuration: 60 * 20, //seconds
+    };
     // panelSize = {};
 
     constructor(rootStore) {
@@ -54,13 +54,13 @@ class UIStore {
         return ZOOM_PERCENTAGES[this.canvasControls.scalePos];
     }
 
-	get timelineSingleLineHeight() {
-		return this.timelineSize.height / this.timelineControls.numberOfRows;
-	}
+    get timelineSingleLineHeight() {
+        return this.timelineSize.height / this.timelineControls.numberOfRows;
+    }
 
-	get trackWidthPx() {
-		return this.timelineConst.trackMaxDuration * this.timelineControls.pxPerSec;
-	}
+    get trackWidthPx() {
+        return this.timelineConst.trackMaxDuration * this.timelineControls.pxPerSec;
+    }
 
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
@@ -68,19 +68,19 @@ class UIStore {
             width: (width / 3) * 2,
             height: (height / 3) * 2,
         };
-		this.timelineSize = {
+        this.timelineSize = {
             width: (width / 3) * 2,
-            height: (height / 3),
-		}
+            height: height / 3,
+        };
     }
 
-	secToPx(seconds) {
-		return seconds * this.timelineControls.pxPerSec;
-	}
-	
-	pxToSec(px) {
-		return Math.round(px / this.timelineControls.pxPerSec * 100) / 100;
-	}
+    secToPx(seconds) {
+        return seconds * this.timelineControls.pxPerSec;
+    }
+
+    pxToSec(px) {
+        return Math.round((px / this.timelineControls.pxPerSec) * 100) / 100;
+    }
 }
 
 export default UIStore;
