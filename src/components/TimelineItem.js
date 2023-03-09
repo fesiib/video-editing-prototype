@@ -1,12 +1,13 @@
 import { DndContext, useDraggable} from "@dnd-kit/core";
 import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
+import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { forwardRef } from "react";
 import useRootContext from "../hooks/useRootContext";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({
-	id, handleName
+	scene, isLeftHandler
 }) {
 
 	const {
@@ -15,13 +16,18 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
 		setNodeRef,
 		transform,
 	} = useDraggable({
-		id: id,
+		id: scene.id + (isLeftHandler ? "leftHandler" : "rightHandler"),
 		transition: {
 			duration: 150, // milliseconds
 			easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
 		},
-		
+		data: {
+			scene,
+			isLeftHandler,
+		}
 	});
+
+
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -33,16 +39,31 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
 		{...listeners}
 		{...attributes}
 		style={style}>
-		<button> {handleName} </button>
+		<button> {isLeftHandler ? "L" : "R"} </button>
 	</div>);
 });
 
 const ResizeWrapper = observer(function ResizeWrapper({
-	id,
+	scene,
 	children
 }) {
-	const leftId = id + "leftHandler";
-	const rightId = id + "rightHandler";
+
+	const {
+		uiStore
+	} = useRootContext();
+
+	const onHandlerDragEnd = action((event) => {
+		const {active, delta} = event;
+		const scene = active.data.current.scene;
+		const isLeftHandler = active.data.current.isLeftHandler;
+		if (isLeftHandler) {
+			scene.start += uiStore.pxToSec(delta.x);
+			scene.duration += -uiStore.pxToSec(delta.x);
+		}
+		else {
+			scene.duration += uiStore.pxToSec(delta.x);
+		}
+	});
 
 	return (<>
 		<DndContext
@@ -50,22 +71,16 @@ const ResizeWrapper = observer(function ResizeWrapper({
 				restrictToHorizontalAxis,
 				restrictToFirstScrollableAncestor
 			]}
+			onDragEnd={onHandlerDragEnd}
 		>
 			<DraggableRangeHandle
-				id={leftId}
-				handleName={"left"}
+				scene={scene}
+				isLeftHandler={true}
 			/>
-		</DndContext>
-		{children}
-		<DndContext
-			modifiers={[
-				restrictToHorizontalAxis,
-				restrictToFirstScrollableAncestor
-			]}
-		>
+			{children}
 			<DraggableRangeHandle
-				id={rightId}
-				handleName={"right"}
+				scene={scene}
+				isLeftHandler={false}
 			/>
 		</DndContext>
 	</>);
@@ -85,6 +100,9 @@ export const TimelineItem = observer(forwardRef(function TimelineItem({
 		),
 		width: uiStore.secToPx(scene.duration),
 	};
+
+	const onPointerOver = (event) => console.log(event);
+
 	return (<div 
 		className={ isOverlay ?
 			"bg-yellow-600 absolute z-10" :
@@ -94,7 +112,14 @@ export const TimelineItem = observer(forwardRef(function TimelineItem({
 		style={style}
 		{...props}
 	>
-		{isOverlay ? "overlay" : scene.id}
+		{isOverlay ?
+			"overlay" :
+			<div className="flex justify-between">
+				<ResizeWrapper scene={scene}>
+					{scene.id}
+				</ResizeWrapper>
+			</div>
+		}
 	</div>
 	);
 }));

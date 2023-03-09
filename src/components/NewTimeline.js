@@ -51,7 +51,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
 			{...attributes}
 		>
 			{
-				isDragging ? (<label
+				(isDragging) ? (<label
 					className="absolute z-30 bg-violet-800 text-white text-xs"
 					style={{
 						left: playIndicatorWidth,
@@ -82,7 +82,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
 	</>);
 });
 
-const TimelineLabels = observer(function TimelineLabels() {
+const TimelineLabels = observer(function TimelineLabels({}) {
 	const {
 		uiStore,
 	} = useRootContext();
