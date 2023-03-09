@@ -36,7 +36,7 @@ class Video {
     thumbnails = [];
 
     start = 0;
-    finish = 10;
+    duration = 10;
     offset = 0;
     speed = 1;
 
@@ -74,7 +74,7 @@ class Video {
     setMetadata(metadata) {
         this.thumbnails = metadata.thumbnails ? metadata.thumbnails : [];
         this.start = 0;
-        this.finish = metadata.duration;
+        this.duration = metadata.duration;
         this.offset = metadata.offset ? metadata.offset : 0;
         this.speed = metadata.speed ? metadata.speed : 1;
 
@@ -98,13 +98,8 @@ class Video {
         this.processing = false;
     }
 
-	timelineTransform(transform) {
-		const retTransform = transform ? {
-			transform: `translate3d(${this.x + transform.x}px, ${this.y + transform.y}px, ${this.z}px)`,
-		} : {
-			transform: `translate3d(${this.x}px, ${this.y}px, ${this.z}px)`,
-		}
-		return retTransform;
+	get finish() {
+		return this.start + this.duration;
 	}
 }
 

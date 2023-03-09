@@ -39,10 +39,9 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({
 const TimelineLabels = observer(function TimelineLabels() {
 	const {
 		uiStore,
-		domainStore
 	} = useRootContext();
 
-	const width = uiStore.timelineConst.timelineMaxWidth;
+	const width = uiStore.trackWidthPx;
 	const height = uiStore.timelineConst.labelHeight;
 
 	return (<DndContext
@@ -69,9 +68,8 @@ const TimelineTrack = observer(forwardRef(function TimelineTrack({
 
 	const {
 		uiStore,
-		domainStore
 	} = useRootContext();
-	const width = uiStore.timelineConst.timelineMaxWidth;
+	const width = uiStore.trackWidthPx;
 
 	return (<div
 		{...props}
@@ -202,14 +200,12 @@ const TimelineTracks = observer(function TimelineTracks() {
 		}
 		else if (type === "scene") {
 			const scene = active.data.current.scene;
-			scene.x += delta.x;
-			scene.y += delta.y;			
+			scene.start += uiStore.pxToSec(delta.x);
 			if (over) {
 				const oldTrackId = scene.trackInfo.trackId;
 				const newTrackId = over.data.current.trackId;
 				if (newTrackId !== oldTrackId) {
 					scene.trackInfo.trackId = newTrackId;
-					scene.y = 0;
 					setTracks((tracks) => {
 						const oldIndex = tracks.findIndex((value) => (value.trackId === oldTrackId));
 						const newIndex = tracks.findIndex((value) => (value.trackId === newTrackId));
@@ -314,9 +310,30 @@ const TimelineTracks = observer(function TimelineTracks() {
 
 const NewTimeline = observer(function NewTimeline() {
 
+	const {
+		uiStore
+	} = useRootContext();
+
+	const onZoomChange = action((event) => {
+		uiStore.timelineControls.pxPerSec = event.target.value;
+	});
+
 	return (<div
 		className="bg-slate-100"
 	>
+		<div>
+			<label htmlFor="timelinen_zoom"> Pixels per second {uiStore.timelineControls.pxPerSec} </label>
+			<input
+				id="timeline_zoom"
+				type={"range"}
+				min={1}
+				max={101}
+				value={uiStore.timelineControls.pxPerSec}
+				onChange={onZoomChange}
+				step={5}
+			/>
+		</div>
+
 		<TimelineTracks />
 	</div>);
 });

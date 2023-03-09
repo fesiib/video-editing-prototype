@@ -3,6 +3,7 @@ import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dn
 import { CSS } from "@dnd-kit/utilities";
 import { observer } from "mobx-react-lite";
 import { forwardRef } from "react";
+import useRootContext from "../hooks/useRootContext";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({
 	id, handleName
@@ -73,14 +74,21 @@ const ResizeWrapper = observer(function ResizeWrapper({
 export const TimelineItem = observer(forwardRef(function TimelineItem({
 	scene, transform, isOverlay, ...props
 }, ref) {
+	const {
+		uiStore
+	} = useRootContext();
 
 	const style = {
-		...scene.timelineTransform(transform),
+		transform: ( transform ?
+			`translate3d(${uiStore.secToPx(scene.start) + transform.x}px, ${0 + transform.y}px, ${0}px)` :
+			`translate3d(${uiStore.secToPx(scene.start)}px, ${0}px, ${0}px)`
+		),
+		width: uiStore.secToPx(scene.duration),
 	};
 	return (<div 
 		className={ isOverlay ?
-			"bg-yellow-600 w-20 absolute z-10" :
-			"bg-yellow-400 w-20 absolute z-10"
+			"bg-yellow-600 absolute z-10" :
+			"bg-yellow-400 absolute z-10"
 		}
 		ref={ref}
 		style={style}

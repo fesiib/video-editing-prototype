@@ -1,3 +1,4 @@
+import Konva from "konva";
 import { Animation } from "konva/lib/Animation";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -15,6 +16,10 @@ const DraggableVideo = observer(function DraggableVideo({
 
     const imageRef = useRef(null);
     const [isSelected, setIsSelected] = useState(false);
+	const [brightness, setBrightness] = useState(1);
+
+	const imageElement = document.createElement("img");
+    imageElement.src = "/logo192.png";
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
@@ -83,16 +88,21 @@ const DraggableVideo = observer(function DraggableVideo({
         transformerRef.current.getLayer().batchDraw();
     }, [isSelected, transformerRef]);
 
-	const adjustedX = curVideo.x;
-	const adjustedY = curVideo.y;
+	useEffect(() => {
+		const opacity = 0.8;
+		const blur = 20;
+		const canvas = imageRef.current.getLayer().getCanvas()._canvas;
+		canvas.style.filter = `brightness(${brightness*100}%), opacity(${opacity*100}%), blur(${blur}px);`
+	}, [brightness]);
 
     return (
         <Image
             ref={imageRef}
             image={videoElement}
+			//image={imageElement}
             stroke="black"
-            x={adjustedX}
-            y={adjustedY}
+            x={curVideo.x}
+            y={curVideo.y}
             width={curVideo.width}
             height={curVideo.height}
             offsetX={curVideo.width / 2}
@@ -102,6 +112,7 @@ const DraggableVideo = observer(function DraggableVideo({
             draggable={isSelected}
             onDblClick={() => setIsSelected(!isSelected)}
 			onDragEnd={onVideoDragEnd}
+			perfectDrawEnabled={false}
         />
     );
 });

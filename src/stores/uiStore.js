@@ -28,17 +28,17 @@ class UIStore {
 	};
 	timelineControls = {
 		numberOfRows: 3,
-		scalePos: 4,
+		pxPerSec: 10,
 		playPosition: 0, //secs
 	};
 	timelineConst = {
 		labelHeight: 10,
 		linePadding: 1,
+		
 		positionIndicatorWidth: 8,
 		labelStep: 5, //seconds
 
-		timelineMaxWidth: 3000,
-		timelineMaxHeight: 3000,
+		trackMaxDuration: 60*20, //seconds
 	};
     // panelSize = {};
 
@@ -54,14 +54,12 @@ class UIStore {
         return ZOOM_PERCENTAGES[this.canvasControls.scalePos];
     }
 
-	get timelineScale() {
-		return ZOOM_PERCENTAGES[[this.timelineControls.scalePos]] / 100;
-	}
-	get timelineZoom() {
-		return ZOOM_PERCENTAGES[[this.timelineControls.scalePos]];
-	}
 	get timelineSingleLineHeight() {
 		return this.timelineSize.height / this.timelineControls.numberOfRows;
+	}
+
+	get trackWidthPx() {
+		return this.timelineConst.trackMaxDuration * this.timelineControls.pxPerSec;
 	}
 
     setWindowSize({ width, height }) {
@@ -75,6 +73,14 @@ class UIStore {
             height: (height / 3),
 		}
     }
+
+	secToPx(seconds) {
+		return seconds * this.timelineControls.pxPerSec;
+	}
+
+	pxToSec(px) {
+		return Math.round(px / this.timelineControls.pxPerSec * 100) / 100;
+	}
 }
 
 export default UIStore;
