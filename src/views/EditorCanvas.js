@@ -7,6 +7,7 @@ import { Layer, Rect, Stage, Transformer } from "react-konva";
 
 import useRootContext from "../hooks/useRootContext";
 import DraggableVideo from "../components/canvas/DraggableVideo";
+import DraggableText from "../components/canvas/DraggableText";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const transformerRef = useRef(null);
@@ -100,6 +101,19 @@ const EditorCanvas = observer(function EditorCanvas() {
                         curVideo={domainStore.videos[0]}
                         transformerRef={transformerRef}
                     />
+				</Layer>
+				<Layer
+					scaleX={uiStore.canvasScale}
+					scaleY={uiStore.canvasScale}
+					offsetX={uiStore.canvasSize.width / 2}
+					offsetY={uiStore.canvasSize.height / 2}
+					x={uiStore.canvasSize.width / 2}
+					y={uiStore.canvasSize.height / 2}
+				>
+					<DraggableText
+						curText={domainStore.texts[0]}
+						transformerRef={transformerRef}
+					/>
 				</Layer>
             </Stage>
         </>

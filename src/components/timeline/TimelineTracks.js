@@ -95,6 +95,10 @@ const TimelineTracks = observer(function TimelineTracks() {
             const id = video.trackInfo.trackId;
             newTracks[id].scenes.push(video);
         }
+		for (let text of domainStore.texts) {
+			const id = text.trackInfo.trackId;
+            newTracks[id].scenes.push(text);
+		}
         setTracks(newTracks);
     }, [domainStore.videos, trackCnt]);
 

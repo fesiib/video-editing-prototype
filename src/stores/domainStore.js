@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
 import VideoState from "./videoState";
+import TextState from "./textState";
 
 class DomainStore {
     videos = [];
@@ -15,7 +16,7 @@ class DomainStore {
         width: 1280,
         height: 720, //720p
         duration: 10, // seconds
-        trackCnt: 3,
+        trackCnt: 4,
     };
 
     constructor(rootStore) {
@@ -27,6 +28,9 @@ class DomainStore {
             new VideoState(this, "http://localhost:3000/demo-3.webm", "video-2", 1),
             new VideoState(this, "http://localhost:3000/demo-3.webm", "video-3", 2),
         ];
+		this.texts = [
+			new TextState(this, "HELLO WORLD !", "text-1", 3),
+		];
     }
 }
 
