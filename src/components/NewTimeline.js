@@ -4,36 +4,82 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext, useSortable,
 import { CSS } from "@dnd-kit/utilities";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import useRootContext from "../hooks/useRootContext";
+import IndicatorIcon from "../icons/IndicatorIcon";
 import { selectiveRestrictToVerticalAxis } from "../utilities/dndKitUtilities";
+import { secondsToFormat } from "../utilities/timelineUtilities";
 import DraggableTimelineItem, { TimelineItem } from "./TimelineItem";
 
-const TimelinePositionIndicator = observer(function TimelinePositionIndicator({
-	id
-}) {
+const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}) {
+	const {
+		uiStore,
+	} = useRootContext();
+
+	const width = uiStore.trackWidthPx;
+	const height = uiStore.timelineSize.height;
+	const labelIntervalPx = uiStore.timelineConst.labelIntervalPx;
+
+	const playPositionPx = uiStore.secToPx(uiStore.timelineControls.playPosition);
+	const playIndicatorWidth = 8;
 
 	const {
-		attributes,
-		listeners,
 		setNodeRef,
-		transform
+		listeners,
+		attributes,
+		transform,
+		isDragging
 	} = useDraggable({
-		id: id
+		id: "position_indicator"
 	});
 
-	const style = {
-		transform: CSS.Transform.toString(transform),
-	};
+	const curPlayPosition = (uiStore.timelineControls.playPosition + 
+		(transform ? uiStore.pxToSec(transform.x) : 0) );
+	return (<>
+		<div
+			className={isDragging ?
+				"absolute z-20 bg-violet-500" :
+				"absolute z-20 hover:bg-violet-500"
+			}
+			style={{
+				height: height,
+				left: playPositionPx - (playIndicatorWidth / 2),
+				transform: CSS.Transform.toString(transform)
+			}}
+			ref={setNodeRef}
+			{...listeners}
+			{...attributes}
+		>
+			{
+				isDragging ? (<label
+					className="absolute z-30 bg-violet-800 text-white text-xs"
+					style={{
+						left: playIndicatorWidth,
+					}}
+					htmlFor="position_indicator_button"
+				> { secondsToFormat(curPlayPosition) } </label>)
+				: null
+			}
+			<button 
+				type="button"
+				id="position_indicator_button"
+				style={{
+					width: playIndicatorWidth,
+					height: height,
+				}}
+			>
+				<div
+					className="mx-auto"
+					style={{
+						width: 2,
+						height: height,
+						background: "black",
+					}}
+				/>
 
-	return (<div className="flex-start"
-		style={style}
-		ref={setNodeRef}
-		{...listeners}
-		{...attributes}
-	>
-		indicator
-	</div>)
+			</button>
+		</div>
+	</>);
 });
 
 const TimelineLabels = observer(function TimelineLabels() {
@@ -43,21 +89,52 @@ const TimelineLabels = observer(function TimelineLabels() {
 
 	const width = uiStore.trackWidthPx;
 	const height = uiStore.timelineConst.labelHeight;
+	const labelIntervalPx = uiStore.timelineConst.labelIntervalPx;
+
+
+	const labels = useMemo(() => {
+		const newLabels = [];
+		for (let px = 0; px < width; px += labelIntervalPx) {
+			let timestamp = uiStore.pxToSec(px + labelIntervalPx);
+			newLabels.push(timestamp);
+		}
+		return newLabels;
+	}, [width, labelIntervalPx]);
+
+	const onIndicatorDragEnd = action((event) => {
+		const {delta} = event;
+		uiStore.timelineControls.playPosition += uiStore.pxToSec(delta.x);
+	});
 
 	return (<DndContext
 		modifiers={[
 			restrictToHorizontalAxis,
-			restrictToParentElement
 		]}
+		onDragEnd={onIndicatorDragEnd}
 	>
 		<div 
-			className="bg-slate-500 flex"
+			className={"bg-slate-500 flex relative"}
 			style={{
 				width: width,
 				height: height,
 			}}
 		>
-			<TimelinePositionIndicator id={"draggable_indicator"}/>
+			{
+				labels.map((timestamp) => {
+					return (<span
+						key={"label" + timestamp}
+						className={"text-xs text-right border-r-2"}
+						style={{
+							width: labelIntervalPx,
+							height: uiStore.timelineConst.labelHeight,
+						}}
+					>
+						{secondsToFormat(timestamp)}
+					</span>);
+				})
+			}
+
+			<TimelinePositionIndicator/>
 		</div>
 	</DndContext>);
 });
@@ -238,7 +315,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 	return (<div 
 		className="bg-slate-300 m-5 flex-column overflow-scroll"
 		style={{
-			width: width
+			width: width,
 		}}
 	>
 		<TimelineLabels/>
@@ -321,17 +398,44 @@ const NewTimeline = observer(function NewTimeline() {
 	return (<div
 		className="bg-slate-100"
 	>
-		<div>
-			<label htmlFor="timelinen_zoom"> Pixels per second {uiStore.timelineControls.pxPerSec} </label>
-			<input
-				id="timeline_zoom"
-				type={"range"}
-				min={1}
-				max={101}
-				value={uiStore.timelineControls.pxPerSec}
-				onChange={onZoomChange}
-				step={5}
-			/>
+		<div className="flex justify-between">
+			<div>
+				<label htmlFor="play_button" className="bg-indigo-300 p-1" > Play </label>
+				<input
+					id="play_button"
+					type="button"
+				/>
+			</div>
+			<div>
+				<label htmlFor="split_button" className="bg-indigo-300 p-1" > Split </label>
+				<input
+					id="split_button"
+					type="button"
+				/>
+			</div>
+			<div>
+				<label htmlFor="speed_input" className="bg-indigo-300 p-1" > Speed </label>
+				<input
+					id="speed_input"
+					type="number"
+					style={{
+						width: 50
+					}}
+					step={0.25}
+				/>
+			</div>
+			<div>
+				<label htmlFor="timelinen_zoom"> Pixels per second {uiStore.timelineControls.pxPerSec} </label>
+				<input
+					id="timeline_zoom"
+					type={"range"}
+					min={10}
+					max={100}
+					value={uiStore.timelineControls.pxPerSec}
+					onChange={onZoomChange}
+					step={10}
+				/>
+			</div>
 		</div>
 
 		<TimelineTracks />

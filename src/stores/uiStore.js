@@ -32,11 +32,11 @@ class UIStore {
 		playPosition: 0, //secs
 	};
 	timelineConst = {
-		labelHeight: 10,
+		labelHeight: 20,
 		linePadding: 1,
 		
 		positionIndicatorWidth: 8,
-		labelStep: 5, //seconds
+		labelIntervalPx: 100, //px
 
 		trackMaxDuration: 60*20, //seconds
 	};
@@ -77,7 +77,7 @@ class UIStore {
 	secToPx(seconds) {
 		return seconds * this.timelineControls.pxPerSec;
 	}
-
+	
 	pxToSec(px) {
 		return Math.round(px / this.timelineControls.pxPerSec * 100) / 100;
 	}
