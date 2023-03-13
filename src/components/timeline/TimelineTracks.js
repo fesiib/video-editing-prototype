@@ -61,17 +61,17 @@ const TimelineTracks = observer(function TimelineTracks() {
             setActiveTrackId(null);
         } else if (type === "scene") {
             const scene = active.data.current.scene;
-            scene.start += uiStore.pxToSec(delta.x);
+            scene.commonState.offset += uiStore.pxToSec(delta.x);
             if (over) {
-                const oldTrackId = scene.trackInfo.trackId;
+                const oldTrackId = scene.commonState.trackInfo.trackId;
                 const newTrackId = over.data.current.trackId;
                 if (newTrackId !== oldTrackId) {
-                    scene.trackInfo.trackId = newTrackId;
+                    scene.commonState.trackInfo.trackId = newTrackId;
                     setTracks((tracks) => {
                         const oldIndex = tracks.findIndex((value) => value.trackId === oldTrackId);
                         const newIndex = tracks.findIndex((value) => value.trackId === newTrackId);
                         const sceneIndex = tracks[oldIndex].scenes.findIndex(
-                            (curScene) => curScene.id === scene.id
+                            (curScene) => curScene.commonState.id === scene.commonState.id
                         );
                         tracks[oldIndex].scenes.splice(sceneIndex, 1);
                         tracks[newIndex].scenes.push(scene);
@@ -92,11 +92,11 @@ const TimelineTracks = observer(function TimelineTracks() {
             });
         }
         for (let video of domainStore.videos) {
-            const id = video.trackInfo.trackId;
+            const id = video.commonState.trackInfo.trackId;
             newTracks[id].scenes.push(video);
         }
 		for (let text of domainStore.texts) {
-			const id = text.trackInfo.trackId;
+			const id = text.commonState.trackInfo.trackId;
             newTracks[id].scenes.push(text);
 		}
         setTracks(newTracks);
@@ -115,7 +115,6 @@ const TimelineTracks = observer(function TimelineTracks() {
                 modifiers={[restrictToFirstScrollableAncestor]}
                 collisionDetection={closestCorners}
                 onDragStart={onGenericDragStart}
-                //onDragOver={onGenericDragOver}
                 onDragEnd={onGenericDragEnd}
             >
                 <SortableContext

@@ -8,7 +8,7 @@ import TimelineItem from "./TimelineItem";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene }) {
     const { attributes, listeners, setNodeRef } = useDraggable({
-        id: scene.id,
+        id: scene.commonState.id,
         data: {
             type: "scene",
             scene,

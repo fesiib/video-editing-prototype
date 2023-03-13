@@ -11,7 +11,7 @@ import useRootContext from "../../hooks/useRootContext";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, isLeftHandler }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: scene.id + (isLeftHandler ? "leftHandler" : "rightHandler"),
+        id: scene.commonState.id + (isLeftHandler ? "leftHandler" : "rightHandler"),
         transition: {
             duration: 150, // milliseconds
             easing: "cubic-bezier(0.25, 1, 0.5, 1)",
@@ -41,10 +41,11 @@ const ResizeWrapper = observer(function ResizeWrapper({ scene, children }) {
         const scene = active.data.current.scene;
         const isLeftHandler = active.data.current.isLeftHandler;
         if (isLeftHandler) {
-            scene.start += uiStore.pxToSec(delta.x);
-            scene.duration += -uiStore.pxToSec(delta.x);
+            scene.commonState.start += uiStore.pxToSec(delta.x);
+			scene.commonState.offset += uiStore.pxToSec(delta.x);
+            scene.commonState.duration += -uiStore.pxToSec(delta.x);
         } else {
-            scene.duration += uiStore.pxToSec(delta.x);
+            scene.commonState.duration += uiStore.pxToSec(delta.x);
         }
     });
 

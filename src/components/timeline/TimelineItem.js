@@ -13,10 +13,10 @@ export const TimelineItem = observer(
         const style = {
             transform: (transform ? 
 				`translate3d(${
-					uiStore.secToPx(scene.start) + transform.x
+					uiStore.secToPx(scene.commonState.offset) + transform.x
 				}px, ${0 + transform.y}px, ${0}px)`
-                : `translate3d(${uiStore.secToPx(scene.start)}px, ${0}px, ${0}px)`),
-            width: uiStore.secToPx(scene.duration),
+                : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`),
+            width: uiStore.secToPx(scene.commonState.duration),
         };
 
         return (
@@ -32,7 +32,7 @@ export const TimelineItem = observer(
                     "overlay"
                 ) : (
                     <div className="flex justify-between">
-                        <ResizeWrapper scene={scene}>{scene.id}</ResizeWrapper>
+                        <ResizeWrapper scene={scene}>{scene.commonState.id}</ResizeWrapper>
                     </div>
                 )}
             </div>

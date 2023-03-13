@@ -16,7 +16,7 @@ class DomainStore {
         width: 1280,
         height: 720, //720p
         duration: 10, // seconds
-        trackCnt: 4,
+        trackCnt: 5,
     };
 
     constructor(rootStore) {
@@ -30,6 +30,7 @@ class DomainStore {
         ];
 		this.texts = [
 			new TextState(this, "HELLO WORLD !", "text-1", 3),
+			new TextState(this, "ANOTHER text !", "text-2", 4),
 		];
     }
 }
