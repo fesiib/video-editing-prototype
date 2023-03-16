@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -8,9 +8,14 @@ import { Layer, Rect, Stage, Transformer } from "react-konva";
 import useRootContext from "../hooks/useRootContext";
 import DraggableVideo from "../components/canvas/DraggableVideo";
 import DraggableText from "../components/canvas/DraggableText";
+import { Util } from "konva/lib/Util";
 
 const EditorCanvas = observer(function EditorCanvas() {
-    const transformerRef = useRef(null);
+    const stageRef = useRef(null);
+	const transformerRef = useRef(null);
+	const selectionRectRef = useRef(null);
+
+	const [selectionRectCoordinates, setSelectionRectCoordinates] = useState([0, 0, 0, 0]);
 
     const { uiStore, domainStore } = useRootContext();
 
@@ -21,9 +26,114 @@ const EditorCanvas = observer(function EditorCanvas() {
         uiStore.canvasControls.scalePos = event.target.value;
     });
 
-    const onBackgroundClick = () => {
-        transformerRef.current.nodes([]);
-    };
+	const isBackground = (target) => {
+		return target.name() === uiStore.backgroundName;
+	}
+	const isObject = (target) => {
+		for (let i in uiStore.objectNames) {
+			const objectName = uiStore.objectNames[i];
+			if (objectName === target.name()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const onStageMouseDown = action((event) => {
+		if (!isBackground(event.target)) {
+			return;
+		}
+		event.evt.preventDefault();
+		setSelectionRectCoordinates([
+			stageRef.current.getPointerPosition().x,
+			stageRef.current.getPointerPosition().y,
+			stageRef.current.getPointerPosition().x,
+			stageRef.current.getPointerPosition().y,
+		]);
+		transformerRef.current.nodes([]);
+		uiStore.canvasControls.transformerNodes = [];
+		selectionRectRef.current.visible(true);
+		selectionRectRef.current.width(0);
+		selectionRectRef.current.height(0);
+	});
+
+	const onStageMouseMove = (event) => {
+		if (!selectionRectRef.current.visible()) {
+			return;
+		}
+		event.evt.preventDefault();	
+		setSelectionRectCoordinates([
+			selectionRectCoordinates[0],
+			selectionRectCoordinates[1],
+			stageRef.current.getPointerPosition().x,
+			stageRef.current.getPointerPosition().y,
+		]);
+		selectionRectRef.current.x(Math.min(selectionRectCoordinates[0], selectionRectCoordinates[2]));
+		selectionRectRef.current.y(Math.min(selectionRectCoordinates[1], selectionRectCoordinates[3]));
+		selectionRectRef.current.width(Math.abs(
+			selectionRectCoordinates[0] - selectionRectCoordinates[2]
+		));
+		selectionRectRef.current.height(Math.abs(
+			selectionRectCoordinates[1] - selectionRectCoordinates[3]
+		));
+	};
+
+	const onStageMouseUp = action((event) => {
+		if (!selectionRectRef.current.visible()) {
+			return;
+		}
+		event.evt.preventDefault();
+
+		setTimeout(() => {;
+			selectionRectRef.current.visible(false);
+		});
+
+		const objects = stageRef.current.find((value) => isObject(value));
+		const box = selectionRectRef.current.getClientRect();
+		const selected = objects.filter((object) => {
+			return Util.haveIntersection(box, object.getClientRect());
+		})
+		transformerRef.current.nodes(selected);
+		uiStore.canvasControls.transformerNodes = selected;
+	});
+	
+	const onStageClick = action((event) => {
+		if (selectionRectRef.current.visible()) {
+			return;
+		}
+		if (isBackground(event.target)) {
+			transformerRef.current.nodes([]);
+			uiStore.canvasControls.transformerNodes = [];
+			return;
+		}
+		if (!isObject(event.target)) {
+			return;
+		}
+
+		const metaPressed = event.evt.shiftKey || event.evt.ctrlKey || event.evt.metaKey;
+        const isSelected = transformerRef.current.nodes().indexOf(event.target) >= 0;
+
+        if (!metaPressed && !isSelected) {
+			// if no key pressed and the node is not selected
+			// select just one
+			transformerRef.current.nodes([event.target]);
+			uiStore.canvasControls.transformerNodes = [event.target];
+        } else if (metaPressed && isSelected) {
+			// if we pressed keys and node was selected
+			// we need to remove it from selection:
+			const nodes = transformerRef.current.nodes().slice(); // use slice to have new copy of array
+			// remove node from array
+			nodes.splice(nodes.indexOf(event.target), 1);
+			transformerRef.current.nodes(nodes);
+			uiStore.canvasControls.transformerNodes = nodes;
+        } else if (metaPressed && !isSelected) {
+			// add the node into selection
+			const nodes = transformerRef.current.nodes().concat([event.target]);
+			transformerRef.current.nodes(nodes);
+			uiStore.canvasControls.transformerNodes = nodes;
+		}
+	});
+
 
     useEffect(
         action(() => {
@@ -39,7 +149,7 @@ const EditorCanvas = observer(function EditorCanvas() {
         }),
         [projectHeight, projectWidth]
     );
-
+	
     return (
         <>
             <div>
@@ -53,15 +163,23 @@ const EditorCanvas = observer(function EditorCanvas() {
                     onChange={onZoomChange}
                 />
             </div>
-            <Stage width={uiStore.canvasSize.width} height={uiStore.canvasSize.height}>
+            <Stage
+				ref={stageRef}
+				width={uiStore.canvasSize.width}
+				height={uiStore.canvasSize.height}
+				onMouseDown={onStageMouseDown}
+				onMouseMove={onStageMouseMove}
+				onMouseUp={onStageMouseUp}
+				onClick={onStageClick}
+			>
                 <Layer>
                     <Rect
                         x={0}
                         y={0}
                         width={uiStore.canvasSize.width}
                         height={uiStore.canvasSize.height}
-                        fill="red"
-                        onClick={onBackgroundClick}
+                        fill={"red"}
+						name={uiStore.backgroundName}
                     />
                 </Layer>
                 <Layer
@@ -79,9 +197,10 @@ const EditorCanvas = observer(function EditorCanvas() {
                         height={projectHeight}
                         offsetX={projectWidth / 2}
                         offsetY={projectHeight / 2}
-                        fill="black"
+                        fill={"black"}
                         scaleX={1}
                         scaleY={1}
+						name={uiStore.backgroundName}
                     />
                     <Transformer
                         ref={transformerRef}
@@ -99,7 +218,6 @@ const EditorCanvas = observer(function EditorCanvas() {
                 >
 					<DraggableVideo
                         curVideo={domainStore.videos[0]}
-                        transformerRef={transformerRef}
                     />
 				</Layer>
 				<Layer
@@ -112,7 +230,13 @@ const EditorCanvas = observer(function EditorCanvas() {
 				>
 					<DraggableText
 						curText={domainStore.texts[0]}
-						transformerRef={transformerRef}
+					/>
+				</Layer>
+				<Layer>
+					<Rect
+						ref={selectionRectRef}
+						fill={"rgba(0, 0, 255, 0.4"}
+						visible={false}
 					/>
 				</Layer>
             </Stage>

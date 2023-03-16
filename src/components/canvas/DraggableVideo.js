@@ -8,11 +8,12 @@ import { Animation } from "konva/lib/Animation";
 
 import useRootContext from "../../hooks/useRootContext";
 
-const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerRef }) {
+const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     const { uiStore } = useRootContext();
 
     const imageRef = useRef(null);
-    const [isSelected, setIsSelected] = useState(false);
+
+	const [isSelected, setIsSelected] =  useState(false);
 
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
@@ -27,14 +28,14 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerR
     const onLoadedMetadata = action(() => {
         const metadata = {
             duration: videoElement.duration,
-            videoWidth: videoElement.videoWidth,
-            videoHeight: videoElement.videoHeight,
+            width: videoElement.videoWidth,
+            height: videoElement.videoHeight,
             scaleX: 1,
             scaleY: 1,
             x: uiStore.canvasSize.width / 2,
             y: uiStore.canvasSize.height / 2,
         };
-        curVideo.setMetadata(metadata);
+        curVideo.commonState.setMetadata(metadata);
     });
 
     useEffect(() => {
@@ -54,35 +55,12 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerR
         return () => anim.stop();
     };
 
-    const onVideoDragEnd = action((event) => {
-        curVideo.x = event.target.x();
-        curVideo.y = event.target.y();
-    });
-
-    const onTransformerEnd = action((event) => {
-        curVideo.scaleX = event.target.scaleX();
-        curVideo.scaleY = event.target.scaleY();
-        curVideo.x = event.target.x();
-        curVideo.y = event.target.y();
-    });
-
     useEffect(() => {
         videoElement.addEventListener("canplay", onCanPlay);
         return () => {
             videoElement.removeEventListener("canplay", onCanPlay);
         };
     }, [videoElement]);
-
-    useEffect(() => {
-        if (!isSelected) {
-            transformerRef.current.detach();
-            transformerRef.current.off("transformend");
-        } else {
-            transformerRef.current.nodes([imageRef.current]);
-            transformerRef.current.on("transformend", onTransformerEnd);
-        }
-        transformerRef.current.getLayer().batchDraw();
-    }, [isSelected, transformerRef]);
 
     useEffect(() => {
         const opacity = 0.5;
@@ -95,24 +73,30 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo, transformerR
 		canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
     }, []);
 
+	useEffect(() => {
+		setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(imageRef.current) >= 0);
+	}, [uiStore.canvasControls.transformerNodes]);
+
+
     return (
         <Image
+			name={uiStore.objectNames.video}
             ref={imageRef}
             image={videoElement}
             //image={imageElement}
             stroke="black"
-            x={curVideo.x}
-            y={curVideo.y}
-            width={curVideo.width}
-            height={curVideo.height}
-            offsetX={curVideo.width / 2}
-            offsetY={curVideo.height / 2}
-            scaleX={curVideo.scaleX}
-            scaleY={curVideo.scaleY}
+            x={curVideo.commonState.x}
+            y={curVideo.commonState.y}
+            width={curVideo.commonState.width}
+            height={curVideo.commonState.height}
+            offsetX={curVideo.commonState.width / 2}
+            offsetY={curVideo.commonState.height / 2}
+            scaleX={curVideo.commonState.scaleX}
+            scaleY={curVideo.commonState.scaleY}
             draggable={isSelected}
-            onDblClick={() => setIsSelected(!isSelected)}
-            onDragEnd={onVideoDragEnd}
-            perfectDrawEnabled={false}
+	        perfectDrawEnabled={false}
+			onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
+			onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}
         />
     );
 });

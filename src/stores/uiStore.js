@@ -17,6 +17,7 @@ class UIStore {
     };
     canvasControls = {
         scalePos: 4,
+		transformerNodes: [],
     };
     canvasConst = {
         margin: 10,
@@ -40,6 +41,14 @@ class UIStore {
 
         trackMaxDuration: 60 * 20, //seconds
     };
+
+	objectNames = {
+		video: "video",
+		image: "image",
+		text: "text",
+	};
+	backgroundName = "bg";
+
     // panelSize = {};
 
     constructor(rootStore) {

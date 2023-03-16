@@ -7,52 +7,35 @@ import { Text } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 
-const DraggableText = observer(function DraggableText({ curText, transformerRef }) {
+const DraggableText = observer(function DraggableText({ curText }) {
     const { uiStore } = useRootContext();
 
     const textRef = useRef(null);
-    const [isSelected, setIsSelected] = useState(false);
 
-    const onTextDragEnd = action((event) => {
-        curText.x = event.target.x();
-        curText.y = event.target.y();
-    });
+	const [isSelected, setIsSelected] =  useState(false);
 
-    const onTransformerEnd = action((event) => {
-        curText.scaleX = event.target.scaleX();
-        curText.scaleY = event.target.scaleY();
-        curText.x = event.target.x();
-        curText.y = event.target.y();
-    });
-
-    useEffect(() => {
-        if (!isSelected) {
-            transformerRef.current.detach();
-            transformerRef.current.off("transformend");
-        } else {
-            transformerRef.current.nodes([textRef.current]);
-            transformerRef.current.on("transformend", onTransformerEnd);
-        }
-        transformerRef.current.getLayer().batchDraw();
-    }, [isSelected, transformerRef]);
+	useEffect(() => {
+		setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(textRef.current) >= 0);
+	}, [uiStore.canvasControls.transformerNodes]);
 
     return (
         <Text
+			name={uiStore.objectNames.text}
             ref={textRef}
 			text={curText.content}
 			{...curText.textStyle}
-            x={curText.x}
-            y={curText.y}
-            width={curText.width}
-            height={curText.height}
-            offsetX={curText.width / 2}
-            offsetY={curText.height / 2}
-            scaleX={curText.scaleX}
-            scaleY={curText.scaleY}
+            x={curText.commonState.x}
+            y={curText.commonState.y}
+            width={curText.commonState.width}
+            height={curText.commonState.height}
+            offsetX={curText.commonState.width / 2}
+            offsetY={curText.commonState.height / 2}
+            scaleX={curText.commonState.scaleX}
+            scaleY={curText.commonState.scaleY}
             draggable={isSelected}
-            onDblClick={() => setIsSelected(!isSelected)}
-            onDragEnd={onTextDragEnd}
             perfectDrawEnabled={false}
+			onDragEnd={(event) => curText.commonState.onDragEnd(event.target)}
+			onTransformEnd={(event) => curText.commonState.onTransformerEnd(event.target)}
         />
     );
 });

@@ -73,7 +73,7 @@ class CommonState {
 	}
 
 	onTransformerEnd(target) {
-		console.log(target)
+		console.log(target.scaleX(), target.x())
 		this.scaleX = target.scaleX();
         this.scaleY = target.scaleY();
         this.x = target.x();
