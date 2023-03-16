@@ -11,7 +11,7 @@ const TimelineTrack = observer(
         const { uiStore } = useRootContext();
         const width = uiStore.trackWidthPx;
 
-        return (
+		return (
             <div {...props} ref={ref}>
                 <div
                     className={
@@ -27,7 +27,7 @@ const TimelineTrack = observer(
                 >
                     <div className="absolute inset-y-0 left-0">{title}</div>
                     {scenes.map((scene) => (
-                        <DraggableTimelineItem key={scene.commonState.id} scene={scene} />
+                        <DraggableTimelineItem key={scene.commonState.id} scene={scene} scenes={scenes} />
                     ))}
                 </div>
             </div>

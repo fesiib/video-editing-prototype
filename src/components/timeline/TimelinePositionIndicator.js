@@ -23,7 +23,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
     });
 
     const curPlayPosition =
-        uiStore.timelineControls.playPosition + (transform ? uiStore.pxToSec(transform.x) : 0);
+        uiStore.timelineControls.playPosition + (typeof transform?.x === 'number' ? uiStore.pxToSec(transform.x) : 0);
     return (
         <>
             <div

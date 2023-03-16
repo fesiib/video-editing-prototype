@@ -20,6 +20,7 @@ import TimelineLabels from "./TimelineLabels";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
+import { preventCollision, timlineItemMiddle } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
     const { uiStore, domainStore } = useRootContext();
@@ -62,14 +63,48 @@ const TimelineTracks = observer(function TimelineTracks() {
 				});
 			}
 		}
+		if (delta) {
+			const index = tracks.findIndex((value) => value.trackId === scene.commonState.trackInfo.trackId);
+			const newOffset = preventCollision(scene, tracks[index].scenes, delta, uiStore);
+			let moveOffset = 0;
+			const middle = timlineItemMiddle(scene, delta, uiStore);
+			for (let otherScene of tracks[index].scenes) {
+				if (otherScene.commonState.id === scene.commonState.id) {
+					continue;
+				}
+				const otherOffset = otherScene.commonState.offset;
+				const otherEnd = otherScene.commonState.end;
+				const otherMiddle = (otherEnd + otherOffset) / 2;
+				
+				if (otherMiddle > middle) {
+					if (newOffset + scene.commonState.sceneDuration > otherOffset) {
+						moveOffset = Math.max(moveOffset, newOffset + scene.commonState.sceneDuration - otherOffset);
+					}
+				}
+			}
+			for (let otherScene of tracks[index].scenes) {
+				if (otherScene.commonState.id === scene.commonState.id) {
+					continue;
+				}
+				const otherOffset = otherScene.commonState.offset;
+				const otherEnd = otherScene.commonState.end;
+				const otherMiddle = (otherEnd + otherOffset) / 2;
+				
+				if (otherMiddle > middle) {
+					otherScene.commonState.offset = otherScene.commonState.offset + moveOffset;
+
+				}
+			}
+			scene.commonState.offset = newOffset;
+		}
 	});
 
 	const onGenericDrageMove = action((event) => {
-		const { active, over, delta } = event;
+		const { active, over } = event;
         const type = active.data.current.type;
         console.log("move", type, event);
 		if (type === "scene") {
-			sceneTrackChange(active, over, delta);
+			sceneTrackChange(active, over, null);
 		}
 	});
 
@@ -89,8 +124,6 @@ const TimelineTracks = observer(function TimelineTracks() {
             }
             setActiveTrackId(null);
         } else if (type === "scene") {
-			const scene = active.data.current.scene;
-			scene.commonState.offset += uiStore.pxToSec(delta.x);
 			sceneTrackChange(active, over, delta);
             setActiveItem(null);
         }

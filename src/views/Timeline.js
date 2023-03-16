@@ -11,7 +11,7 @@ const Timeline = observer(function Timeline() {
     const { uiStore } = useRootContext();
 
     const onZoomChange = action((event) => {
-        uiStore.timelineControls.pxPerSec = event.target.value;
+        uiStore.timelineControls.pxPerSec = event.target.value / 10;
     });
 
     return (
@@ -54,10 +54,10 @@ const Timeline = observer(function Timeline() {
                         id="timeline_zoom"
                         type={"range"}
                         min={10}
-                        max={100}
-                        value={uiStore.timelineControls.pxPerSec}
+                        max={1000}
+                        value={uiStore.timelineControls.pxPerSec * 10}
                         onChange={onZoomChange}
-                        step={10}
+                        step={5}
                     />
                 </div>
             </div>
