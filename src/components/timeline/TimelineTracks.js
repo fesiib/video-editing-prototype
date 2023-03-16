@@ -43,12 +43,41 @@ const TimelineTracks = observer(function TimelineTracks() {
         }
     });
 
+	const sceneTrackChange = action((active, over, delta) => {
+		const scene = active.data.current.scene;
+		if (over) {
+			const oldTrackId = scene.commonState.trackInfo.trackId;
+			const newTrackId = over.data.current.trackId;
+			if (newTrackId !== oldTrackId) {
+				scene.commonState.trackInfo.trackId = newTrackId;
+				setTracks((tracks) => {
+					const oldIndex = tracks.findIndex((value) => value.trackId === oldTrackId);
+					const newIndex = tracks.findIndex((value) => value.trackId === newTrackId);
+					const sceneIndex = tracks[oldIndex].scenes.findIndex(
+						(curScene) => curScene.commonState.id === scene.commonState.id
+					);
+					tracks[oldIndex].scenes.splice(sceneIndex, 1);
+					tracks[newIndex].scenes.push(scene);
+					return tracks;
+				});
+			}
+		}
+	});
+
+	const onGenericDrageMove = action((event) => {
+		const { active, over, delta } = event;
+        const type = active.data.current.type;
+        console.log("move", type, event);
+		if (type === "scene") {
+			sceneTrackChange(active, over, delta);
+		}
+	});
+
     const onGenericDragEnd = action((event) => {
         const { active, delta, over } = event;
         const type = active.data.current.type;
         console.log("end", type, event);
-
-        if (type === "track") {
+        if (type === "track" && over) {
             if (active.id !== over.id) {
                 const activeTrackId = active.data.current.trackId;
                 const overTrackId = over.data.current.trackId;
@@ -60,25 +89,9 @@ const TimelineTracks = observer(function TimelineTracks() {
             }
             setActiveTrackId(null);
         } else if (type === "scene") {
-            const scene = active.data.current.scene;
-            scene.commonState.offset += uiStore.pxToSec(delta.x);
-            if (over) {
-                const oldTrackId = scene.commonState.trackInfo.trackId;
-                const newTrackId = over.data.current.trackId;
-                if (newTrackId !== oldTrackId) {
-                    scene.commonState.trackInfo.trackId = newTrackId;
-                    setTracks((tracks) => {
-                        const oldIndex = tracks.findIndex((value) => value.trackId === oldTrackId);
-                        const newIndex = tracks.findIndex((value) => value.trackId === newTrackId);
-                        const sceneIndex = tracks[oldIndex].scenes.findIndex(
-                            (curScene) => curScene.commonState.id === scene.commonState.id
-                        );
-                        tracks[oldIndex].scenes.splice(sceneIndex, 1);
-                        tracks[newIndex].scenes.push(scene);
-                        return tracks;
-                    });
-                }
-            }
+			const scene = active.data.current.scene;
+			scene.commonState.offset += uiStore.pxToSec(delta.x);
+			sceneTrackChange(active, over, delta);
             setActiveItem(null);
         }
     });
@@ -115,6 +128,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                 modifiers={[restrictToFirstScrollableAncestor]}
                 collisionDetection={closestCorners}
                 onDragStart={onGenericDragStart}
+				onDragOver={onGenericDrageMove}
                 onDragEnd={onGenericDragEnd}
             >
                 <SortableContext

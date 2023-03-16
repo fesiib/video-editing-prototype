@@ -7,7 +7,12 @@ import { useDraggable } from "@dnd-kit/core";
 import TimelineItem from "./TimelineItem";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene }) {
-    const { attributes, listeners, setNodeRef } = useDraggable({
+    const { 
+		attributes,
+		listeners,
+		setNodeRef,
+		transform
+	} = useDraggable({
         id: scene.commonState.id,
         data: {
             type: "scene",
@@ -19,7 +24,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene })
         <TimelineItem
             ref={setNodeRef}
             scene={scene}
-            transform={null}
+            transform={transform}
             isOverlay={false}
             {...attributes}
             {...listeners}

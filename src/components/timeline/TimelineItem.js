@@ -9,12 +9,11 @@ import ResizeWrapper from "./ResizeWrapper";
 export const TimelineItem = observer(
     forwardRef(function TimelineItem({ scene, transform, isOverlay, ...props }, ref) {
         const { uiStore } = useRootContext();
-
         const style = {
             transform: (transform ? 
 				`translate3d(${
 					uiStore.secToPx(scene.commonState.offset) + transform.x
-				}px, ${0 + transform.y}px, ${0}px)`
+				}px, ${0}px, ${0}px)`
                 : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`),
             width: uiStore.secToPx(scene.commonState.duration),
         };
