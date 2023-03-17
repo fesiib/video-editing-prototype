@@ -13,14 +13,6 @@ export function playPositionToFormat(seconds) {
     );
 }
 
-export function timlineItemMiddle(scene, transform, uiStore) {
-	let newOffset = scene.commonState.offset + ( typeof transform?.x === 'number' ?
-		uiStore.pxToSec(transform.x) :
-		0
-	);
-	return newOffset + scene.commonState.sceneDuration / 2;
-}
-
 export function preventCollision(scene, scenes, transform, uiStore) {
 	const curOffset = scene.commonState.offset + ( typeof transform?.x === 'number' ?
 		uiStore.pxToSec(transform.x) :
@@ -49,5 +41,24 @@ export function preventCollision(scene, scenes, transform, uiStore) {
 			newOffset = candidateOffset;
 		}
 	}
-	return newOffset;
+
+	let moveOffset = 0;
+	for (let otherScene of scenes) {
+		if (otherScene.commonState.id === scene.commonState.id) {
+			continue;
+		}
+		const otherOffset = otherScene.commonState.offset;
+		const otherEnd = otherScene.commonState.end;
+		const otherMiddle = (otherEnd + otherOffset) / 2;
+		
+		if (otherMiddle > middle) {
+			if (newOffset + scene.commonState.sceneDuration > otherOffset) {
+				moveOffset = Math.max(moveOffset, newOffset + scene.commonState.sceneDuration - otherOffset);
+			}
+		}
+	}
+
+	return {
+		newOffset, moveOffset, middle
+	};
 }

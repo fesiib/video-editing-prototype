@@ -7,7 +7,7 @@ import { useDraggable } from "@dnd-kit/core";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollision, timlineItemMiddle } from "../../utilities/timelineUtilities";
+import { preventCollision } from "../../utilities/timelineUtilities";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
 	const { uiStore } = useRootContext();
@@ -31,39 +31,40 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 	};
 
 	if (isDragging) {
-		const newOffset = preventCollision(scene, scenes, transform, uiStore);
+		const { 
+			newOffset,
+			moveOffset,
+			middle
+		} = preventCollision(scene, scenes, transform, uiStore);
 		adjustedTransform = {
 			...transform,
 			x: uiStore.secToPx(newOffset - scene.commonState.offset),
 		};
-		// // move items with otherMiddle > middle
-		// const middle = timlineItemMiddle(scene, transform, uiStore);
-		// const sceneDuration = (scene.commonState.finish - scene.commonState.start);
-		// for (let otherScene of scenes) {
-		// 	if (otherScene.commonState.id === scene.commonState.id) {
-		// 		continue;
-		// 	}
-		// 	const otherOffset = otherScene.commonState.offset;
-		// 	const otherEnd = otherScene.commonState.offset;
-		// 	const otherMiddle = (otherEnd + otherOffset) / 2;
-			
-		// 	if (otherMiddle > middle) {
-		// 		const otherSceneDiv = document.getElementById(otherScene.commonState.id);
-		// 		console.log(otherSceneDiv, sceneDuration)
-		// 		if (otherSceneDiv) {
-		// 			otherSceneDiv.style = {
-		// 				...otherSceneDiv.style,
-		// 				transform: (`translate3d(${
-		// 						uiStore.secToPx(otherScene.commonState.offset + sceneDuration)
-		// 					}px, ${0}px, ${0}px)`)
-		// 			};
-		// 		}
-		// 	}
-		// }
+		// move items on the right side
+		for (let otherScene of scenes) {
+			if (otherScene.commonState.id === scene.commonState.id) {
+				continue;
+			}
+			const otherOffset = otherScene.commonState.offset;
+			const otherEnd = otherScene.commonState.end;
+			const otherMiddle = (otherEnd + otherOffset) / 2;
+			const otherDiv = document.getElementById(otherScene.commonState.id);
+			if (otherMiddle > middle) {
+				otherDiv.style.transform = `translate3d(${
+					uiStore.secToPx(otherScene.commonState.offset + moveOffset)
+				}px, ${0}px, ${0}px)`;
+			}
+			else {
+				otherDiv.style.transform = `translate3d(${
+					uiStore.secToPx(otherScene.commonState.offset)
+				}px, ${0}px, ${0}px)`;
+			}
+		}
 	}
 
     return (
         <TimelineItem
+			id={scene.commonState.id}
             ref={setNodeRef}
             scene={scene}
             transform={adjustedTransform}

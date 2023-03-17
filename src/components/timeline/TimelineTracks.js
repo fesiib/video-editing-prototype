@@ -20,7 +20,7 @@ import TimelineLabels from "./TimelineLabels";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollision, timlineItemMiddle } from "../../utilities/timelineUtilities";
+import { preventCollision } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
     const { uiStore, domainStore } = useRootContext();
@@ -65,23 +65,11 @@ const TimelineTracks = observer(function TimelineTracks() {
 		}
 		if (delta) {
 			const index = tracks.findIndex((value) => value.trackId === scene.commonState.trackInfo.trackId);
-			const newOffset = preventCollision(scene, tracks[index].scenes, delta, uiStore);
-			let moveOffset = 0;
-			const middle = timlineItemMiddle(scene, delta, uiStore);
-			for (let otherScene of tracks[index].scenes) {
-				if (otherScene.commonState.id === scene.commonState.id) {
-					continue;
-				}
-				const otherOffset = otherScene.commonState.offset;
-				const otherEnd = otherScene.commonState.end;
-				const otherMiddle = (otherEnd + otherOffset) / 2;
-				
-				if (otherMiddle > middle) {
-					if (newOffset + scene.commonState.sceneDuration > otherOffset) {
-						moveOffset = Math.max(moveOffset, newOffset + scene.commonState.sceneDuration - otherOffset);
-					}
-				}
-			}
+			const {
+				newOffset,
+				moveOffset,
+				middle
+			} = preventCollision(scene, tracks[index].scenes, delta, uiStore);
 			for (let otherScene of tracks[index].scenes) {
 				if (otherScene.commonState.id === scene.commonState.id) {
 					continue;
