@@ -33,7 +33,7 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, isL
     );
 });
 
-const ResizeWrapper = observer(function ResizeWrapper({ scene, children }) {
+const TrimWrapper = observer(function TrimWrapper({ scene, children }) {
     const { uiStore } = useRootContext();
 
     const onHandlerDragEnd = action((event) => {
@@ -70,4 +70,4 @@ const ResizeWrapper = observer(function ResizeWrapper({ scene, children }) {
     );
 });
 
-export default ResizeWrapper;
+export default TrimWrapper;

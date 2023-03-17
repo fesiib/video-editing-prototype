@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 
 import useRootContext from "../../hooks/useRootContext";
 
-import ResizeWrapper from "./ResizeWrapper";
+import TrimWrapper from "./TrimWrapper";
 
 export const TimelineItem = observer(
     forwardRef(function TimelineItem({ scene, transform, isOverlay, ...props }, ref) {
@@ -30,7 +30,7 @@ export const TimelineItem = observer(
                     "overlay"
                 ) : (
                     <div className="flex justify-between">
-                        <ResizeWrapper scene={scene}>{scene.commonState.id}</ResizeWrapper>
+                        <TrimWrapper scene={scene}>{scene.commonState.id}</TrimWrapper>
                     </div>
                 )}
             </div>
