@@ -16,6 +16,7 @@ const TimelineLabels = observer(function TimelineLabels({}) {
 
     const width = uiStore.trackWidthPx;
     const height = uiStore.timelineConst.labelHeight;
+	const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
     const labelIntervalPx = uiStore.timelineConst.labelIntervalPx;
 
     const labels = useMemo(() => {
@@ -29,10 +30,27 @@ const TimelineLabels = observer(function TimelineLabels({}) {
 
     const onIndicatorDragEnd = action((event) => {
         const { delta } = event;
-        uiStore.timelineControls.playPosition += uiStore.pxToSec(delta.x);
+		const transformSeconds = uiStore.pxToSec(delta.x);
+        uiStore.timelineControls.playPosition = Math.min(uiStore.timelineConst.trackMaxDuration,
+			Math.max(uiStore.timelineConst.trackMinDuration,
+				uiStore.timelineControls.playPosition + transformSeconds)
+		);
     });
 
-    return (
+    return (<div 
+		className="flex flex-row flex-nowrap"
+		style={{
+			width: width + handlerWidth,
+		}}
+	>
+		<div 
+			//className="my-2"
+			style={{
+				width: handlerWidth,
+				overflow: "hidden",
+			}}
+		> #
+		</div>
         <DndContext
             sensors={useSensors(useSensor(PointerSensor))}
             modifiers={[restrictToHorizontalAxis]}
@@ -63,7 +81,7 @@ const TimelineLabels = observer(function TimelineLabels({}) {
                 <TimelinePositionIndicator />
             </div>
         </DndContext>
-    );
+    </div>);
 });
 
 export default TimelineLabels;

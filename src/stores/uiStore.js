@@ -39,7 +39,10 @@ class UIStore {
         positionIndicatorWidth: 8,
         labelIntervalPx: 100, //px
 
+		trackHandlerWidth: 20, //px
+
         trackMaxDuration: 60 * 20, //seconds
+		trackMinDuration: 0 //seconds
     };
 
 	objectNames = {

@@ -162,7 +162,6 @@ const TimelineTracks = observer(function TimelineTracks() {
                             <SortableTimelineTrack
                                 key={id}
                                 trackId={trackId}
-                                title={id}
                                 scenes={scenes}
                             />
                         );
@@ -176,7 +175,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                         <TimelineTrack
                             key={"track_overlay"}
                             id={activeTrackId}
-                            title={"overlay"}
+                            title={"?"}
                             scenes={[]}
                             isOverlay={true}
                             isOver={false}

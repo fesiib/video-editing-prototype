@@ -16,6 +16,7 @@ export const TimelineItem = observer(
 				}px, ${0}px, ${0}px)`
                 : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`),
             width: uiStore.secToPx(scene.commonState.sceneDuration),
+			transition: `transform ${0.5}s`,
         };
         return (
             <div

@@ -7,10 +7,12 @@ import { CSS } from "@dnd-kit/utilities";
 
 import TimelineTrack from "./TimelineTrack";
 
-const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId, title, scenes }) {
+const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId, scenes }) {
     const id = "track_" + trackId;
 
-    const { attributes, listeners, setNodeRef, transform, transition, isOver, active } =
+    const {
+		attributes, listeners, setNodeRef, transform, transition, setActivatorNodeRef, isOver, active
+	} =
         useSortable({
             id: "sortable_" + id,
             data: {
@@ -33,14 +35,15 @@ const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId,
     return (
         <TimelineTrack
             ref={setNodeRef}
+			id={id}
             style={style}
-            id={id}
-            title={title}
+            title={trackId}
             scenes={scenes}
             isOverlay={false}
             isOver={isSceneOver}
-            {...attributes}
-            {...listeners}
+			setActivatorNodeRef={setActivatorNodeRef}
+			attributes={attributes}
+			listeners={listeners}
         />
     );
 });
