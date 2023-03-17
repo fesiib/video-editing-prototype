@@ -40,12 +40,18 @@ const ResizeWrapper = observer(function ResizeWrapper({ scene, children }) {
         const { active, delta } = event;
         const scene = active.data.current.scene;
         const isLeftHandler = active.data.current.isLeftHandler;
+		let deltaSeconds = uiStore.pxToSec(delta.x);
         if (isLeftHandler) {
-            scene.commonState.start += uiStore.pxToSec(delta.x);
-			scene.commonState.offset += uiStore.pxToSec(delta.x);
-            scene.commonState.duration += -uiStore.pxToSec(delta.x);
+			deltaSeconds = Math.max(-scene.commonState.start,
+				Math.min(deltaSeconds, scene.commonState.sceneDuration)
+			);
+            scene.commonState.start += deltaSeconds
+			scene.commonState.offset += deltaSeconds;
         } else {
-            scene.commonState.duration += uiStore.pxToSec(delta.x);
+			deltaSeconds = Math.max(-scene.commonState.sceneDuration,
+				Math.min(deltaSeconds, scene.commonState.duration - scene.commonState.finish)
+			);
+            scene.commonState.finish += deltaSeconds;
         }
     });
 
