@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -21,8 +21,11 @@ import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
 import { preventCollision } from "../../utilities/timelineUtilities";
+import PositionIndicator from "./PositionIndicator";
 
 const TimelineTracks = observer(function TimelineTracks() {
+	const timelineRef = useRef(null);
+
     const { uiStore, domainStore } = useRootContext();
 
     const width = uiStore.timelineSize.width;
@@ -136,14 +139,45 @@ const TimelineTracks = observer(function TimelineTracks() {
         setTracks(newTracks);
     }, [domainStore.videos, trackCnt]);
 
+	const [positionIndicatorVisibilty, setPositionIndicatorVisibility] = useState(false);
+	const [playPosition, setPlayPosition] = useState(0);
+
+
+	const showPositionIndicator = (event) => {
+		event.preventDefault();
+		setPositionIndicatorVisibility(true);
+	}
+
+	const hidePositionIndicator = (event) => {
+		event.preventDefault();
+		setPositionIndicatorVisibility(false);
+	}
+
+	const updatePositionIndicator = (event) => {
+		event.preventDefault();
+		const timelineRect = timelineRef.current.getBoundingClientRect();
+		let playPositionPx = (event.clientX - timelineRect.left
+			+ timelineRef.current.scrollLeft - uiStore.timelineConst.trackHandlerWidth);
+		if (playPositionPx < 0) {
+			playPositionPx = 0;
+		}
+		setPlayPosition(uiStore.pxToSec(playPositionPx));
+	}
+
     return (
         <div
-            className="bg-slate-300 m-5 flex-column overflow-scroll"
+			ref={timelineRef}
+            className="bg-slate-300 m-5 flex-column overflow-scroll relative"
             style={{
                 width: width,
             }}
+
+			onMouseEnter={showPositionIndicator}
+			onMouseLeave={hidePositionIndicator}
+			onMouseMove={updatePositionIndicator}
+			
         >
-            <TimelineLabels />
+			<TimelineLabels />
             <DndContext
                 sensors={useSensors(useSensor(PointerSensor))}
                 modifiers={[restrictToFirstScrollableAncestor]}
@@ -192,6 +226,23 @@ const TimelineTracks = observer(function TimelineTracks() {
                     ) : null}
                 </DragOverlay>
             </DndContext>
+			{	positionIndicatorVisibilty ? (
+				<div
+					className={"absolute inset-x-0 top-0 z-30"}
+					style={{
+						height: uiStore.timelineSize.height,
+						left: (uiStore.timelineConst.trackHandlerWidth 
+							- uiStore.timelineConst.positionIndicatorWidth / 2),
+						transform: `translate3d(${uiStore.secToPx(playPosition)}px, 0px, 0px)`
+					}}
+				>
+					<PositionIndicator
+						showLabel={true}
+						playPosition={playPosition}
+						className="opacity-80"
+					/>
+				</div>) : null
+			}
         </div>
     );
 });

@@ -14,9 +14,12 @@ export function playPositionToFormat(seconds) {
 }
 
 export function preventCollision(scene, scenes, transform, uiStore) {
-	const curOffset = scene.commonState.offset + ( typeof transform?.x === 'number' ?
+	const transitionSeconds = ( typeof transform?.x === 'number' ?
 		uiStore.pxToSec(transform.x) :
 		0
+	);
+	const curOffset = Math.min(uiStore.timelineConst.trackMaxDuration - scene.commonState.sceneDuration,
+		Math.max(0, scene.commonState.offset + transitionSeconds)
 	);
 
 	const middle = curOffset + scene.commonState.sceneDuration / 2;
