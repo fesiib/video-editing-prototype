@@ -45,37 +45,35 @@ class CommonState {
         this.start = 0;
         this.duration = metadata.duration;
         this.finish = this.duration;
-        this.offset = metadata.offset ? metadata.offset : 0;
-        this.speed = metadata.speed ? metadata.speed : 1;
+        this.offset = metadata.offset ? metadata.offset : this.offset;
+        this.speed = metadata.speed ? metadata.speed : this.speed;
 
-        this.x = metadata.x ? metadata.x : 0;
-        this.y = metadata.y ? metadata.y : 0;
-        this.z = metadata.z ? metadata.z : 0;
+        this.x = metadata.x ? metadata.x : this.x;
+        this.y = metadata.y ? metadata.y : this.y;
+        this.z = metadata.z ? metadata.z : this.z;
         this.width = metadata.width;
         this.height = metadata.height;
-        this.scaleX = metadata.scaleX ? metadata.scaleX : 1;
-        this.scaleY = metadata.scaleY ? metadata.scaleY : 1;
-        this.rotation = metadata.rotation ? metadata.rotation : 0;
+        this.scaleX = metadata.scaleX ? metadata.scaleX : this.scaleX;
+        this.scaleY = metadata.scaleY ? metadata.scaleY : this.scaleY;
+        this.rotation = metadata.rotation ? metadata.rotation : this.rotation;
 
-        this.animation = metadata.animation ? metadata.animation : {};
-        this.filterMap = metadata.filterMap ? metadata.filterMap : {};
+        this.animation = metadata.animation ? metadata.animation : this.animation;
+        this.filterMap = metadata.filterMap ? metadata.filterMap : this.filterMap;
 
         this.transitionStart = {};
         this.transitionEnd = {};
 
-        this.trackInfo.trackId = metadata.trackId ? metadata.trackId : 0;
+        this.trackInfo.trackId = metadata.trackId ? metadata.trackId : this.trackInfo.trackId;
 
         this.processing = false;
     }
 
     onDragEnd(target) {
-        console.log(target);
         this.x = target.x();
         this.y = target.y();
     }
 
     onTransformerEnd(target) {
-        console.log(target.scaleX(), target.x());
         this.scaleX = target.scaleX();
         this.scaleY = target.scaleY();
         this.x = target.x();

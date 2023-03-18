@@ -65,7 +65,12 @@ const TimelineTracks = observer(function TimelineTracks() {
                                     ...track.scenes.slice(0, sceneIndex),
                                     ...track.scenes.slice(sceneIndex + 1),
                                 ];
-                                console.log(newScenes);
+								for (let otherScene of newScenes) {
+									const otherDiv = document.getElementById(otherScene.commonState.id);
+									otherDiv.style.transform = `translate3d(${uiStore.secToPx(
+										otherScene.commonState.offset
+									)}px, ${0}px, ${0}px)`;
+								}
                                 return {
                                     trackId: track.trackId,
                                     scenes: newScenes,
