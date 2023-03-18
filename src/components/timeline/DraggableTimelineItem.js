@@ -10,15 +10,9 @@ import useRootContext from "../../hooks/useRootContext";
 import { preventCollision } from "../../utilities/timelineUtilities";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
-	const { uiStore } = useRootContext();
+    const { uiStore } = useRootContext();
 
-	const { 
-		attributes,
-		listeners,
-		setNodeRef,
-		transform,
-		isDragging
-	} = useDraggable({
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: scene.commonState.id,
         data: {
             type: "scene",
@@ -26,45 +20,45 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         },
     });
 
-	let adjustedTransform = {
-		...transform,
-	};
+    let adjustedTransform = {
+        ...transform,
+    };
 
-	if (isDragging) {
-		const { 
-			newOffset,
-			moveOffset,
-			middle
-		} = preventCollision(scene, scenes, transform, uiStore);
-		adjustedTransform = {
-			...transform,
-			x: uiStore.secToPx(newOffset - scene.commonState.offset),
-		};
-		// move items on the right side
-		for (let otherScene of scenes) {
-			if (otherScene.commonState.id === scene.commonState.id) {
-				continue;
-			}
-			const otherOffset = otherScene.commonState.offset;
-			const otherEnd = otherScene.commonState.end;
-			const otherMiddle = (otherEnd + otherOffset) / 2;
-			const otherDiv = document.getElementById(otherScene.commonState.id);
-			if (otherMiddle > middle) {
-				otherDiv.style.transform = `translate3d(${
-					uiStore.secToPx(otherScene.commonState.offset + moveOffset)
-				}px, ${0}px, ${0}px)`;
-			}
-			else {
-				otherDiv.style.transform = `translate3d(${
-					uiStore.secToPx(otherScene.commonState.offset)
-				}px, ${0}px, ${0}px)`;
-			}
-		}
-	}
+    if (isDragging) {
+        const { newOffset, moveOffset, middle } = preventCollision(
+            scene,
+            scenes,
+            transform,
+            uiStore
+        );
+        adjustedTransform = {
+            ...transform,
+            x: uiStore.secToPx(newOffset - scene.commonState.offset),
+        };
+        // move items on the right side
+        for (let otherScene of scenes) {
+            if (otherScene.commonState.id === scene.commonState.id) {
+                continue;
+            }
+            const otherOffset = otherScene.commonState.offset;
+            const otherEnd = otherScene.commonState.end;
+            const otherMiddle = (otherEnd + otherOffset) / 2;
+            const otherDiv = document.getElementById(otherScene.commonState.id);
+            if (otherMiddle > middle) {
+                otherDiv.style.transform = `translate3d(${uiStore.secToPx(
+                    otherScene.commonState.offset + moveOffset
+                )}px, ${0}px, ${0}px)`;
+            } else {
+                otherDiv.style.transform = `translate3d(${uiStore.secToPx(
+                    otherScene.commonState.offset
+                )}px, ${0}px, ${0}px)`;
+            }
+        }
+    }
 
     return (
         <TimelineItem
-			id={scene.commonState.id}
+            id={scene.commonState.id}
             ref={setNodeRef}
             scene={scene}
             transform={adjustedTransform}

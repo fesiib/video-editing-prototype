@@ -40,17 +40,19 @@ const TrimWrapper = observer(function TrimWrapper({ scene, children }) {
         const { active, delta } = event;
         const scene = active.data.current.scene;
         const isLeftHandler = active.data.current.isLeftHandler;
-		let deltaSeconds = uiStore.pxToSec(delta.x);
+        let deltaSeconds = uiStore.pxToSec(delta.x);
         if (isLeftHandler) {
-			deltaSeconds = Math.max(-scene.commonState.start,
-				Math.min(deltaSeconds, scene.commonState.sceneDuration)
-			);
-            scene.commonState.start += deltaSeconds
-			scene.commonState.offset += deltaSeconds;
+            deltaSeconds = Math.max(
+                -scene.commonState.start,
+                Math.min(deltaSeconds, scene.commonState.sceneDuration)
+            );
+            scene.commonState.start += deltaSeconds;
+            scene.commonState.offset += deltaSeconds;
         } else {
-			deltaSeconds = Math.max(-scene.commonState.sceneDuration,
-				Math.min(deltaSeconds, scene.commonState.duration - scene.commonState.finish)
-			);
+            deltaSeconds = Math.max(
+                -scene.commonState.sceneDuration,
+                Math.min(deltaSeconds, scene.commonState.duration - scene.commonState.finish)
+            );
             scene.commonState.finish += deltaSeconds;
         }
     });

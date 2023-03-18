@@ -13,7 +13,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     const imageRef = useRef(null);
 
-	const [isSelected, setIsSelected] =  useState(false);
+    const [isSelected, setIsSelected] = useState(false);
 
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
@@ -63,24 +63,23 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, [videoElement]);
 
     useEffect(() => {
-        const opacity = 0.5;
-        const blur = 20;
-		const brightness = 2;
+        const opacity = 1;
+        const blur = 0;
+        const brightness = 1;
         const canvas = imageRef.current.getLayer().getCanvas()._canvas;
-		const filterBrightness = `brightness(${brightness * 100}%)`;
-		const filterOpacity = `opacity(${opacity * 100}%)`;
-		const filterBlur = `blur(${blur}px)`;
-		canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
+        const filterBrightness = `brightness(${brightness * 100}%)`;
+        const filterOpacity = `opacity(${opacity * 100}%)`;
+        const filterBlur = `blur(${blur}px)`;
+        canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
     }, []);
 
-	useEffect(() => {
-		setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(imageRef.current) >= 0);
-	}, [uiStore.canvasControls.transformerNodes]);
-
+    useEffect(() => {
+        setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(imageRef.current) >= 0);
+    }, [uiStore.canvasControls.transformerNodes]);
 
     return (
         <Image
-			name={uiStore.objectNames.video}
+            name={uiStore.objectNames.video}
             ref={imageRef}
             image={videoElement}
             //image={imageElement}
@@ -94,9 +93,9 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
             draggable={isSelected}
-	        perfectDrawEnabled={false}
-			onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
-			onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}
+            perfectDrawEnabled={false}
+            onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
+            onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}
         />
     );
 });

@@ -17,12 +17,15 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
     const { setNodeRef, listeners, attributes, transform, isDragging } = useDraggable({
         id: "position_indicator",
     });
-	const transformSeconds = (typeof transform?.x === 'number' ? uiStore.pxToSec(transform.x) : 0);
-    const playPosition = Math.min(uiStore.timelineConst.trackMaxDuration,
-		Math.max(uiStore.timelineConst.trackMinDuration,
-			uiStore.timelineControls.playPosition + transformSeconds)
-	);
-	const playPositionPx = uiStore.secToPx(playPosition);
+    const transformSeconds = typeof transform?.x === "number" ? uiStore.pxToSec(transform.x) : 0;
+    const playPosition = Math.min(
+        uiStore.timelineConst.trackMaxDuration,
+        Math.max(
+            uiStore.timelineConst.trackMinDuration,
+            uiStore.timelineControls.playPosition + transformSeconds
+        )
+    );
+    const playPositionPx = uiStore.secToPx(playPosition);
     return (
         <>
             <div
@@ -32,16 +35,13 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
                 style={{
                     height: height,
                     left: -positionIndicatorWidth / 2,
-					transform: `translate3d(${playPositionPx}px, 0px, 0px)`
+                    transform: `translate3d(${playPositionPx}px, 0px, 0px)`,
                 }}
                 ref={setNodeRef}
                 {...listeners}
                 {...attributes}
             >
-				<PositionIndicator
-					showLabel={isDragging}
-					playPosition={playPosition}
-				/>
+                <PositionIndicator showLabel={isDragging} playPosition={playPosition} />
             </div>
         </>
     );

@@ -17,7 +17,7 @@ class UIStore {
     };
     canvasControls = {
         scalePos: 4,
-		transformerNodes: [],
+        transformerNodes: [],
     };
     canvasConst = {
         margin: 10,
@@ -39,18 +39,18 @@ class UIStore {
         positionIndicatorWidth: 8,
         labelIntervalPx: 100, //px
 
-		trackHandlerWidth: 20, //px
+        trackHandlerWidth: 20, //px
 
         trackMaxDuration: 60 * 20, //seconds
-		trackMinDuration: 0 //seconds
+        trackMinDuration: 0, //seconds
     };
 
-	objectNames = {
-		video: "video",
-		image: "image",
-		text: "text",
-	};
-	backgroundName = "bg";
+    objectNames = {
+        video: "video",
+        image: "image",
+        text: "text",
+    };
+    backgroundName = "bg";
 
     // panelSize = {};
 

@@ -8,36 +8,38 @@ import useRootContext from "../../hooks/useRootContext";
 import PositionIndicator from "./PositionIndicator";
 
 const TimelineTrack = observer(
-    forwardRef(function TimelineTrack({ 
-		id, style, title, scenes, isOverlay, isOver,
-		setActivatorNodeRef, listeners, attributes,
-	}, ref) {
+    forwardRef(function TimelineTrack(
+        { id, style, title, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
+        ref
+    ) {
         const { uiStore } = useRootContext();
         const width = uiStore.trackWidthPx;
-		const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
+        const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
 
-		return (
-            <div 
-				ref={ref}
-				id={id}
-				className="flex flex-row flex-nowrap"
-				style={{
-					...style,
-					width: handlerWidth + width,
-					overflow: "visible",
-				}}
-			>
-				<div 
-					ref={setActivatorNodeRef}
-					className="my-2"
-					style={{
-						width: handlerWidth,
-						overflow: "hidden",
-					}}
-					{...listeners}
-					{...attributes}
-				> {title}
-				</div>
+        return (
+            <div
+                ref={ref}
+                id={id}
+                className="flex flex-row flex-nowrap"
+                style={{
+                    ...style,
+                    width: handlerWidth + width,
+                    overflow: "visible",
+                }}
+            >
+                <div
+                    ref={setActivatorNodeRef}
+                    className="my-2"
+                    style={{
+                        width: handlerWidth,
+                        overflow: "hidden",
+                    }}
+                    {...listeners}
+                    {...attributes}
+                >
+                    {" "}
+                    {title}
+                </div>
                 <div
                     className={
                         isOverlay
@@ -51,7 +53,11 @@ const TimelineTrack = observer(
                     }}
                 >
                     {scenes.map((scene) => (
-                        <DraggableTimelineItem key={scene.commonState.id} scene={scene} scenes={scenes} />
+                        <DraggableTimelineItem
+                            key={scene.commonState.id}
+                            scene={scene}
+                            scenes={scenes}
+                        />
                     ))}
                 </div>
             </div>

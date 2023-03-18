@@ -4,10 +4,10 @@ class CommonState {
     processing = false;
     id = "test";
 
-	thumbnails = [];
+    thumbnails = [];
 
     start = 0;
-	finish = 10;
+    finish = 10;
     duration = 10;
     offset = 0;
     speed = 1;
@@ -44,7 +44,7 @@ class CommonState {
         this.thumbnails = metadata.thumbnails ? metadata.thumbnails : null;
         this.start = 0;
         this.duration = metadata.duration;
-		this.finish = this.duration;
+        this.finish = this.duration;
         this.offset = metadata.offset ? metadata.offset : 0;
         this.speed = metadata.speed ? metadata.speed : 1;
 
@@ -68,27 +68,27 @@ class CommonState {
         this.processing = false;
     }
 
-	onDragEnd(target) {
-		console.log(target)
-		this.x = target.x();
+    onDragEnd(target) {
+        console.log(target);
+        this.x = target.x();
         this.y = target.y();
-	}
+    }
 
-	onTransformerEnd(target) {
-		console.log(target.scaleX(), target.x())
-		this.scaleX = target.scaleX();
+    onTransformerEnd(target) {
+        console.log(target.scaleX(), target.x());
+        this.scaleX = target.scaleX();
         this.scaleY = target.scaleY();
         this.x = target.x();
         this.y = target.y();
-	}
+    }
 
-	get end() {
-		return this.offset + (this.finish - this.start);
-	}
-	
-	get sceneDuration() {
-		return this.finish - this.start;
-	}
+    get end() {
+        return this.offset + (this.finish - this.start);
+    }
+
+    get sceneDuration() {
+        return this.finish - this.start;
+    }
 }
 
 export default CommonState;

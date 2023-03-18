@@ -7,14 +7,14 @@ class VideoState {
     constructor(domainStore, source, id, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
-		this.commonState = new CommonState(domainStore, id, trackId);
+        this.commonState = new CommonState(domainStore, id, trackId);
         this.source = source;
     }
 
-	setSource(source) {
-		this.source = source;
-		this.commonState.processing = true;
-	}
+    setSource(source) {
+        this.source = source;
+        this.commonState.processing = true;
+    }
 }
 
 export default VideoState;

@@ -10,13 +10,14 @@ export const TimelineItem = observer(
     forwardRef(function TimelineItem({ scene, transform, isOverlay, ...props }, ref) {
         const { uiStore } = useRootContext();
         const style = {
-            transform: (typeof transform?.x === 'number' ? 
-				`translate3d(${
-					uiStore.secToPx(scene.commonState.offset) + transform.x
-				}px, ${0}px, ${0}px)`
-                : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`),
+            transform:
+                typeof transform?.x === "number"
+                    ? `translate3d(${
+                          uiStore.secToPx(scene.commonState.offset) + transform.x
+                      }px, ${0}px, ${0}px)`
+                    : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
             width: uiStore.secToPx(scene.commonState.sceneDuration),
-			transition: `transform ${0.5}s`,
+            transition: `transform ${0.5}s`,
         };
         return (
             <div

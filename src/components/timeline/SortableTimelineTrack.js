@@ -11,19 +11,25 @@ const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId,
     const id = "track_" + trackId;
 
     const {
-		attributes, listeners, setNodeRef, transform, transition, setActivatorNodeRef, isOver, active
-	} =
-        useSortable({
-            id: "sortable_" + id,
-            data: {
-                type: "track",
-                trackId,
-            },
-            transition: {
-                duration: 150, // milliseconds
-                easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-            },
-        });
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        setActivatorNodeRef,
+        isOver,
+        active,
+    } = useSortable({
+        id: "sortable_" + id,
+        data: {
+            type: "track",
+            trackId,
+        },
+        transition: {
+            duration: 150, // milliseconds
+            easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+        },
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -35,15 +41,15 @@ const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId,
     return (
         <TimelineTrack
             ref={setNodeRef}
-			id={id}
+            id={id}
             style={style}
             title={trackId}
             scenes={scenes}
             isOverlay={false}
             isOver={isSceneOver}
-			setActivatorNodeRef={setActivatorNodeRef}
-			attributes={attributes}
-			listeners={listeners}
+            setActivatorNodeRef={setActivatorNodeRef}
+            attributes={attributes}
+            listeners={listeners}
         />
     );
 });
