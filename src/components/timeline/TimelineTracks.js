@@ -169,11 +169,11 @@ const TimelineTracks = observer(function TimelineTracks() {
     const [playPosition, setPlayPosition] = useState(0);
 
     const showPositionIndicator = (event) => {
-        setPositionIndicatorVisibility(false);
+        setPositionIndicatorVisibility(true);
     };
 
     const hidePositionIndicator = (event) => {
-        setPositionIndicatorVisibility(false);
+        setPositionIndicatorVisibility(true);
     };
 
     const updatePositionIndicator = (event) => {
@@ -267,7 +267,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                             uiStore.timelineConst.positionIndicatorWidth / 2,
                         transform: `translate3d(${uiStore.secToPx(playPosition)}px, 0px, 0px)`,
                     }}
-                    //onClick={onPositionIndicatorClick}
+                    onClick={onPositionIndicatorClick}
                 >
                     <PositionIndicator
                         showLabel={true}

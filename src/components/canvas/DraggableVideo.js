@@ -38,29 +38,34 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
         curVideo.commonState.setMetadata(metadata);
     });
 
-    useEffect(() => {
-        videoElement.addEventListener("loadedmetadata", onLoadedMetadata);
-        return () => {
-            videoElement.removeEventListener("loadedmetadata", onLoadedMetadata);
-        };
-    }, [videoElement]);
+	const onPlaying = action(((event) => {
+		console.log(event);
+		uiStore.timelineControls.playPosition = videoElement.currentTime;
+	}));
 
-    const onCanPlay = () => {
+	const onCanPlay = action(() => {
         videoElement.muted = true;
-        videoElement.play();
-        //videoElement.muted = false;
+		videoElement.currentTime = uiStore.timelineControls.playPosition;
         const layer = imageRef.current.getLayer();
         const anim = new Animation(() => {}, layer);
         anim.start();
         return () => anim.stop();
-    };
+    });
 
     useEffect(() => {
+        videoElement.addEventListener("loadedmetadata", onLoadedMetadata);
+		videoElement.addEventListener("playing", onPlaying);
         videoElement.addEventListener("canplay", onCanPlay);
-        return () => {
-            videoElement.removeEventListener("canplay", onCanPlay);
+		return () => {
+            videoElement.removeEventListener("loadedmetadata", onLoadedMetadata);
+			videoElement.removeEventListener("playing", onPlaying);
+			videoElement.removeEventListener("canplay", onCanPlay);
         };
     }, [videoElement]);
+
+	useEffect(() => {
+
+	});
 
     useEffect(() => {
         const opacity = 1;
