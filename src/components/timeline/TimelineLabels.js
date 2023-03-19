@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -10,8 +10,11 @@ import TimelinePositionIndicator from "./TimelinePositionIndicator";
 
 import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat } from "../../utilities/timelineUtilities";
+import PositionIndicator from "./PositionIndicator";
 
 const TimelineLabels = observer(function TimelineLabels({}) {
+	const labelsRef = useRef(null);
+
     const { uiStore } = useRootContext();
 
     const width = uiStore.trackWidthPx;
@@ -40,12 +43,56 @@ const TimelineLabels = observer(function TimelineLabels({}) {
         );
     });
 
+	const [positionIndicatorVisibilty, setPositionIndicatorVisibility] = useState(false);
+    const [playPosition, setPlayPosition] = useState(0);
+
+    const showPositionIndicator = (event) => {
+        setPositionIndicatorVisibility((visibility) => true);
+    };
+
+    const hidePositionIndicator = (event) => {
+        setPositionIndicatorVisibility((visibility) => false);
+    };
+
+    const updatePositionIndicator = (event) => {
+        const timelineRect = labelsRef.current.getBoundingClientRect();
+        let playPositionPx =
+            event.clientX -
+            timelineRect.left +
+            labelsRef.current.scrollLeft -
+			handlerWidth;
+        if (playPositionPx < 0) {
+            playPositionPx = 0;
+        }
+        setPlayPosition(uiStore.pxToSec(playPositionPx));
+    };
+
+    const onLabelClick = action((event) => {
+        const timelineRect = labelsRef.current.getBoundingClientRect();
+        let playPositionPx =
+            event.clientX -
+            timelineRect.left +
+            labelsRef.current.scrollLeft -
+			handlerWidth;
+        if (playPositionPx < 0) {
+            return;
+        }
+        uiStore.timelineControls.playPosition = uiStore.pxToSec(playPositionPx);
+    });
+
+
     return (
         <div
             className="flex flex-row flex-nowrap"
             style={{
                 width: width + handlerWidth,
+				height: height,
             }}
+
+			ref={labelsRef}
+			onMouseEnter={showPositionIndicator}
+			onMouseLeave={hidePositionIndicator}
+			onMouseMove={updatePositionIndicator}
         >
             <div
                 //className="my-2"
@@ -56,37 +103,55 @@ const TimelineLabels = observer(function TimelineLabels({}) {
             >
                 {" "}
                 #
-            </div>
-            <DndContext
-                sensors={useSensors(useSensor(PointerSensor))}
-                modifiers={[restrictToHorizontalAxis]}
-                onDragEnd={onIndicatorDragEnd}
-            >
-                <div
-                    className={"bg-slate-500 flex relative"}
-                    style={{
-                        width: width,
-                        height: height,
-                    }}
-                >
-                    {labels.map((timestamp) => {
-                        return (
-                            <span
-                                key={"label" + timestamp}
-                                className={"text-xs text-right border-r-2"}
-                                style={{
-                                    width: labelIntervalPx,
-                                    height: uiStore.timelineConst.labelHeight,
-                                }}
-                            >
-                                {playPositionToFormat(timestamp)}
-                            </span>
-                        );
-                    })}
+			</div>
+			<DndContext
+				sensors={useSensors(useSensor(PointerSensor))}
+				modifiers={[restrictToHorizontalAxis]}
+				onDragEnd={onIndicatorDragEnd}
+			>
+				<div
+					className={"bg-slate-500 flex relative"}
+					style={{
+						width: width,
+						height: height,
+					}}
+                    onClick={onLabelClick}
+				>
+					{labels.map((timestamp) => {
+						return (
+							<span
+								key={"label" + timestamp}
+								className={"text-xs text-right border-r-2"}
+								style={{
+									width: labelIntervalPx,
+									height: uiStore.timelineConst.labelHeight,
+								}}
+							>
+								{playPositionToFormat(timestamp)}
+							</span>
+						);
+					})}
 
-                    <TimelinePositionIndicator />
+					<TimelinePositionIndicator />
+				</div>
+			</DndContext>
+			{positionIndicatorVisibilty ? (
+                <div
+                    className={"absolute top-0 z-30"}
+                    style={{
+                        height: uiStore.timelineSize.height,
+                        left:handlerWidth -
+                            uiStore.timelineConst.positionIndicatorWidth / 2,
+                        transform: `translate3d(${uiStore.secToPx(playPosition)}px, 0px, 0px)`,
+                    }}
+				>
+                    <PositionIndicator
+                        showLabel={true}
+                        playPosition={playPosition}
+                        className="opacity-80 pointer-events-none"
+                    />
                 </div>
-            </DndContext>
+            ) : null}
         </div>
     );
 });

@@ -14,15 +14,24 @@ const Timeline = observer(function Timeline() {
         uiStore.timelineControls.pxPerSec = event.target.value / 10;
     });
 
+	const onPressPlay = action((event) => {
+		
+	});
+
     return (
         <div className="bg-slate-100">
             <div className="flex justify-between">
                 <div>
                     <label htmlFor="play_button" className="bg-indigo-300 p-1">
                         {" "}
-                        Play{" "}
+                        Play
+						{" "}
                     </label>
-                    <input id="play_button" type="button" />
+                    <input 
+						id="play_button"
+						type="button"
+						onClick={onPressPlay}
+					/>
                 </div>
                 <div>
                     <label htmlFor="split_button" className="bg-indigo-300 p-1">

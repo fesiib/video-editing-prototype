@@ -63,10 +63,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
         };
     }, [videoElement]);
 
-	useEffect(() => {
-
-	});
-
     useEffect(() => {
         const opacity = 1;
         const blur = 0;
