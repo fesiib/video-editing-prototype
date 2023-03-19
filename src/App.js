@@ -7,9 +7,11 @@ import EditorCanvas from "./views/EditorCanvas";
 import Timeline from "./views/Timeline";
 
 import useRootContext from "./hooks/useRootContext";
+import { DUMMY_SEGMENTS } from "./data/dummy";
+import VideoState from "./stores/videoState";
 
 const App = observer(function App() {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore }= useRootContext();
 
     useEffect(
         action(() => {
@@ -20,6 +22,29 @@ const App = observer(function App() {
         }),
         [window.innerWidth, window.innerHeight]
     );
+
+	useEffect(action(() => {
+		const newVideos = [];
+		for (let segment of DUMMY_SEGMENTS) {
+			const title = segment.title;
+			for (let subsegment in segment) {
+				if (subsegment === 'title') {
+					continue;
+				}
+				const info = segment[subsegment];
+				const video = 
+					new VideoState(domainStore, "http://localhost:3000/example.mp4", `${"videol"} ${newVideos.length + 10}`, 1);
+				video.commonState.setMetadata({
+					offset: info.start,
+					start: info.start,
+					finish: info.finish,
+				});
+				console.log(video)
+				newVideos.push(video);
+			}
+		}
+		domainStore.videos = [...newVideos];
+	}));
 
     return (
         <div className="App">

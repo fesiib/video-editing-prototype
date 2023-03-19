@@ -6,10 +6,10 @@ class CommonState {
 
     thumbnails = [];
 
-    start = 0;
-    finish = 10;
-    duration = 10;
-    offset = 0;
+    start = 0; // start after trimming relative to video
+    finish = 10; // finish after trimming relative to video
+    duration = 10; // total duration (should not change)
+    offset = 0; // offset relative to timeline
     speed = 1;
 
     x = 0;
@@ -42,17 +42,17 @@ class CommonState {
 
     setMetadata(metadata) {
         this.thumbnails = metadata.thumbnails ? metadata.thumbnails : null;
-        this.start = 0;
-        this.duration = metadata.duration;
-        this.finish = this.duration;
+        this.start = metadata.start ? metadata.start: this.start;
+        this.duration = metadata.duration ? metadata.duration : this.duration;
+        this.finish = metadata.finish ? metadata.finish : this.finish;
         this.offset = metadata.offset ? metadata.offset : this.offset;
         this.speed = metadata.speed ? metadata.speed : this.speed;
 
         this.x = metadata.x ? metadata.x : this.x;
         this.y = metadata.y ? metadata.y : this.y;
         this.z = metadata.z ? metadata.z : this.z;
-        this.width = metadata.width;
-        this.height = metadata.height;
+        this.width = metadata.width ? metadata.width: this.width;
+        this.height = metadata.height ? metadata.height: this.height;
         this.scaleX = metadata.scaleX ? metadata.scaleX : this.scaleX;
         this.scaleY = metadata.scaleY ? metadata.scaleY : this.scaleY;
         this.rotation = metadata.rotation ? metadata.rotation : this.rotation;
@@ -80,11 +80,11 @@ class CommonState {
         this.y = target.y();
     }
 
-    get end() {
+    get end() { // relative to timline
         return this.offset + (this.finish - this.start);
     }
 
-    get sceneDuration() {
+    get sceneDuration() { // relative to timline
         return this.finish - this.start;
     }
 }
