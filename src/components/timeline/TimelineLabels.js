@@ -81,8 +81,15 @@ const TimelineLabels = observer(function TimelineLabels({}) {
     });
 
 
-    return (
-        <div
+    return (<div>
+		<DndContext
+			sensors={useSensors(useSensor(PointerSensor))}
+			modifiers={[restrictToHorizontalAxis]}
+			onDragEnd={onIndicatorDragEnd}
+		>
+			<TimelinePositionIndicator />
+		</DndContext>
+		<div
             className="flex flex-row flex-nowrap"
             style={{
                 width: width + handlerWidth,
@@ -104,37 +111,29 @@ const TimelineLabels = observer(function TimelineLabels({}) {
                 {" "}
                 #
 			</div>
-			<DndContext
-				sensors={useSensors(useSensor(PointerSensor))}
-				modifiers={[restrictToHorizontalAxis]}
-				onDragEnd={onIndicatorDragEnd}
+			<div
+				className={"bg-slate-500 flex relative"}
+				style={{
+					width: width,
+					height: height,
+				}}
+				onClick={onLabelClick}
 			>
-				<div
-					className={"bg-slate-500 flex relative"}
-					style={{
-						width: width,
-						height: height,
-					}}
-                    onClick={onLabelClick}
-				>
-					{labels.map((timestamp) => {
-						return (
-							<span
-								key={"label" + timestamp}
-								className={"text-xs text-right border-r-2"}
-								style={{
-									width: labelIntervalPx,
-									height: uiStore.timelineConst.labelHeight,
-								}}
-							>
-								{playPositionToFormat(timestamp)}
-							</span>
-						);
-					})}
-
-					<TimelinePositionIndicator />
-				</div>
-			</DndContext>
+				{labels.map((timestamp) => {
+					return (
+						<span
+							key={"label" + timestamp}
+							className={"text-xs text-right border-r-2"}
+							style={{
+								width: labelIntervalPx,
+								height: uiStore.timelineConst.labelHeight,
+							}}
+						>
+							{playPositionToFormat(timestamp)}
+						</span>
+					);
+				})}
+			</div>
 			{positionIndicatorVisibilty ? (
                 <div
                     className={"absolute top-0 z-30"}
@@ -153,7 +152,7 @@ const TimelineLabels = observer(function TimelineLabels({}) {
                 </div>
             ) : null}
         </div>
-    );
+	</div>);
 });
 
 export default TimelineLabels;

@@ -13,6 +13,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
 
     const height = uiStore.timelineSize.height;
     const positionIndicatorWidth = uiStore.timelineConst.positionIndicatorWidth;
+	const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
 
     const { setNodeRef, listeners, attributes, transform, isDragging } = useDraggable({
         id: "position_indicator",
@@ -34,7 +35,7 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
                 }
                 style={{
                     height: height,
-                    left: -positionIndicatorWidth / 2,
+                    left: handlerWidth-positionIndicatorWidth / 2,
                     transform: `translate3d(${playPositionPx}px, 0px, 0px)`,
                 }}
                 ref={setNodeRef}
