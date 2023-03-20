@@ -33,6 +33,15 @@ class DomainStore {
             new TextState(this, "ANOTHER text !", "text-2", 4),
         ];
     }
+
+	get scripts() {
+		let script = [];
+		for (let video of this.videos) {
+			script = [...script, ...video.adjustedScript];
+		}
+		script.sort((p1, p2) => p1.start - p2.start);
+		return script;
+	}
 }
 
 export default DomainStore;

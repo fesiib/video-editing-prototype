@@ -9,6 +9,7 @@ import Timeline from "./views/Timeline";
 import useRootContext from "./hooks/useRootContext";
 import { DUMMY_SEGMENTS } from "./data/dummy";
 import VideoState from "./stores/videoState";
+import Script from "./views/Script";
 
 const App = observer(function App() {
     const { uiStore, domainStore }= useRootContext();
@@ -42,6 +43,12 @@ const App = observer(function App() {
 					start: info.start,
 					finish: info.finish,
 				});
+				video.setScript([{
+					text: info.script,
+					start: info.start,
+					lowLabel: subsegment,
+					highLabel: title,
+				}]);
 				newVideos.push(video);
 			}
 		}
@@ -53,7 +60,7 @@ const App = observer(function App() {
             <h1 className="text-3xl font-bold underline">Hello !</h1>
             <div className="flex flex-row flex-nowrap m-10">
                 <div className="flex-col basis-1/3">
-                    <h1> PANEL </h1>
+                    <Script />
                 </div>
                 <div className="flex-col grow basis-2/3 gap-10">
                     <div className={"basis-1/3"}>

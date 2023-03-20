@@ -4,12 +4,12 @@ export const DUMMY_SEGMENTS = [
 		"goal": {
 			start: 0,
 			finish: 10,
-			transcript: "Polygonal Lasso",
+			script: "Polygonal Lasso",
 		},
 		"tool": {
 			start: 10,
 			finish: 20,
-			transcript: "Polygonal Lasso",
+			script: "Polygonal Lasso",
 		},
 	},
 	{
@@ -17,12 +17,12 @@ export const DUMMY_SEGMENTS = [
 		"instruction": {
 			start: 20,
 			finish: 30,
-			transcript: "Polygonal Lasso",
+			script: "Polygonal Lasso",
 		},
 		"outcome": {
 			start: 30,
 			finish: 405,
-			transcript: "Polygonal Lasso",
+			script: "Polygonal Lasso",
 		},
 	},
 	{
