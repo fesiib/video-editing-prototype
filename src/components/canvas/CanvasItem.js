@@ -10,15 +10,14 @@ const CanvasItem = observer(function CanvasItem({ item, type }) {
 	const left = item.commonState.offset;
 	const right = item.commonState.end;
 	const playPosition = uiStore.timelineControls.playPosition;
-	if (left <= playPosition && right >= playPosition) {
-		if (type === 'video') {
-			return <DraggableVideo curVideo={item} />
+	const isVisible = (left <= playPosition && right >= playPosition);
+
+	return (<div className={!isVisible ? "invisible" : ""} >
+		{ 
+			type === 'video' ? <DraggableVideo curVideo={item} />
+			: (type === 'text' ? <DraggableText curText={item} /> : null)
 		}
-		if (type === 'text') {
-			return <DraggableText curText={item} />
-		}
-	}
-	return null;
+	</div>);
 });
 
 export default CanvasItem;

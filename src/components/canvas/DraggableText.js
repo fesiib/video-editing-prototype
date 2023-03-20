@@ -14,6 +14,12 @@ const DraggableText = observer(function DraggableText({ curText }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
+	const left = curText.commonState.offset;
+	const right = curText.commonState.end;
+	const isVisible = (left <= uiStore.timelineControls.playPosition
+		&& right >= uiStore.timelineControls.playPosition);
+
+
     useEffect(() => {
         setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(textRef.current) >= 0);
     }, [uiStore.canvasControls.transformerNodes]);
@@ -33,6 +39,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
             scaleX={curText.commonState.scaleX}
             scaleY={curText.commonState.scaleY}
             draggable={isSelected}
+			visible={isVisible}
             perfectDrawEnabled={false}
             onDragEnd={(event) => curText.commonState.onDragEnd(event.target)}
             onTransformEnd={(event) => curText.commonState.onTransformerEnd(event.target)}

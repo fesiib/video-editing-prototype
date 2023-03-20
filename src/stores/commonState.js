@@ -4,7 +4,7 @@ class CommonState {
     processing = false;
     id = "test";
 
-    thumbnails = [];
+    thumbnails = ["unknown"];
 
     start = 0; // start after trimming relative to video
     finish = 10; // finish after trimming relative to video
@@ -41,7 +41,7 @@ class CommonState {
     }
 
     setMetadata(metadata) {
-        this.thumbnails = metadata.thumbnails ? metadata.thumbnails : null;
+        this.thumbnails = metadata.thumbnails ? metadata.thumbnails : this.thumbnails;
         this.start = metadata.start ? metadata.start: this.start;
         this.duration = metadata.duration ? metadata.duration : this.duration;
         this.finish = metadata.finish ? metadata.finish : this.finish;
@@ -66,6 +66,10 @@ class CommonState {
         this.trackInfo.trackId = metadata.trackId ? metadata.trackId : this.trackInfo.trackId;
 
         this.processing = false;
+
+		if (this.end > this.domainStore.projectMetadata.duration) {
+			this.domainStore.projectMetadata.duration = this.end;
+		}
     }
 
     onDragEnd(target) {

@@ -18,6 +18,11 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
 
+	const left = curVideo.commonState.offset;
+	const right = curVideo.commonState.end;
+	const isVisible = (left <= uiStore.timelineControls.playPosition
+		&& right >= uiStore.timelineControls.playPosition);
+
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
         element.src = curVideo.source;
@@ -35,22 +40,31 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             x: uiStore.canvasSize.width / 2,
             y: uiStore.canvasSize.height / 2,
         };
-        curVideo.commonState.setMetadata(metadata);
+		curVideo.commonState.setMetadata(metadata);
     });
 
 	const onPlaying = action(((event) => {
+		if (!isVisible) {
+			return;
+		}
 		console.log(event);
 		uiStore.timelineControls.playPosition = videoElement.currentTime 
 			+ curVideo.commonState.offset - curVideo.commonState.start;
 	}));
 
 	const onEnded = action((event) => {
+		if (!isVisible) {
+			return;
+		}
 		console.log(event);
 		uiStore.timelineControls.tryPlaying = false;
 		uiStore.timelineControls.playPosition = 0;
 	});
 
 	const onTimeUpdate = action((event) => {
+		if (!isVisible) {
+			return;
+		}
 		if (uiStore.timelineControls.isPlaying) {
 			uiStore.timelineControls.playPosition = videoElement.currentTime 
 				+ curVideo.commonState.offset - curVideo.commonState.start;
@@ -70,15 +84,15 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 		//videoElement.addEventListener("playing", onPlaying);
         videoElement.addEventListener("canplay", onCanPlay);
 		//videoElement.addEventListener("ended", onEnded);
-		videoElement.addEventListener("timeupdate", onTimeUpdate);
+		//videoElement.addEventListener("timeupdate", onTimeUpdate);
 		return () => {
             videoElement.removeEventListener("loadedmetadata", onLoadedMetadata);
 			//videoElement.removeEventListener("playing", onPlaying);
 			videoElement.removeEventListener("canplay", onCanPlay);
 			//videoElement.removeEventListener("ended", onEnded);
-			videoElement.removeEventListener("timeupdate", onTimeUpdate);
+			//videoElement.removeEventListener("timeupdate", onTimeUpdate);
         };
-    }, [videoElement]);
+    }, [isVisible, videoElement]);
 
     useEffect(() => {
         const opacity = 1;
@@ -96,23 +110,41 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, [uiStore.canvasControls.transformerNodes]);
 
 	useEffect(() => {
-		if (videoElement.paused || !uiStore.timelineControls.isPlaying) {
-			videoElement.currentTime = uiStore.timelineControls.playPosition;
+		if (!isVisible) {
+			return;
 		}
-	}, [uiStore.timelineControls.playPosition, uiStore.timelineControls.isPlaying]);
+		videoElement.currentTime = uiStore.timelineControls.playPosition 
+			- curVideo.commonState.offset + curVideo.commonState.start;
+	}, [videoElement, isVisible, uiStore.timelineControls.playPosition]);
 
-	useEffect(action(() => {
-		uiStore.timelineControls.isPlaying = false;
-		if (!uiStore.timelineControls.tryPlaying) {
-			videoElement.pause();
-		}
-		else {
-			videoElement.play().then(action(() => {
-				uiStore.timelineControls.isPlaying = true;
-			}));
-		}
-	}), [uiStore.timelineControls.tryPlaying]);
+	// useEffect(() => {
+	// 	if (!isVisible) {
+	// 		return;
+	// 	}
+	// 	if (videoElement.paused || !uiStore.timelineControls.isPlaying) {
+	// 		videoElement.currentTime = uiStore.timelineControls.playPosition;
+	// 	}
+	// }, [isVisible, 
+	// 	videoElement,
+	// 	uiStore.timelineControls.playPosition,
+	// 	uiStore.timelineControls.isPlaying
+	// ]);
 
+	// useEffect(action(() => {
+	// 	if (!isVisible) {
+	// 		return;
+	// 	}
+	// 	uiStore.timelineControls.isPlaying = false;
+	// 	if (!uiStore.timelineControls.tryPlaying) {
+	// 		videoElement.pause();
+	// 	}
+	// 	else {
+	// 		videoElement.play().then(action(() => {
+	// 			uiStore.timelineControls.isPlaying = true;
+	// 		}));
+	// 	}
+	// }), [isVisible, videoElement, uiStore.timelineControls.tryPlaying]);
+	
     return (
         <Image
             name={uiStore.objectNames.video}
@@ -129,6 +161,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
             draggable={isSelected}
+			visible={isVisible}
             perfectDrawEnabled={false}
             onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
             onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}

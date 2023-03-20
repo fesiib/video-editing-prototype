@@ -24,7 +24,9 @@ const App = observer(function App() {
     );
 
 	useEffect(action(() => {
-		const newVideos = [];
+		const newVideos = [
+			//new VideoState(this, "http://localhost:3000/demo-3.webm", "video-1", 0),
+		];
 		for (let segment of DUMMY_SEGMENTS) {
 			const title = segment.title;
 			for (let subsegment in segment) {
@@ -33,8 +35,9 @@ const App = observer(function App() {
 				}
 				const info = segment[subsegment];
 				const video = 
-					new VideoState(domainStore, "http://localhost:3000/example.mp4", `${"videol"} ${newVideos.length + 10}`, 1);
+					new VideoState(domainStore, "http://localhost:3000/example.mp4", `${"video"}-${newVideos.length + 10}`, 1);
 				video.commonState.setMetadata({
+					thumbnails: [subsegment],
 					offset: info.start,
 					start: info.start,
 					finish: info.finish,
@@ -43,7 +46,7 @@ const App = observer(function App() {
 			}
 		}
 		domainStore.videos = [...newVideos];
-	}));
+	}), [DUMMY_SEGMENTS]);
 
     return (
         <div className="App">

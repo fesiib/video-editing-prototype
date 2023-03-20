@@ -7,7 +7,8 @@ import { Layer, Rect, Stage, Transformer } from "react-konva";
 
 import useRootContext from "../hooks/useRootContext";
 import { Util } from "konva/lib/Util";
-import CanvasItem from "../components/canvas/CanvasItem";
+import DraggableVideo from "../components/canvas/DraggableVideo";
+import DraggableText from "../components/canvas/DraggableText";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -244,17 +245,15 @@ const EditorCanvas = observer(function EditorCanvas() {
 					y={uiStore.canvasSize.height / 2}
 				>
 					{
-						domainStore.videos.map((video) => <CanvasItem 
+						domainStore.videos.map((video) => <DraggableVideo 
 							key={video.commonState.id}
-							item={video} 
-							type={"video"}
+							curVideo={video} 
 						/>)
 					}
 					{
-						domainStore.texts.map((text) => <CanvasItem
+						domainStore.texts.map((text) => <DraggableText
 							key={text.commonState.id}
-							item={text} 
-							type={"text"}
+							curText={text} 
 						/>)
 					}
 				</Layer>

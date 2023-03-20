@@ -22,7 +22,7 @@ export const TimelineItem = observer(
         return (
             <div
                 className={
-                    isOverlay ? "bg-yellow-600 absolute z-10" : "bg-yellow-400 absolute z-10"
+                    isOverlay ? "bg-yellow-600 absolute z-10 border" : "bg-yellow-400 absolute z-10 border"
                 }
                 ref={ref}
                 style={style}
@@ -32,7 +32,8 @@ export const TimelineItem = observer(
                     "overlay"
                 ) : (
                     <div className="flex justify-between">
-                        <TrimWrapper scene={scene}>{scene.commonState.id}</TrimWrapper>
+                        {/* <TrimWrapper scene={scene}>{scene.commonState.id}</TrimWrapper> */}
+						<span className="grow"> {scene.commonState.thumbnails[0]} </span>
                     </div>
                 )}
             </div>
