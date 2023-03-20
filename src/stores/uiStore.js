@@ -31,6 +31,8 @@ class UIStore {
         numberOfRows: 3,
         pxPerSec: 10,
         playPosition: 0, //secs
+		isPlaying: false,
+		tryPlaying: false,
     };
     timelineConst = {
         labelHeight: 20,

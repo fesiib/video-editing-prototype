@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -9,13 +9,13 @@ import useRootContext from "../hooks/useRootContext";
 
 const Timeline = observer(function Timeline() {
     const { uiStore } = useRootContext();
-
+	
     const onZoomChange = action((event) => {
         uiStore.timelineControls.pxPerSec = event.target.value / 10;
     });
 
-	const onPressPlay = action((event) => {
-		
+	const onPressPlay = action((event) => {	
+		uiStore.timelineControls.tryPlaying = !uiStore.timelineControls.tryPlaying;
 	});
 
     return (
@@ -24,7 +24,7 @@ const Timeline = observer(function Timeline() {
                 <div>
                     <label htmlFor="play_button" className="bg-indigo-300 p-1">
                         {" "}
-                        Play
+                        {uiStore.timelineControls.tryPlaying ? "pause" : "play"}
 						{" "}
                     </label>
                     <input 

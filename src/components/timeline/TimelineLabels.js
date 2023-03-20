@@ -34,6 +34,9 @@ const TimelineLabels = observer(function TimelineLabels({}) {
     const onIndicatorDragEnd = action((event) => {
         const { delta } = event;
         const transformSeconds = uiStore.pxToSec(delta.x);
+		if (uiStore.timelineControls.isPlaying) {
+			uiStore.timelineControls.tryPlaying = false;
+		}
         uiStore.timelineControls.playPosition = Math.min(
             uiStore.timelineConst.trackMaxDuration,
             Math.max(
@@ -68,6 +71,9 @@ const TimelineLabels = observer(function TimelineLabels({}) {
     };
 
     const onLabelClick = action((event) => {
+		if (uiStore.timelineControls.isPlaying) {
+			uiStore.timelineControls.tryPlaying = false;
+		}
         const timelineRect = labelsRef.current.getBoundingClientRect();
         let playPositionPx =
             event.clientX -

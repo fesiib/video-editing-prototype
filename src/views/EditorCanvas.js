@@ -6,9 +6,8 @@ import { observer } from "mobx-react-lite";
 import { Layer, Rect, Stage, Transformer } from "react-konva";
 
 import useRootContext from "../hooks/useRootContext";
-import DraggableVideo from "../components/canvas/DraggableVideo";
-import DraggableText from "../components/canvas/DraggableText";
 import { Util } from "konva/lib/Util";
+import CanvasItem from "../components/canvas/CanvasItem";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -206,26 +205,59 @@ const EditorCanvas = observer(function EditorCanvas() {
                         name={uiStore.backgroundName}
                     />
                 </Layer>
-                <Layer
-                    scaleX={uiStore.canvasScale}
-                    scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
-                >
-                    <DraggableVideo curVideo={domainStore.videos[1]} />
-                </Layer>
-                <Layer
-                    scaleX={uiStore.canvasScale}
-                    scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
-                >
-                    <DraggableText curText={domainStore.texts[0]} />
-                </Layer>
+				{/* {
+					domainStore.videos.map((video) => {
+						return (
+							<Layer
+								scaleX={uiStore.canvasScale}
+								scaleY={uiStore.canvasScale}
+								offsetX={uiStore.canvasSize.width / 2}
+								offsetY={uiStore.canvasSize.height / 2}
+								x={uiStore.canvasSize.width / 2}
+								y={uiStore.canvasSize.height / 2}
+							>
+								<DraggableVideo curVideo={video} />
+							</Layer>);
+					})
+				}
+				{
+					domainStore.texts.map((text) => {
+						return (
+						<Layer
+							scaleX={uiStore.canvasScale}
+							scaleY={uiStore.canvasScale}
+							offsetX={uiStore.canvasSize.width / 2}
+							offsetY={uiStore.canvasSize.height / 2}
+							x={uiStore.canvasSize.width / 2}
+							y={uiStore.canvasSize.height / 2}
+						>
+							<DraggableText curText={text} />
+						</Layer>);
+					})
+				} */}
+				<Layer
+					scaleX={uiStore.canvasScale}
+					scaleY={uiStore.canvasScale}
+					offsetX={uiStore.canvasSize.width / 2}
+					offsetY={uiStore.canvasSize.height / 2}
+					x={uiStore.canvasSize.width / 2}
+					y={uiStore.canvasSize.height / 2}
+				>
+					{
+						domainStore.videos.map((video) => <CanvasItem 
+							key={video.commonState.id}
+							item={video} 
+							type={"video"}
+						/>)
+					}
+					{
+						domainStore.texts.map((text) => <CanvasItem
+							key={text.commonState.id}
+							item={text} 
+							type={"text"}
+						/>)
+					}
+				</Layer>
                 <Layer>
                     <Transformer
                         ref={transformerRef}

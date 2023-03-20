@@ -39,7 +39,6 @@ const App = observer(function App() {
 					start: info.start,
 					finish: info.finish,
 				});
-				console.log(video)
 				newVideos.push(video);
 			}
 		}
