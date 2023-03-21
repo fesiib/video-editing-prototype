@@ -13,8 +13,8 @@ class DomainStore {
         projectId: "test",
         title: "TEST",
         fps: 25,
-        width: 1280,
-        height: 720, //720p
+        width: 854,
+        height: 480, //720p
         duration: 10, // seconds
         trackCnt: 2,
     };

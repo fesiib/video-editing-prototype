@@ -20,7 +20,7 @@ import TimelineLabels from "./TimelineLabels";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollision } from "../../utilities/timelineUtilities";
+import { preventCollisionDrag } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
     const { uiStore, domainStore } = useRootContext();
@@ -91,7 +91,7 @@ const TimelineTracks = observer(function TimelineTracks() {
             const index = tracks.findIndex(
                 (value) => value.trackId === scene.commonState.trackInfo.trackId
             );
-            const { newOffset, moveOffset, middle } = preventCollision(
+            const { newOffset, moveOffset, middle } = preventCollisionDrag(
                 scene,
                 tracks[index].scenes,
                 delta,
@@ -204,6 +204,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                         <TimelineItem
                             key={"item_overlay"}
                             scene={activeItem.data.current.scene}
+							scenes={[]}
                             transform={null}
                             isOverlay={true}
                             id={activeItem.id}

@@ -72,7 +72,7 @@ const App = observer(function App() {
 				finish: segment.finish,
 			});
 			video.setScript([{
-				text: segment.script,
+				text: segment.text,
 				start: segment.start,
 				lowLabel: segment.lowLabel,
 				highLabel: segment.highLabel,
@@ -84,19 +84,16 @@ const App = observer(function App() {
 
     return (
         <div className="App">
-            <h1 className="text-3xl font-bold underline">Hello !</h1>
-            <div className="flex flex-row flex-nowrap m-10">
-                <div className="flex-col basis-1/3">
-                    <Script />
+            <div className="grid grid-cols-2 grid-rows-2">
+                <div className="col-span-1 row-span-1">
+					<Script />
+				</div>
+				<div className="col-span-1 row-span-1">	
+					<EditorCanvas />
                 </div>
-                <div className="flex-col grow basis-2/3 gap-10">
-                    <div className={"basis-1/3"}>
-                        <Timeline />
-                    </div>
-                    <div className={"basis-2/3"}>
-                        <EditorCanvas />
-                    </div>
-                </div>
+				<div className="col-span-2 row-span-1">
+					<Timeline />
+				</div>
             </div>
         </div>
     );

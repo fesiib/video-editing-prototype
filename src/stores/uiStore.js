@@ -140,12 +140,12 @@ class UIStore {
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
         this.canvasSize = {
-            width: (width / 3) * 2,
-            height: (height / 3) * 2,
+            width: (width / 2),
+            height: (height / 2),
         };
         this.timelineSize = {
-            width: (width / 3) * 2,
-            height: height / 3,
+            width: width,
+            height: 60 * this.rootStore.domainStore.projectMetadata.trackCnt,
         };
     }
 

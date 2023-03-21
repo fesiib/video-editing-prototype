@@ -13,11 +13,11 @@ export function playPositionToFormat(seconds) {
     );
 }
 
-export function preventCollision(scene, scenes, transform, uiStore) {
-    const transitionSeconds = typeof transform?.x === "number" ? uiStore.pxToSec(transform.x) : 0;
+export function preventCollisionDrag(scene, scenes, transform, uiStore) {
+    const transformSeconds = typeof transform?.x === "number" ? uiStore.pxToSec(transform.x) : 0;
     const curOffset = Math.min(
         uiStore.timelineConst.trackMaxDuration - scene.commonState.sceneDuration,
-        Math.max(0, scene.commonState.offset + transitionSeconds)
+        Math.max(0, scene.commonState.offset + transformSeconds)
     );
 
     const middle = curOffset + scene.commonState.sceneDuration / 2;
@@ -35,9 +35,6 @@ export function preventCollision(scene, scenes, transform, uiStore) {
         if (otherMiddle <= middle) {
             candidateOffset = otherEnd;
         }
-        // else if (otherMiddle > middle && otherOffset < curOffset + scene.commonState.sceneDuration) {
-        // 	candidateOffset = otherOffset - scene.commonState.sceneDuration;
-        // }
         if (candidateOffset > newOffset) {
             newOffset = candidateOffset;
         }

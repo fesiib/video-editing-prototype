@@ -3,7 +3,8 @@ export const DUMMY_SEGMENTS = [
 		"start": 0,
 		"finish": 29,
 		"text": "",
-		"lowLabel": "Introduction"
+		"lowLabel": "greeting",
+		"highLabel": null,
 	},
 	{
 		"start": 29,
@@ -51,14 +52,14 @@ export const DUMMY_SEGMENTS = [
 		"start": 250,
 		"finish": 323,
 		"text": "Move Face to new Document",
-		"highLabel": "Move",
+		"highLabel": "Mouse+Keyboard",
 		"lowLabel": "goal"
 	},
 	{
 		"start": 323,
 		"finish": 352,
 		"text": "Move Galaxy background to new document",
-		"highLabel": "Move",
+		"highLabel": "Mouse+Keyboard",
 		"lowLabel": "goal"
 	},
 	{
@@ -79,7 +80,7 @@ export const DUMMY_SEGMENTS = [
 		"start": 410,
 		"finish": 431,
 		"text": "Add Bevel & Emboss",
-		"highLabel": "Bevel & Emboss",
+		"highLabel": "Filter",
 		"lowLabel": "instruction"
 	},
 	{
@@ -114,7 +115,7 @@ export const DUMMY_SEGMENTS = [
         "start": 534,
         "finish": 583,
         "text": "Copy layer style of face and paste to text layer",
-        "highLabel": "Copy & Paste Layer Style",
+        "highLabel": "Layer Style",
         "lowLabel": "instruction"
     },
 ]

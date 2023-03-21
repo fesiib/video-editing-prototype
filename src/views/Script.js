@@ -13,9 +13,13 @@ function SentenceBox ({ item }) {
 	const colorPalette = uiStore.labelColorPalette;
 
     return (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-8 gap-3">
 			<div className="col-span-1">{playPositionToFormat(item.start)}</div>
-            <div className="col-span-1">
+			<div className="col-span-2 text-left">
+				{item.highLabel}
+			</div>
+            <div className="col-span-2">
+				
                 <div className="text-center"
 					style={{backgroundColor: colorPalette[item.lowLabel] }}
 				>
@@ -23,7 +27,7 @@ function SentenceBox ({ item }) {
                    {/* <span className="tooltiptext">{item.lowLabel}<br/>{"definition"}</span> */}
                 </div>
             </div>
-            <div className="col-span-2 text-left">{item.text}</div>
+            <div className="col-span-3 text-left">{item.text}</div>
         </div>
     )
 }

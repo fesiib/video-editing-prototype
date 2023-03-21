@@ -7,7 +7,7 @@ import { useDraggable } from "@dnd-kit/core";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollision } from "../../utilities/timelineUtilities";
+import { preventCollisionDrag } from "../../utilities/timelineUtilities";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
     const { uiStore } = useRootContext();
@@ -24,8 +24,8 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         ...transform,
     };
 
-    if (isDragging) {
-        const { newOffset, moveOffset, middle } = preventCollision(
+    if (isDragging && typeof adjustedTransform?.x === "number") {
+        const { newOffset, moveOffset, middle } = preventCollisionDrag(
             scene,
             scenes,
             transform,
@@ -61,6 +61,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             id={scene.commonState.id}
             ref={setNodeRef}
             scene={scene}
+			scenes={scenes}
             transform={adjustedTransform}
             isOverlay={false}
             {...attributes}
