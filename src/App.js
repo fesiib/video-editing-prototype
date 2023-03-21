@@ -28,29 +28,56 @@ const App = observer(function App() {
 		const newVideos = [
 			//new VideoState(this, "http://localhost:3000/demo-3.webm", "video-1", 0),
 		];
+		// for (let segment of DUMMY_SEGMENTS) {
+		// 	const title = segment.title;
+		// 	for (let subsegment in segment) {
+		// 		if (subsegment === 'title') {
+		// 			continue;
+		// 		}
+		// 		const info = segment[subsegment];
+		// 		const video = 
+		// 			new VideoState(
+		// 				domainStore,
+		// 				"http://localhost:3000/example.mp4",
+		// 				`${"video"}-${newVideos.length + 10}`,
+		// 				0
+		// 			);
+		// 		video.commonState.setMetadata({
+		// 			thumbnails: [subsegment],
+		// 			offset: info.start,
+		// 			start: info.start,
+		// 			finish: info.finish,
+		// 		});
+		// 		video.setScript([{
+		// 			text: info.script,
+		// 			start: info.start,
+		// 			lowLabel: subsegment,
+		// 			highLabel: title,
+		// 		}]);
+		// 		newVideos.push(video);
+		// 	}
+		// }
 		for (let segment of DUMMY_SEGMENTS) {
-			const title = segment.title;
-			for (let subsegment in segment) {
-				if (subsegment === 'title') {
-					continue;
-				}
-				const info = segment[subsegment];
-				const video = 
-					new VideoState(domainStore, "http://localhost:3000/example.mp4", `${"video"}-${newVideos.length + 10}`, 1);
-				video.commonState.setMetadata({
-					thumbnails: [subsegment],
-					offset: info.start,
-					start: info.start,
-					finish: info.finish,
-				});
-				video.setScript([{
-					text: info.script,
-					start: info.start,
-					lowLabel: subsegment,
-					highLabel: title,
-				}]);
-				newVideos.push(video);
-			}
+			const video = 
+				new VideoState(
+					domainStore,
+					"http://localhost:3000/example.mp4",
+					`${"video"}-${newVideos.length + 10}`,
+					0
+				);
+			video.commonState.setMetadata({
+				thumbnails: [segment.lowLabel],
+				offset: segment.start,
+				start: segment.start,
+				finish: segment.finish,
+			});
+			video.setScript([{
+				text: segment.script,
+				start: segment.start,
+				lowLabel: segment.lowLabel,
+				highLabel: segment.highLabel,
+			}]);
+			newVideos.push(video);
 		}
 		domainStore.videos = [...newVideos];
 	}), [DUMMY_SEGMENTS]);

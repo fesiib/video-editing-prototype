@@ -16,7 +16,7 @@ class DomainStore {
         width: 1280,
         height: 720, //720p
         duration: 10, // seconds
-        trackCnt: 5,
+        trackCnt: 2,
     };
 
     constructor(rootStore) {
@@ -29,8 +29,8 @@ class DomainStore {
             //new VideoState(this, "http://localhost:3000/demo-3.webm", "video-3", 2),
         ];
         this.texts = [
-            new TextState(this, "HELLO WORLD !", "text-1", 3),
-            new TextState(this, "ANOTHER text !", "text-2", 4),
+            //new TextState(this, "HELLO WORLD !", "text-1", 3),
+            //new TextState(this, "ANOTHER text !", "text-2", 4),
         ];
     }
 
