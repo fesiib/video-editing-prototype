@@ -13,6 +13,10 @@ export const TimelineItem = observer(
 		const lowLabel = (scene.commonState.thumbnails.length > 0 ?
 			scene.commonState.thumbnails[0] : "misc");
 
+		const isSelected = uiStore.timelineControls.selectedTimelineItems.findIndex(
+			(value) => value.commonState.id === scene.commonState.id
+		) >= 0;
+
         const style = {
             transform:
                 typeof transform?.x === "number"
@@ -22,13 +26,15 @@ export const TimelineItem = observer(
                     : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
             width: uiStore.secToPx(scene.commonState.sceneDuration),
             //transition: `transform ${0.5}s`,
-			backgroundColor: uiStore.labelColorPalette[lowLabel]
+			backgroundColor: uiStore.labelColorPalette[lowLabel],
+			
         };
         return (
             <div
-                className={
-                    "absolute z-10 border"
-                }
+                className={ isSelected ?
+					"absolute z-10 border border-red-400" :
+					"absolute z-10 border" 
+				}
                 ref={ref}
                 style={style}
                 {...props}

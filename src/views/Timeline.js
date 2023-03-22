@@ -36,6 +36,10 @@ const Timeline = observer(function Timeline() {
 		}
 	});
 
+	const onBackgroundClick = action((event) => {
+		uiStore.timelineControls.selectedTimelineItems = [];
+	});
+
 	useEffect(action(() => {
 		if (uiStore.timelineControls.intervalId === -1) {
 			return;
@@ -53,7 +57,10 @@ const Timeline = observer(function Timeline() {
 	]);
 
     return (
-        <div className="bg-slate-100">
+        <div 
+			className="bg-slate-100"
+			onClick={onBackgroundClick}
+		>
             <div className="flex justify-between">
                 <div>
                     <label htmlFor="play_button" className="bg-indigo-300 p-1">

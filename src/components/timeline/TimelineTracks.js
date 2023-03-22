@@ -173,7 +173,13 @@ const TimelineTracks = observer(function TimelineTracks() {
         >
             <TimelineLabels />
             <DndContext
-                sensors={useSensors(useSensor(PointerSensor))}
+                sensors={useSensors(
+					useSensor(PointerSensor, {
+						activationConstraint: {	
+							distance: 10
+						}
+					}),
+				)}
                 modifiers={[restrictToFirstScrollableAncestor]}
                 collisionDetection={closestCorners}
                 onDragStart={onGenericDragStart}

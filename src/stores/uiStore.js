@@ -37,6 +37,8 @@ class UIStore {
 		
 		positionIndicatorVisibility: 0,
 		positionIndicatorSec: 0,
+
+		selectedTimelineItems: [],
     };
     timelineConst = {
         labelHeight: 20,

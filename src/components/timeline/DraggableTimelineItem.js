@@ -8,9 +8,14 @@ import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat, preventCollisionDrag } from "../../utilities/timelineUtilities";
+import { action } from "mobx";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
     const { uiStore } = useRootContext();
+
+	const isSelected = uiStore.timelineControls.selectedTimelineItems.findIndex(
+		(value) => value.commonState.id === scene.commonState.id
+	) >= 0;
 
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: scene.commonState.id,
@@ -18,7 +23,38 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             type: "scene",
             scene,
         },
+		disabled: !isSelected,
     });
+
+	const onTimelineItemClick = action((event) => {
+		event.stopPropagation();
+		event.preventDefault();
+		console.log(event);
+		const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
+			(value) => value.commonState.id === scene.commonState.id
+		);
+		const metaKey = event.metaKey;
+		if (index >= 0) {
+			if (metaKey) {
+				uiStore.timelineControls.selectedTimelineItems = [
+					...uiStore.timelineControls.selectedTimelineItems.slice(0, index),
+					...uiStore.timelineControls.selectedTimelineItems.slice(index + 1)
+				];
+			}
+			else {
+				uiStore.timelineControls.selectedTimelineItems = [
+					scene
+				];
+			}
+		}
+		else {
+			uiStore.timelineControls.selectedTimelineItems = [
+				...( metaKey ? uiStore.timelineControls.selectedTimelineItems : [] ),
+				scene,
+			];
+		}
+	});
+
 
     let adjustedTransform = {
         ...transform,
@@ -75,6 +111,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 			scenes={scenes}
             transform={adjustedTransform}
             isOverlay={false}
+			onClick={onTimelineItemClick}
             {...attributes}
             {...listeners}
         />
