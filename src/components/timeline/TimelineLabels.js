@@ -6,11 +6,11 @@ import { action } from "mobx";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 
-import TimelinePositionIndicator from "./TimelinePositionIndicator";
+import PositionIndicator from "./PositionIndicator";
+import PlayPositionIndicator from "./PlayPositionIndicator";
 
 import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat } from "../../utilities/timelineUtilities";
-import PositionIndicator from "./PositionIndicator";
 
 const TimelineLabels = observer(function TimelineLabels({}) {
 	const labelsRef = useRef(null);
@@ -46,29 +46,28 @@ const TimelineLabels = observer(function TimelineLabels({}) {
         );
     });
 
-	const [positionIndicatorVisibilty, setPositionIndicatorVisibility] = useState(false);
-    const [playPosition, setPlayPosition] = useState(0);
+    const showPositionIndicator = action((event) => {
+		uiStore.timelineControls.positionIndicatorVisibility += 1;
+    });
 
-    const showPositionIndicator = (event) => {
-        setPositionIndicatorVisibility((visibility) => true);
-    };
+    const hidePositionIndicator = action((event) => {
+		uiStore.timelineControls.positionIndicatorVisibility -= 1;
+    });
 
-    const hidePositionIndicator = (event) => {
-        setPositionIndicatorVisibility((visibility) => false);
-    };
-
-    const updatePositionIndicator = (event) => {
+    const updatePositionIndicator = action((event) => {
         const timelineRect = labelsRef.current.getBoundingClientRect();
-        let playPositionPx =
+        let positionIndicatorPx =
             event.clientX -
             timelineRect.left +
             labelsRef.current.scrollLeft -
 			handlerWidth;
-        if (playPositionPx < 0) {
-            playPositionPx = 0;
+        if (positionIndicatorPx < 0) {
+            positionIndicatorPx = 0;
         }
-        setPlayPosition(uiStore.pxToSec(playPositionPx));
-    };
+		uiStore.timelineControls.positionIndicatorSec = uiStore.pxToSec(
+			positionIndicatorPx
+		);
+    });
 
     const onLabelClick = action((event) => {
 		// if (uiStore.timelineControls.isPlaying) {
@@ -86,6 +85,8 @@ const TimelineLabels = observer(function TimelineLabels({}) {
         uiStore.timelineControls.playPosition = uiStore.pxToSec(playPositionPx);
     });
 
+	const positionIndicatorVisibility = uiStore.timelineControls.positionIndicatorVisibility;
+	const positionIndicatorSec = uiStore.timelineControls.positionIndicatorSec;
 
     return (<div>
 		<DndContext
@@ -93,7 +94,7 @@ const TimelineLabels = observer(function TimelineLabels({}) {
 			modifiers={[restrictToHorizontalAxis]}
 			onDragEnd={onIndicatorDragEnd}
 		>
-			<TimelinePositionIndicator />
+			<PlayPositionIndicator />
 		</DndContext>
 		<div
             className="flex flex-row flex-nowrap"
@@ -140,19 +141,20 @@ const TimelineLabels = observer(function TimelineLabels({}) {
 					);
 				})}
 			</div>
-			{positionIndicatorVisibilty ? (
-                <div
+			{ positionIndicatorVisibility > 0 ? (
+				<div
+					id={uiStore.timelineConst.positionIndicatorId}
                     className={"absolute top-0 z-30"}
                     style={{
                         height: uiStore.timelineSize.height,
-                        left:handlerWidth -
+                        left: handlerWidth -
                             uiStore.timelineConst.positionIndicatorWidth / 2,
-                        transform: `translate3d(${uiStore.secToPx(playPosition)}px, 0px, 0px)`,
+                        transform: `translate3d(${uiStore.secToPx(positionIndicatorSec)}px, 0px, 0px)`,
                     }}
 				>
                     <PositionIndicator
                         showLabel={true}
-                        playPosition={playPosition}
+                        positionIndicatorSec={positionIndicatorSec}
                         className="opacity-80 pointer-events-none"
                     />
                 </div>

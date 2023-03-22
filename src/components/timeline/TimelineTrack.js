@@ -5,7 +5,6 @@ import { observer } from "mobx-react-lite";
 import DraggableTimelineItem from "./DraggableTimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import PositionIndicator from "./PositionIndicator";
 
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(

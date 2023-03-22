@@ -34,6 +34,9 @@ class UIStore {
 		isPlaying: false,
 		tryPlaying: false,
 		intervalId: -1,
+		
+		positionIndicatorVisibility: 0,
+		positionIndicatorSec: 0,
     };
     timelineConst = {
         labelHeight: 20,
@@ -47,6 +50,9 @@ class UIStore {
         trackMaxDuration: 60 * 20, //seconds
         trackMinDuration: 0, //seconds
 		delay: 0.1,
+
+		positionIndicatorId: "position_indicator",
+		positionIndicatorLabelId: "position_indicator_label",
     };
 
     objectNames = {

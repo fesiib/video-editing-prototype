@@ -8,7 +8,7 @@ import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat } from "../../utilities/timelineUtilities";
 import PositionIndicator from "./PositionIndicator";
 
-const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}) {
+const PlayPositionIndicator = observer(function PlayPositionIndicator({}) {
     const { uiStore } = useRootContext();
 
     const height = uiStore.timelineSize.height;
@@ -42,10 +42,10 @@ const TimelinePositionIndicator = observer(function TimelinePositionIndicator({}
                 {...listeners}
                 {...attributes}
             >
-                <PositionIndicator showLabel={isDragging} playPosition={playPosition} />
+                <PositionIndicator showLabel={isDragging} positionIndicatorSec={playPosition} />
             </div>
         </>
     );
 });
 
-export default TimelinePositionIndicator;
+export default PlayPositionIndicator;

@@ -1,15 +1,18 @@
 import React from "react";
 
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { DndContext, PointerSensor, useDraggable, useSensor, useSensors } from "@dnd-kit/core";
 import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 
+import PositionIndicator from "./PositionIndicator";
+
 import TrimHandlerLeftIcon from "../../icons/TrimHandlerLeftIcon";
 import TrimHandlerRightIcon from "../../icons/TrimHandlerRightIcon";
 import useRootContext from "../../hooks/useRootContext";
+import { playPositionToFormat } from "../../utilities/timelineUtilities";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, scenes, isLeftHandler }) {
 	const { uiStore } = useRootContext();
@@ -51,6 +54,9 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
         }
 		let transformSeconds = uiStore.pxToSec(adjustedTransform.x);
 		const sceneDiv = document.getElementById(scene.commonState.id);
+		const positionIndicatorDiv = document.getElementById(uiStore.timelineConst.positionIndicatorId);
+		const positionIndicatorLabelDiv = document.getElementById(uiStore.timelineConst.positionIndicatorLabelId);
+
 		if (isLeftHandler) {
 			transformSeconds = Math.min(
 				transformSeconds,
@@ -61,11 +67,18 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
 				leftUpperBound - scene.commonState.offset,
                 -scene.commonState.start,  
             );
-			console.log(transformSeconds, -scene.commonState.start, leftUpperBound - scene.commonState.offset);
 			sceneDiv.style.transform = `translate3d(${uiStore.secToPx(
 				scene.commonState.offset + transformSeconds
 			)}px, ${0}px, ${0}px)`;
 			sceneDiv.style.width = `${uiStore.secToPx(scene.commonState.sceneDuration - transformSeconds)}px`;
+			if (positionIndicatorDiv) {
+				positionIndicatorDiv.style.transform = `translate3d(${uiStore.secToPx(
+					scene.commonState.offset + transformSeconds
+				)}px, ${0}px, ${0}px)`;
+			}
+			if (positionIndicatorLabelDiv) {
+				positionIndicatorLabelDiv.innerHTML = playPositionToFormat(scene.commonState.offset + transformSeconds);
+			}
         } else {
 			transformSeconds = Math.min(
 				transformSeconds,
@@ -83,6 +96,15 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
                 -scene.commonState.sceneDuration,  
             );
 			sceneDiv.style.width = `${uiStore.secToPx(scene.commonState.sceneDuration + transformSeconds)}px`;
+
+			if (positionIndicatorDiv) {
+				positionIndicatorDiv.style.transform = `translate3d(${uiStore.secToPx(
+					scene.commonState.end + transformSeconds
+				)}px, ${0}px, ${0}px)`;
+			}
+			if (positionIndicatorLabelDiv) {
+				positionIndicatorLabelDiv.innerHTML = playPositionToFormat(scene.commonState.end + transformSeconds);
+			}
         }
 		adjustedTransform = {
 			...adjustedTransform,
@@ -108,6 +130,18 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
 
 const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
     const { uiStore } = useRootContext();
+
+	const onHandlerDragStart = action((event) => {
+		const { active } = event;
+		uiStore.timelineControls.positionIndicatorVisibility += 1;
+		const { isLeftHandler, scene } = active.data.current;
+		if (isLeftHandler) {
+			uiStore.timelineControls.positionIndicatorSec = scene.commonState.offset;
+		}
+		else {
+			uiStore.timelineControls.positionIndicatorSec = scene.commonState.end;
+		}
+	});
 
     const onHandlerDragEnd = action((event) => {
         const { active, delta } = event;
@@ -162,6 +196,8 @@ const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
             );
             scene.commonState.finish += deltaSeconds;
         }
+
+		uiStore.timelineControls.positionIndicatorVisibility -= 1;
     });
 
     return (
@@ -169,6 +205,7 @@ const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
             <DndContext
                 sensors={useSensors(useSensor(PointerSensor))}
                 modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
+				onDragStart={onHandlerDragStart}
                 onDragEnd={onHandlerDragEnd}
             >
                 <DraggableRangeHandle scene={scene} scenes={scenes} isLeftHandler={true} />

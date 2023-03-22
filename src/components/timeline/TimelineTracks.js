@@ -34,13 +34,15 @@ const TimelineTracks = observer(function TimelineTracks() {
 
     const onGenericDragStart = action((event) => {
         const { active } = event;
-        const type = active.data.current.type;
+        const { type, scene } = active.data.current;
         console.log("start", type, event);
 
         if (type === "track") {
             setActiveTrackId(active.id);
         } else if (type === "scene") {
             setActiveItem(active);
+			uiStore.timelineControls.positionIndicatorVisibility += 1;
+			uiStore.timelineControls.positionIndicatorSec = scene.commonState.offset;
         }
     });
 
@@ -140,6 +142,7 @@ const TimelineTracks = observer(function TimelineTracks() {
         } else if (type === "scene") {
             sceneTrackChange(active, over, delta);
             setActiveItem(null);
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
         }
     });
 

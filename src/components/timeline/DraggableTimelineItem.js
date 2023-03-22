@@ -7,7 +7,7 @@ import { useDraggable } from "@dnd-kit/core";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollisionDrag } from "../../utilities/timelineUtilities";
+import { playPositionToFormat, preventCollisionDrag } from "../../utilities/timelineUtilities";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
     const { uiStore } = useRootContext();
@@ -54,6 +54,17 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
                 )}px, ${0}px, ${0}px)`;
             }
         }
+
+		const positionIndicatorDiv = document.getElementById(uiStore.timelineConst.positionIndicatorId);
+		const positionIndicatorLabelDiv = document.getElementById(uiStore.timelineConst.positionIndicatorLabelId);
+		if (positionIndicatorDiv) {
+			positionIndicatorDiv.style.transform = `translate3d(${uiStore.secToPx(
+				newOffset
+			)}px, ${0}px, ${0}px)`;
+		}
+		if (positionIndicatorLabelDiv) {
+			positionIndicatorLabelDiv.innerHTML = playPositionToFormat(newOffset);
+		}
     }
 
     return (

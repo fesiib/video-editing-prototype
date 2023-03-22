@@ -6,10 +6,10 @@ export function playPositionToFormat(seconds) {
             hour12: false,
             minute: "2-digit",
             second: "2-digit",
-        }) +
-        (date.getMilliseconds() !== 0
-            ? ":" + (date.getMilliseconds() + 1000).toString().slice(1)
-            : "")
+        }) + ":" + (date.getMilliseconds() + 1000).toString().slice(1, 3)
+        // (date.getMilliseconds() !== 0
+        //     ? ":" + (date.getMilliseconds() + 1000).toString().slice(1)
+        //     : "")
     );
 }
 

@@ -3,7 +3,7 @@ import React from "react";
 import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat } from "../../utilities/timelineUtilities";
 
-function PositionIndicator({ showLabel, playPosition, className = "" }) {
+function PositionIndicator({ showLabel, positionIndicatorSec, className = "" }) {
     const { uiStore } = useRootContext();
 
     const height = uiStore.timelineSize.height;
@@ -13,14 +13,14 @@ function PositionIndicator({ showLabel, playPosition, className = "" }) {
         <div className={className}>
             {showLabel ? (
                 <label
+					id={uiStore.timelineConst.positionIndicatorLabelId}
                     className="absolute z-30 bg-violet-800 text-white text-xs"
                     style={{
                         left: positionIndicatorWidth,
                     }}
                     htmlFor="position_indicator_button"
                 >
-                    {" "}
-                    {playPositionToFormat(playPosition)}{" "}
+                    {playPositionToFormat(positionIndicatorSec)}
                 </label>
             ) : null}
             <button
