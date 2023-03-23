@@ -4,6 +4,9 @@ import CommonState from "./commonState";
 class VideoState {
     source = "http://localhost:3000/flame.avi";
 	script = [];
+	highLabel = "None";
+	lowLabel = "misc";
+
 	// {text: "", start: ""} start is relative to video
     constructor(domainStore, source, id, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -26,9 +29,12 @@ class VideoState {
 	get adjustedScript() {
 		const adjusted = [];
 		for (let single of this.script) {
+			const start = single.start - this.commonState.start + this.commonState.offset;
+			const finish = single.finish - this.commonState.start + this.commonState.offset;
 			adjusted.push({
 				text: single.text,
-				start: single.start - this.commonState.start + this.commonState.offset,
+				start: start,
+				finish: finish,
 				lowLabel: single.lowLabel,
 				highLabel: single.highLabel,
 			});

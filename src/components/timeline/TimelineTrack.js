@@ -42,10 +42,10 @@ const TimelineTrack = observer(
                 <div
                     className={
                         isOverlay
-                            ? "bg-slate-600 my-1 relative h-10"
+                            ? "bg-slate-600 my-1 relative h-14"
                             : isOver
-                            ? "bg-slate-500 my-1 relative h-10"
-                            : "bg-slate-400 my-1 relative h-10"
+                            ? "bg-slate-500 my-1 relative h-14"
+                            : "bg-slate-400 my-1 relative h-14"
                     }
                     style={{
                         width: width,

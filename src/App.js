@@ -66,14 +66,20 @@ const App = observer(function App() {
 					0
 				);
 			video.commonState.setMetadata({
-				thumbnails: [segment.lowLabel],
+				thumbnails: [
+					(segment?.lowLabel ? segment.lowLabel : "misc"),
+					(segment?.highLabel ? segment.highLabel : "None")
+				],
 				offset: segment.start,
 				start: segment.start,
 				finish: segment.finish,
 			});
+			video.highLabel = segment?.highLabel ? segment.highLabel : "None";
+			video.lowLabel = segment?.lowLabel ? segment.lowLabel : "misc";
 			video.setScript([{
 				text: segment.text,
 				start: segment.start,
+				finish: segment.finish,
 				lowLabel: segment.lowLabel,
 				highLabel: segment.highLabel,
 			}]);

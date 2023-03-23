@@ -8,17 +8,38 @@ export const DUMMY_SEGMENTS = [
 	},
 	{
 		"start": 29,
-		"finish": 61,
-		"text": "Open Man model and Galaxy background (You can download at description)",
+		"finish": 45,
+		"text": "Open Man model",
 		"highLabel": "Open",
 		"lowLabel": "description"
 	},
 	{
+		"start": 45,
+		"finish": 61,
+		"text": "Galaxy background (You can download at description)",
+		"highLabel": "Open",
+		"lowLabel": "outcome"
+	},
+	{
 		"start": 61,
-		"finish": 126,
-		"text": "Use polygonal Lasso Tool to face cut",
+		"finish": 75,
+		"text": "Use",
+		"highLabel": "Lasso Tool",
+		"lowLabel": "goal"
+	},
+	{
+		"start": 75,
+		"finish": 107,
+		"text": "polygonal Lasso Tool",
 		"highLabel": "Lasso Tool",
 		"lowLabel": "instruction"
+	},
+	{
+		"start": 107,
+		"finish": 126,
+		"text": "face cut",
+		"highLabel": "Lasso Tool",
+		"lowLabel": "outcome"
 	},
 	{
 		"start": 126,
@@ -43,24 +64,40 @@ export const DUMMY_SEGMENTS = [
 	},
 	{
 		"start": 206,
-		"finish": 250,
-		"text": "Add Gradient",
+		"finish": 235,
+		"text": "Add",
 		"highLabel": "Gradient",
 		"lowLabel": "instruction"
 	},
+
+	{
+		"start": 235,
+		"finish": 250,
+		"text": "Add Gradient",
+		"highLabel": "Gradient",
+		"lowLabel": "outcome"
+	},
 	{
 		"start": 250,
-		"finish": 323,
+		"finish": 280,
 		"text": "Move Face to new Document",
 		"highLabel": "Mouse+Keyboard",
 		"lowLabel": "goal"
+	},
+
+	{
+		"start": 280,
+		"finish": 323,
+		"text": "Move Face to new Document",
+		"highLabel": "Mouse+Keyboard",
+		"lowLabel": "instruction"
 	},
 	{
 		"start": 323,
 		"finish": 352,
 		"text": "Move Galaxy background to new document",
 		"highLabel": "Mouse+Keyboard",
-		"lowLabel": "goal"
+		"lowLabel": "outcome"
 	},
 	{
 		"start": 352,
@@ -85,10 +122,17 @@ export const DUMMY_SEGMENTS = [
 	},
 	{
         "start": 431,
-        "finish": 491,
+        "finish": 470,
         "text": "Add text",
         "highLabel": "Text",
         "lowLabel": "instruction"
+    },
+	{
+        "start": 470,
+        "finish": 491,
+        "text": "Here is the text",
+        "highLabel": "Text",
+        "lowLabel": "outcome"
     },
     {
         "start": 491,

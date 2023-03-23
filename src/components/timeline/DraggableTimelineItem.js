@@ -133,17 +133,17 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
     }
 
     return (
-        <TimelineItem
-            id={scene.commonState.id}
-            ref={setNodeRef}
-            scene={scene}
+		<TimelineItem
+			id={scene.commonState.id}
+			ref={setNodeRef}
+			scene={scene}
 			scenes={scenes}
-            transform={adjustedTransform}
-            isOverlay={false}
+			transform={adjustedTransform}
+			isOverlay={false}
 			onClick={onTimelineItemClick}
-            {...attributes}
-            {...listeners}
-        />
+			attributes={attributes}
+			listeners={listeners}
+		/>
     );
 });
 

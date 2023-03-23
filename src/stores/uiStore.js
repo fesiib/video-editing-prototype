@@ -154,7 +154,7 @@ class UIStore {
         };
         this.timelineSize = {
             width: width,
-            height: 60 * this.rootStore.domainStore.projectMetadata.trackCnt,
+            height: 80 * this.rootStore.domainStore.projectMetadata.trackCnt,
         };
     }
 
