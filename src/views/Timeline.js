@@ -36,6 +36,10 @@ const Timeline = observer(function Timeline() {
 		}
 	});
 
+	const onPressSplit = action((event) => {
+
+	});
+
 	const onBackgroundClick = action((event) => {
 		uiStore.timelineControls.selectedTimelineItems = [];
 	});
@@ -79,7 +83,12 @@ const Timeline = observer(function Timeline() {
                         {" "}
                         Split{" "}
                     </label>
-                    <input id="split_button" type="button" />
+                    <input 
+						id="split_button"
+						type="button"
+						disabled={true}
+						onClick={onPressSplit}
+					/>
                 </div>
                 <div>
                     <label htmlFor="speed_input" className="bg-indigo-300 p-1">

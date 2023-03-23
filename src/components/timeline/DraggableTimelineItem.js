@@ -7,7 +7,7 @@ import { useDraggable } from "@dnd-kit/core";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { playPositionToFormat, preventCollisionDrag } from "../../utilities/timelineUtilities";
+import { playPositionToFormat, preventCollisionDrag, preventCollisionDragMultiple } from "../../utilities/timelineUtilities";
 import { action } from "mobx";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
@@ -29,29 +29,49 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 	const onTimelineItemClick = action((event) => {
 		event.stopPropagation();
 		event.preventDefault();
-		console.log(event);
 		const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
 			(value) => value.commonState.id === scene.commonState.id
 		);
+		const areItemsSelected = uiStore.timelineControls.selectedTimelineItems.length > 0;
+		const sameTrack = areItemsSelected ? 
+			scene.commonState.trackInfo.trackId === uiStore.timelineControls.selectedTimelineItems[0].commonState.trackInfo.trackId :
+			true;
 		const metaKey = event.metaKey;
-		if (index >= 0) {
-			if (metaKey) {
-				uiStore.timelineControls.selectedTimelineItems = [
-					...uiStore.timelineControls.selectedTimelineItems.slice(0, index),
-					...uiStore.timelineControls.selectedTimelineItems.slice(index + 1)
-				];
+		if (metaKey && areItemsSelected && sameTrack) {
+			let newSelectedTimelineItems = [];
+			if (index >= 0) {
+				const rightMostEnd = scene.commonState.end;
+				for (let otherScene of uiStore.timelineControls.selectedTimelineItems) {
+					if (otherScene.commonState.end < rightMostEnd) {
+						newSelectedTimelineItems.push(otherScene);
+					}
+				}
+			}
+			else {
+				let leftMostOffset = scene.commonState.offset;
+				let rightMostEnd = scene.commonState.end;
+				for (let otherScene of uiStore.timelineControls.selectedTimelineItems) {
+					leftMostOffset = Math.min(leftMostOffset, otherScene.commonState.offset);
+					rightMostEnd = Math.max(rightMostEnd, otherScene.commonState.end);
+				}
+				for (let someScene of scenes) {
+					if (someScene.commonState.offset >= leftMostOffset
+						&& someScene.commonState.end <= rightMostEnd) {
+						newSelectedTimelineItems.push(someScene);
+					}
+				}
+			}
+			uiStore.timelineControls.selectedTimelineItems = [ ...newSelectedTimelineItems ];
+		}
+		else {
+			if (index >= 0) {
+				uiStore.timelineControls.selectedTimelineItems = [];
 			}
 			else {
 				uiStore.timelineControls.selectedTimelineItems = [
-					scene
+					scene,
 				];
 			}
-		}
-		else {
-			uiStore.timelineControls.selectedTimelineItems = [
-				...( metaKey ? uiStore.timelineControls.selectedTimelineItems : [] ),
-				scene,
-			];
 		}
 	});
 
@@ -60,26 +80,35 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         ...transform,
     };
 
-    if (isDragging && typeof adjustedTransform?.x === "number") {
-        const { newOffset, moveOffset, middle } = preventCollisionDrag(
-            scene,
+    if (isSelected && isDragging && typeof adjustedTransform?.x === "number") {
+		const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
+        const { leftMostScene, newOffset, moveOffset, middle } = preventCollisionDragMultiple(
+			scene,
             scenes,
             transform,
             uiStore
         );
         adjustedTransform = {
             ...transform,
-            x: uiStore.secToPx(newOffset - scene.commonState.offset),
+            x: uiStore.secToPx(newOffset - leftMostScene.commonState.offset),
         };
         // move items on the right side
         for (let otherScene of scenes) {
-            if (otherScene.commonState.id === scene.commonState.id) {
-                continue;
+			const isSelected = selectedScenes.findIndex(
+					(value) => value.commonState.id === otherScene.commonState.id
+				) >= 0;
+			const otherDiv = document.getElementById(otherScene.commonState.id);
+            if (isSelected) {
+                if (otherScene.commonState.id !== scene.commonState.id) {
+					otherDiv.style.transform = `translate3d(${uiStore.secToPx(
+						otherScene.commonState.offset + (newOffset - leftMostScene.commonState.offset)
+					)}px, ${0}px, ${0}px)`;
+				}
+				continue
             }
             const otherOffset = otherScene.commonState.offset;
             const otherEnd = otherScene.commonState.end;
             const otherMiddle = (otherEnd + otherOffset) / 2;
-            const otherDiv = document.getElementById(otherScene.commonState.id);
             if (otherMiddle > middle) {
                 otherDiv.style.transform = `translate3d(${uiStore.secToPx(
                     otherScene.commonState.offset + moveOffset

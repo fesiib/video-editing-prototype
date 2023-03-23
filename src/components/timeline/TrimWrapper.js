@@ -54,8 +54,11 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
         }
 		let transformSeconds = uiStore.pxToSec(adjustedTransform.x);
 		const sceneDiv = document.getElementById(scene.commonState.id);
+		const labelDiv = document.getElementById("label_" + scene.commonState.id);
 		const positionIndicatorDiv = document.getElementById(uiStore.timelineConst.positionIndicatorId);
 		const positionIndicatorLabelDiv = document.getElementById(uiStore.timelineConst.positionIndicatorLabelId);
+		const lowLabel = (scene.commonState.thumbnails.length > 0 ?
+			scene.commonState.thumbnails[0] : "misc");
 
 		if (isLeftHandler) {
 			transformSeconds = Math.min(
@@ -71,6 +74,14 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
 				scene.commonState.offset + transformSeconds
 			)}px, ${0}px, ${0}px)`;
 			sceneDiv.style.width = `${uiStore.secToPx(scene.commonState.sceneDuration - transformSeconds)}px`;
+			
+			if (uiStore.secToPx(scene.commonState.sceneDuration - transformSeconds) < uiStore.timelineConst.minTimelineItemWidthPx) {
+				labelDiv.innerHTML = "";			
+			}
+			else {
+				labelDiv.innerHTML = lowLabel;
+			}
+
 			if (positionIndicatorDiv) {
 				positionIndicatorDiv.style.transform = `translate3d(${uiStore.secToPx(
 					scene.commonState.offset + transformSeconds
@@ -95,7 +106,16 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({ scene, sce
 				transformSeconds,
                 -scene.commonState.sceneDuration,  
             );
+			
+			
 			sceneDiv.style.width = `${uiStore.secToPx(scene.commonState.sceneDuration + transformSeconds)}px`;
+
+			if (uiStore.secToPx(scene.commonState.sceneDuration + transformSeconds) < uiStore.timelineConst.minTimelineItemWidthPx) {
+				labelDiv.innerHTML = "";			
+			}
+			else {
+				labelDiv.innerHTML = lowLabel;
+			}
 
 			if (positionIndicatorDiv) {
 				positionIndicatorDiv.style.transform = `translate3d(${uiStore.secToPx(

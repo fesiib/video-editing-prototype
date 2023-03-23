@@ -17,6 +17,9 @@ export const TimelineItem = observer(
 			(value) => value.commonState.id === scene.commonState.id
 		) >= 0;
 
+		const willOverflow = 
+			uiStore.secToPx(scene.commonState.sceneDuration) < uiStore.timelineConst.minTimelineItemWidthPx;
+
         const style = {
             transform:
                 typeof transform?.x === "number"
@@ -24,10 +27,10 @@ export const TimelineItem = observer(
                           uiStore.secToPx(scene.commonState.offset) + transform.x
                       }px, ${0}px, ${0}px)`
                     : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
-            width: uiStore.secToPx(scene.commonState.sceneDuration),
+            width: (uiStore.secToPx(scene.commonState.sceneDuration)),
             //transition: `transform ${0.5}s`,
 			backgroundColor: uiStore.labelColorPalette[lowLabel],
-			
+			opacity: (isOverlay ? 0.8 : 1),
         };
         return (
             <div
@@ -39,17 +42,24 @@ export const TimelineItem = observer(
                 style={style}
                 {...props}
             >
-                {isOverlay ? (
-                    "overlay"
-                ) : (
-                    <div className="flex justify-between">
-                        <TrimWrapper 
-							scene={scene}
-							scenes={scenes}
-						>{lowLabel}</TrimWrapper>
-						{/* <span className="grow"> {lowLabel} </span> */}
-                    </div>
-                )}
+                {isOverlay ? (<span>
+					{uiStore.timelineControls.selectedTimelineItems.length > 1 ? 
+						uiStore.timelineControls.selectedTimelineItems.length + " scenes" :
+						"1 scene"
+					}
+					
+				</span>
+                ) : (<div className="flex justify-between">
+					<TrimWrapper 
+						scene={scene}
+						scenes={scenes}
+					>
+						<span id={"label_" + scene.commonState.id}>
+							{ !willOverflow ? lowLabel : "" }
+						</span>
+					</TrimWrapper>
+					{/* <span className="grow"> {lowLabel} </span> */}
+				</div>)}
             </div>
         );
     })

@@ -20,7 +20,7 @@ import TimelineLabels from "./TimelineLabels";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollisionDrag } from "../../utilities/timelineUtilities";
+import { preventCollisionDrag, preventCollisionDragMultiple } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
     const { uiStore, domainStore } = useRootContext();
@@ -48,23 +48,28 @@ const TimelineTracks = observer(function TimelineTracks() {
 
     const sceneTrackChange = action((active, over, delta) => {
         const scene = active.data.current.scene;
+		const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
         if (over) {
             const oldTrackId = scene.commonState.trackInfo.trackId;
             const newTrackId = over.data.current.trackId;
             if (newTrackId !== oldTrackId) {
                 setTracks(
                     action((tracks) => {
-                        scene.commonState.trackInfo.trackId = newTrackId;
+						for (let selectedScene of selectedScenes) {
+							selectedScene.commonState.trackInfo.trackId = newTrackId;
+						}
                         const newTracks = tracks.map((track) => {
+							let newScenes = [];
                             if (track.trackId === oldTrackId) {
-                                const sceneIndex = track.scenes.findIndex(
-                                    (curScene) => curScene.commonState.id === scene.commonState.id
-                                );
-                                const newScenes = [
-                                    ...track.scenes.slice(0, sceneIndex),
-                                    ...track.scenes.slice(sceneIndex + 1),
-                                ];
-								for (let otherScene of newScenes) {
+								for (let otherScene of track.scenes) {
+									const isSelected = selectedScenes.findIndex(
+										(value) => value.commonState.id === otherScene.commonState.id
+									) >= 0;
+									if (!isSelected) {
+										newScenes.push(otherScene);
+									}
+								}
+                                for (let otherScene of newScenes) {
 									const otherDiv = document.getElementById(otherScene.commonState.id);
 									otherDiv.style.transform = `translate3d(${uiStore.secToPx(
 										otherScene.commonState.offset
@@ -76,7 +81,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                                 };
                             }
                             if (track.trackId === newTrackId) {
-                                const newScenes = [...track.scenes, scene];
+                                const newScenes = [...track.scenes, ...selectedScenes];
                                 return {
                                     trackId: track.trackId,
                                     scenes: newScenes,
@@ -93,16 +98,20 @@ const TimelineTracks = observer(function TimelineTracks() {
             const index = tracks.findIndex(
                 (value) => value.trackId === scene.commonState.trackInfo.trackId
             );
-            const { newOffset, moveOffset, middle } = preventCollisionDrag(
-                scene,
-                tracks[index].scenes,
-                delta,
-                uiStore
-            );
+			const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
+			const { leftMostScene, newOffset, moveOffset, middle } = preventCollisionDragMultiple(
+				scene,
+				tracks[index].scenes,
+				delta,
+				uiStore
+			);
             for (let otherScene of tracks[index].scenes) {
-                if (otherScene.commonState.id === scene.commonState.id) {
-                    continue;
-                }
+				const isSelected = selectedScenes.findIndex(
+					(value) => value.commonState.id === otherScene.commonState.id
+				) >= 0;
+				if (isSelected) {
+					continue;
+				}
                 const otherOffset = otherScene.commonState.offset;
                 const otherEnd = otherScene.commonState.end;
                 const otherMiddle = (otherEnd + otherOffset) / 2;
@@ -111,7 +120,10 @@ const TimelineTracks = observer(function TimelineTracks() {
                     otherScene.commonState.offset = otherScene.commonState.offset + moveOffset;
                 }
             }
-            scene.commonState.offset = newOffset;
+			const deltaSeconds = newOffset - leftMostScene.commonState.offset;
+			for (let selectedScene of selectedScenes) {
+				selectedScene.commonState.offset = selectedScene.commonState.offset + deltaSeconds;
+			}
         }
     });
 

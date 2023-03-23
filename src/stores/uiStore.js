@@ -55,6 +55,7 @@ class UIStore {
 
 		positionIndicatorId: "position_indicator",
 		positionIndicatorLabelId: "position_indicator_label",
+		minTimelineItemWidthPx: 120,
     };
 
     objectNames = {
