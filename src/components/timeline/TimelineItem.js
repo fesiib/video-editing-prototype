@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import useRootContext from "../../hooks/useRootContext";
 
 import TrimWrapper from "./TrimWrapper";
+import { action } from "mobx";
 
 export const TimelineItem = observer(
     forwardRef(function TimelineItem({ scene, scenes, transform, isOverlay, attributes, listeners, ...props }, ref) {
@@ -40,7 +41,7 @@ export const TimelineItem = observer(
 			opacity: (isOverlay ? 0.8 : 1),
         };
 
-		const onHighLabelClick = (event) => {
+		const onHighLabelClick = action((event) => {
 			event.stopPropagation();
 			event.preventDefault();
 			let newSelectedTimelineItems = [];
@@ -64,7 +65,7 @@ export const TimelineItem = observer(
 				lastEnd = selectedScene.commonState.end;
 			}
 			uiStore.timelineControls.selectedTimelineItems = contSelectedTimelineItems;
-		}
+		});
         return (
             <div
                 className={ (isSelected ?

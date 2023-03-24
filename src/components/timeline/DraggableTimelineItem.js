@@ -112,16 +112,24 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 
 			const positionIndicatorDiv = document.getElementById(uiStore.timelineConst.positionIndicatorId);
 			const positionIndicatorLabelDiv = document.getElementById(uiStore.timelineConst.positionIndicatorLabelId);
+			const videoElement = document.getElementById("video_element_" + scene.commonState.id);
+
 			let offsetPx = event.clientX -
 				timelineRect.left +
 				labelsDiv.scrollLeft -
 				uiStore.timelineConst.trackHandlerWidth;
 
+			const offset = uiStore.pxToSec(offsetPx);
+
 			if (positionIndicatorDiv) {
 				positionIndicatorDiv.style.transform = `translate3d(${offsetPx}px, ${0}px, ${0}px)`;
 			}
 			if (positionIndicatorLabelDiv) {
-				positionIndicatorLabelDiv.innerHTML = playPositionToFormat(uiStore.pxToSec(offsetPx));
+				positionIndicatorLabelDiv.innerHTML = playPositionToFormat(offset);
+			}
+			if (videoElement) {
+				videoElement.currentTime = offset 
+				- scene.commonState.offset + scene.commonState.start;
 			}
 		}
 		else {

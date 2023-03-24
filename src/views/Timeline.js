@@ -46,6 +46,25 @@ const Timeline = observer(function Timeline() {
 		uiStore.timelineControls.splitting = true;
 	});
 
+	const onDeleteTimelineItems = action(() => {
+		const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
+			(value) => value.commonState.id
+		);
+		console.log(selectedSceneIds, uiStore.timelineControls.selectedTimelineItems.length)
+		domainStore.videos = domainStore.videos.filter((video) => {
+			const isSelected = selectedSceneIds.includes(video.commonState.id);
+			console.log(isSelected);
+			return !isSelected;
+		});
+		console.log(domainStore.videos.length);
+	});
+
+	const onDeleteKeyDown = action((event) => {
+		if (event.which === 46) { ///delete key
+			onDeleteTimelineItems();
+		}
+	});
+
 	const onBackgroundClick = action((event) => {
 		uiStore.timelineControls.selectedTimelineItems = [];
 		if (uiStore.timelineControls.splitting) {
@@ -73,37 +92,35 @@ const Timeline = observer(function Timeline() {
         <div 
 			className="bg-slate-100"
 			onClick={onBackgroundClick}
+			onKeyDown={onDeleteKeyDown}
 		>
             <div className="flex justify-between">
-                <div  className="bg-indigo-300 p-1">
-                    <label htmlFor="play_button">
-                        {" "}
-                        {uiStore.timelineControls.tryPlaying ? "pause" : "play"}
-						{" "}
-                    </label>
-                    <input 
-						id="play_button"
-						type="button"
-						onClick={onPressPlay}
-					/>
-                </div>
-                <div className={ uiStore.timelineControls.splitting ?
-					"bg-indigo-500 p-1" :
-					"bg-indigo-300 p-1" }
-					onClick={onPressSplit}	
+                <button 
+					className="bg-indigo-300 p-1"
+					id="play_button"
+					onClick={onPressPlay}
 				>
-                    <label htmlFor="split_button">
-						{
-							uiStore.timelineControls.splitting ?
-							"Splitting" : "Split"
-						}
-                        
-                    </label>
-                    <button 
-						id="split_button"
-						type="button"
-					/>
-                </div>
+					{uiStore.timelineControls.tryPlaying ? "pause" : "play"}
+                </button>
+                <button
+					className={ uiStore.timelineControls.splitting ?
+						"bg-indigo-500 p-1" :
+						"bg-indigo-300 p-1" }
+					onClick={onPressSplit}	
+					id="split_button"
+				>
+					{
+						uiStore.timelineControls.splitting ?
+						"Splitting" : "Split"
+					}
+                </button>
+				<button 
+					className={ "bg-indigo-300 p-1" }
+					id="delete_button"
+					onClick={onDeleteTimelineItems}
+				>
+					Delete
+                </button>
                 <div className="bg-indigo-300 p-1">
                     <label htmlFor="speed_input">
                         {" "}

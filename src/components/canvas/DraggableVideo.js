@@ -27,6 +27,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
         const element = document.createElement("video");
         element.src = curVideo.source;
         element.loop = true;
+		element.id = "video_element_" + curVideo.commonState.id;
         return element;
     }, [curVideo.source]);
 
