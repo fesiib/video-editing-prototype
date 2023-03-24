@@ -42,7 +42,7 @@ class CommonState {
 
     setMetadata(metadata) {
         this.thumbnails = metadata.thumbnails ? metadata.thumbnails : this.thumbnails;
-        this.start = metadata.start ? metadata.start: this.start;
+        this.start = metadata.start ? metadata.start : this.start;
         this.duration = metadata.duration ? metadata.duration : this.duration;
         this.finish = metadata.finish ? metadata.finish : this.finish;
         this.offset = metadata.offset ? metadata.offset : this.offset;
@@ -51,8 +51,8 @@ class CommonState {
         this.x = metadata.x ? metadata.x : this.x;
         this.y = metadata.y ? metadata.y : this.y;
         this.z = metadata.z ? metadata.z : this.z;
-        this.width = metadata.width ? metadata.width: this.width;
-        this.height = metadata.height ? metadata.height: this.height;
+        this.width = metadata.width ? metadata.width : this.width;
+        this.height = metadata.height ? metadata.height : this.height;
         this.scaleX = metadata.scaleX ? metadata.scaleX : this.scaleX;
         this.scaleY = metadata.scaleY ? metadata.scaleY : this.scaleY;
         this.rotation = metadata.rotation ? metadata.rotation : this.rotation;
@@ -67,9 +67,9 @@ class CommonState {
 
         this.processing = false;
 
-		if (this.end > this.domainStore.projectMetadata.duration) {
-			this.domainStore.projectMetadata.duration = this.end;
-		}
+        if (this.end > this.domainStore.projectMetadata.duration) {
+            this.domainStore.projectMetadata.duration = this.end;
+        }
     }
 
     onDragEnd(target) {
@@ -84,16 +84,18 @@ class CommonState {
         this.y = target.y();
     }
 
-	offsetToNative(timestamp) {
-		const native = timestamp - this.offset + this.start;
-		return native;
-	}
+    offsetToNative(timestamp) {
+        const native = timestamp - this.offset + this.start;
+        return native;
+    }
 
-    get end() { // relative to timline
+    get end() {
+        // relative to timline
         return this.offset + (this.finish - this.start);
     }
 
-    get sceneDuration() { // relative to timline
+    get sceneDuration() {
+        // relative to timline
         return this.finish - this.start;
     }
 }

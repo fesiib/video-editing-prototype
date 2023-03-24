@@ -5,15 +5,14 @@ import { observer } from "mobx-react-lite";
 import { useDraggable } from "@dnd-kit/core";
 
 import useRootContext from "../../hooks/useRootContext";
-import { playPositionToFormat } from "../../utilities/timelineUtilities";
 import PositionIndicator from "./PositionIndicator";
 
-const PlayPositionIndicator = observer(function PlayPositionIndicator({}) {
+const PlayPositionIndicator = observer(function PlayPositionIndicator() {
     const { uiStore } = useRootContext();
 
     const height = uiStore.timelineSize.height;
     const positionIndicatorWidth = uiStore.timelineConst.positionIndicatorWidth;
-	const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
+    const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
 
     const { setNodeRef, listeners, attributes, transform, isDragging } = useDraggable({
         id: "position_indicator",
@@ -35,7 +34,7 @@ const PlayPositionIndicator = observer(function PlayPositionIndicator({}) {
                 }
                 style={{
                     height: height,
-                    left: handlerWidth-positionIndicatorWidth / 2,
+                    left: handlerWidth - positionIndicatorWidth / 2,
                     transform: `translate3d(${playPositionPx}px, 0px, 0px)`,
                 }}
                 ref={setNodeRef}

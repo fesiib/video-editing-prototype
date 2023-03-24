@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { Text } from "react-konva";
@@ -14,11 +13,11 @@ const DraggableText = observer(function DraggableText({ curText }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
-	const left = curText.commonState.offset;
-	const right = curText.commonState.end;
-	const isVisible = (left <= uiStore.timelineControls.playPosition
-		&& right >= uiStore.timelineControls.playPosition);
-
+    const left = curText.commonState.offset;
+    const right = curText.commonState.end;
+    const isVisible =
+        left <= uiStore.timelineControls.playPosition &&
+        right >= uiStore.timelineControls.playPosition;
 
     useEffect(() => {
         setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(textRef.current) >= 0);
@@ -39,7 +38,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
             scaleX={curText.commonState.scaleX}
             scaleY={curText.commonState.scaleY}
             draggable={isSelected}
-			visible={isVisible}
+            visible={isVisible}
             perfectDrawEnabled={false}
             onDragEnd={(event) => curText.commonState.onDragEnd(event.target)}
             onTransformEnd={(event) => curText.commonState.onTransformerEnd(event.target)}

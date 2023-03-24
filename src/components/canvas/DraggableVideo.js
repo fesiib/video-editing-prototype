@@ -18,18 +18,19 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
 
-	const left = curVideo.commonState.offset;
-	const right = curVideo.commonState.end;
-	const isVisible = (left <= uiStore.timelineControls.playPosition
-		&& right >= uiStore.timelineControls.playPosition);
+    const left = curVideo.commonState.offset;
+    const right = curVideo.commonState.end;
+    const isVisible =
+        left <= uiStore.timelineControls.playPosition &&
+        right >= uiStore.timelineControls.playPosition;
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
         element.src = curVideo.source;
         element.loop = true;
-		element.id = "video_element_" + curVideo.commonState.id;
+        element.id = "video_element_" + curVideo.commonState.id;
         return element;
-    }, [curVideo.source]);
+    }, [curVideo.source, curVideo.commonState.id]);
 
     const onLoadedMetadata = action(() => {
         const metadata = {
@@ -41,38 +42,38 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             x: uiStore.canvasSize.width / 2,
             y: uiStore.canvasSize.height / 2,
         };
-		curVideo.commonState.setMetadata(metadata);
+        curVideo.commonState.setMetadata(metadata);
     });
 
-	const onPlaying = action(((event) => {
-		if (!isVisible) {
-			return;
-		}
-		console.log(event);
-		uiStore.timelineControls.playPosition = videoElement.currentTime 
-			+ curVideo.commonState.offset - curVideo.commonState.start;
-	}));
+    // const onPlaying = action(((event) => {
+    // 	if (!isVisible) {
+    // 		return;
+    // 	}
+    // 	console.log(event);
+    // 	uiStore.timelineControls.playPosition = videoElement.currentTime
+    // 		+ curVideo.commonState.offset - curVideo.commonState.start;
+    // }));
 
-	const onEnded = action((event) => {
-		if (!isVisible) {
-			return;
-		}
-		console.log(event);
-		uiStore.timelineControls.tryPlaying = false;
-		uiStore.timelineControls.playPosition = 0;
-	});
+    // const onEnded = action((event) => {
+    // 	if (!isVisible) {
+    // 		return;
+    // 	}
+    // 	console.log(event);
+    // 	uiStore.timelineControls.tryPlaying = false;
+    // 	uiStore.timelineControls.playPosition = 0;
+    // });
 
-	const onTimeUpdate = action((event) => {
-		if (!isVisible) {
-			return;
-		}
-		if (uiStore.timelineControls.isPlaying) {
-			uiStore.timelineControls.playPosition = videoElement.currentTime 
-				+ curVideo.commonState.offset - curVideo.commonState.start;
-		}
-	});
+    // const onTimeUpdate = action((event) => {
+    // 	if (!isVisible) {
+    // 		return;
+    // 	}
+    // 	if (uiStore.timelineControls.isPlaying) {
+    // 		uiStore.timelineControls.playPosition = videoElement.currentTime
+    // 			+ curVideo.commonState.offset - curVideo.commonState.start;
+    // 	}
+    // });
 
-	const onCanPlay = action(() => {
+    const onCanPlay = action(() => {
         videoElement.muted = true;
         const layer = imageRef.current.getLayer();
         const anim = new Animation(() => {}, layer);
@@ -82,16 +83,16 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     useEffect(() => {
         videoElement.addEventListener("loadedmetadata", onLoadedMetadata);
-		//videoElement.addEventListener("playing", onPlaying);
+        //videoElement.addEventListener("playing", onPlaying);
         videoElement.addEventListener("canplay", onCanPlay);
-		//videoElement.addEventListener("ended", onEnded);
-		//videoElement.addEventListener("timeupdate", onTimeUpdate);
-		return () => {
+        //videoElement.addEventListener("ended", onEnded);
+        //videoElement.addEventListener("timeupdate", onTimeUpdate);
+        return () => {
             videoElement.removeEventListener("loadedmetadata", onLoadedMetadata);
-			//videoElement.removeEventListener("playing", onPlaying);
-			videoElement.removeEventListener("canplay", onCanPlay);
-			//videoElement.removeEventListener("ended", onEnded);
-			//videoElement.removeEventListener("timeupdate", onTimeUpdate);
+            //videoElement.removeEventListener("playing", onPlaying);
+            videoElement.removeEventListener("canplay", onCanPlay);
+            //videoElement.removeEventListener("ended", onEnded);
+            //videoElement.removeEventListener("timeupdate", onTimeUpdate);
         };
     }, [isVisible, videoElement]);
 
@@ -110,42 +111,44 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
         setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(imageRef.current) >= 0);
     }, [uiStore.canvasControls.transformerNodes]);
 
-	useEffect(() => {
-		if (!isVisible) {
-			return;
-		}
-		videoElement.currentTime = uiStore.timelineControls.playPosition 
-			- curVideo.commonState.offset + curVideo.commonState.start;
-	}, [videoElement, isVisible, uiStore.timelineControls.playPosition]);
+    useEffect(() => {
+        if (!isVisible) {
+            return;
+        }
+        videoElement.currentTime =
+            uiStore.timelineControls.playPosition -
+            curVideo.commonState.offset +
+            curVideo.commonState.start;
+    }, [videoElement, isVisible, uiStore.timelineControls.playPosition, curVideo.commonState.offset, curVideo.commonState.start]);
 
-	// useEffect(() => {
-	// 	if (!isVisible) {
-	// 		return;
-	// 	}
-	// 	if (videoElement.paused || !uiStore.timelineControls.isPlaying) {
-	// 		videoElement.currentTime = uiStore.timelineControls.playPosition;
-	// 	}
-	// }, [isVisible, 
-	// 	videoElement,
-	// 	uiStore.timelineControls.playPosition,
-	// 	uiStore.timelineControls.isPlaying
-	// ]);
+    // useEffect(() => {
+    // 	if (!isVisible) {
+    // 		return;
+    // 	}
+    // 	if (videoElement.paused || !uiStore.timelineControls.isPlaying) {
+    // 		videoElement.currentTime = uiStore.timelineControls.playPosition;
+    // 	}
+    // }, [isVisible,
+    // 	videoElement,
+    // 	uiStore.timelineControls.playPosition,
+    // 	uiStore.timelineControls.isPlaying
+    // ]);
 
-	// useEffect(action(() => {
-	// 	if (!isVisible) {
-	// 		return;
-	// 	}
-	// 	uiStore.timelineControls.isPlaying = false;
-	// 	if (!uiStore.timelineControls.tryPlaying) {
-	// 		videoElement.pause();
-	// 	}
-	// 	else {
-	// 		videoElement.play().then(action(() => {
-	// 			uiStore.timelineControls.isPlaying = true;
-	// 		}));
-	// 	}
-	// }), [isVisible, videoElement, uiStore.timelineControls.tryPlaying]);
-	
+    // useEffect(action(() => {
+    // 	if (!isVisible) {
+    // 		return;
+    // 	}
+    // 	uiStore.timelineControls.isPlaying = false;
+    // 	if (!uiStore.timelineControls.tryPlaying) {
+    // 		videoElement.pause();
+    // 	}
+    // 	else {
+    // 		videoElement.play().then(action(() => {
+    // 			uiStore.timelineControls.isPlaying = true;
+    // 		}));
+    // 	}
+    // }), [isVisible, videoElement, uiStore.timelineControls.tryPlaying]);
+
     return (
         <Image
             name={uiStore.objectNames.video}
@@ -162,7 +165,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
             draggable={isSelected}
-			visible={isVisible}
+            visible={isVisible}
             perfectDrawEnabled={false}
             onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
             onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}

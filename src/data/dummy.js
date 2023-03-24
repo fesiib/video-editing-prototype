@@ -1,274 +1,271 @@
 export const DUMMY_SEGMENTS = [
-	{
-		"start": 0,
-		"finish": 29,
-		"text": "",
-		"lowLabel": "greeting",
-		"highLabel": null,
-	},
-	{
-		"start": 29,
-		"finish": 45,
-		"text": "Open Man model",
-		"highLabel": "Open",
-		"lowLabel": "description"
-	},
-	{
-		"start": 45,
-		"finish": 61,
-		"text": "Galaxy background (You can download at description)",
-		"highLabel": "Open",
-		"lowLabel": "outcome"
-	},
-	{
-		"start": 61,
-		"finish": 75,
-		"text": "Use",
-		"highLabel": "Lasso Tool",
-		"lowLabel": "goal"
-	},
-	{
-		"start": 75,
-		"finish": 107,
-		"text": "polygonal Lasso Tool",
-		"highLabel": "Lasso Tool",
-		"lowLabel": "instruction"
-	},
-	{
-		"start": 107,
-		"finish": 126,
-		"text": "face cut",
-		"highLabel": "Lasso Tool",
-		"lowLabel": "outcome"
-	},
-	{
-		"start": 126,
-		"finish": 162,
-		"text": "Add Threshold effect to face",
-		"highLabel": "Threshold Effect",
-		"lowLabel": "tip"
-	},
-	{
-		"start": 162,
-		"finish": 182,
-		"text": "Use Color Range to select black color",
-		"highLabel": "Color Range",
-		"lowLabel": "instruction"
-	},
-	{
-		"start": 182,
-		"finish": 206,
-		"text": "Add new Document",
-		"highLabel": "New Document",
-		"lowLabel": "goal"
-	},
-	{
-		"start": 206,
-		"finish": 235,
-		"text": "Add",
-		"highLabel": "Gradient",
-		"lowLabel": "instruction"
-	},
+    {
+        start: 0,
+        finish: 29,
+        text: "",
+        lowLabel: "greeting",
+        highLabel: null,
+    },
+    {
+        start: 29,
+        finish: 45,
+        text: "Open Man model",
+        highLabel: "Open",
+        lowLabel: "description",
+    },
+    {
+        start: 45,
+        finish: 61,
+        text: "Galaxy background (You can download at description)",
+        highLabel: "Open",
+        lowLabel: "outcome",
+    },
+    {
+        start: 61,
+        finish: 75,
+        text: "Use",
+        highLabel: "Lasso Tool",
+        lowLabel: "goal",
+    },
+    {
+        start: 75,
+        finish: 107,
+        text: "polygonal Lasso Tool",
+        highLabel: "Lasso Tool",
+        lowLabel: "instruction",
+    },
+    {
+        start: 107,
+        finish: 126,
+        text: "face cut",
+        highLabel: "Lasso Tool",
+        lowLabel: "outcome",
+    },
+    {
+        start: 126,
+        finish: 162,
+        text: "Add Threshold effect to face",
+        highLabel: "Threshold Effect",
+        lowLabel: "tip",
+    },
+    {
+        start: 162,
+        finish: 182,
+        text: "Use Color Range to select black color",
+        highLabel: "Color Range",
+        lowLabel: "instruction",
+    },
+    {
+        start: 182,
+        finish: 206,
+        text: "Add new Document",
+        highLabel: "New Document",
+        lowLabel: "goal",
+    },
+    {
+        start: 206,
+        finish: 235,
+        text: "Add",
+        highLabel: "Gradient",
+        lowLabel: "instruction",
+    },
 
-	{
-		"start": 235,
-		"finish": 250,
-		"text": "Add Gradient",
-		"highLabel": "Gradient",
-		"lowLabel": "outcome"
-	},
-	{
-		"start": 250,
-		"finish": 280,
-		"text": "Move Face to new Document",
-		"highLabel": "Mouse+Keyboard",
-		"lowLabel": "goal"
-	},
+    {
+        start: 235,
+        finish: 250,
+        text: "Add Gradient",
+        highLabel: "Gradient",
+        lowLabel: "outcome",
+    },
+    {
+        start: 250,
+        finish: 280,
+        text: "Move Face to new Document",
+        highLabel: "Mouse+Keyboard",
+        lowLabel: "goal",
+    },
 
-	{
-		"start": 280,
-		"finish": 323,
-		"text": "Move Face to new Document",
-		"highLabel": "Mouse+Keyboard",
-		"lowLabel": "instruction"
-	},
-	{
-		"start": 323,
-		"finish": 352,
-		"text": "Move Galaxy background to new document",
-		"highLabel": "Mouse+Keyboard",
-		"lowLabel": "outcome"
-	},
-	{
-		"start": 352,
-		"finish": 363,
-		"text": "Hold ALT key and move Mouse control and click",
-		"highLabel": "Mouse Control",
-		"lowLabel": "instruction"
-	},
-	{
-		"start": 363,
-		"finish": 410,
-		"text": "Ctrl + T to edit size Galaxy Background",
-		"highLabel": "Edit Size",
-		"lowLabel": "instruction"
-	},
-	{
-		"start": 410,
-		"finish": 431,
-		"text": "Add Bevel & Emboss",
-		"highLabel": "Filter",
-		"lowLabel": "instruction"
-	},
-	{
-        "start": 431,
-        "finish": 470,
-        "text": "Add text",
-        "highLabel": "Text",
-        "lowLabel": "instruction"
-    },
-	{
-        "start": 470,
-        "finish": 491,
-        "text": "Here is the text",
-        "highLabel": "Text",
-        "lowLabel": "outcome"
+    {
+        start: 280,
+        finish: 323,
+        text: "Move Face to new Document",
+        highLabel: "Mouse+Keyboard",
+        lowLabel: "instruction",
     },
     {
-        "start": 491,
-        "finish": 512,
-        "text": "Duplicate Galaxy background",
-        "highLabel": "Duplicate",
-        "lowLabel": "goal"
+        start: 323,
+        finish: 352,
+        text: "Move Galaxy background to new document",
+        highLabel: "Mouse+Keyboard",
+        lowLabel: "outcome",
     },
     {
-        "start": 512,
-        "finish": 521,
-        "text": "Hold ALT key and move Mouse control and click",
-        "highLabel": "Mouse Control",
-        "lowLabel": "instruction"
+        start: 352,
+        finish: 363,
+        text: "Hold ALT key and move Mouse control and click",
+        highLabel: "Mouse Control",
+        lowLabel: "instruction",
     },
     {
-        "start": 521,
-        "finish": 534,
-        "text": "Edit position Galaxy 2 background",
-        "highLabel": "Edit Position",
-        "lowLabel": "instruction"
+        start: 363,
+        finish: 410,
+        text: "Ctrl + T to edit size Galaxy Background",
+        highLabel: "Edit Size",
+        lowLabel: "instruction",
     },
     {
-        "start": 534,
-        "finish": 583,
-        "text": "Copy layer style of face and paste to text layer",
-        "highLabel": "Layer Style",
-        "lowLabel": "instruction"
+        start: 410,
+        finish: 431,
+        text: "Add Bevel & Emboss",
+        highLabel: "Filter",
+        lowLabel: "instruction",
     },
-]
-  
-  
+    {
+        start: 431,
+        finish: 470,
+        text: "Add text",
+        highLabel: "Text",
+        lowLabel: "instruction",
+    },
+    {
+        start: 470,
+        finish: 491,
+        text: "Here is the text",
+        highLabel: "Text",
+        lowLabel: "outcome",
+    },
+    {
+        start: 491,
+        finish: 512,
+        text: "Duplicate Galaxy background",
+        highLabel: "Duplicate",
+        lowLabel: "goal",
+    },
+    {
+        start: 512,
+        finish: 521,
+        text: "Hold ALT key and move Mouse control and click",
+        highLabel: "Mouse Control",
+        lowLabel: "instruction",
+    },
+    {
+        start: 521,
+        finish: 534,
+        text: "Edit position Galaxy 2 background",
+        highLabel: "Edit Position",
+        lowLabel: "instruction",
+    },
+    {
+        start: 534,
+        finish: 583,
+        text: "Copy layer style of face and paste to text layer",
+        highLabel: "Layer Style",
+        lowLabel: "instruction",
+    },
+];
 
 export const DUMMY_SEGMENTS2 = [
-	{
-		title: "Polygonal Lasso",
-		"goal": {
-			start: 0,
-			finish: 10,
-			script: "Polygonal Lasso",
-		},
-		"tool": {
-			start: 10,
-			finish: 20,
-			script: "Polygonal Lasso",
-		},
-	},
-	{
-		title: "Layer Via Copy",
-		"instruction": {
-			start: 20,
-			finish: 30,
-			script: "Layer Via Copy",
-		},
-		"outcome": {
-			start: 30,
-			finish: 405,
-			script: "Layer Via Copy",
-		},
-	},
-	{
-		title: "Threshold",
-	},
-	{
-		title: "Color Range",
-	},
-	{
-		title: "New Gradient Fill Layer",
-	},
-	{
-		title: "Name Change",
-	},
-	{
-		title: "Drag Selection",
-	},
-	{
-		title: "Move",
-	},
-	{
-		title: "Free Transform",
-	},
-	{
-		title: "Align Horizontal Centers",
-	},
-	{
-		title: "Name Change",
-	},
-	{
-		title: "Select Canvas",
-	},
-	{
-		title: "Paste",
-	},
-	{
-		title: "Name Change",
-	},
-	{
-		title: "Create Clipping Mask",
-	},
-	{
-		title: "Move",
-	},
-	{
-		title: "Free Transform",
-	},
-	{
-		title: "Move",
-	},
-	{
-		title: "Layer Style",
-	},
-	{
-		title: "New Type Layer",
-	},
-	{
-		title: "Layer Via Copy",
-	},
-	{
-		title: "Name Change",
-	},
-	{
-		title: "Layer Order",
-	},
-	{
-		title: "Create Clipping Mask",
-	},
-	{
-		title: "Move",
-	},
-	{
-		title: "Paste Style",
-	},
-	{
-		title: "Stamp Visible",
-	},
-
+    {
+        title: "Polygonal Lasso",
+        goal: {
+            start: 0,
+            finish: 10,
+            script: "Polygonal Lasso",
+        },
+        tool: {
+            start: 10,
+            finish: 20,
+            script: "Polygonal Lasso",
+        },
+    },
+    {
+        title: "Layer Via Copy",
+        instruction: {
+            start: 20,
+            finish: 30,
+            script: "Layer Via Copy",
+        },
+        outcome: {
+            start: 30,
+            finish: 405,
+            script: "Layer Via Copy",
+        },
+    },
+    {
+        title: "Threshold",
+    },
+    {
+        title: "Color Range",
+    },
+    {
+        title: "New Gradient Fill Layer",
+    },
+    {
+        title: "Name Change",
+    },
+    {
+        title: "Drag Selection",
+    },
+    {
+        title: "Move",
+    },
+    {
+        title: "Free Transform",
+    },
+    {
+        title: "Align Horizontal Centers",
+    },
+    {
+        title: "Name Change",
+    },
+    {
+        title: "Select Canvas",
+    },
+    {
+        title: "Paste",
+    },
+    {
+        title: "Name Change",
+    },
+    {
+        title: "Create Clipping Mask",
+    },
+    {
+        title: "Move",
+    },
+    {
+        title: "Free Transform",
+    },
+    {
+        title: "Move",
+    },
+    {
+        title: "Layer Style",
+    },
+    {
+        title: "New Type Layer",
+    },
+    {
+        title: "Layer Via Copy",
+    },
+    {
+        title: "Name Change",
+    },
+    {
+        title: "Layer Order",
+    },
+    {
+        title: "Create Clipping Mask",
+    },
+    {
+        title: "Move",
+    },
+    {
+        title: "Paste Style",
+    },
+    {
+        title: "Stamp Visible",
+    },
 ];
 /*
 0:00
@@ -319,4 +316,3 @@ Example:
 }
 
 */
-

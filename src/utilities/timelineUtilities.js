@@ -6,7 +6,9 @@ export function playPositionToFormat(seconds) {
             hour12: false,
             minute: "2-digit",
             second: "2-digit",
-        }) + ":" + (date.getMilliseconds() + 1000).toString().slice(1, 3)
+        }) +
+        ":" +
+        (date.getMilliseconds() + 1000).toString().slice(1, 3)
         // (date.getMilliseconds() !== 0
         //     ? ":" + (date.getMilliseconds() + 1000).toString().slice(1)
         //     : "")
@@ -67,43 +69,46 @@ export function preventCollisionDrag(scene, scenes, transform, uiStore) {
 }
 
 export function preventCollisionDragMultiple(scene, scenes, transform, uiStore) {
-	const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
-	if (selectedScenes.length === 0) {
-		throw Error("no scenes were selected");
-	}
+    const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
+    if (selectedScenes.length === 0) {
+        throw Error("no scenes were selected");
+    }
 
-	let leftMostScene = selectedScenes[0];
-	let rightMostScene = selectedScenes[0];
-	for (let someScene of selectedScenes) {
-		if (leftMostScene.commonState.offset > someScene.commonState.offset) {
-			leftMostScene = someScene;
-		}
-		if (rightMostScene.commonState.end < someScene.commonState.end) {
-			rightMostScene = someScene;
-		}
-	}
+    let leftMostScene = selectedScenes[0];
+    let rightMostScene = selectedScenes[0];
+    for (let someScene of selectedScenes) {
+        if (leftMostScene.commonState.offset > someScene.commonState.offset) {
+            leftMostScene = someScene;
+        }
+        if (rightMostScene.commonState.end < someScene.commonState.end) {
+            rightMostScene = someScene;
+        }
+    }
 
     let transformSeconds = typeof transform?.x === "number" ? uiStore.pxToSec(transform.x) : 0;
-	const selectedScenesDuration = (rightMostScene.commonState.end - leftMostScene.commonState.offset);
+    const selectedScenesDuration =
+        rightMostScene.commonState.end - leftMostScene.commonState.offset;
 
     const curOffset = Math.min(
         uiStore.timelineConst.trackMaxDuration - selectedScenesDuration,
         Math.max(0, leftMostScene.commonState.offset + transformSeconds)
     );
 
-	transformSeconds = curOffset - leftMostScene.commonState.offset;
+    transformSeconds = curOffset - leftMostScene.commonState.offset;
 
-    const middle = (scene.commonState.offset + transformSeconds) + scene.commonState.sceneDuration / 2;
+    const middle =
+        scene.commonState.offset + transformSeconds + scene.commonState.sceneDuration / 2;
 
     let newOffset = curOffset;
 
     for (let otherScene of scenes) {
-        const isSelected = selectedScenes.findIndex(
-			(value) => value.commonState.id === otherScene.commonState.id
-			) >= 0;
-		if (isSelected) {
-			continue;
-		}
+        const isSelected =
+            selectedScenes.findIndex(
+                (value) => value.commonState.id === otherScene.commonState.id
+            ) >= 0;
+        if (isSelected) {
+            continue;
+        }
         const otherOffset = otherScene.commonState.offset;
         const otherEnd = otherScene.commonState.end;
         const otherMiddle = (otherEnd + otherOffset) / 2;
@@ -118,28 +123,26 @@ export function preventCollisionDragMultiple(scene, scenes, transform, uiStore) 
 
     let moveOffset = 0;
     for (let otherScene of scenes) {
-        const isSelected = selectedScenes.findIndex(
-			(value) => value.commonState.id === otherScene.commonState.id
-			) >= 0;
-		if (isSelected) {
-			continue;
-		}
+        const isSelected =
+            selectedScenes.findIndex(
+                (value) => value.commonState.id === otherScene.commonState.id
+            ) >= 0;
+        if (isSelected) {
+            continue;
+        }
         const otherOffset = otherScene.commonState.offset;
         const otherEnd = otherScene.commonState.end;
         const otherMiddle = (otherEnd + otherOffset) / 2;
 
         if (otherMiddle > middle) {
             if (newOffset + selectedScenesDuration > otherOffset) {
-                moveOffset = Math.max(
-                    moveOffset,
-                    newOffset + selectedScenesDuration - otherOffset
-                );
+                moveOffset = Math.max(moveOffset, newOffset + selectedScenesDuration - otherOffset);
             }
         }
     }
 
     return {
-		leftMostScene,
+        leftMostScene,
         newOffset,
         moveOffset,
         middle,

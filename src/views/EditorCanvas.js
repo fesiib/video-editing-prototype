@@ -206,7 +206,7 @@ const EditorCanvas = observer(function EditorCanvas() {
                         name={uiStore.backgroundName}
                     />
                 </Layer>
-				{/* {
+                {/* {
 					domainStore.videos.map((video) => {
 						return (
 							<Layer
@@ -236,27 +236,21 @@ const EditorCanvas = observer(function EditorCanvas() {
 						</Layer>);
 					})
 				} */}
-				<Layer
-					scaleX={uiStore.canvasScale}
-					scaleY={uiStore.canvasScale}
-					offsetX={uiStore.canvasSize.width / 2}
-					offsetY={uiStore.canvasSize.height / 2}
-					x={uiStore.canvasSize.width / 2}
-					y={uiStore.canvasSize.height / 2}
-				>
-					{
-						domainStore.videos.map((video) => <DraggableVideo 
-							key={video.commonState.id}
-							curVideo={video} 
-						/>)
-					}
-					{
-						domainStore.texts.map((text) => <DraggableText
-							key={text.commonState.id}
-							curText={text} 
-						/>)
-					}
-				</Layer>
+                <Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
+                    {domainStore.videos.map((video) => (
+                        <DraggableVideo key={video.commonState.id} curVideo={video} />
+                    ))}
+                    {domainStore.texts.map((text) => (
+                        <DraggableText key={text.commonState.id} curText={text} />
+                    ))}
+                </Layer>
                 <Layer>
                     <Transformer
                         ref={transformerRef}

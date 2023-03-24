@@ -20,7 +20,7 @@ import TimelineLabels from "./TimelineLabels";
 import TimelineItem from "./TimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
-import { preventCollisionDrag, preventCollisionDragMultiple } from "../../utilities/timelineUtilities";
+import { preventCollisionDragMultiple } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
     const { uiStore, domainStore } = useRootContext();
@@ -41,40 +41,44 @@ const TimelineTracks = observer(function TimelineTracks() {
             setActiveTrackId(active.id);
         } else if (type === "scene") {
             setActiveItem(active);
-			uiStore.timelineControls.positionIndicatorVisibility += 1;
-			uiStore.timelineControls.positionIndicatorSec = scene.commonState.offset;
+            uiStore.timelineControls.positionIndicatorVisibility += 1;
+            uiStore.timelineControls.positionIndicatorSec = scene.commonState.offset;
         }
     });
 
     const sceneTrackChange = action((active, over, delta) => {
         const scene = active.data.current.scene;
-		const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
+        const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
         if (over) {
             const oldTrackId = scene.commonState.trackInfo.trackId;
             const newTrackId = over.data.current.trackId;
             if (newTrackId !== oldTrackId) {
                 setTracks(
                     action((tracks) => {
-						for (let selectedScene of selectedScenes) {
-							selectedScene.commonState.trackInfo.trackId = newTrackId;
-						}
+                        for (let selectedScene of selectedScenes) {
+                            selectedScene.commonState.trackInfo.trackId = newTrackId;
+                        }
                         const newTracks = tracks.map((track) => {
-							let newScenes = [];
+                            let newScenes = [];
                             if (track.trackId === oldTrackId) {
-								for (let otherScene of track.scenes) {
-									const isSelected = selectedScenes.findIndex(
-										(value) => value.commonState.id === otherScene.commonState.id
-									) >= 0;
-									if (!isSelected) {
-										newScenes.push(otherScene);
-									}
-								}
+                                for (let otherScene of track.scenes) {
+                                    const isSelected =
+                                        selectedScenes.findIndex(
+                                            (value) =>
+                                                value.commonState.id === otherScene.commonState.id
+                                        ) >= 0;
+                                    if (!isSelected) {
+                                        newScenes.push(otherScene);
+                                    }
+                                }
                                 for (let otherScene of newScenes) {
-									const otherDiv = document.getElementById(otherScene.commonState.id);
-									otherDiv.style.transform = `translate3d(${uiStore.secToPx(
-										otherScene.commonState.offset
-									)}px, ${0}px, ${0}px)`;
-								}
+                                    const otherDiv = document.getElementById(
+                                        otherScene.commonState.id
+                                    );
+                                    otherDiv.style.transform = `translate3d(${uiStore.secToPx(
+                                        otherScene.commonState.offset
+                                    )}px, ${0}px, ${0}px)`;
+                                }
                                 return {
                                     trackId: track.trackId,
                                     scenes: newScenes,
@@ -98,20 +102,21 @@ const TimelineTracks = observer(function TimelineTracks() {
             const index = tracks.findIndex(
                 (value) => value.trackId === scene.commonState.trackInfo.trackId
             );
-			const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
-			const { leftMostScene, newOffset, moveOffset, middle } = preventCollisionDragMultiple(
-				scene,
-				tracks[index].scenes,
-				delta,
-				uiStore
-			);
+            const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
+            const { leftMostScene, newOffset, moveOffset, middle } = preventCollisionDragMultiple(
+                scene,
+                tracks[index].scenes,
+                delta,
+                uiStore
+            );
             for (let otherScene of tracks[index].scenes) {
-				const isSelected = selectedScenes.findIndex(
-					(value) => value.commonState.id === otherScene.commonState.id
-				) >= 0;
-				if (isSelected) {
-					continue;
-				}
+                const isSelected =
+                    selectedScenes.findIndex(
+                        (value) => value.commonState.id === otherScene.commonState.id
+                    ) >= 0;
+                if (isSelected) {
+                    continue;
+                }
                 const otherOffset = otherScene.commonState.offset;
                 const otherEnd = otherScene.commonState.end;
                 const otherMiddle = (otherEnd + otherOffset) / 2;
@@ -120,10 +125,10 @@ const TimelineTracks = observer(function TimelineTracks() {
                     otherScene.commonState.offset = otherScene.commonState.offset + moveOffset;
                 }
             }
-			const deltaSeconds = newOffset - leftMostScene.commonState.offset;
-			for (let selectedScene of selectedScenes) {
-				selectedScene.commonState.offset = selectedScene.commonState.offset + deltaSeconds;
-			}
+            const deltaSeconds = newOffset - leftMostScene.commonState.offset;
+            for (let selectedScene of selectedScenes) {
+                selectedScene.commonState.offset = selectedScene.commonState.offset + deltaSeconds;
+            }
         }
     });
 
@@ -154,7 +159,7 @@ const TimelineTracks = observer(function TimelineTracks() {
         } else if (type === "scene") {
             sceneTrackChange(active, over, delta);
             setActiveItem(null);
-			uiStore.timelineControls.positionIndicatorVisibility -= 1;
+            uiStore.timelineControls.positionIndicatorVisibility -= 1;
         }
     });
 
@@ -186,12 +191,12 @@ const TimelineTracks = observer(function TimelineTracks() {
             <TimelineLabels />
             <DndContext
                 sensors={useSensors(
-					useSensor(PointerSensor, {
-						activationConstraint: {	
-							distance: 10
-						}
-					}),
-				)}
+                    useSensor(PointerSensor, {
+                        activationConstraint: {
+                            distance: 10,
+                        },
+                    })
+                )}
                 modifiers={[restrictToFirstScrollableAncestor]}
                 collisionDetection={closestCorners}
                 onDragStart={onGenericDragStart}
@@ -225,7 +230,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                         <TimelineItem
                             key={"item_overlay"}
                             scene={activeItem.data.current.scene}
-							scenes={[]}
+                            scenes={[]}
                             transform={null}
                             isOverlay={true}
                             id={activeItem.id}
