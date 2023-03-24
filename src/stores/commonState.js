@@ -84,6 +84,11 @@ class CommonState {
         this.y = target.y();
     }
 
+	offsetToNative(timestamp) {
+		const native = timestamp - this.offset + this.start;
+		return native;
+	}
+
     get end() { // relative to timline
         return this.offset + (this.finish - this.start);
     }

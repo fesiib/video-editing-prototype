@@ -31,7 +31,14 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 		event.preventDefault();
 
 		if (uiStore.timelineControls.splitting) {
-			//split
+			const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId)
+			const timelineRect = labelsDiv.getBoundingClientRect();
+			let offsetPx = event.clientX -
+				timelineRect.left +
+				labelsDiv.scrollLeft -
+				uiStore.timelineConst.trackHandlerWidth;
+
+			scene.domainStore.splitVideo(scene, uiStore.pxToSec(offsetPx));
 			uiStore.timelineControls.splitting = false;
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;
 			return;
