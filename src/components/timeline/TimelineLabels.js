@@ -13,8 +13,6 @@ import useRootContext from "../../hooks/useRootContext";
 import { playPositionToFormat } from "../../utilities/timelineUtilities";
 
 const TimelineLabels = observer(function TimelineLabels({}) {
-	const labelsRef = useRef(null);
-
     const { uiStore } = useRootContext();
 
     const width = uiStore.trackWidthPx;
@@ -55,11 +53,13 @@ const TimelineLabels = observer(function TimelineLabels({}) {
     });
 
     const updatePositionIndicator = action((event) => {
-        const timelineRect = labelsRef.current.getBoundingClientRect();
+		const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId)
+
+        const timelineRect = labelsDiv.getBoundingClientRect();
         let positionIndicatorPx =
             event.clientX -
             timelineRect.left +
-            labelsRef.current.scrollLeft -
+            labelsDiv.scrollLeft -
 			handlerWidth;
         if (positionIndicatorPx < 0) {
             positionIndicatorPx = 0;
@@ -73,11 +73,13 @@ const TimelineLabels = observer(function TimelineLabels({}) {
 		// if (uiStore.timelineControls.isPlaying) {
 		// 	uiStore.timelineControls.tryPlaying = false;
 		// }
-        const timelineRect = labelsRef.current.getBoundingClientRect();
+        const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId)
+
+        const timelineRect = labelsDiv.getBoundingClientRect();
         let playPositionPx =
             event.clientX -
             timelineRect.left +
-            labelsRef.current.scrollLeft -
+            labelsDiv.scrollLeft -
 			handlerWidth;
         if (playPositionPx < 0) {
             return;
@@ -102,8 +104,7 @@ const TimelineLabels = observer(function TimelineLabels({}) {
                 width: width + handlerWidth,
 				height: height,
             }}
-
-			ref={labelsRef}
+			id={uiStore.timelineConst.timelineLabelsId}
 			onMouseEnter={showPositionIndicator}
 			onMouseLeave={hidePositionIndicator}
 			onMouseMove={updatePositionIndicator}

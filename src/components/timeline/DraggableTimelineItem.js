@@ -29,6 +29,13 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 	const onTimelineItemClick = action((event) => {
 		event.stopPropagation();
 		event.preventDefault();
+
+		if (uiStore.timelineControls.splitting) {
+			//split
+			uiStore.timelineControls.splitting = false;
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
+			return;
+		}
 		const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
 			(value) => value.commonState.id === scene.commonState.id
 		);
@@ -74,6 +81,46 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 			}
 		}
 	});
+
+	const onTimelineItemMouseEnter = action((event) => {
+		if (uiStore.timelineControls.splitting) {
+			uiStore.timelineControls.positionIndicatorVisibility += 1;
+		}
+	});
+
+
+	const onTimelineItemMouseLeave = action((event) => {
+		if (uiStore.timelineControls.splitting) {
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
+		}
+	});
+
+	const onTimelineItemMouseMove = (event) => {
+		event.stopPropagation();
+		event.preventDefault();
+
+		if (uiStore.timelineControls.splitting) {
+			const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId)
+			const timelineRect = labelsDiv.getBoundingClientRect();
+
+			const positionIndicatorDiv = document.getElementById(uiStore.timelineConst.positionIndicatorId);
+			const positionIndicatorLabelDiv = document.getElementById(uiStore.timelineConst.positionIndicatorLabelId);
+			let offsetPx = event.clientX -
+				timelineRect.left +
+				labelsDiv.scrollLeft -
+				uiStore.timelineConst.trackHandlerWidth;
+
+			if (positionIndicatorDiv) {
+				positionIndicatorDiv.style.transform = `translate3d(${offsetPx}px, ${0}px, ${0}px)`;
+			}
+			if (positionIndicatorLabelDiv) {
+				positionIndicatorLabelDiv.innerHTML = playPositionToFormat(uiStore.pxToSec(offsetPx));
+			}
+		}
+		else {
+			return;
+		}
+	}
 
 
     let adjustedTransform = {
@@ -141,6 +188,9 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 			transform={adjustedTransform}
 			isOverlay={false}
 			onClick={onTimelineItemClick}
+			onMouseMove={onTimelineItemMouseMove}
+			onMouseEnter={onTimelineItemMouseEnter}
+			onMouseLeave={onTimelineItemMouseLeave}
 			attributes={attributes}
 			listeners={listeners}
 		/>

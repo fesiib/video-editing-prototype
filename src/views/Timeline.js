@@ -37,11 +37,20 @@ const Timeline = observer(function Timeline() {
 	});
 
 	const onPressSplit = action((event) => {
-
+		event.preventDefault();
+		event.stopPropagation();
+		if (uiStore.timelineControls.splitting === true) {
+			uiStore.timelineControls.splitting = false;	
+			return;
+		}
+		uiStore.timelineControls.splitting = true;
 	});
 
 	const onBackgroundClick = action((event) => {
 		uiStore.timelineControls.selectedTimelineItems = [];
+		if (uiStore.timelineControls.splitting) {
+		}
+		uiStore.timelineControls.splitting = false;
 	});
 
 	useEffect(action(() => {
@@ -66,8 +75,8 @@ const Timeline = observer(function Timeline() {
 			onClick={onBackgroundClick}
 		>
             <div className="flex justify-between">
-                <div>
-                    <label htmlFor="play_button" className="bg-indigo-300 p-1">
+                <div  className="bg-indigo-300 p-1">
+                    <label htmlFor="play_button">
                         {" "}
                         {uiStore.timelineControls.tryPlaying ? "pause" : "play"}
 						{" "}
@@ -78,20 +87,25 @@ const Timeline = observer(function Timeline() {
 						onClick={onPressPlay}
 					/>
                 </div>
-                <div>
-                    <label htmlFor="split_button" className="bg-indigo-300 p-1">
-                        {" "}
-                        Split{" "}
+                <div className={ uiStore.timelineControls.splitting ?
+					"bg-indigo-500 p-1" :
+					"bg-indigo-300 p-1" }
+					onClick={onPressSplit}	
+				>
+                    <label htmlFor="split_button">
+						{
+							uiStore.timelineControls.splitting ?
+							"Splitting" : "Split"
+						}
+                        
                     </label>
-                    <input 
+                    <button 
 						id="split_button"
 						type="button"
-						disabled={true}
-						onClick={onPressSplit}
 					/>
                 </div>
-                <div>
-                    <label htmlFor="speed_input" className="bg-indigo-300 p-1">
+                <div className="bg-indigo-300 p-1">
+                    <label htmlFor="speed_input">
                         {" "}
                         Speed{" "}
                     </label>

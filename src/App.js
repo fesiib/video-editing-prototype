@@ -80,8 +80,8 @@ const App = observer(function App() {
 				text: segment.text,
 				start: segment.start,
 				finish: segment.finish,
-				lowLabel: segment.lowLabel,
-				highLabel: segment.highLabel,
+				lowLabel: video.lowLabel,
+				highLabel: video.highLabel,
 			}]);
 			newVideos.push(video);
 		}
