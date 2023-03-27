@@ -81,7 +81,7 @@ export const TimelineItem = observer(
             <div
                 className={
                     (isSelected
-                        ? "absolute bottom-0 z-10 border border-red-400"
+                        ? "absolute bottom-0 z-10 border-2 border-red-600 brightness-50"
                         : "absolute bottom-0 z-10 border") +
                     (showHighLabel ? " divide-x-2 divide-black" : "")
                 }

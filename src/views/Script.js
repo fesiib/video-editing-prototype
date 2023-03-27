@@ -50,7 +50,13 @@ const Script = observer(function Script() {
     const selectedIndex = largerIndex === -1 ? filteredScript.length - 1 : largerIndex - 1;
 
     return (
-        <div className="bg-slate-100">
+        <div 
+			className="bg-slate-100 overflow-scroll"
+			style={{
+				//width: uiStore.canvasSize.width,
+                height: uiStore.windowSize.height / 3 * 2
+			}}
+		>
             {filteredScript.length === 0 ? (
                 <div className="text-red"> No Script... </div>
             ) : (

@@ -61,7 +61,7 @@ const App = observer(function App() {
             for (let segment of DUMMY_SEGMENTS) {
                 const video = new VideoState(
                     domainStore,
-                    "http://localhost:3000/example.mp4",
+                    "http://localhost:3000/output.webm",
                     `${"video"}-${newVideos.length + 10}`,
                     0
                 );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -27,6 +27,8 @@ const TimelineTracks = observer(function TimelineTracks() {
 
     const width = uiStore.timelineSize.width;
     const trackCnt = domainStore.projectMetadata.trackCnt;
+
+	const tracksContainer = useRef(null);
 
     const [tracks, setTracks] = useState([]);
     const [activeTrackId, setActiveTrackId] = useState(null);
@@ -181,8 +183,22 @@ const TimelineTracks = observer(function TimelineTracks() {
         }
         setTracks(newTracks);
     }, [domainStore.videos, domainStore.texts, trackCnt]);
+
+	useEffect(() => {
+		if (tracksContainer.current) {
+			const playPositionPx = uiStore.secToPx(uiStore.timelineControls.playPosition);
+			if (tracksContainer.current.scrollLeft > playPositionPx) {
+				tracksContainer.current.scrollLeft = Math.max(0, playPositionPx - 100);
+			}
+			if (playPositionPx - tracksContainer.current.scrollLeft > width) {
+				tracksContainer.current.scrollLeft = playPositionPx - width + 100;
+			}
+		}
+	}, [uiStore.timelineControls.playPosition])
+
     return (
         <div
+			ref={tracksContainer}
             className="bg-slate-300 m-5 flex-column overflow-scroll relative"
             style={{
                 width: width,
