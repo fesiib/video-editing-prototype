@@ -17,7 +17,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
     const right = curText.commonState.end;
     const isVisible =
         left <= uiStore.timelineControls.playPosition &&
-        right >= uiStore.timelineControls.playPosition;
+        right > uiStore.timelineControls.playPosition;
 
     useEffect(() => {
         setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(textRef.current) >= 0);

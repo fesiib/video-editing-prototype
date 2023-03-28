@@ -99,7 +99,10 @@ export function preventCollisionDragMultiple(scene, scenes, transform, uiStore) 
     const middle =
         scene.commonState.offset + transformSeconds + scene.commonState.sceneDuration / 2;
 
-    let newOffset = curOffset;
+	let maxOffset = 0;
+	let minEnd = uiStore.timelineConst.trackMaxDuration;
+    // let newOffset = curOffset;
+	// let newEnd = curOffset + selectedScenesDuration;
 
     for (let otherScene of scenes) {
         const isSelected =
@@ -112,14 +115,32 @@ export function preventCollisionDragMultiple(scene, scenes, transform, uiStore) 
         const otherOffset = otherScene.commonState.offset;
         const otherEnd = otherScene.commonState.end;
         const otherMiddle = (otherEnd + otherOffset) / 2;
-        let candidateOffset = newOffset;
-        if (otherMiddle <= middle) {
-            candidateOffset = otherEnd;
-        }
-        if (candidateOffset > newOffset) {
-            newOffset = candidateOffset;
-        }
+		
+		if (otherMiddle <= middle) {
+			maxOffset = Math.max(otherEnd, maxOffset);
+		}
+		if (otherMiddle >= middle) {
+			minEnd = Math.min(minEnd, otherOffset);
+		}
+		// // move the scenes on the right with the scenes that are being dragged
+		// if (otherMiddle <= middle) {
+        //     candidateOffset = otherEnd;
+        // }
+        // if (candidateOffset > newOffset) {
+        //     newOffset = candidateOffset;
+        // }
+		// if (candidateEnd < newEnd) {
+		// 	newEnd = candidateEnd;
+		// }
     }
+
+	let newOffset = curOffset;
+	if (minEnd - selectedScenesDuration <= curOffset) {
+		newOffset = minEnd - selectedScenesDuration;
+	}
+	if (maxOffset >= newOffset) {
+		newOffset = maxOffset;
+	}
 
     let moveOffset = 0;
     for (let otherScene of scenes) {
