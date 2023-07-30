@@ -26,6 +26,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
+		console.log(curVideo.source)
         element.src = curVideo.source;
         element.loop = true;
         element.id = "video_element_" + curVideo.commonState.id;
@@ -42,6 +43,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             x: uiStore.canvasSize.width / 2,
             y: uiStore.canvasSize.height / 2,
         };
+		console.log("here", metadata);
         curVideo.commonState.setMetadata(metadata);
     });
 

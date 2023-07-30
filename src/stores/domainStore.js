@@ -24,9 +24,6 @@ class DomainStore {
         this.rootStore = rootStore;
 
         this.videos = [
-            //new VideoState(this, "http://localhost:3000/demo-3.webm", "video-1", 0),
-            //new VideoState(this, "http://localhost:3000/example.mp4", "video-2", 1),
-            //new VideoState(this, "http://localhost:3000/demo-3.webm", "video-3", 2),
         ];
         this.texts = [
             //new TextState(this, "HELLO WORLD !", "text-1", 3),
@@ -53,15 +50,15 @@ class DomainStore {
             finish: nativeTimestamp,
         });
 
-        let videoScript = [];
-        let originalVideoScript = [];
+        let videoTranscript = [];
+        let originalVideoTranscript = [];
 
-        for (let script of originalVideo.script) {
+        for (let script of originalVideo.transcript) {
             if (script.finish <= nativeTimestamp) {
-                originalVideoScript.push(script);
+                originalVideoTranscript.push(script);
             } else {
                 if (script.start >= nativeTimestamp) {
-                    videoScript.push(script);
+                    videoTranscript.push(script);
                 } else if (script.finish - script.start > 0) {
                     const proportionOfText =
                         (nativeTimestamp - script.start) / (script.finish - script.start);
@@ -69,14 +66,14 @@ class DomainStore {
                     while (textMiddle < script.text.length && script.text[textMiddle] !== " ") {
                         textMiddle += 1;
                     }
-                    originalVideoScript.push({
+                    originalVideoTranscript.push({
                         text: script.text.slice(0, textMiddle),
                         start: script.start,
                         finish: nativeTimestamp,
                         lowLabel: script.lowLabel,
                         highLabel: script.highLabel,
                     });
-                    videoScript.push({
+                    videoTranscript.push({
                         text: script.text.slice(textMiddle + 1),
                         start: nativeTimestamp,
                         finish: script.finish,
@@ -87,19 +84,19 @@ class DomainStore {
             }
         }
 
-        video.setScript(videoScript);
-        originalVideo.setScript(originalVideoScript);
+        video.setTranscript(videoTranscript);
+        originalVideo.setTranscript(originalVideoTranscript);
 
         this.videos = [...this.videos, video];
     }
 
-    get scripts() {
-        let script = [];
+    get transcripts() {
+        let transcript = [];
         for (let video of this.videos) {
-            script = [...script, ...video.adjustedScript];
+            transcript = [...transcript, ...video.adjustedTranscript];
         }
-        script.sort((p1, p2) => p1.start - p2.start);
-        return script;
+        transcript.sort((p1, p2) => p1.start - p2.start);
+        return transcript;
     }
 }
 

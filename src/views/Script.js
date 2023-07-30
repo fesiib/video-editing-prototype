@@ -14,18 +14,20 @@ function SentenceBox({ item, showHighLabel }) {
     return (
         <div className={"grid grid-cols-8 gap-3 border-dashed border border-red-500"}>
             <div className="col-span-1 my-auto text-left">{playPositionToFormat(item.start)}</div>
-            <div className="col-span-2 my-auto text-left bg-black text-white">
+            {/* <div className="col-span-2 my-auto text-left bg-black text-white">
                 {showHighLabel ? item.highLabel : ""}
-            </div>
-            <div className="flex col-span-2">
+            </div> */}
+            {/*
+			<div className="flex col-span-2">
                 <div
                     className="w-32 m-auto text-center"
                     style={{ backgroundColor: colorPalette[item.lowLabel] }}
                 >
                     {item.lowLabel}
-                    {/* <span className="tooltiptext">{item.lowLabel}<br/>{"definition"}</span> */}
-                </div>
-            </div>
+                    {/* <span className="tooltiptext">{item.lowLabel}<br/>{"definition"}</span>
+                </div> 
+            </div>  */}
+
             <div className="col-span-3 text-left">{item.text}</div>
         </div>
     );
@@ -34,7 +36,7 @@ function SentenceBox({ item, showHighLabel }) {
 const Script = observer(function Script() {
     const { uiStore, domainStore } = useRootContext();
 
-    const filteredScript = domainStore.scripts;
+    const filteredScript = domainStore.transcripts;
 
     const handleSentenceClick = action((index) => {
         uiStore.timelineControls.playPosition = filteredScript[index].start;

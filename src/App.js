@@ -7,9 +7,10 @@ import EditorCanvas from "./views/EditorCanvas";
 import Timeline from "./views/Timeline";
 
 import useRootContext from "./hooks/useRootContext";
-import { DUMMY_SEGMENTS } from "./data/dummy";
+import { DUMMY_VIDEO_LINKS } from "./data/dummy";
 import VideoState from "./stores/videoState";
 import Script from "./views/Script";
+import CommandSpace from "./views/CommandSpace";
 
 const App = observer(function App() {
     const { uiStore, domainStore } = useRootContext();
@@ -26,74 +27,54 @@ const App = observer(function App() {
 
     useEffect(
         action(() => {
-            const newVideos = [
-                //new VideoState(this, "http://localhost:3000/demo-3.webm", "video-1", 0),
-            ];
-            // for (let segment of DUMMY_SEGMENTS) {
-            // 	const title = segment.title;
-            // 	for (let subsegment in segment) {
-            // 		if (subsegment === 'title') {
-            // 			continue;
-            // 		}
-            // 		const info = segment[subsegment];
-            // 		const video =
-            // 			new VideoState(
-            // 				domainStore,
-            // 				"http://localhost:3000/example.mp4",
-            // 				`${"video"}-${newVideos.length + 10}`,
-            // 				0
-            // 			);
-            // 		video.commonState.setMetadata({
-            // 			thumbnails: [subsegment],
-            // 			offset: info.start,
-            // 			start: info.start,
-            // 			finish: info.finish,
-            // 		});
-            // 		video.setScript([{
-            // 			text: info.script,
-            // 			start: info.start,
-            // 			lowLabel: subsegment,
-            // 			highLabel: title,
-            // 		}]);
-            // 		newVideos.push(video);
-            // 	}
-            // }
-            for (let segment of DUMMY_SEGMENTS) {
-                const video = new VideoState(
+            const newVideos = [];
+			for (let link of DUMMY_VIDEO_LINKS) {
+				const video = new VideoState(
                     domainStore,
-                    "http://localhost:3000/output.webm",
+                    link,
                     `${"video"}-${newVideos.length + 10}`,
-                    0
+                    newVideos.length,
                 );
-                video.commonState.setMetadata({
-                    thumbnails: [
-                        segment?.lowLabel ? segment.lowLabel : "misc",
-                        segment?.highLabel ? segment.highLabel : "None",
-                    ],
-                    offset: segment.start,
-                    start: segment.start,
-                    finish: segment.finish,
-                });
-                video.highLabel = segment?.highLabel ? segment.highLabel : "None";
-                video.lowLabel = segment?.lowLabel ? segment.lowLabel : "misc";
-                video.setScript([
-                    {
-                        text: segment.text,
-                        start: segment.start,
-                        finish: segment.finish,
-                        lowLabel: video.lowLabel,
-                        highLabel: video.highLabel,
-                    },
-                ]);
-                newVideos.push(video);
-            }
+				newVideos.push(video);
+			}
+            // for (let segment of DUMMY_SEGMENTS) {
+            //     const video = new VideoState(
+            //         domainStore,
+            //         "http://localhost:3000/output.webm",
+            //         `${"video"}-${newVideos.length + 10}`,
+            //         0
+            //     );
+            //     video.commonState.setMetadata({
+            //         thumbnails: [
+            //             segment?.lowLabel ? segment.lowLabel : "misc",
+            //             segment?.highLabel ? segment.highLabel : "None",
+            //         ],
+            //         offset: segment.start,
+            //         start: segment.start,
+            //         finish: segment.finish,
+            //     });
+            //     video.highLabel = segment?.highLabel ? segment.highLabel : "None";
+            //     video.lowLabel = segment?.lowLabel ? segment.lowLabel : "misc";
+            //     video.setTranscript([
+            //         {
+            //             text: segment.text,
+            //             start: segment.start,
+            //             finish: segment.finish,
+            //             lowLabel: video.lowLabel,
+            //             highLabel: video.highLabel,
+            //         },
+            //     ]);
+            //     newVideos.push(video);
+            // }
+			domainStore.projectMetadata.trackCnt = newVideos.length;
             domainStore.videos = [...newVideos];
         }),
-        [DUMMY_SEGMENTS]
+        [DUMMY_VIDEO_LINKS]
     );
 
     return (
         <div className="App">
+			<CommandSpace />
             <div className="grid grid-cols-2 grid-rows-2">
                 <div className="col-span-1 row-span-1">
                     <Script />

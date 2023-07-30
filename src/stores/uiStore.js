@@ -167,7 +167,7 @@ class UIStore {
 
     pxToSec(px) {
         return Math.round((px / this.timelineControls.pxPerSec) * 100) / 100;
-    }
+	}
 }
 
 export default UIStore;

@@ -1,3 +1,8 @@
+export const DUMMY_VIDEO_LINKS = [
+	"https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
+	"https://www.youtube.com/watch?v=sz8Lo3NY1m0",
+];
+
 export const DUMMY_SEGMENTS = [
     {
         start: 0,
