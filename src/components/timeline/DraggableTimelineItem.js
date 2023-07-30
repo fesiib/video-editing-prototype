@@ -1,6 +1,7 @@
 import React from "react";
 
 import { observer } from "mobx-react-lite";
+import { action } from "mobx";
 
 import { useDraggable } from "@dnd-kit/core";
 
@@ -11,7 +12,6 @@ import {
     playPositionToFormat,
     preventCollisionDragMultiple,
 } from "../../utilities/timelineUtilities";
-import { action } from "mobx";
 
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
     const { uiStore } = useRootContext();
@@ -143,6 +143,14 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         }
     };
 
+	const onDrag = action((event) => {
+		console.log(event);
+		event.stopPropagation();
+		if (!isSelected && !uiStore.timelineControls.splitting) {
+			onTimelineItemClick(event);
+		}
+	});
+
     let adjustedTransform = {
         ...transform,
     };
@@ -217,6 +225,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             onMouseMove={onTimelineItemMouseMove}
             onMouseEnter={onTimelineItemMouseEnter}
             onMouseLeave={onTimelineItemMouseLeave}
+			//onDrag={onDrag}
             attributes={attributes}
             listeners={listeners}
         />
