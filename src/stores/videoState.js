@@ -60,6 +60,10 @@ class VideoState {
 		this.processSource();
     }
 
+	setTranscript(transcript) {
+		this.transcript = transcript;
+	}
+
     processSource() {
 		if (this.processedLink === true) {
 			return;

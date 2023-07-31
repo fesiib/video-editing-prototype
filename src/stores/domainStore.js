@@ -2,12 +2,14 @@ import { makeAutoObservable } from "mobx";
 
 import VideoState from "./videoState";
 import TextState from "./textState";
+import IntentState from "./intentState";
 
 class DomainStore {
     videos = [];
     audios = [];
     images = [];
     texts = [];
+	intents = [];
 
     projectMetadata = {
         projectId: "test",
@@ -19,6 +21,8 @@ class DomainStore {
         trackCnt: 2,
     };
 
+	curIntentPos = 0;
+
     constructor(rootStore) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.rootStore = rootStore;
@@ -29,6 +33,10 @@ class DomainStore {
             //new TextState(this, "HELLO WORLD !", "text-1", 3),
             //new TextState(this, "ANOTHER text !", "text-2", 4),
         ];
+		this.intents = [
+				new IntentState(this, "", [], "todo", 0, 0)
+		];
+		this.curIntentPos = 0;
     }
 
     splitVideo(originalVideo, offsetTimestamp) {
