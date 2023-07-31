@@ -12,7 +12,10 @@ export const TimelineItem = observer(
         { scene, scenes, transform, isOverlay, attributes, listeners, ...props },
         ref
     ) {
-        const { uiStore } = useRootContext();
+        const { uiStore, domainStore } = useRootContext();
+		const curIntent = domainStore.intents[domainStore.curIntentPos];
+		const curSelectedPeriods = (Object.keys(curIntent.selectedPeriodsPerVideo).includes(scene.commonState.id) === true ?
+		curIntent.selectedPeriodsPerVideo[scene.commonState.id] : []);
 
         const lowLabel = scene.lowLabel;
 
@@ -82,8 +85,8 @@ export const TimelineItem = observer(
                 className={
                     (isSelected
                         ? "absolute bottom-0 z-10 border-2 border-red-600 brightness-50"
-                        : "absolute bottom-0 z-10 border") +
-                    (showHighLabel ? " divide-x-2 divide-black" : "")
+                        : "absolute bottom-0 z-10 border")
+						//+ (showHighLabel ? " divide-x-2 divide-black" : "")
                 }
                 ref={ref}
                 style={style}
@@ -99,14 +102,27 @@ export const TimelineItem = observer(
                     </span>
                 ) : (
                     <>
-                        {showHighLabel ? (
+                        {/* {showHighLabel ? (
                             <div
                                 className="h-6 px-2 bg-black text-white absolute -top-6 left-0 overflow-hidden"
                                 onClick={onHighLabelClick}
                             >
                                 {highLabel}
                             </div>
-                        ) : null}
+                        ) : null} */}
+						{curSelectedPeriods.map((period, idx) => {
+							return (<div
+                                className="h-6 bg-yellow-500 text-white absolute -top-6"
+								key={"selectedPeriod" + idx}
+								style={{
+									left: uiStore.secToPx(period.start - scene.commonState.start - scene.commonState.offset),
+									width: uiStore.secToPx(
+										period.finish - period.start - scene.commonState.start - scene.commonState.offset
+									),
+								}}
+                            >
+                            </div>);
+						})}
                         <div className="flex justify-between">
                             <TrimWrapper scene={scene} scenes={scenes}>
                                 <span id={"label_" + scene.commonState.id}>

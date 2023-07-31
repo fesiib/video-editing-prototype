@@ -44,12 +44,25 @@ const Timeline = observer(function Timeline() {
     const onPressSplit = action((event) => {
         event.preventDefault();
         event.stopPropagation();
+		uiStore.timelineControls.intentSelectingTimeline = false;
         if (uiStore.timelineControls.splitting === true) {
             uiStore.timelineControls.splitting = false;
             return;
         }
         uiStore.timelineControls.splitting = true;
     });
+
+	const onPressIntentSelect = action((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        uiStore.timelineControls.splitting = false;
+		if (uiStore.timelineControls.intentSelectingTimeline === true) {
+            uiStore.timelineControls.intentSelectingTimeline = false;
+            return;
+        }
+        uiStore.timelineControls.intentSelectingTimeline = true;
+    });
+
 
     const onDeleteTimelineItems = action(() => {
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
@@ -113,6 +126,17 @@ const Timeline = observer(function Timeline() {
                     id="split_button"
                 >
                     {uiStore.timelineControls.splitting ? "Splitting" : "Split"}
+                </button>
+				<button
+                    className={
+                        uiStore.timelineControls.intentSelectingTimeline
+                            ? "bg-indigo-500 p-1"
+                            : "bg-indigo-300 p-1"
+                    }
+                    onClick={onPressIntentSelect}
+                    id="intentselect_button"
+                >
+                    {uiStore.timelineControls.intentSelectingTimeline ? "Intent Selecting" : "Intent Select"}
                 </button>
                 <button
                     className={"bg-indigo-300 p-1"}

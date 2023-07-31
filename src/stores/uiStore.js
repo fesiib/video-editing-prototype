@@ -41,6 +41,7 @@ class UIStore {
         selectedTimelineItems: [],
 
         splitting: false,
+		intentSelectingTimeline: false,
     };
     timelineConst = {
         labelHeight: 20,

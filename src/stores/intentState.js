@@ -45,20 +45,21 @@ class IntentState {
 		let intersectedIdx = curSelectedPeriods.length;
 		let intersectedCount = 0;
 		curSelectedPeriods.forEach((period, idx) => {
-			if (Math.max(start, period.start) < Math.min(finish, period.finish)) {
+			if (Math.max(start, period.start) <= Math.min(finish, period.finish)) {
 				intersectedIdx = Math.min(intersectedIdx, idx);
 				intersectedCount++;
 				minStart = Math.min(period.start, minStart);
-				maxFinish = Math.max(period.finish, finish);
+				maxFinish = Math.max(period.finish, maxFinish);
 			}
-			else if (period.start >= finish) {
+			else if (period.start > finish) {
 				intersectedIdx = Math.min(intersectedIdx, idx);
 			}
 		});
+		console.log(start, finish, minStart, maxFinish, intersectedIdx, intersectedCount)
 		this.selectedPeriodsPerVideo[video.commonState.id].splice(intersectedIdx, intersectedCount, {
 			video,
-			start,
-			finish,
+			start: minStart,
+			finish: maxFinish,
 		});
 	}
 

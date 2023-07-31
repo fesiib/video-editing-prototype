@@ -55,7 +55,7 @@ const Script = observer(function Script() {
 
 	const [intentSelector, setIntentSelector] = useState({
 		start: -1,
-		select: null,
+		select: false,
 	});
 
     const handleSentenceClick = action((index) => {
@@ -93,7 +93,7 @@ const Script = observer(function Script() {
 			}
 			setIntentSelector({
 				start: -1,
-				select: null,
+				select: false,
 			});
 		}
 	});
