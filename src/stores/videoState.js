@@ -119,6 +119,7 @@ class VideoState {
                 finish: finish,
                 lowLabel: single.lowLabel,
                 highLabel: single.highLabel,
+				video: this,
             });
         }
         return adjusted;

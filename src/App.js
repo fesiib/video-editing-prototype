@@ -74,13 +74,13 @@ const App = observer(function App() {
 
     return (
         <div className="App">
-			<CommandSpace />
             <div className="grid grid-cols-2 grid-rows-2">
                 <div className="col-span-1 row-span-1">
                     <Script />
                 </div>
                 <div className="col-span-1 row-span-1">
-                    <EditorCanvas />
+					<CommandSpace />
+                    {/* <EditorCanvas /> */}
                 </div>
                 <div className="col-span-2 row-span-1">
                     <Timeline />

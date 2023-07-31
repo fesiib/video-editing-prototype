@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -6,14 +6,25 @@ import { action } from "mobx";
 import useRootContext from "../hooks/useRootContext";
 import { playPositionToFormat } from "../utilities/timelineUtilities";
 
-function SentenceBox({ item, showHighLabel }) {
+const SentenceBox = observer(function SentenceBox({ 
+	item,
+	showHighLabel ,
+	onTimestampClick,
+	onScriptMouseDown,
+	onScriptMouseUp,
+}) {
     const { uiStore } = useRootContext();
 
     const colorPalette = uiStore.labelColorPalette;
 
     return (
-        <div className={"grid grid-cols-8 gap-3 border-dashed border border-red-500"}>
-            <div className="col-span-1 my-auto text-left">{playPositionToFormat(item.start)}</div>
+        <div 
+			// className={"grid grid-cols-8 gap-3 border-dashed border border-red-500"}
+			className={"grid grid-cols-8 border-dashed border border-red-500"}
+		>
+            <div className="col-span-1 my-auto text-left text-sky-600 hover:text-blue-800 underline decoration-sky-600 hover:decoration-blue-800"
+				onClick={onTimestampClick}
+			>{playPositionToFormat(item.start)}</div>
             {/* <div className="col-span-2 my-auto text-left bg-black text-white">
                 {showHighLabel ? item.highLabel : ""}
             </div> */}
@@ -28,28 +39,64 @@ function SentenceBox({ item, showHighLabel }) {
                 </div> 
             </div>  */}
 
-            <div className="col-span-3 text-left">{item.text}</div>
+            <div className="col-span-7 text-left"
+				onMouseDown={onScriptMouseDown}
+				onMouseUp={onScriptMouseUp}
+			>{item.text}</div>
         </div>
     );
-}
+});
 
 const Script = observer(function Script() {
     const { uiStore, domainStore } = useRootContext();
-
+	const curIntent = domainStore.intents[domainStore.curIntentPos];
     const filteredScript = domainStore.transcripts;
+	const selectedIndex = domainStore.transcriptSelectedIndex;
+
+	const [intentSelector, setIntentSelector] = useState({
+		start: -1,
+		select: null,
+	});
 
     const handleSentenceClick = action((index) => {
         uiStore.timelineControls.playPosition = filteredScript[index].start;
     });
 
-    const largerIndex = filteredScript.findIndex((item, index) => {
-        if (item.start > uiStore.timelineControls.playPosition) {
-            return true;
-        }
-        return false;
-    });
+	const handleSentenceMouseDown = action((event, index) => {
+		setIntentSelector({
+			start: index,
+			select: (curIntent.selectedTranscriptIndex(filteredScript[index]) === -1 ? true : false),
+		});
+	});
 
-    const selectedIndex = largerIndex === -1 ? filteredScript.length - 1 : largerIndex - 1;
+	const handleSentenceMouseUp = action((event, index) => {
+		const start = intentSelector.start;
+		if (start >= 0) {
+			const left = Math.min(index, start);
+			const right = Math.max(index, start);
+			for (let idx = left; idx <= right; idx++) {
+				const single = filteredScript[idx];
+				if (intentSelector.select === true) {
+					curIntent.selectPeriod(
+						single.video, 
+						single.start,
+						single.finish
+					);
+				}
+				else {
+					curIntent.deselectPeriod(
+						single.video, 
+						single.start,
+						single.finish
+					);
+				}
+			}
+			setIntentSelector({
+				start: -1,
+				select: null,
+			});
+		}
+	});
 
     return (
         <div 
@@ -72,15 +119,25 @@ const Script = observer(function Script() {
                         ) {
                             showHighLabel = false;
                         }
+						const isSelected = selectedIndex === index;
+						const isIntentSelected = curIntent.selectedTranscriptIndex(filteredScript[index]) !== -1;
                         return (
                             <div
                                 key={index}
                                 id={"script" + index}
-                                className={selectedIndex === index ? "bg-red-400" : "bg-slate-300"}
-                                onClick={() => handleSentenceClick(index)}
+                                className={isSelected ? "bg-red-400" : (
+									isIntentSelected ? "bg-yellow-300" : "bg-slate-300"
+								)}
                             >
-                                <div className={showHighLabel ? "border-t-2 border-black" : ""}>
-                                    <SentenceBox showHighLabel={showHighLabel} item={item} />
+                                <div className={showHighLabel ? "border-t-2 border-black" : ""}
+								>
+                                    <SentenceBox 
+										showHighLabel={showHighLabel}
+										item={item} 
+										onTimestampClick={() => handleSentenceClick(index)}
+										onScriptMouseDown={(event) => handleSentenceMouseDown(event, index)}
+										onScriptMouseUp={(event) => handleSentenceMouseUp(event, index)}
+									/>
                                 </div>
                             </div>
                         );
@@ -90,5 +147,6 @@ const Script = observer(function Script() {
         </div>
     );
 });
+
 
 export default Script;

@@ -35,7 +35,7 @@ class DomainStore {
             //new TextState(this, "ANOTHER text !", "text-2", 4),
         ];
 		this.intents = [
-				new IntentState(this, "", [], "todo", 0, 0)
+				new IntentState(this, "", {}, "todo", 0, 0)
 		];
 		this.curIntentPos = 0;
     }
@@ -107,6 +107,17 @@ class DomainStore {
         transcript.sort((p1, p2) => p1.start - p2.start);
         return transcript;
     }
+
+	get transcriptSelectedIndex() {
+		const largerIndex = this.transcripts.findIndex((item) => {
+			if (item.start > this.rootStore.uiStore.timelineControls.playPosition) {
+				return true;
+			}
+			return false;
+		});
+	
+		return largerIndex === -1 ? (this.transcripts.length - 1) : (largerIndex - 1);
+	}
 }
 
 export default DomainStore;
