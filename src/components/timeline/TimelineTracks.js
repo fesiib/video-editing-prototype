@@ -199,7 +199,7 @@ const TimelineTracks = observer(function TimelineTracks() {
     return (
         <div
 			ref={tracksContainer}
-            className="bg-slate-300 m-5 flex-column overflow-scroll relative"
+            className="bg-slate-300 m-5 flex-column overflow-scroll relative disable-select"
             style={{
                 width: width,
             }}

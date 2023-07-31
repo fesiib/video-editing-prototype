@@ -14,7 +14,7 @@ function PositionIndicator({ showLabel, positionIndicatorSec, className = "" }) 
             {showLabel ? (
                 <label
                     id={uiStore.timelineConst.positionIndicatorLabelId}
-                    className="absolute z-30 bg-violet-800 text-white text-xs"
+                    className="absolute z-30 bg-violet-800 text-white text-xs disable-select"
                     style={{
                         left: positionIndicatorWidth,
                     }}

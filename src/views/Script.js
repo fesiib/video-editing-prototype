@@ -53,7 +53,7 @@ const Script = observer(function Script() {
 
     return (
         <div 
-			className="bg-slate-100 overflow-scroll"
+			className="bg-slate-100 overflow-scroll disable-select"
 			style={{
 				//width: uiStore.canvasSize.width,
                 height: uiStore.windowSize.height / 3 * 2

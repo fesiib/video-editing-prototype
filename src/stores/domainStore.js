@@ -29,6 +29,7 @@ class DomainStore {
 
         this.videos = [
         ];
+		this.audios = [] //todo
         this.texts = [
             //new TextState(this, "HELLO WORLD !", "text-1", 3),
             //new TextState(this, "ANOTHER text !", "text-2", 4),
