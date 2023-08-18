@@ -13,7 +13,9 @@ import TrimHandlerRightIcon from "../icons/TrimHandlerRightIcon";
 const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler, isOverlay }) {
 	const { uiStore } = useRootContext();
 	const limit = edit.domainStore.activeEdits.reduce((prev, otherEdit) => {
-		console.log(otherEdit)
+		if (otherEdit.commonState.id === edit.commonState.id) {
+			return prev;
+		}
 		if (isLeftHandler) {
 			if (otherEdit.commonState.end <= edit.commonState.offset) {
 				return Math.max(prev, otherEdit.commonState.end);
@@ -39,7 +41,7 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
         disabled: false,
     });
 
-	const handlerClassName = "z-30 absolute text-s";
+	const handlerClassName = "z-30 text-s";
 	return <div
 		ref={setNodeRef}
 		className={handlerClassName}
@@ -64,7 +66,7 @@ const SentenceBox = observer(function SentenceBox({
 	isTimeSelected,
 	activeEdits,
 }) {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore } = useRootContext();
 
 	const {
         setNodeRef,
@@ -79,8 +81,31 @@ const SentenceBox = observer(function SentenceBox({
 
 	const [showTime, setShowTime] = useState(false);
 
-	const handleClick = action(() => {
-        uiStore.timelineControls.playPosition = item.start;
+	const handleClick = action((event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
+			let offset = item.start;
+			let finish = item.finish;
+			for (let edit of activeEdits) {
+				if (edit.commonState.offset > offset) {
+					finish = Math.min(finish, edit.commonState.offset);
+				}
+				else {
+					offset = Math.max(offset, edit.commonState.end);
+				}
+			}
+			if (finish <= offset) {
+				alert("intersects with exsiting edit");
+				return;
+			}
+			domainStore.addActiveEdit(offset, finish);
+			uiStore.timelineControls.rangeSelectingTimeline = false;
+			uiStore.timelineControls.rangeSelectingFirstPx = -1;
+		}
+		else {
+			uiStore.timelineControls.playPosition = item.start;
+		}
     });
 
 	const onMouseEnter = action(() => {
@@ -105,7 +130,7 @@ const SentenceBox = observer(function SentenceBox({
 			ref={setNodeRef}
 			id={"script-" + index}
 			className={outerClassName}
-			onClick={(event) => handleClick()}
+			onClick={(event) => handleClick(event)}
 			onMouseEnter={(event) => onMouseEnter()}
 			onMouseLeave={(event) => onMouseLeave()}
 		>	
@@ -121,10 +146,10 @@ const SentenceBox = observer(function SentenceBox({
 					innerClassName += " justify-between";
 				}
 				else if (isRightEnd) {
-					innerClassName += " justify-end"
+					innerClassName += " justify-end";
 				}
 				else if (isLeftEnd) {
-					innerClassName += " justify-start"
+					innerClassName += " justify-start";
 				}
 				return(<div
 					key={`script-${index}-${edit.commonState.id}`}
@@ -182,7 +207,8 @@ const TextWall = observer(function TextWall() {
 	});
 
 	const onHandlerDragEnd = action((event) => {
-		const { active, over } = event;
+		const { over } = event;
+		const active = activeHandler;
 		if (active === null || over === null) {
 			return;
 		}
@@ -196,6 +222,7 @@ const TextWall = observer(function TextWall() {
 			edit.commonState.start = updatedStart;
 		}
 		else {
+			console.log(limit, item.finish, edit.commonState.offset);
 			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
 			edit.commonState.finish = updatedFinish;	
 		}
@@ -204,12 +231,17 @@ const TextWall = observer(function TextWall() {
 	});
 
 	const onHandlerDragMove = action((event) => {
-		const { active, over } = event;
+		const { over } = event;
+		const active = activeHandler;
 		if (active === null || over === null) {
 			return;
 		}
 		const item = over.data.current.item;
 		const edit = active.data.current.edit;
+		console.log(edit, activeHandler);
+		if (edit === undefined) {
+			console.log(active);
+		}
 		const isLeftHandler = active.data.current.isLeftHandler;
 		const limit = active.data.current.limit;
 		if (isLeftHandler) {
@@ -283,7 +315,7 @@ const TextWall = observer(function TextWall() {
                     modifiers={!!activeHandler ? [] : []}
                     dropAnimation={null}
                 >
-					{activeHandler ? (
+					{!!activeHandler ? (
 						<DraggableHandle 
 							edit={activeHandler.data.current.edit} 
 							isLeftHandler={activeHandler.data.current.isLeftHandler}
