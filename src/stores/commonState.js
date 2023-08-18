@@ -67,8 +67,9 @@ class CommonState {
 
         this.processing = metadata.processing ? metadata.processing : this.processing;
 
-        if (this.end > this.domainStore.projectMetadata.duration) {
+        if (this.end >= this.domainStore.projectMetadata.duration) {
             this.domainStore.projectMetadata.duration = this.end;
+			this.domainStore.rootStore.uiStore.timelineConst.trackMaxDuration = this.end;
         }
     }
 

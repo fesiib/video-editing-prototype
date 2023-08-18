@@ -19,7 +19,7 @@ const PlayPositionIndicator = observer(function PlayPositionIndicator() {
     });
     const transformSeconds = typeof transform?.x === "number" ? uiStore.pxToSec(transform.x) : 0;
     const playPosition = Math.min(
-        uiStore.timelineConst.trackMaxDuration,
+		uiStore.timelineConst.trackMaxDuration,
         Math.max(
             uiStore.timelineConst.trackMinDuration,
             uiStore.timelineControls.playPosition + transformSeconds

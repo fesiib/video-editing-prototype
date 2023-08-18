@@ -146,7 +146,6 @@ class DomainStore {
 		this.activeEdits = [];
 		this.curIntentPos = this.intents.length;
 		this.intents.push(new IntentState(this, "", "todo", 0, 0));
-		
 	}
 
 	cancelIntent() {
