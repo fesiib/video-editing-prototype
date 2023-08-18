@@ -65,7 +65,7 @@ class CommonState {
 
         this.trackInfo.trackId = metadata.trackId ? metadata.trackId : this.trackInfo.trackId;
 
-        this.processing = false;
+        this.processing = metadata.processing ? metadata.processing : this.processing;
 
         if (this.end > this.domainStore.projectMetadata.duration) {
             this.domainStore.projectMetadata.duration = this.end;
@@ -98,6 +98,37 @@ class CommonState {
         // relative to timline
         return this.finish - this.start;
     }
+
+	get metadata() {
+		return {
+			thumbnails: [...this.thumbnails],
+        	start: this.start,
+        	duration: this.duration,
+        	finish: this.finish,
+        	offset: this.offset,
+        	speed: this.speed,
+
+        	x: this.x,
+        	y: this.y,
+        	z: this.z,
+        	width: this.width,
+        	height: this.height,
+        	scaleX: this.scaleX,
+        	scaleY: this.scaleY,
+        	rotation: this.rotation,
+
+        	animation: { ...this.animation},
+        	filterMap: { ...this.filterMap },
+
+	        transitionStart: { ...this.transitionStart },
+			transitionEnd: { ...this.transitionEnd },
+
+			trackId: this.trackInfo.trackId,
+			
+			processing: this.processing,
+		};
+	}
+
 }
 
 export default CommonState;

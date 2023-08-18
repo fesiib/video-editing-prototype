@@ -170,19 +170,20 @@ const TimelineTracks = observer(function TimelineTracks() {
         for (let i = 0; i < trackCnt; i++) {
             newTracks.push({
                 trackId: i,
+				mainScenes: [],
                 scenes: [],
             });
         }
-        for (let video of domainStore.videos) {
-            const id = video.commonState.trackInfo.trackId;
-            newTracks[id].scenes.push(video);
-        }
-        for (let text of domainStore.texts) {
-            const id = text.commonState.trackInfo.trackId;
-            newTracks[id].scenes.push(text);
+		for (let video of domainStore.videos) {
+			const id = video.commonState.trackInfo.trackId;
+            newTracks[id].mainScenes.push(video);
+		}
+        for (let edit of domainStore.activeEdits) {
+            const id = edit.commonState.trackInfo.trackId;
+            newTracks[id].scenes.push(edit);
         }
         setTracks(newTracks);
-    }, [domainStore.videos, domainStore.texts, trackCnt]);
+    }, [domainStore.videos, domainStore.activeEdits, trackCnt]);
 
 	useEffect(() => {
 		if (tracksContainer.current) {
@@ -223,9 +224,14 @@ const TimelineTracks = observer(function TimelineTracks() {
                     items={tracks.map(({ trackId }) => "sortable_track_" + trackId)}
                     strategy={verticalListSortingStrategy}
                 >
-                    {tracks.map(({ trackId, scenes }) => {
+                    {tracks.map(({ trackId, mainScenes, scenes }) => {
                         const id = "track_" + trackId;
-                        return <SortableTimelineTrack key={id} trackId={trackId} scenes={scenes} />;
+                        return <SortableTimelineTrack 
+							key={id}
+							trackId={trackId}
+							mainScenes={mainScenes}
+							scenes={scenes}
+						/>;
                     })}
                 </SortableContext>
                 <DragOverlay
@@ -237,6 +243,7 @@ const TimelineTracks = observer(function TimelineTracks() {
                             key={"track_overlay"}
                             id={activeTrackId}
                             title={"?"}
+							mainScenes={[]}
                             scenes={[]}
                             isOverlay={true}
                             isOver={false}

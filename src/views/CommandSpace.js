@@ -37,12 +37,17 @@ const CommandSpace = observer(function CommandSpace() {
 					display: "grid"
 				}}>
 				{
+					curIntent.selectedTranscript.reduce((prevVal, curVal, idx) => {
+						return prevVal + " " + curVal.text;
+					}, "")
+				}
+				{/* {
 					curIntent.selectedTranscript.map((item, idx) => {
 						return <span key={"selected_transcript" + idx}>
 							{item.video.commonState.id} {item.start} - {item.finish}
 						</span>
 					})
-				}
+				} */}
 				</div>
 			</div>
 			<div> <span style={{fontWeight: "bold"}}> Selected Periods: </span>

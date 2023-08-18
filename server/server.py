@@ -47,7 +47,7 @@ def process_youtube_link():
     # }
 
     transcript, moments, metadata = process_video(video_link)
-    filename = metadata["id"] + "." + metadata["ext"]
+    filename = f'{metadata["id"]}.mp4'
 
     responseJSON = {
         "request": {

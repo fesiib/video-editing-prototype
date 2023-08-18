@@ -10,6 +10,7 @@ import useRootContext from "./hooks/useRootContext";
 import { DUMMY_VIDEO_LINKS } from "./data/dummy";
 import VideoState from "./stores/videoState";
 import Script from "./views/Script";
+import TextWall from "./views/TextWall";
 import CommandSpace from "./views/CommandSpace";
 
 const App = observer(function App() {
@@ -27,47 +28,14 @@ const App = observer(function App() {
 
     useEffect(
         action(() => {
-            const newVideos = [];
-			for (let link of DUMMY_VIDEO_LINKS) {
-				const video = new VideoState(
-                    domainStore,
-                    link,
-                    `${"video"}-${newVideos.length + 10}`,
-                    newVideos.length,
-                );
-				newVideos.push(video);
-			}
-            // for (let segment of DUMMY_SEGMENTS) {
-            //     const video = new VideoState(
-            //         domainStore,
-            //         "http://localhost:3000/output.webm",
-            //         `${"video"}-${newVideos.length + 10}`,
-            //         0
-            //     );
-            //     video.commonState.setMetadata({
-            //         thumbnails: [
-            //             segment?.lowLabel ? segment.lowLabel : "misc",
-            //             segment?.highLabel ? segment.highLabel : "None",
-            //         ],
-            //         offset: segment.start,
-            //         start: segment.start,
-            //         finish: segment.finish,
-            //     });
-            //     video.highLabel = segment?.highLabel ? segment.highLabel : "None";
-            //     video.lowLabel = segment?.lowLabel ? segment.lowLabel : "misc";
-            //     video.setTranscript([
-            //         {
-            //             text: segment.text,
-            //             start: segment.start,
-            //             finish: segment.finish,
-            //             lowLabel: video.lowLabel,
-            //             highLabel: video.highLabel,
-            //         },
-            //     ]);
-            //     newVideos.push(video);
-            // }
-			domainStore.projectMetadata.trackCnt = newVideos.length;
-            domainStore.videos = [...newVideos];
+			domainStore.in_mainVideos = [new VideoState(
+				domainStore,
+				DUMMY_VIDEO_LINKS[0],
+				`${"video"}`,
+				0,
+				true,
+			)];
+			domainStore.projectMetadata.trackCnt = 1;
         }),
         [DUMMY_VIDEO_LINKS]
     );
@@ -76,14 +44,14 @@ const App = observer(function App() {
         <div className="App">
             <div className="grid grid-cols-2 grid-rows-2">
                 <div className="col-span-1 row-span-1">
-                    <Script />
+                    <TextWall />
                 </div>
                 <div className="col-span-1 row-span-1">
-					<CommandSpace />
-                    {/* <EditorCanvas /> */}
+                    <EditorCanvas />
                 </div>
                 <div className="col-span-2 row-span-1">
                     <Timeline />
+					<CommandSpace />
                 </div>
             </div>
         </div>

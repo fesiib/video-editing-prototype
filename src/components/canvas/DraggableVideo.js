@@ -42,8 +42,8 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             scaleY: 1,
             x: uiStore.canvasSize.width / 2,
             y: uiStore.canvasSize.height / 2,
+			processing: false,
         };
-		console.log("here", metadata);
         curVideo.commonState.setMetadata(metadata);
     });
 

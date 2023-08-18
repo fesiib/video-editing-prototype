@@ -12,6 +12,7 @@ const SentenceBox = observer(function SentenceBox({
 	onTimestampClick,
 	onScriptMouseDown,
 	onScriptMouseUp,
+	onScriptMouseOver,
 }) {
     const { uiStore } = useRootContext();
 
@@ -20,7 +21,7 @@ const SentenceBox = observer(function SentenceBox({
     return (
         <div 
 			// className={"grid grid-cols-8 gap-3 border-dashed border border-red-500"}
-			className={"grid grid-cols-8 border-dashed border border-red-500"}
+			className={"grid grid-cols-8"}
 		>
             <div className="col-span-1 my-auto text-left text-sky-600 hover:text-blue-800 underline decoration-sky-600 hover:decoration-blue-800"
 				onClick={onTimestampClick}
@@ -39,9 +40,10 @@ const SentenceBox = observer(function SentenceBox({
                 </div> 
             </div>  */}
 
-            <div className="col-span-7 text-left"
+            <div className="col-span-7 text-left border-dashed border-b-2 border-red-500"
 				onMouseDown={onScriptMouseDown}
 				onMouseUp={onScriptMouseUp}
+				onMouseOver={onScriptMouseOver}
 			>{item.text}</div>
         </div>
     );
@@ -63,34 +65,75 @@ const Script = observer(function Script() {
     });
 
 	const handleSentenceMouseDown = action((event, index) => {
+		event.preventDefault();
+		const transcriptIndex = curIntent.selectedTranscriptIndex(filteredScript[index])
 		setIntentSelector({
 			start: index,
-			select: (curIntent.selectedTranscriptIndex(filteredScript[index]) === -1 ? true : false),
+			select: (transcriptIndex === -1 ? true : false),
 		});
+		const single = filteredScript[index];
+		if (transcriptIndex === -1) {
+			curIntent.selectPeriod(
+				single.video, 
+				single.start,
+				single.finish
+			);
+		}
+		else {
+			curIntent.deselectPeriod(
+				single.video, 
+				single.start,
+				single.finish
+			);
+		}
+	});
+
+	const handleSentenceMouseOver = action((event, index) => {
+		event.preventDefault();
+		const start = intentSelector.start;
+		if (start >= 0) {
+			const transcriptIndex = curIntent.selectedTranscriptIndex(filteredScript[index])
+			const single = filteredScript[index];
+			if (transcriptIndex === -1 && intentSelector.select === true) {
+				curIntent.selectPeriod(
+					single.video, 
+					single.start,
+					single.finish
+				);
+			}
+			if (transcriptIndex > -1 && intentSelector.select === false) {
+				curIntent.deselectPeriod(
+					single.video, 
+					single.start,
+					single.finish
+				);
+			}
+		}
 	});
 
 	const handleSentenceMouseUp = action((event, index) => {
+		event.preventDefault();
 		const start = intentSelector.start;
 		if (start >= 0) {
-			const left = Math.min(index, start);
-			const right = Math.max(index, start);
-			for (let idx = left; idx <= right; idx++) {
-				const single = filteredScript[idx];
-				if (intentSelector.select === true) {
-					curIntent.selectPeriod(
-						single.video, 
-						single.start,
-						single.finish
-					);
-				}
-				else {
-					curIntent.deselectPeriod(
-						single.video, 
-						single.start,
-						single.finish
-					);
-				}
-			}
+			// const left = Math.min(index, start);
+			// const right = Math.max(index, start);
+			// for (let idx = left; idx <= right; idx++) {
+			// 	const single = filteredScript[idx];
+			// 	if (intentSelector.select === true) {
+			// 		curIntent.selectPeriod(
+			// 			single.video, 
+			// 			single.start,
+			// 			single.finish
+			// 		);
+			// 	}
+			// 	else {
+			// 		curIntent.deselectPeriod(
+			// 			single.video, 
+			// 			single.start,
+			// 			single.finish
+			// 		);
+			// 	}
+			// }
 			setIntentSelector({
 				start: -1,
 				select: false,
@@ -137,6 +180,7 @@ const Script = observer(function Script() {
 										onTimestampClick={() => handleSentenceClick(index)}
 										onScriptMouseDown={(event) => handleSentenceMouseDown(event, index)}
 										onScriptMouseUp={(event) => handleSentenceMouseUp(event, index)}
+										onScriptMouseOver={(event) => handleSentenceMouseOver(event, index)}
 									/>
                                 </div>
                             </div>

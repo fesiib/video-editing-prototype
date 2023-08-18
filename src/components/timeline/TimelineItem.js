@@ -5,28 +5,15 @@ import { observer } from "mobx-react-lite";
 import useRootContext from "../../hooks/useRootContext";
 
 import TrimWrapper from "./TrimWrapper";
-import { action } from "mobx";
 
 export const TimelineItem = observer(
     forwardRef(function TimelineItem(
-        { scene, scenes, transform, isOverlay, attributes, listeners, ...props },
+        { isMain, scene, scenes, transform, isOverlay, attributes, listeners, ...props },
         ref
     ) {
-        const { uiStore, domainStore } = useRootContext();
-		const curIntent = domainStore.intents[domainStore.curIntentPos];
-		const curSelectedPeriods = (Object.keys(curIntent.selectedPeriodsPerVideo).includes(scene.commonState.id) === true ?
-		curIntent.selectedPeriodsPerVideo[scene.commonState.id] : []);
+        const { uiStore } = useRootContext();
 
         const lowLabel = scene.lowLabel;
-
-        const highLabel = scene.highLabel;
-
-        let showHighLabel =
-            scenes.findIndex(
-                (value) =>
-                    value.commonState.end === scene.commonState.offset &&
-                    value.highLabel === scene.highLabel
-            ) < 0;
 
         const isSelected =
             uiStore.timelineControls.selectedTimelineItems.findIndex(
@@ -50,44 +37,15 @@ export const TimelineItem = observer(
             opacity: isOverlay ? 0.8 : 1,
         };
 
-        const onHighLabelClick = action((event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            let newSelectedTimelineItems = [];
-            for (let someScene of scenes) {
-                const someHighLabel =
-                    someScene.commonState.thumbnails.length > 1
-                        ? someScene.commonState.thumbnails[1]
-                        : "None";
-                if (
-                    someScene.commonState.offset >= scene.commonState.offset &&
-                    someHighLabel === highLabel
-                ) {
-                    newSelectedTimelineItems.push(someScene);
-                }
-            }
-            newSelectedTimelineItems.sort(
-                (p1, p2) => p1.commonState.offset - p2.commonState.offset
-            );
-            let lastEnd = scene.commonState.offset;
-            let contSelectedTimelineItems = [];
-            for (let selectedScene of newSelectedTimelineItems) {
-                if (selectedScene.commonState.offset !== lastEnd) {
-                    break;
-                }
-                contSelectedTimelineItems.push(selectedScene);
-                lastEnd = selectedScene.commonState.end;
-            }
-            uiStore.timelineControls.selectedTimelineItems = contSelectedTimelineItems;
-        });
+		let outerClassName = (isMain ? "absolute bottom-0 z-10" :
+			(isSelected
+				? "absolute bottom-6 z-10 border-2 border-red-600 brightness-50"
+				: "absolute bottom-6 z-10 border"));
+		let innerClassName = (isMain ? "h-6 bg-white" : "flex justify-between bg-orange-300");
+
         return (
             <div
-                className={
-                    (isSelected
-                        ? "absolute bottom-0 z-10 border-2 border-red-600 brightness-50"
-                        : "absolute bottom-0 z-10 border")
-						//+ (showHighLabel ? " divide-x-2 divide-black" : "")
-                }
+                className={outerClassName}
                 ref={ref}
                 style={style}
                 {...attributes}
@@ -101,37 +59,17 @@ export const TimelineItem = observer(
                             : "1 scene"}
                     </span>
                 ) : (
-                    <>
-                        {/* {showHighLabel ? (
-                            <div
-                                className="h-6 px-2 bg-black text-white absolute -top-6 left-0 overflow-hidden"
-                                onClick={onHighLabelClick}
-                            >
-                                {highLabel}
-                            </div>
-                        ) : null} */}
-						{curSelectedPeriods.map((period, idx) => {
-							return (<div
-                                className="h-6 bg-yellow-500 text-white absolute -top-6"
-								key={"selectedPeriod" + idx}
-								style={{
-									left: uiStore.secToPx(period.start - scene.commonState.start - scene.commonState.offset),
-									width: uiStore.secToPx(
-										period.finish - period.start - scene.commonState.start - scene.commonState.offset
-									),
-								}}
-                            >
-                            </div>);
-						})}
-                        <div className="flex justify-between">
-                            <TrimWrapper scene={scene} scenes={scenes}>
-                                <span id={"label_" + scene.commonState.id}>
-                                    {!willOverflow ? lowLabel : ""}
-                                </span>
-                            </TrimWrapper>
-                            {/* <span className="grow"> {lowLabel} </span> */}
-                        </div>
-                    </>
+					<div className={innerClassName}>
+						{isMain ? null
+							: (
+								<TrimWrapper scene={scene} scenes={scenes}>
+									<span id={"label_" + scene.commonState.id}>
+										{!willOverflow ? lowLabel : ""}
+									</span>
+								</TrimWrapper>
+							)
+						}
+					</div>
                 )}
             </div>
         );

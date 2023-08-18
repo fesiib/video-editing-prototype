@@ -6,26 +6,28 @@ import DraggableTimelineItem from "./DraggableTimelineItem";
 
 import useRootContext from "../../hooks/useRootContext";
 import EmptySpace from "./EmptySpace";
+import MainTimelineItem from "./MainTimelineItem";
 
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(
-        { id, style, title, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
+        { id, style, title, mainScenes, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
         ref
     ) {
-        const { uiStore } = useRootContext();
+        const { uiStore, domainStore } = useRootContext();
         const width = uiStore.trackWidthPx;
         const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
+		mainScenes.sort((p1, p2) => p1.commonState.offset - p2.commonState.offset);
 		scenes.sort((p1, p2) => p1.commonState.offset - p2.commonState.offset);
-		const emptySpaces = scenes.map((value, idx) => {
-			const lastEnd = idx === 0 ? 0 : scenes[idx - 1].commonState.end;
-			let space = {
-				offset: lastEnd,
-				duration: value.commonState.offset - lastEnd,
-				idx: idx,
-				key: "empty_space_for_" + value.commonState.id,
-			};
-			return space;
-		});
+		// const emptySpaces = scenes.map((value, idx) => {
+		// 	const lastEnd = idx === 0 ? 0 : scenes[idx - 1].commonState.end;
+		// 	let space = {
+		// 		offset: lastEnd,
+		// 		duration: value.commonState.offset - lastEnd,
+		// 		idx: idx,
+		// 		key: "empty_space_for_" + value.commonState.id,
+		// 	};
+		// 	return space;
+		// });
 
         return (
             <div
@@ -63,6 +65,14 @@ const TimelineTrack = observer(
                         width: width,
                     }}
                 >
+					{mainScenes.map((mainScene) => (
+                        <MainTimelineItem
+                            key={mainScene.commonState.id}
+                            mainScene={mainScene}
+                            mainScenes={mainScenes}
+							scenes={scenes}
+                        />
+                    ))}
                     {scenes.map((scene) => (
                         <DraggableTimelineItem
                             key={scene.commonState.id}
@@ -70,12 +80,12 @@ const TimelineTrack = observer(
                             scenes={scenes}
                         />
                     ))}
-					{emptySpaces.map((space) => (
+					{/* {emptySpaces.map((space) => (
 						<EmptySpace
 							key={space.key}
 							space={space}
 							scenes={scenes} />
-					))}
+					))} */}
                 </div>
             </div>
         );

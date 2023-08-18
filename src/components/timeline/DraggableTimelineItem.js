@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -16,11 +16,6 @@ import {
 const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, scenes }) {
     const { uiStore } = useRootContext();
 
-	const [intentSelector, setIntentSelector] = useState({
-		start: -1,
-		select: false,
-	})
-
     const isSelected =
         uiStore.timelineControls.selectedTimelineItems.findIndex(
             (value) => value.commonState.id === scene.commonState.id
@@ -34,37 +29,6 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         },
         disabled: !isSelected,
     });
-
-	const onTimelineItemMouseDown = action((event) => {
-		if (uiStore.timelineControls.intentSelectingTimeline) {
-			const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId);
-			const timelineRect = labelsDiv.getBoundingClientRect();
-			let offsetPx =
-				event.clientX -
-				timelineRect.left +
-				labelsDiv.scrollLeft -
-				uiStore.timelineConst.trackHandlerWidth;
-			const seconds = uiStore.pxToSec(offsetPx);
-			return;
-		}
-	});
-
-	const onTimelineItemMouseUp = action((event) => {
-		if (uiStore.timelineControls.intentSelectingTimeline) {
-			const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId);
-			const timelineRect = labelsDiv.getBoundingClientRect();
-			let offsetPx =
-				event.clientX -
-				timelineRect.left +
-				labelsDiv.scrollLeft -
-				uiStore.timelineConst.trackHandlerWidth;
-			const seconds = uiStore.pxToSec(offsetPx);
-			
-			uiStore.timelineControls.intentSelectingTimeline = false;
-			uiStore.timelineControls.positionIndicatorVisibility -= 1;
-			return;
-		}
-	});
 
     const onTimelineItemClick = action((event) => {
         event.stopPropagation();
@@ -85,7 +49,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             return;
         }
 
-		if (uiStore.timelineControls.intentSelectingTimeline) {
+		if (uiStore.timelineControls.rangeSelectingTimeline) {
 			return;
 		}
 
@@ -134,17 +98,13 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
     });
 
     const onTimelineItemMouseEnter = action((event) => {
-        if (uiStore.timelineControls.splitting
-			|| uiStore.timelineControls.intentSelectingTimeline
-		) {
+        if (uiStore.timelineControls.splitting) {
             uiStore.timelineControls.positionIndicatorVisibility += 1;
         }
     });
 
     const onTimelineItemMouseLeave = action((event) => {
-        if (uiStore.timelineControls.splitting
-			|| uiStore.timelineControls.intentSelectingTimeline	
-		) {
+        if (uiStore.timelineControls.splitting) {
             uiStore.timelineControls.positionIndicatorVisibility -= 1;
         }
     });
@@ -153,9 +113,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         event.stopPropagation();
         event.preventDefault();
 
-        if (uiStore.timelineControls.splitting
-			|| uiStore.timelineControls.intentSelectingTimeline
-		) {
+        if (uiStore.timelineControls.splitting) {
             const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId);
             const timelineRect = labelsDiv.getBoundingClientRect();
 
@@ -189,16 +147,6 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             return;
         }
     };
-
-	const onDrag = action((event) => {
-		console.log(event);
-		event.stopPropagation();
-		if (!isSelected && !uiStore.timelineControls.splitting 
-			&& !uiStore.timelineControls.intentSelectingTimeline
-		) {
-			onTimelineItemClick(event);
-		}
-	});
 
     let adjustedTransform = {
         ...transform,
@@ -266,6 +214,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         <TimelineItem
             id={scene.commonState.id}
             ref={setNodeRef}
+			isMain={false}
             scene={scene}
             scenes={scenes}
             transform={adjustedTransform}

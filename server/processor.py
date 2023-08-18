@@ -1,6 +1,7 @@
 import cv2
 import json
 import webvtt
+import os
 
 
 from yt_dlp import YoutubeDL
@@ -17,25 +18,40 @@ def get_video_by_filename(filename):
 
 def download_video(video_link):
     options = {
-        "paths": {
-            "home": str(DATABASE)
-        },
-        "outtmpl": {
-            "default": "%(id)s.%(ext)s"
-        },
-        "writesubtitles": True,
-        "writeautomaticsub": True,
-        "format": "mp4[height<=480]",
-        "subtitleslangs": {"en"},
-        "subtitlesformat": "/vtt/g",
+		'format': 'mp4[height<=480]',
+        'outtmpl': os.path.join(DATABASE, '%(id)s.%(ext)s'),
+        'writesubtitles': True,
+        'writeautomaticsub': True,
+        'subtitleslangs': {'en'},  # Download English subtitles
+        'subtitlesformat': '/vtt/g',
+        'skip_download': False,
+
+        # "paths": {
+        #     "home": str(DATABASE)
+        # },
+        # "outtmpl": {
+        #     "default": "%(id)s.%(ext)s"
+        # },
+        # "writesubtitles": True,
+        # "writeautomaticsub": True,
+        # "format": "mp4[height<=480]",
+        # "subtitleslangs": {"en"},
+        # "subtitlesformat": "/vtt/g",
+		# "retries": 10,
     }
 
     with YoutubeDL(options) as ydl:
-        info = ydl.extract_info(video_link, download=True)
+        info = ydl.extract_info(video_link, download=False)
         metadata = ydl.sanitize_info(info)
+        video_title = metadata.get('id')
+        video_path = os.path.join(DATABASE, f'{video_title}.mp4')
+        if not os.path.exists(video_path):
+            ydl.download([video_link])
+            print(f"Video '{video_title}' downloaded successfully.")
+        else:
+            print(f"Video '{video_title}' already exists in the directory.")
         return metadata
         
-
 def get_transcript(subtitles):
     transcript = []
     for caption in subtitles:
@@ -83,13 +99,16 @@ def get_moments(stream):
     }]
 
 def process_video(video_link):
+    print(f"Requested Link '{video_link}'")
     if (video_link not in video_library):
         video_library[video_link] = download_video(video_link)
     
     metadata = video_library[video_link]
+    video_title = metadata.get('id')
+    print(f"'{video_title}'")
 
-    video_path = metadata["requested_downloads"][0]["filepath"]
-    subtitles_path = metadata["requested_subtitles"]["en"]["filepath"]
+    video_path = os.path.join(DATABASE, f'{video_title}.mp4')
+    subtitles_path = os.path.join(DATABASE, f'{video_title}.en.vtt')
     
     transcript = []
     moments = []

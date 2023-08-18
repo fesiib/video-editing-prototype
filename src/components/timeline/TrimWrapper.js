@@ -62,7 +62,7 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
             uiStore.timelineConst.positionIndicatorLabelId
         );
         const lowLabel =
-            scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "misc";
+            scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "";
 
         if (isLeftHandler) {
             transformSeconds = Math.min(transformSeconds, scene.commonState.sceneDuration);
@@ -202,7 +202,7 @@ const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
             scene.commonState.start += deltaSeconds;
             scene.commonState.offset += deltaSeconds;
         } else {
-            deltaSeconds = Math.min(
+			deltaSeconds = Math.min(
                 deltaSeconds,
                 scene.commonState.duration - scene.commonState.finish
             );

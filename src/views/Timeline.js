@@ -44,7 +44,8 @@ const Timeline = observer(function Timeline() {
     const onPressSplit = action((event) => {
         event.preventDefault();
         event.stopPropagation();
-		uiStore.timelineControls.intentSelectingTimeline = false;
+		uiStore.timelineControls.rangeSelectingTimeline = false;
+		uiStore.timelineControls.rangeSelectingFirstPx = -1;
         if (uiStore.timelineControls.splitting === true) {
             uiStore.timelineControls.splitting = false;
             return;
@@ -52,15 +53,16 @@ const Timeline = observer(function Timeline() {
         uiStore.timelineControls.splitting = true;
     });
 
-	const onPressIntentSelect = action((event) => {
+	const onPressRangeSelect = action((event) => {
         event.preventDefault();
         event.stopPropagation();
         uiStore.timelineControls.splitting = false;
-		if (uiStore.timelineControls.intentSelectingTimeline === true) {
-            uiStore.timelineControls.intentSelectingTimeline = false;
+		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
+            uiStore.timelineControls.rangeSelectingTimeline = false;
+			uiStore.timelineControls.rangeSelectingFirstPx = -1;
             return;
         }
-        uiStore.timelineControls.intentSelectingTimeline = true;
+        uiStore.timelineControls.rangeSelectingTimeline = true;
     });
 
 
@@ -69,12 +71,7 @@ const Timeline = observer(function Timeline() {
             (value) => value.commonState.id
         );
         console.log(selectedSceneIds, uiStore.timelineControls.selectedTimelineItems.length);
-        domainStore.videos = domainStore.videos.filter((video) => {
-            const isSelected = selectedSceneIds.includes(video.commonState.id);
-            console.log(isSelected);
-            return !isSelected;
-        });
-        console.log(domainStore.videos.length);
+        domainStore.deleteEdits(selectedSceneIds);
     });
 
     const onDeleteKeyDown = action((event) => {
@@ -129,14 +126,14 @@ const Timeline = observer(function Timeline() {
                 </button>
 				<button
                     className={
-                        uiStore.timelineControls.intentSelectingTimeline
+                        uiStore.timelineControls.rangeSelectingTimeline
                             ? "bg-indigo-500 p-1"
                             : "bg-indigo-300 p-1"
                     }
-                    onClick={onPressIntentSelect}
+                    onClick={onPressRangeSelect}
                     id="intentselect_button"
                 >
-                    {uiStore.timelineControls.intentSelectingTimeline ? "Intent Selecting" : "Intent Select"}
+                    {uiStore.timelineControls.rangeSelectingTimeline ? "Range Selecting" : "Range Select"}
                 </button>
                 <button
                     className={"bg-indigo-300 p-1"}

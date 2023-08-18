@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import CommonState from "./commonState";
 
 import axios from 'axios'
@@ -30,83 +30,108 @@ function formatVTTtime(str_time) {
 }
 
 class VideoState {
+	videoLink = null;
     source = null;
     transcript = [];
 	moments = [];
 	videoMetadata = {};
     highLabel = "None";
     lowLabel = "misc";
-	processedLink = false;
 
     // {text: "", start: ""} start is relative to video
-    constructor(domainStore, source, id, trackId) {
+    constructor(domainStore, videoLink, id, trackId, processLink=false) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.commonState = new CommonState(domainStore, id, trackId);
         this.domainStore = domainStore;
-        this.source = source;
-        this.transcript = [];
-		this.moments = [];
-		this.videoMetadata = [];
-		this.processSource();
-    }
-
-    setSource(source) {
-        this.source = source;
-        this.commonState.processing = true;
-		this.processedLink = false;
+        this.videoLink = videoLink;
         this.transcript = [];
 		this.moments = [];
 		this.videoMetadata = {};
-		this.processSource();
+		if (processLink) {
+			this.processVideoLink();
+		}
+    }
+
+	getDeepCopy() {
+		const video = new VideoState(
+            this.domainStore,
+            this.videoLink,
+            this.commonState.id + "c@",
+            this.commonState.trackInfo.trackId
+        );
+		video.source = this.source;
+		video.transcript = [...this.transcript];
+		video.moments = [...this.moments];
+		video.videoMetadata = {
+			...this.videoMetadata,
+		}
+		video.commonState.setMetadata(this.commonState.metadata);
+		video.highLabel = this.highLabel;
+		video.lowLabel = this.lowLabel;
+		return video;
+	}
+
+    setVideoLink(videoLink) {
+        this.videoLink = videoLink;
+		this.source = false;
+        this.commonState.processing = true;
+        this.transcript = [];
+		this.moments = [];
+		this.videoMetadata = {};
+		this.processVideoLink();
     }
 
 	setTranscript(transcript) {
-		this.transcript = transcript;
+		this.transcript = [...transcript];
+	}
+	
+	setMoments(moments) {
+		this.moments = [...moments];
 	}
 
-    processSource() {
-		if (this.processedLink === true) {
+    processVideoLink() {
+		const requestCfg = REQUEST_TYPES.youtubeLink;
+		console.log("here -> ", this.videoLink);
+        axios.post(requestCfg.serverAddr + requestCfg.route, {
+            videoLink: this.videoLink,
+        }).then(this.processVideoLinkSuccess, this.processVideoLinkFailure);
+    }
+
+	processVideoLinkSuccess(response) {
+		console.log(response);
+		if (response.data.status === "error") {
+			alert("Could not process the youtube link")
 			return;
 		}
-		this.processedLink = true;
-        const requestCfg = REQUEST_TYPES.youtubeLink;
-		console.log("here -> ", this.source);
-        axios.post(requestCfg.serverAddr + requestCfg.route, {
-            videoLink: this.source,
-        }).then( (response) => {
-            console.log(response);
-            if (response.data.status === "error") {
-                alert("Could not process the youtube link")
-                return;
-            }
-			this.transcript = [];
-			for (let single of response.data.transcript) {
-				this.transcript.push({
-					text: single.text,
-					start: formatVTTtime(single.start),
-					finish: formatVTTtime(single.finish),
-					lowLabel: this.lowLabel,
-					highLabel: this.highLabel,	
-				});
-			}
-            this.moments = response.data.moments;
-			this.videoMetadata = response.data.metadata;
-			this.source = ADDR + response.data.source;
-			console.log(this.source);
-			this.commonState.setMetadata({
-				thumbnails: [
-					this.commonState.id,
-					"misc",
-					"None",
-				],
-				offset: 0,
-				start: 0,
-				finish: this.videoMetadata.duration,
+		this.transcript = [];
+		for (let single of response.data.transcript) {
+			this.transcript.push({
+				text: single.text,
+				start: formatVTTtime(single.start),
+				finish: formatVTTtime(single.finish),
+				lowLabel: this.lowLabel,
+				highLabel: this.highLabel,	
 			});
-        }).catch((reason) => {
-            console.log(reason);
-        });
-    }
+		}
+		this.moments = response.data.moments;
+		this.videoMetadata = response.data.metadata;
+		this.source = ADDR + response.data.source;
+		console.log(this.source);
+		this.commonState.setMetadata({
+			thumbnails: [
+				this.commonState.id,
+				"misc",
+				"None",
+			],
+			offset: 0,
+			start: 0,
+			finish: this.videoMetadata.duration,
+		});
+	}
+	
+	processVideoLinkFailure(error) {
+		console.log(error);
+	}
 
     get adjustedTranscript() {
         const adjusted = [];
