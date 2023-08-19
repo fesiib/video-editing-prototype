@@ -142,7 +142,7 @@ const Timeline = observer(function Timeline() {
                 >
                     Delete
                 </button>
-                <div className="bg-indigo-300 p-1">
+                {/* <div className="bg-indigo-300 p-1">
                     <label htmlFor="speed_input"> Speed </label>
                     <input
                         id="speed_input"
@@ -152,7 +152,7 @@ const Timeline = observer(function Timeline() {
                         }}
                         step={0.25}
                     />
-                </div>
+                </div> */}
                 <div>
                     <label htmlFor="timelinen_zoom">
                         {" "}

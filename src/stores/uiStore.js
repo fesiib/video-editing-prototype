@@ -20,7 +20,7 @@ class UIStore {
         transformerNodes: [],
     };
     canvasConst = {
-        margin: 10,
+        margin: 2,
     };
 
     timelineSize = {
@@ -129,6 +129,37 @@ class UIStore {
         "side-note": "lightgray",
     };
 
+	editOperations = [
+		{
+			title: "Text",
+			icon: null,
+		},
+		{
+			title: "Image",
+			icon: null,
+		},
+		{
+			title: "Shape",
+			icon: null,
+		},
+		{
+			title: "Cut",
+			icon: null,
+		},
+		{
+			title: "Crop",
+			icon: null,
+		},
+		{
+			title: "Zoom",
+			icon: null,
+		},
+		{
+			title: "Blur",
+			icon: null,
+		},
+	];
+
     // panelSize = {};
 
     constructor(rootStore) {
@@ -154,11 +185,11 @@ class UIStore {
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
         this.canvasSize = {
-            width: width / 2,
+            width: width / 7 * 3,
             height: height / 2,
         };
         this.timelineSize = {
-            width: width,
+            width: width / 7 * 3,
             height: 80 * this.rootStore.domainStore.projectMetadata.trackCnt,
         };
     }
