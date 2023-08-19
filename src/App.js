@@ -8,11 +8,11 @@ import Timeline from "./views/Timeline";
 
 import useRootContext from "./hooks/useRootContext";
 import { DUMMY_VIDEO_LINKS } from "./data/dummy";
-import VideoState from "./stores/videoState";
-import Script from "./views/Script";
+
+import VideoState from "./stores/objects/videoState";
+
 import TextWall from "./views/TextWall";
 import CommandSpace from "./views/CommandSpace";
-import EditOperations from "./components/panel/EditOperations";
 import EditPanel from "./views/EditPanel";
 
 const App = observer(function App() {
@@ -33,7 +33,6 @@ const App = observer(function App() {
 			domainStore.in_mainVideos = [new VideoState(
 				domainStore,
 				DUMMY_VIDEO_LINKS[0],
-				`${"video"}`,
 				0,
 				true,
 			)];

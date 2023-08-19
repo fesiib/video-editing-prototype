@@ -1,16 +1,27 @@
 import { makeAutoObservable } from "mobx";
 
+import EditState from "./objects/editState";
+
+import { randomUUID } from "../utilities/genericUtilities";
+
 class IntentState {
     textCommand = "";
 	sketchCommand = null;
 	trackId = 0;
+	activeEdits = [];
+	editOperationIdx = -1;
+	defaultObject = null;
+	id = "";
 
-    constructor(domainStore, textCommand, sketchCommand, id, trackId) {
+    constructor(domainStore, textCommand, sketchCommand, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
-		this.id = id;
+		this.editOperationIdx = -1;
+		this.defaultObject = null;
+		this.activeEdits = [];
+		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
     }
 
@@ -20,6 +31,49 @@ class IntentState {
 
 	setSketchCommand(sketchCommand) {
 		this.sketchCommand = sketchCommand;
+	}
+
+	setEditOperationIdx(newIdx) {
+		if (newIdx === -1) {
+			this.editOperationIdx = -1;
+			this.activeEdits = [];
+			this.defaultObject = null;
+			return;
+		}
+		if (!this.domainStore.editOperations[newIdx].supported) {
+			return;
+		}
+		this.editOperationIdx = newIdx;
+		//conversion between types should happen
+	}
+
+	addActiveEdit(first, second) {
+		const start = Math.min(first, second);
+		const finish = Math.max(first, second);
+		let newEdit = new EditState(this.domainStore, `edit-${this.activeEdits.length}`, 0);
+		newEdit.commonState.setMetadata({
+			duration: this.domainStore.projectMetadata.duration,
+			start: start,
+			finish: finish, 
+			offset: start,
+		});
+		this.activeEdits.push(newEdit);
+	}
+
+	deleteEdits(selectedIds) {
+		this.activeEdits = this.activeEdits.filter((edit) => {
+            const isSelected = selectedIds.includes(edit.commonState.id);
+            console.log(isSelected);
+            return !isSelected;
+        });
+	}
+	
+	get allExcludedIds() {
+		let result = [];
+		for (let edit of this.activeEdits) {
+			result.push(...edit.excludedIds);
+		}
+		return result;
 	}
 
 	get selectedPeriods() {
@@ -33,6 +87,13 @@ class IntentState {
 	}
 	get selectedRectangle() {
 		return [];
+	}
+
+	get editOperation() {
+		if (this.editOperationIdx === -1) {
+			return null;
+		}
+		return this.domainStore.editOperations[this.editOperationIdx];
 	}
 }
 

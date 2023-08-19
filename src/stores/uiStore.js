@@ -129,37 +129,6 @@ class UIStore {
         "side-note": "lightgray",
     };
 
-	editOperations = [
-		{
-			title: "Text",
-			icon: null,
-		},
-		{
-			title: "Image",
-			icon: null,
-		},
-		{
-			title: "Shape",
-			icon: null,
-		},
-		{
-			title: "Cut",
-			icon: null,
-		},
-		{
-			title: "Crop",
-			icon: null,
-		},
-		{
-			title: "Zoom",
-			icon: null,
-		},
-		{
-			title: "Blur",
-			icon: null,
-		},
-	];
-
     // panelSize = {};
 
     constructor(rootStore) {

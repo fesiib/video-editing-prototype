@@ -12,7 +12,7 @@ import TrimHandlerRightIcon from "../icons/TrimHandlerRightIcon";
 
 const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler, isOverlay }) {
 	const { uiStore } = useRootContext();
-	const limit = edit.domainStore.activeEdits.reduce((prev, otherEdit) => {
+	const limit = edit.domainStore.curIntent.activeEdits.reduce((prev, otherEdit) => {
 		if (otherEdit.commonState.id === edit.commonState.id) {
 			return prev;
 		}
@@ -99,7 +99,7 @@ const SentenceBox = observer(function SentenceBox({
 				alert("intersects with exsiting edit");
 				return;
 			}
-			domainStore.addActiveEdit(offset, finish);
+			domainStore.curIntent.addActiveEdit(offset, finish);
 			uiStore.timelineControls.rangeSelectingTimeline = false;
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 		}
@@ -279,7 +279,7 @@ const TextWall = observer(function TextWall() {
 						{filteredScript.map((item, index) => {
 							const isTimeSelected = selectedIndex === index;
 							const isEditSelected = false;
-							const activeEdits = domainStore.activeEdits.filter((edit) => {
+							const activeEdits = domainStore.curIntent.activeEdits.filter((edit) => {
 								return (
 									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
 									|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
@@ -295,7 +295,7 @@ const TextWall = observer(function TextWall() {
 								isEditSelected={isEditSelected}
 							/>);
 						})}
-						{/* {domainStore.activeEdits.map((edit, index) => {
+						{/* {domainStore.curIntent.activeEdits.map((edit, index) => {
 							const leftScript = filteredScript.find((item) => {
 								return item.start <= edit.commonState.offset && item.end >= edit.commonState.offset;
 							});

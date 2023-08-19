@@ -31,10 +31,10 @@ class CommonState {
         trackId: 0,
     };
 
-    constructor(domainStore, id, trackId) {
+    constructor(domainStore, object, id, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
-
+		this.object = object;
         this.id = id;
         this.processing = true;
         this.trackInfo.trackId = trackId;

@@ -51,7 +51,7 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
 					finish = Math.min(finish, scene.commonState.offset);
 				}
 			}
-			domainStore.addActiveEdit(offset, finish);
+			domainStore.curIntent.addActiveEdit(offset, finish);
 			uiStore.timelineControls.rangeSelectingTimeline = false;
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;
@@ -63,7 +63,7 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
 			// else {
 			// 	const second = offsetPx;
 			// 	// create editState between "first" and "second"
-			// 	domainStore.addActiveEdit(uiStore.pxToSec(first), uiStore.pxToSec(second));
+			// 	domainStore.curIntent.addActiveEdit(uiStore.pxToSec(first), uiStore.pxToSec(second));
 			// 	uiStore.timelineControls.rangeSelectingTimeline = false;
 			// 	uiStore.timelineControls.rangeSelectingFirstPx = -1;
 			// 	uiStore.timelineControls.positionIndicatorVisibility -= 1;

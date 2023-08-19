@@ -43,7 +43,8 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
                 labelsDiv.scrollLeft -
                 uiStore.timelineConst.trackHandlerWidth;
 
-            scene.domainStore.splitVideo(scene, uiStore.pxToSec(offsetPx));
+            const newScene = scene.splitVideo(uiStore.pxToSec(offsetPx));
+			scene.domainStore.in_mainVideos.push(newScene);
             uiStore.timelineControls.splitting = false;
             uiStore.timelineControls.positionIndicatorVisibility -= 1;
             return;

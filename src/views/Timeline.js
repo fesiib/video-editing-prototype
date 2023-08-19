@@ -71,7 +71,7 @@ const Timeline = observer(function Timeline() {
             (value) => value.commonState.id
         );
         console.log(selectedSceneIds, uiStore.timelineControls.selectedTimelineItems.length);
-        domainStore.deleteEdits(selectedSceneIds);
+        domainStore.curIntent.deleteEdits(selectedSceneIds);
     });
 
     const onDeleteKeyDown = action((event) => {

@@ -178,12 +178,12 @@ const TimelineTracks = observer(function TimelineTracks() {
 			const id = video.commonState.trackInfo.trackId;
             newTracks[id].mainScenes.push(video);
 		}
-        for (let edit of domainStore.activeEdits) {
+        for (let edit of domainStore.curIntent.activeEdits) {
             const id = edit.commonState.trackInfo.trackId;
             newTracks[id].scenes.push(edit);
         }
         setTracks(newTracks);
-    }, [domainStore.videos, domainStore.activeEdits, trackCnt]);
+    }, [domainStore.videos, domainStore.curIntent.activeEdits, trackCnt]);
 
 	useEffect(() => {
 		if (tracksContainer.current) {

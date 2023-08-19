@@ -1,5 +1,8 @@
-import { action, makeAutoObservable } from "mobx";
+import { makeAutoObservable } from "mobx";
+
 import CommonState from "./commonState";
+
+import { randomUUID } from "../../utilities/genericUtilities";
 
 import axios from 'axios'
 
@@ -39,9 +42,9 @@ class VideoState {
     lowLabel = "misc";
 
     // {text: "", start: ""} start is relative to video
-    constructor(domainStore, videoLink, id, trackId, processLink=false) {
+    constructor(domainStore, videoLink, trackId, processLink=false) {
         makeAutoObservable(this, {}, { autoBind: true });
-        this.commonState = new CommonState(domainStore, id, trackId);
+        this.commonState = new CommonState(domainStore, this, "video-" + randomUUID(), trackId);
         this.domainStore = domainStore;
         this.videoLink = videoLink;
         this.transcript = [];
@@ -56,7 +59,6 @@ class VideoState {
 		const video = new VideoState(
             this.domainStore,
             this.videoLink,
-            this.commonState.id + "c@",
             this.commonState.trackInfo.trackId
         );
 		video.source = this.source;
@@ -133,6 +135,62 @@ class VideoState {
 		console.log(error);
 	}
 
+	splitVideo(offsetTimestamp) {
+        const nativeTimestamp = this.commonState.offsetToNative(offsetTimestamp);
+        const rightVideo = this.getDeepCopy();
+		const leftVideo = this.getDeepCopy();
+
+        rightVideo.commonState.setMetadata({
+            offset: offsetTimestamp,
+            start: nativeTimestamp,
+        });
+        leftVideo.commonState.setMetadata({
+            finish: nativeTimestamp,
+        });
+
+		console.log(rightVideo.commonState.id, leftVideo.commonState.id);
+        let rightTranscript = [];
+        let leftTranscript = [];
+
+        for (let script of this.transcript) {
+            if (script.finish <= nativeTimestamp) {
+                leftTranscript.push(script);
+            } else {
+                if (script.start >= nativeTimestamp) {
+                    rightTranscript.push(script);
+                } else if (script.finish - script.start > 0) {
+                    const proportionOfText =
+                        (nativeTimestamp - script.start) / (script.finish - script.start);
+                    let textMiddle = Math.round(proportionOfText * script.text.length);
+                    while (textMiddle < script.text.length && script.text[textMiddle] !== " ") {
+                        textMiddle += 1;
+                    }
+                    leftTranscript.push({
+                        text: script.text.slice(0, textMiddle),
+                        start: script.start,
+                        finish: nativeTimestamp,
+                        lowLabel: script.lowLabel,
+                        highLabel: script.highLabel,
+                    });
+                    rightTranscript.push({
+                        text: script.text.slice(textMiddle + 1),
+                        start: nativeTimestamp,
+                        finish: script.finish,
+                        lowLabel: script.lowLabel,
+                        highLabel: script.highLabel,
+                    });
+                }
+            }
+        }
+
+        rightVideo.setTranscript(rightTranscript);
+        leftVideo.setTranscript(leftTranscript);
+		return {
+			leftVideo,
+			rightVideo,
+		};
+    }
+
     get adjustedTranscript() {
         const adjusted = [];
         for (let single of this.transcript) {
@@ -149,6 +207,43 @@ class VideoState {
         }
         return adjusted;
     }
+
+	get spatialParameters() {
+		return {
+			x: this.commonState.x,
+			y: this.commonState.y,
+			z: this.commonState.z,
+			width: this.commonState.width,
+			height: this.commonState.height,
+			scaleX: this.commonState.scaleX,
+			scaleY: this.commonState.scaleY,
+			rotation: this.commonState.rotation,
+		}
+	}
+
+	get temporalParameters() {
+		return {
+			start: this.commonState.start,
+			finish: this.commonState.finish,
+			duration: this.commonState.duration,
+			offset: this.commonState.offset,
+			speed: this.commonState.speed,
+		};
+	}
+
+	get customParameters() {
+		return {
+			source: this.source,
+		};
+	}
+
+	get metaParameters() {
+		return {
+			spatial: this.spatialParameters,
+			temporal: this.temporalParameters,
+			custom: this.customParameters,
+		};
+	}
 }
 
 export default VideoState;

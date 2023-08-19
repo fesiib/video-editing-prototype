@@ -1,5 +1,8 @@
 import { makeAutoObservable } from "mobx";
+
 import CommonState from "./commonState";
+
+import { randomUUID } from "../../utilities/genericUtilities";
 
 /*
 
@@ -21,10 +24,10 @@ class EditState {
 	excludedIds = [];
 	editOperation = "";
 
-    constructor(domainStore, title, id, trackId) {
+    constructor(domainStore, title, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
-        this.commonState = new CommonState(domainStore, id, trackId);
+        this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
 		this.adjustedObjects = [];
 		this.excludedIds = [];
 		this.title = title;
