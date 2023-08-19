@@ -4,6 +4,9 @@ import { observer } from "mobx-react-lite";
 
 import useRootContext from "../../hooks/useRootContext";
 
+import { flattenObject } from "../../utilities/genericUtilities";
+import ParameterControls from "./ParameterControls";
+
 const OperationPanel = observer(function OperationPanel() {
 
 	const { uiStore, domainStore } = useRootContext();
@@ -13,50 +16,55 @@ const OperationPanel = observer(function OperationPanel() {
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
 	const metaParameters = selectedEdits.reduce((acc, edit) => {
-		for (let object of edit.adjustedObjects) {
-			for (let objectKey of Object.keys(object.metaParameters)) {
-				const curParameters = object.metaParameters[objectKey];
-				for (let parameterKey of Object.keys(curParameters)) {
-					const parameter = curParameters[parameterKey];
-					if (parameter in acc[objectKey]) {
-						acc[objectKey][parameter] = "mixed";
-					}
-					else {
-						acc[objectKey][parameter] = parameter;
-					}
+		for (let metaKey of Object.keys(edit.metaParameters)) {
+			const parameters = flattenObject(edit.metaParameters[metaKey]);
+			for (let parameterKey of Object.keys(parameters)) {
+				if (parameterKey in acc[metaKey]) {
+					acc[metaKey][parameterKey] = "mixed";
+				}
+				else {
+					acc[metaKey][parameterKey] = parameters[parameterKey];
 				}
 			}
 		}
+		return acc;
 	}, {
 		spatial: {},
 		temporal: {},
 		custom: {},
 	});
-
-	return (<div className="flex flex-col items-center p-1 m-1 border">
+	return (<div className="flex flex-col items-center p-2 border">
 		<h2> Operation Panel</h2>
 		{ selectedOperation === null ? 
 			<div> No Operation Selected </div> : 
 			<div> {
-				Object.keys(metaParameters).map((key) => {
-					const metaParameter = metaParameters[key];
+				Object.keys(metaParameters).map((metaKey) => {
+					const metaParameter = metaParameters[metaKey];
 					if (metaParameter !== null) {
 						return (<div
-							key={`metaParameter-${key}`}
-						> {
-							Object.keys(metaParameter).map((key) =>{
-								const parameter = metaParameter[key];
+							key={`metaParameter-${metaKey}`}
+							className="flex flex-col pb-2 border-t-2"
+						> 
+						<span
+							className="font-bold text-left text-xs px-2"
+						> {metaKey} </span> 
+						{
+							Object.keys(metaParameter).map((parameterKey) => {
+								const parameter = metaParameter[parameterKey];
 								if (parameter !== null) {
-									return (<div
-										key={`parameter-${key}`}
-									> {key}: {parameter} </div>);
+									return (<ParameterControls 
+										key={`parameter-${metaKey}-${parameterKey}`}
+										metaKey={metaKey}
+										parameterKey={parameterKey}
+										parameter={parameter}
+									/>);
 								}
 								return null;
 							})
-						} </div>)
-					}	
+						} </div>);
+					}
+					return null;	
 				})
-			
 			} </div> 
 		}
 	</div>);

@@ -50,7 +50,7 @@ class IntentState {
 	addActiveEdit(first, second) {
 		const start = Math.min(first, second);
 		const finish = Math.max(first, second);
-		let newEdit = new EditState(this.domainStore, `edit-${this.activeEdits.length}`, 0);
+		let newEdit = new EditState(this.domainStore, this, `edit-${this.activeEdits.length}`, 0);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,

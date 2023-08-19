@@ -52,13 +52,13 @@ const TimelineTracks = observer(function TimelineTracks() {
         const scene = active.data.current.scene;
         const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
         if (over) {
-            const oldTrackId = scene.commonState.trackInfo.trackId;
+            const oldTrackId = scene.commonState.trackId;
             const newTrackId = over.data.current.trackId;
             if (newTrackId !== oldTrackId) {
                 setTracks(
                     action((tracks) => {
                         for (let selectedScene of selectedScenes) {
-                            selectedScene.commonState.trackInfo.trackId = newTrackId;
+                            selectedScene.commonState.trackId = newTrackId;
                         }
                         const newTracks = tracks.map((track) => {
                             let newScenes = [];
@@ -102,7 +102,7 @@ const TimelineTracks = observer(function TimelineTracks() {
         }
         if (delta) {
             const index = tracks.findIndex(
-                (value) => value.trackId === scene.commonState.trackInfo.trackId
+                (value) => value.trackId === scene.commonState.trackId
             );
             const selectedScenes = uiStore.timelineControls.selectedTimelineItems;
             const { leftMostScene, newOffset, moveOffset, middle } = preventCollisionDragMultiple(
@@ -175,11 +175,11 @@ const TimelineTracks = observer(function TimelineTracks() {
             });
         }
 		for (let video of domainStore.videos) {
-			const id = video.commonState.trackInfo.trackId;
+			const id = video.commonState.trackId;
             newTracks[id].mainScenes.push(video);
 		}
         for (let edit of domainStore.curIntent.activeEdits) {
-            const id = edit.commonState.trackInfo.trackId;
+            const id = edit.commonState.trackId;
             newTracks[id].scenes.push(edit);
         }
         setTracks(newTracks);

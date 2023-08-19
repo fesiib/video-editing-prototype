@@ -1,9 +1,6 @@
 import { makeAutoObservable } from "mobx";
 
 import VideoState from "./objects/videoState";
-import TextState from "./objects/textState";
-import ImageState from "./objects/imageState";
-import ShapeState from "./objects/shapeState";
 import IntentState from "./intentState";
 
 class DomainStore {
@@ -29,19 +26,16 @@ class DomainStore {
 		{
 			title: "Text",
 			icon: null,
-			object: TextState,
 			supported: true,
 		},
 		{
 			title: "Image",
 			icon: null,
-			object: ImageState,
 			supported: false,
 		},
 		{
 			title: "Shape",
 			icon: null,
-			object: ShapeState,
 			supported: false,
 		},
 		{
@@ -52,7 +46,7 @@ class DomainStore {
 		{
 			title: "Crop",
 			icon: null,
-			supported: false,
+			supported: true,
 		},
 		{
 			title: "Zoom",
@@ -66,6 +60,57 @@ class DomainStore {
 		},
 	];
 
+	inputOperationMapping = {
+		text: [
+			"content",
+		],
+		file: [
+			"source",
+		],
+		dropdown: [
+			"type",
+			"style.fontFamily",
+		],
+		color: [
+			"style.fill",
+		],
+		number: [
+			"style.fontSize",
+			"x",
+			"y",
+			"z",
+			"width",
+			"height",
+			"start",
+			"finish",
+			"duration",
+			"speed",
+			"scaleX",
+			"scaleY",
+			"rotation",
+		],
+		align: [
+			"style.align",
+		],
+	};
+	
+	dropdownOptions = {
+		"style.fontFamily": [
+			"Arial",
+			"Times New Roman",
+			"Courier New",
+		],
+		"type": [
+			"rectangle",
+			"circle",
+			"star",
+		],
+		"style.align": [
+			"left",
+			"center",
+			"right",
+		],
+	};
 
     constructor(rootStore) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -109,19 +154,20 @@ class DomainStore {
 			}
 		}
 		for (let edit of this.curIntent.activeEdits) {
-			for (let object of edit.adjustedObjects) {
-				if (object instanceof VideoState) {
-					newMainVideos.push(object);
-				}
-				if (object instanceof TextState) {
-					newTexts.push(object);
-				}
-				if (object instanceof ImageState) {
-					newImages.push(object);
-				}
-				if (object instanceof ShapeState) {
-					newShapes.push(object);
-				}
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Text") {
+				this.in_texts.push(edit);
+			}
+			if (this.curIntent.editOperation.title === "Image") {
+				this.in_images.push(edit);
+			}
+			if (this.curIntent.editOperation.title === "Shape") {
+				this.in_shapes.push(edit);
+			}
+			for (let object of edit.adjustedVideos) {
+				newMainVideos.push(object);
 			}
 		}
 		this.in_mainVideos = newMainVideos;
@@ -170,10 +216,8 @@ class DomainStore {
 			}
 		}
 		for (let edit of this.curIntent.activeEdits) {
-			for (let object of edit.adjustedObjects) {
-				if (object instanceof VideoState) {
-					result.push(object);
-				}
+			for (let object of edit.adjustedVideos) {
+				result.push(object);
 			}
 		}
 		return result;
@@ -188,25 +232,115 @@ class DomainStore {
 			}
 		}
 		for (let edit of this.curIntent.activeEdits) {
-			for (let object of edit.adjustedObjects) {
-				if (object instanceof TextState) {
-					result.push(object);
-				}
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Text") {
+				result.push(edit);
 			}
 		}
 		return result;
 	}
 
 	get images() {
-		return [];
+		let result = [];
+		const excludedIds = this.curIntent.allExcludedIds;
+		for (let text of this.in_images) {
+			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+				result.push(text);
+			}
+		}
+		for (let edit of this.curIntent.activeEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Image") {
+				result.push(edit);
+			}
+		}
+		return result;
 	}
 
 	get shapes() {
-		return [];
+		let result = [];
+		const excludedIds = this.curIntent.allExcludedIds;
+		for (let text of this.in_shapes) {
+			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+				result.push(text);
+			}
+		}
+		for (let edit of this.curIntent.activeEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Shape") {
+				result.push(edit);
+			}
+		}
+		return result;
 	}
 
 	get curIntent() {
 		return this.intents[this.curIntentPos];
+	}
+
+	get numberParameterRanges() {
+		const canvasWidth =  this.rootStore.uiStore.canvasSize.width;
+		const canvasHeight =  this.rootStore.uiStore.canvasSize.height;
+		return {
+			"style.fontSize": {
+				min: 1,
+				max: 100,
+			},
+			"x": {
+				min: 0,
+				max: canvasWidth,
+			},
+			"y": {
+				min: 0,
+				max: canvasHeight,
+			},
+			"z": {
+				min: -100,
+				max: 100,
+			},
+			"width": {
+				min: 0,
+				max: canvasWidth,
+			},
+			"height": {
+				min: 0,
+				max: canvasHeight,
+			},
+			"start": {
+				min: 0,
+				max: this.projectMetadata.duration,
+			},
+			"finish": {
+				min: 0,
+				max: this.projectMetadata.duration,
+			},
+			"duration": {
+				min: 0,
+				max: this.projectMetadata.duration,
+			},
+			"speed": {
+				min: 0,
+				max: 1,
+			},
+			"scaleX": {
+				min: 0.1,
+				max: 1000,
+			},
+			"scaleY": {
+				min: 0.1,
+				max: 1000,
+			},
+			"rotation": {
+				min: 0,
+				max: 100,
+			},
+		};
 	}
 }
 

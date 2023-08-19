@@ -70,7 +70,6 @@ const Timeline = observer(function Timeline() {
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
             (value) => value.commonState.id
         );
-        console.log(selectedSceneIds, uiStore.timelineControls.selectedTimelineItems.length);
         domainStore.curIntent.deleteEdits(selectedSceneIds);
     });
 

@@ -222,7 +222,6 @@ const TextWall = observer(function TextWall() {
 			edit.commonState.start = updatedStart;
 		}
 		else {
-			console.log(limit, item.finish, edit.commonState.offset);
 			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
 			edit.commonState.finish = updatedFinish;	
 		}
@@ -238,10 +237,6 @@ const TextWall = observer(function TextWall() {
 		}
 		const item = over.data.current.item;
 		const edit = active.data.current.edit;
-		console.log(edit, activeHandler);
-		if (edit === undefined) {
-			console.log(active);
-		}
 		const isLeftHandler = active.data.current.isLeftHandler;
 		const limit = active.data.current.limit;
 		if (isLeftHandler) {

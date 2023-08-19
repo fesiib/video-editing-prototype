@@ -22,13 +22,12 @@ const DraggableText = observer(function DraggableText({ curText }) {
     useEffect(() => {
         setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(textRef.current) >= 0);
     }, [uiStore.canvasControls.transformerNodes]);
-
     return (
         <Text
             name={uiStore.objectNames.text}
             ref={textRef}
-            text={curText.content}
-            {...curText.textStyle}
+            text={curText.customParameters.content}
+            {...curText.customParameters.style}
             x={curText.commonState.x}
             y={curText.commonState.y}
             width={curText.commonState.width}

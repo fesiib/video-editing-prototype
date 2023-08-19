@@ -59,7 +59,7 @@ class VideoState {
 		const video = new VideoState(
             this.domainStore,
             this.videoLink,
-            this.commonState.trackInfo.trackId
+            this.commonState.trackId
         );
 		video.source = this.source;
 		video.transcript = [...this.transcript];
@@ -93,14 +93,13 @@ class VideoState {
 
     processVideoLink() {
 		const requestCfg = REQUEST_TYPES.youtubeLink;
-		console.log("here -> ", this.videoLink);
+		console.log("processing -> ", this.videoLink);
         axios.post(requestCfg.serverAddr + requestCfg.route, {
             videoLink: this.videoLink,
         }).then(this.processVideoLinkSuccess, this.processVideoLinkFailure);
     }
 
 	processVideoLinkSuccess(response) {
-		console.log(response);
 		if (response.data.status === "error") {
 			alert("Could not process the youtube link")
 			return;
@@ -118,7 +117,6 @@ class VideoState {
 		this.moments = response.data.moments;
 		this.videoMetadata = response.data.metadata;
 		this.source = ADDR + response.data.source;
-		console.log(this.source);
 		this.commonState.setMetadata({
 			thumbnails: [
 				this.commonState.id,
@@ -136,19 +134,13 @@ class VideoState {
 	}
 
 	splitVideo(offsetTimestamp) {
+		const { 
+			left: leftVideo,
+			right: rightVideo,
+		} = this.commonState.splitObject(offsetTimestamp);
+
         const nativeTimestamp = this.commonState.offsetToNative(offsetTimestamp);
-        const rightVideo = this.getDeepCopy();
-		const leftVideo = this.getDeepCopy();
 
-        rightVideo.commonState.setMetadata({
-            offset: offsetTimestamp,
-            start: nativeTimestamp,
-        });
-        leftVideo.commonState.setMetadata({
-            finish: nativeTimestamp,
-        });
-
-		console.log(rightVideo.commonState.id, leftVideo.commonState.id);
         let rightTranscript = [];
         let leftTranscript = [];
 

@@ -59,8 +59,8 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         );
         const areItemsSelected = uiStore.timelineControls.selectedTimelineItems.length > 0;
         const sameTrack = areItemsSelected
-            ? scene.commonState.trackInfo.trackId ===
-              uiStore.timelineControls.selectedTimelineItems[0].commonState.trackInfo.trackId
+            ? scene.commonState.trackId ===
+              uiStore.timelineControls.selectedTimelineItems[0].commonState.trackId
             : true;
         const metaKey = event.metaKey;
         if (metaKey && areItemsSelected && sameTrack) {

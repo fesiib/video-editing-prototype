@@ -27,9 +27,7 @@ class CommonState {
     transitionStart = {};
     transitionEnd = {};
 
-    trackInfo = {
-        trackId: 0,
-    };
+	trackId = 0;
 
     constructor(domainStore, object, id, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -37,7 +35,7 @@ class CommonState {
 		this.object = object;
         this.id = id;
         this.processing = true;
-        this.trackInfo.trackId = trackId;
+        this.trackId = trackId;
     }
 
     setMetadata(metadata) {
@@ -63,7 +61,7 @@ class CommonState {
         this.transitionStart = {};
         this.transitionEnd = {};
 
-        this.trackInfo.trackId = metadata.trackId ? metadata.trackId : this.trackInfo.trackId;
+        this.trackId = metadata.trackId ? metadata.trackId : this.trackId;
 
         this.processing = metadata.processing ? metadata.processing : this.processing;
 
@@ -89,6 +87,26 @@ class CommonState {
         const native = timestamp - this.offset + this.start;
         return native;
     }
+
+	splitObject(offsetTimestamp) {
+        const nativeTimestamp = this.offsetToNative(offsetTimestamp);
+        const right = this.object.getDeepCopy();
+		const left = this.object.getDeepCopy();
+
+        right.commonState.setMetadata({
+            offset: offsetTimestamp,
+            start: nativeTimestamp,
+        });
+        left.commonState.setMetadata({
+            finish: nativeTimestamp,
+        });
+
+		console.log(left.commonState.id, right.commonState.id);
+		return {
+			left,
+			right
+		};
+	}
 
     get end() {
         // relative to timline
@@ -124,7 +142,7 @@ class CommonState {
 	        transitionStart: { ...this.transitionStart },
 			transitionEnd: { ...this.transitionEnd },
 
-			trackId: this.trackInfo.trackId,
+			trackId: this.trackId,
 			
 			processing: this.processing,
 		};
