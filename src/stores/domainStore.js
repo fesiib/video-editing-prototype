@@ -73,6 +73,10 @@ class DomainStore {
 		],
 		color: [
 			"style.fill",
+			"background.fill",
+		],
+		range: [
+			"background.alpha",
 		],
 		number: [
 			"style.fontSize",
@@ -91,6 +95,7 @@ class DomainStore {
 		],
 		align: [
 			"style.align",
+			"style.verticalAlign",
 		],
 	};
 	
@@ -110,7 +115,20 @@ class DomainStore {
 			"center",
 			"right",
 		],
+		"style.verticalAlign": [
+			"top",
+			"middle",
+			"bottom",
+		],
 	};
+
+	skipParameterIfMultiple = [
+		"source",
+		"start",
+		"finish",
+		"duration",
+		"speed",
+	];
 
     constructor(rootStore) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -284,65 +302,6 @@ class DomainStore {
 
 	get curIntent() {
 		return this.intents[this.curIntentPos];
-	}
-
-	get numberParameterRanges() {
-		const canvasWidth =  this.rootStore.uiStore.canvasSize.width;
-		const canvasHeight =  this.rootStore.uiStore.canvasSize.height;
-		return {
-			"style.fontSize": {
-				min: 1,
-				max: 100,
-			},
-			"x": {
-				min: 0,
-				max: canvasWidth,
-			},
-			"y": {
-				min: 0,
-				max: canvasHeight,
-			},
-			"z": {
-				min: -100,
-				max: 100,
-			},
-			"width": {
-				min: 0,
-				max: canvasWidth,
-			},
-			"height": {
-				min: 0,
-				max: canvasHeight,
-			},
-			"start": {
-				min: 0,
-				max: this.projectMetadata.duration,
-			},
-			"finish": {
-				min: 0,
-				max: this.projectMetadata.duration,
-			},
-			"duration": {
-				min: 0,
-				max: this.projectMetadata.duration,
-			},
-			"speed": {
-				min: 0,
-				max: 1,
-			},
-			"scaleX": {
-				min: 0.1,
-				max: 1000,
-			},
-			"scaleY": {
-				min: 0.1,
-				max: 1000,
-			},
-			"rotation": {
-				min: 0,
-				max: 100,
-			},
-		};
 	}
 }
 

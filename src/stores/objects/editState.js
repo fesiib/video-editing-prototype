@@ -30,6 +30,11 @@ class EditState {
 			fontSize: 50, // number input & +/- buttons
 			fontFamily: "Arial", // dropdown
 			align: "center", // 3 align icons
+			verticalAlign: "middle" // 3 verticalAlign icons
+		},
+		background: {
+			fill: "#ffffff", // color picker
+			alpha: 1, // range slider
 		},
 	};
 
@@ -54,18 +59,17 @@ class EditState {
 		height: 0, // number input
 	};
 
-    constructor(domainStore, intent, title, trackId) {
+    constructor(domainStore, intent, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
 		this.intent = intent;
 		this.adjustedVideos = [];
 		this.excludedIds = [];
-		this.title = title;
     }
 
 	getDeepCopy() {
-		const newEdit = new EditState(this.domainStore, this.intent, this.title, this.commonState.trackId);
+		const newEdit = new EditState(this.domainStore, this.intent, this.commonState.trackId);
 		newEdit.commonState.setMetadata(this.commonState.metadata);
 		newEdit.adjustedVideos = [...this.adjustedVideos];
 		newEdit.excludedIds = [...this.excludedIds];
@@ -101,54 +105,57 @@ class EditState {
 		this.intent.deleteEdits([this.commonState.id]);
 		this.intent.activeEdits = [
 			...this.intent.activeEdits, ...edits];
-		console.log(edits);
 	}
 
 	setCustomParameters(parameters) {
 		if (this.intent.editOperation === null) {
 			return;
 		}
-		if (this.intent.editOperation.title === "Text") {
+		if (this.title === "Text") {
 			this.textParameters = { 
 				...this.textParameters,
 				...parameters,
 				style: {
 					...this.textParameters.style,
 					...parameters.style,
+				},
+				background: {
+					...this.textParameters.background,
+					...parameters.background,
 				}
 			};
 		}
-		if (this.intent.editOperation.title === "Image") {
+		if (this.title === "Image") {
 			this.imageParameters = {
 				...this.imageParameters,
 				...parameters
 			};
 		}
-		if (this.intent.editOperation.title === "Shape") {
+		if (this.title === "Shape") {
 			this.shapeParameters = {
 				...this.shapeParameters,
 				...parameters
 			};
 		}
-		if (this.intent.editOperation.title === "Zoom") {
+		if (this.title === "Zoom") {
 			this.zoomParameters = {
 				...this.zoomParameters,
 				...parameters
 			};
 		}
-		if (this.intent.editOperation.title === "Crop") {
+		if (this.title === "Crop") {
 			this.cropParameters = {
 				...this.cropParameters,
 				...parameters
 			};
 		}
-		if (this.intent.editOperation.title === "Cut") {
+		if (this.title === "Cut") {
 			this.cutParameters = {
 				...this.cutParameters,
 				...parameters
 			};
 		}
-		if (this.intent.editOperation.title === "Blur") {
+		if (this.title === "Blur") {
 			this.blurParameters = {
 				...this.blurParameters,
 				...parameters
@@ -157,6 +164,7 @@ class EditState {
 	}
 
 	setSpatialParameters(parameters) {
+		console.log(parameters)
 		this.commonState.setMetadata({ ...parameters });
 	}
 
@@ -210,27 +218,27 @@ class EditState {
 		if (this.intent.editOperation === null) {
 			return {};
 		}
-		if (this.intent.editOperation.title === "Text") {
+		if (this.title === "Text") {
 			return this.textParameters;
 		}
-		if (this.intent.editOperation.title === "Image") {
+		if (this.title === "Image") {
 			return this.imageParameters;
 		}
-		if (this.intent.editOperation.title === "Shape") {
+		if (this.title === "Shape") {
 			return this.shapeParameters;
 		}
 
-		if (this.intent.editOperation.title === "Zoom") {
+		if (this.title === "Zoom") {
 			return this.zoomParameters;
 		}
-		if (this.intent.editOperation.title === "Crop") {
+		if (this.title === "Crop") {
 			return this.cropParameters;
 		}
 
-		if (this.intent.editOperation.title === "Cut") {
+		if (this.title === "Cut") {
 			return this.cutParameters;
 		}
-		if (this.intent.editOperation.title === "Blur") {
+		if (this.title === "Blur") {
 			return this.blurParameters;
 		}
 		return null;
@@ -240,8 +248,8 @@ class EditState {
 		if (this.intent.editOperation === null) {
 			return {};
 		}
-		if (this.intent.editOperation.title === "Cut"
-			|| this.intent.editOperation.title === "Blur"
+		if (this.title === "Cut"
+			|| this.title === "Blur"
 		) {
 			return {
 				spatial: null,
@@ -253,6 +261,118 @@ class EditState {
 			spatial: this.spatialParameters,
 			temporal: this.temporalParameters,
 			custom: this.customParameters,
+		};
+	}
+
+	get title() {
+		if (this.intent.editOperation === null) {
+			return null;
+		}
+		return this.intent.editOperation.title;
+	}
+
+	get leftTimelineLimit() {
+		return this.intent.activeEdits.reduce((prev, otherEdit) => {
+			if (otherEdit.commonState.id === this.commonState.id) {
+				return prev;
+			}
+			if (otherEdit.commonState.end <= this.commonState.offset) {
+				return Math.max(prev, otherEdit.commonState.end);
+			}
+			return prev;	
+		}, 0);
+	}
+
+	get rightTimelineLimit() {
+		return this.intent.activeEdits.reduce((prev, otherEdit) => {
+			if (otherEdit.commonState.id === this.commonState.id) {
+				return prev;
+			}
+			if (otherEdit.commonState.offset >= this.commonState.end) {
+				return Math.min(prev, otherEdit.commonState.offset);
+			}
+			return prev;
+		}, this.domainStore.projectMetadata.duration);
+	}
+
+	get numberParameterConfig() {
+		const canvasWidth =  this.domainStore.rootStore.uiStore.canvasSize.width;
+		const canvasHeight =  this.domainStore.rootStore.uiStore.canvasSize.height;
+
+		const leftLimit = this.leftTimelineLimit;
+		const rightLimit = this.rightTimelineLimit;
+
+		return {
+			"background.alpha": {
+				min: 0,
+				max: 1,
+				step: 0.1,
+			},
+			"style.fontSize": {
+				min: 1,
+				max: 100,
+				step: 1,
+			},
+			"x": {
+				min: -this.commonState.width,
+				max: canvasWidth,
+				step: Math.min(canvasWidth, canvasHeight) / 100,
+			},
+			"y": {
+				min: -this.commonState.height,
+				max: canvasHeight,
+				step: Math.min(canvasWidth, canvasHeight) / 100,
+			},
+			"z": {
+				min: 0,
+				max: 100,
+				step: 1,
+			},
+			"width": {
+				min: 0,
+				max: canvasWidth,
+				step: Math.min(canvasWidth, canvasHeight) / 100,
+			},
+			"height": {
+				min: 0,
+				max: canvasHeight,
+				step: Math.min(canvasWidth, canvasHeight) / 100,
+			},
+			"start": {
+				min: leftLimit,
+				max: this.commonState.end,
+				step: 1,
+			},
+			"finish": {
+				min: this.commonState.offset,
+				max: rightLimit,
+				step: 1,
+			},
+			"duration": {
+				min: 0,
+				max: rightLimit - leftLimit,
+				step: 1,
+			},
+			"speed": {
+				min: 0,
+				max: 10,
+				step: 0.1,
+			},
+			"scaleX": {
+				min: 0.1,
+				max: 1000,
+				step: 1,
+			},
+			"scaleY": {
+				min: 0.1,
+				max: 1000,
+				step: 1,
+			},
+			"rotation": {
+				min: -180,
+				max: 180,
+				step: 10,
+			},
 		};
 	}
 }

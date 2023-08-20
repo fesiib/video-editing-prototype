@@ -12,23 +12,7 @@ import TrimHandlerRightIcon from "../icons/TrimHandlerRightIcon";
 
 const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler, isOverlay }) {
 	const { uiStore } = useRootContext();
-	const limit = edit.domainStore.curIntent.activeEdits.reduce((prev, otherEdit) => {
-		if (otherEdit.commonState.id === edit.commonState.id) {
-			return prev;
-		}
-		if (isLeftHandler) {
-			if (otherEdit.commonState.end <= edit.commonState.offset) {
-				return Math.max(prev, otherEdit.commonState.end);
-			}
-			return prev;	
-		}
-		else {
-			if (otherEdit.commonState.offset >= edit.commonState.end) {
-				return Math.min(prev, otherEdit.commonState.offset);
-			}
-			return prev;
-		}
-	}, isLeftHandler ? 0 : uiStore.timelineConst.trackMaxDuration);
+	const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
 	const { attributes, listeners, setNodeRef } = useDraggable({
         id: isOverlay ? `overlay-script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`
 			: `script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`,

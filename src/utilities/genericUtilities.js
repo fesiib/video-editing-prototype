@@ -48,6 +48,9 @@ export function unFlattenObject(object) {
 	return unFlattened;
 }
 
-export function isNumber(value) {
-	return typeof value === "number" && !isNaN(value);
+export function isNumeric(value) {
+	if (typeof value !== "string") {
+		return false;
+	}
+	return !isNaN(value) && !isNaN(parseFloat(value)) && isFinite(value);
 }

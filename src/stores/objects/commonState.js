@@ -39,31 +39,31 @@ class CommonState {
     }
 
     setMetadata(metadata) {
-        this.thumbnails = metadata.thumbnails ? metadata.thumbnails : this.thumbnails;
-        this.start = metadata.start ? metadata.start : this.start;
-        this.duration = metadata.duration ? metadata.duration : this.duration;
-        this.finish = metadata.finish ? metadata.finish : this.finish;
-        this.offset = metadata.offset ? metadata.offset : this.offset;
-        this.speed = metadata.speed ? metadata.speed : this.speed;
+        this.thumbnails = metadata.thumbnails !== undefined ? metadata.thumbnails : this.thumbnails;
+        this.start = metadata.start !== undefined ? metadata.start : this.start;
+        this.duration = metadata.duration !== undefined ? metadata.duration : this.duration;
+        this.finish = metadata.finish !== undefined ? metadata.finish : this.finish;
+        this.offset = metadata.offset !== undefined ? metadata.offset : this.offset;
+        this.speed = metadata.speed !== undefined ? metadata.speed : this.speed;
 
-        this.x = metadata.x ? metadata.x : this.x;
-        this.y = metadata.y ? metadata.y : this.y;
-        this.z = metadata.z ? metadata.z : this.z;
-        this.width = metadata.width ? metadata.width : this.width;
-        this.height = metadata.height ? metadata.height : this.height;
-        this.scaleX = metadata.scaleX ? metadata.scaleX : this.scaleX;
-        this.scaleY = metadata.scaleY ? metadata.scaleY : this.scaleY;
-        this.rotation = metadata.rotation ? metadata.rotation : this.rotation;
+        this.x = metadata.x !== undefined ? metadata.x : this.x;
+        this.y = metadata.y !== undefined ? metadata.y : this.y;
+        this.z = metadata.z !== undefined ? metadata.z : this.z;
+        this.width = metadata.width !== undefined ? metadata.width : this.width;
+        this.height = metadata.height !== undefined ? metadata.height : this.height;
+        this.scaleX = metadata.scaleX !== undefined ? metadata.scaleX : this.scaleX;
+        this.scaleY = metadata.scaleY !== undefined ? metadata.scaleY : this.scaleY;
+        this.rotation = metadata.rotation !== undefined ? metadata.rotation : this.rotation;
 
-        this.animation = metadata.animation ? metadata.animation : this.animation;
-        this.filterMap = metadata.filterMap ? metadata.filterMap : this.filterMap;
+        this.animation = metadata.animation !== undefined ? metadata.animation : this.animation;
+        this.filterMap = metadata.filterMap !== undefined ? metadata.filterMap : this.filterMap;
 
         this.transitionStart = {};
         this.transitionEnd = {};
 
-        this.trackId = metadata.trackId ? metadata.trackId : this.trackId;
+        this.trackId = metadata.trackId !== undefined ? metadata.trackId : this.trackId;
 
-        this.processing = metadata.processing ? metadata.processing : this.processing;
+        this.processing = metadata.processing !== undefined ? metadata.processing : this.processing;
 
         if (this.end >= this.domainStore.projectMetadata.duration) {
             this.domainStore.projectMetadata.duration = this.end;
@@ -71,16 +71,29 @@ class CommonState {
         }
     }
 
-    onDragEnd(target) {
+    onDrag(target) {
         this.x = target.x();
         this.y = target.y();
     }
 
-    onTransformerEnd(target) {
-        this.scaleX = target.scaleX();
-        this.scaleY = target.scaleY();
-        this.x = target.x();
-        this.y = target.y();
+    onTransform(target) {
+		if (this.object.title === "Text") {
+			const newWidth = this.width * target.scaleX();
+			const newHeight = this.height * target.scaleY();
+
+			this.width = newWidth;
+			this.height = newHeight;
+			this.x = target.x();
+			this.y = target.y();
+			this.rotation = target.rotation();
+		}
+		else {
+			this.scaleX = target.scaleX();
+			this.scaleY = target.scaleY();
+			this.x = target.x();
+			this.y = target.y();
+			this.rotation = target.rotation();
+		}
     }
 
     offsetToNative(timestamp) {

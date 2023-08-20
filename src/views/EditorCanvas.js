@@ -271,6 +271,7 @@ const EditorCanvas = observer(function EditorCanvas() {
                         ref={transformerRef}
                         rotateAnchorOffset={60}
                         enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+						keepRatio={false}
                     />
                     <Rect ref={selectionRectRef} fill={"rgba(0, 0, 255, 0.4"} visible={false} />
                 </Layer>

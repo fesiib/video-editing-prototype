@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 
-import { Text } from "react-konva";
+import { Rect, Text } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 
@@ -40,8 +40,28 @@ const DraggableText = observer(function DraggableText({ curText }) {
 	]);
 
 
-    return (
-        <Text
+    return (<>
+		<Rect 
+			id={curText.commonState.id + "_background"}
+			name={uiStore.objectNames.text + "_background"}
+			x={curText.commonState.x}
+			y={curText.commonState.y}
+			width={curText.commonState.width}
+			height={curText.commonState.height}
+			offsetX={curText.commonState.width / 2}
+			offsetY={curText.commonState.height / 2}
+			scaleX={curText.commonState.scaleX}
+			scaleY={curText.commonState.scaleY}
+			rotation={curText.commonState.rotation}
+			fill={curText.customParameters.background.fill}
+			opacity={curText.customParameters.background.alpha}
+			visible={isVisible}
+			perfectDrawEnabled={false}
+			draggable={false}
+			// onDragMove={action((event) => curText.commonState.onDrag(event.target))}
+			// onTransform={action((event) => curText.commonState.onTransform(event.target))}
+		/>
+		<Text
 			id={curText.commonState.id}
             name={uiStore.objectNames.text}
             ref={textRef}
@@ -55,12 +75,14 @@ const DraggableText = observer(function DraggableText({ curText }) {
             offsetY={curText.commonState.height / 2}
             scaleX={curText.commonState.scaleX}
             scaleY={curText.commonState.scaleY}
+			rotation={curText.commonState.rotation}
             draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
-            onDragEnd={(event) => curText.commonState.onDragEnd(event.target)}
-            onTransformEnd={(event) => curText.commonState.onTransformerEnd(event.target)}
+            onDragMove={action((event) => curText.commonState.onDrag(event.target))}
+            onTransform={action((event) => curText.commonState.onTransform(event.target))}
         />
+	</>
     );
 });
 
