@@ -9,6 +9,7 @@ import useRootContext from "../hooks/useRootContext";
 import { Util } from "konva/lib/Util";
 import DraggableVideo from "../components/canvas/DraggableVideo";
 import DraggableText from "../components/canvas/DraggableText";
+import DraggableImage from "../components/canvas/DraggableImage";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -264,6 +265,9 @@ const EditorCanvas = observer(function EditorCanvas() {
                     ))}
                     {domainStore.texts.map((text) => (
                         <DraggableText key={text.commonState.id} curText={text} />
+                    ))}
+                    {domainStore.images.map((image) => (
+                        <DraggableImage key={image.commonState.id} curImage={image} />
                     ))}
                 </Layer>
                 <Layer>

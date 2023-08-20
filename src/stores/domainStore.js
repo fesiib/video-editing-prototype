@@ -31,7 +31,7 @@ class DomainStore {
 		{
 			title: "Image",
 			icon: null,
-			supported: false,
+			supported: true,
 		},
 		{
 			title: "Shape",

@@ -15,9 +15,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
-    const imageElement = document.createElement("img");
-    imageElement.src = "/logo192.png";
-
     const isVisible = curVideo.commonState.isVisible(uiStore.timelineControls.playPosition);
 
     const videoElement = useMemo(() => {

@@ -15,7 +15,7 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
-	const onInputChange = action((event) => {
+	const onFileInputChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
 			let functionToCall = null;
@@ -33,9 +33,42 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 			}));
 		}
 	});
-	return (<div className="flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
-		<input className="w-1/2 border" id={inputId} type="file" value={parameter} onChange={(event) => onInputChange(event)} />
+
+	const onUrlInputChange = action((event) => {
+		const value = event.target.value;
+		for (let edit of selectedEdits) {
+			let functionToCall = null;
+			if (metaKey === "custom") {
+				functionToCall = edit.setCustomParameters;
+			}
+			if (metaKey === "spatial") {
+				functionToCall = edit.setSpatialParameters;
+			}
+			if (metaKey === "temporal") {
+				functionToCall = edit.setTemporalParameters;
+			}
+			functionToCall(unFlattenObject({
+				[parameterKey]: value
+			}));
+		}
+	});
+
+	return (<div className="">
+		{/* <label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label> */}
+		<div id={inputId} className="border grid">
+			<input className="" 
+				id={inputId + "_url"} 
+				type="url"
+				value={parameter}
+				onChange={(event) => onUrlInputChange(event)} 
+			/>
+			<input className=""
+				id={inputId}
+				type="file"
+				onChange={(event) => onFileInputChange(event)}
+				accept={"image/*"}
+			/>
+		</div>
 	</div>);
 });
 
@@ -352,6 +385,9 @@ const ParameterControls = observer(function ParameterControls({
 	if (inputOperationMapping.align.includes(parameterKey)) {
 		return (<AlignInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} 
 			options={dropdownOptions[parameterKey]} />);
+	}
+	if (inputOperationMapping.file.includes(parameterKey)) {
+		return (<FileInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
 	}
 	return (<div> no format for {metaKey}.{parameterKey} </div>);
 });

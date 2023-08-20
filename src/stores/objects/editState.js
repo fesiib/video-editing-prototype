@@ -39,7 +39,7 @@ class EditState {
 	};
 
 	imageParameters = {
-		source: "", // file picker
+		source: "/placeholder.jpg", // file picker
 	};
 
 	shapeParameters = {
