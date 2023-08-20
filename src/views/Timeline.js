@@ -81,6 +81,32 @@ const Timeline = observer(function Timeline() {
         }
     });
 
+	const onNavigationClick = action((direction) => {
+		if (direction === "prev") {
+			const prevEditStart = domainStore.curIntent.activeEdits.reduce((acc, edit) => {
+				if (edit.commonState.offset < uiStore.timelineControls.playPosition
+					&& edit.commonState.offset > acc) {
+					return edit.commonState.offset;
+				}
+				else {
+					return acc;
+				}
+			}, 0);
+			uiStore.timelineControls.playPosition = prevEditStart;
+		} else if (direction === "next") {
+			const nextEditStart = domainStore.curIntent.activeEdits.reduce((acc, edit) => {
+				if (edit.commonState.offset > uiStore.timelineControls.playPosition
+					&& edit.commonState.offset < acc) {
+					return edit.commonState.offset;
+				}
+				else {
+					return acc;
+				}
+			}, domainStore.projectMetadata.duration);
+			uiStore.timelineControls.playPosition = nextEditStart;
+		}
+	});
+
     useEffect(
         action(() => {
             if (uiStore.timelineControls.intervalId === -1) {
@@ -164,6 +190,22 @@ const Timeline = observer(function Timeline() {
             </div>
 
             <TimelineTracks />
+			<div className="flex justify-end gap-2">
+				<button
+                    className={"bg-indigo-300 p-1"}
+                    id="prev_button"
+                    onClick={() => onNavigationClick("prev")}
+                >
+                    Previous
+                </button>
+				<button
+                    className={"bg-indigo-300 p-1"}
+                    id="next_button"
+                    onClick={() => onNavigationClick("next")}
+                >
+                    Next
+                </button>
+			</div>
         </div>
     );
 });

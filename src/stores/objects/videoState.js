@@ -42,10 +42,11 @@ class VideoState {
     lowLabel = "misc";
 
     // {text: "", start: ""} start is relative to video
-    constructor(domainStore, videoLink, trackId, processLink=false) {
+    constructor(domainStore, parentList, videoLink, trackId, processLink=false) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.commonState = new CommonState(domainStore, this, "video-" + randomUUID(), trackId);
         this.domainStore = domainStore;
+		this.parentList = parentList;
         this.videoLink = videoLink;
         this.transcript = [];
 		this.moments = [];
@@ -58,6 +59,7 @@ class VideoState {
 	getDeepCopy() {
 		const video = new VideoState(
             this.domainStore,
+			this.parentList,
             this.videoLink,
             this.commonState.trackId
         );
@@ -133,10 +135,10 @@ class VideoState {
 		console.log(error);
 	}
 
-	splitVideo(offsetTimestamp) {
+	split(offsetTimestamp) {
 		const { 
-			left: leftVideo,
-			right: rightVideo,
+			left,
+			right,
 		} = this.commonState.splitObject(offsetTimestamp);
 
         const nativeTimestamp = this.commonState.offsetToNative(offsetTimestamp);
@@ -175,13 +177,19 @@ class VideoState {
             }
         }
 
-        rightVideo.setTranscript(rightTranscript);
-        leftVideo.setTranscript(leftTranscript);
+        right.setTranscript(rightTranscript);
+        left.setTranscript(leftTranscript);
 		return {
-			leftVideo,
-			rightVideo,
+			left,
+			right,
 		};
     }
+
+	replaceSelf(edits) {
+		let newParentList = this.parentList.filter((video) => video.commonState.id !== this.commonState.id);
+		newParentList.push(...edits);
+		this.parentList = [...newParentList];
+	}
 
     get adjustedTranscript() {
         const adjusted = [];

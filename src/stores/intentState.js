@@ -60,7 +60,6 @@ class IntentState {
 	deleteEdits(selectedIds) {
 		this.activeEdits = this.activeEdits.filter((edit) => {
             const isSelected = selectedIds.includes(edit.commonState.id);
-            console.log(isSelected);
             return !isSelected;
         });
 	}

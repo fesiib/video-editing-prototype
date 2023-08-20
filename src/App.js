@@ -32,6 +32,7 @@ const App = observer(function App() {
         action(() => {
 			domainStore.in_mainVideos = [new VideoState(
 				domainStore,
+				domainStore.in_mainVideos,
 				DUMMY_VIDEO_LINKS[0],
 				0,
 				true,

@@ -167,7 +167,6 @@ const TimelineTracks = observer(function TimelineTracks() {
 
 	const onBackgroundClick = action((event) => {
         uiStore.selectTimelineObjects([]);
-        uiStore.timelineControls.splitting = false;
     });
 
     useEffect(() => {

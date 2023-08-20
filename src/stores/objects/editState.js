@@ -83,6 +83,27 @@ class EditState {
 		return newEdit;
 	}
 
+	split(offsetTimestamp) {
+		const { 
+			left,
+			right
+		} = this.commonState.splitObject(offsetTimestamp);
+
+        //const nativeTimestamp = this.commonState.offsetToNative(offsetTimestamp);
+		// probably do something for zoom, blur, crop, cut
+		return { 
+			left,
+			right
+		};
+    }
+
+	replaceSelf(edits) {
+		this.intent.deleteEdits([this.commonState.id]);
+		this.intent.activeEdits = [
+			...this.intent.activeEdits, ...edits];
+		console.log(edits);
+	}
+
 	setCustomParameters(parameters) {
 		if (this.intent.editOperation === null) {
 			return;
