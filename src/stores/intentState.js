@@ -10,7 +10,6 @@ class IntentState {
 	trackId = 0;
 	activeEdits = [];
 	editOperationIdx = -1;
-	defaultObject = null;
 	id = "";
 
     constructor(domainStore, textCommand, sketchCommand, trackId) {
@@ -19,7 +18,6 @@ class IntentState {
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.editOperationIdx = -1;
-		this.defaultObject = null;
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
@@ -34,10 +32,9 @@ class IntentState {
 	}
 
 	setEditOperationIdx(newIdx) {
+		this.domainStore.rootStore.resetTempState();
 		if (newIdx === -1) {
 			this.editOperationIdx = -1;
-			this.activeEdits = [];
-			this.defaultObject = null;
 			return;
 		}
 		if (!this.domainStore.editOperations[newIdx].supported) {
@@ -66,6 +63,10 @@ class IntentState {
             console.log(isSelected);
             return !isSelected;
         });
+	}
+
+	getObjectById(id) {
+		return this.activeEdits.find((edit) => edit.commonState.id === id);
 	}
 	
 	get allExcludedIds() {

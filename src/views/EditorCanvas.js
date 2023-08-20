@@ -30,6 +30,10 @@ const EditorCanvas = observer(function EditorCanvas() {
         return target.name() === uiStore.backgroundName;
     };
     const isObject = (target) => {
+		const object = domainStore.curIntent.getObjectById(target.id());
+		if (object === undefined) {
+			return false;
+		}
         for (let i in uiStore.objectNames) {
             const objectName = uiStore.objectNames[i];
             if (objectName === target.name()) {
@@ -50,8 +54,7 @@ const EditorCanvas = observer(function EditorCanvas() {
             stageRef.current.getPointerPosition().x,
             stageRef.current.getPointerPosition().y,
         ]);
-        transformerRef.current.nodes([]);
-        uiStore.canvasControls.transformerNodes = [];
+		uiStore.selectCanvasObjects([]);
         selectionRectRef.current.visible(true);
         selectionRectRef.current.width(0);
         selectionRectRef.current.height(0);
@@ -97,17 +100,15 @@ const EditorCanvas = observer(function EditorCanvas() {
         const selected = objects.filter((object) => {
             return Util.haveIntersection(box, object.getClientRect());
         });
-        transformerRef.current.nodes(selected);
-        uiStore.canvasControls.transformerNodes = selected;
+		uiStore.selectCanvasObjects(selected);
     });
 
     const onStageClick = action((event) => {
         if (selectionRectRef.current.visible()) {
             return;
         }
-        if (isBackground(event.target)) {
-            transformerRef.current.nodes([]);
-            uiStore.canvasControls.transformerNodes = [];
+        if (isBackground(event.target) || !isObject(event.target)) {
+			uiStore.selectCanvasObjects([]);
             return;
         }
         if (!isObject(event.target)) {
@@ -120,21 +121,18 @@ const EditorCanvas = observer(function EditorCanvas() {
         if (!metaPressed && !isSelected) {
             // if no key pressed and the node is not selected
             // select just one
-            transformerRef.current.nodes([event.target]);
-            uiStore.canvasControls.transformerNodes = [event.target];
+			uiStore.selectCanvasObjects([event.target]);
         } else if (metaPressed && isSelected) {
             // if we pressed keys and node was selected
             // we need to remove it from selection:
             const nodes = transformerRef.current.nodes().slice(); // use slice to have new copy of array
             // remove node from array
             nodes.splice(nodes.indexOf(event.target), 1);
-            transformerRef.current.nodes(nodes);
-            uiStore.canvasControls.transformerNodes = nodes;
+			uiStore.selectCanvasObjects(nodes);
         } else if (metaPressed && !isSelected) {
             // add the node into selection
             const nodes = transformerRef.current.nodes().concat([event.target]);
-            transformerRef.current.nodes(nodes);
-            uiStore.canvasControls.transformerNodes = nodes;
+			uiStore.selectCanvasObjects(nodes);
         }
     });
 
@@ -152,6 +150,23 @@ const EditorCanvas = observer(function EditorCanvas() {
         }),
         [projectHeight, projectWidth]
     );
+
+	useEffect(() => {
+		let nodes = [];
+		for (let nodeId of uiStore.canvasControls.transformerNodeIds) {
+			const object = domainStore.curIntent.getObjectById(nodeId);
+			const node = stageRef.current.findOne(`#${nodeId}`);
+			if (node !== undefined
+				&& object.commonState.isVisible(uiStore.timelineControls.playPosition)	
+			) {
+				nodes.push(node);
+			}
+		}
+		transformerRef.current.nodes(nodes);
+	}, [
+		uiStore.canvasControls.transformerNodeIds,
+		uiStore.timelineControls.playPosition,
+	]);
 
     return (
         <>

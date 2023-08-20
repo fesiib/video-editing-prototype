@@ -17,7 +17,7 @@ class UIStore {
     };
     canvasControls = {
         scalePos: 4,
-        transformerNodes: [],
+        transformerNodeIds: [],
     };
     canvasConst = {
         margin: 2,
@@ -65,9 +65,13 @@ class UIStore {
     };
 
     objectNames = {
-        video: "video",
+        //video: "video",
         image: "image",
         text: "text",
+		shape: "shape",
+		zoom: "zoom",
+		crop: "crop",
+		blur: "blur",
     };
     backgroundName = "bg";
 
@@ -151,6 +155,14 @@ class UIStore {
         return this.timelineConst.trackMaxDuration * this.timelineControls.pxPerSec;
     }
 
+	resetTempState() {
+		this.canvasControls.transformerNodeIds = [];
+		this.timelineControls.selectedTimelineItems = [];
+		this.timelineControls.splitting = false;
+		this.timelineControls.rangeSelectingTimeline = false;
+		this.timelineControls.rangeSelectingFirstPx = -1;
+	}
+
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
         this.canvasSize = {
@@ -169,6 +181,45 @@ class UIStore {
 
     pxToSec(px) {
         return Math.round((px / this.timelineControls.pxPerSec) * 100) / 100;
+	}
+
+	removeSelectedCanvasObject(objectId) {
+		this.canvasControls.transformerNodeIds = 
+			this.canvasControls.transformerNodeIds.filter((id) => id !== objectId);
+	}
+
+	addSelectedCanvasObject(objectId) {
+		if (this.canvasControls.transformerNodeIds.includes(objectId)) {
+			return;
+		}
+		this.canvasControls.transformerNodeIds = [
+			...this.canvasControls.transformerNodeIds,
+			objectId,
+		];
+	}
+
+	selectCanvasObjects(objects) {
+		const objectIds = objects.map((object) => object.id());
+		let selectedObjects = [];
+
+		for (const id of objectIds) {
+			const object = this.rootStore.domainStore.curIntent.getObjectById(id);
+			if (object !== undefined) {
+				selectedObjects.push(object);
+			}
+		}
+		this.canvasControls.transformerNodeIds = objectIds;
+		this.timelineControls.selectedTimelineItems = selectedObjects;
+	}
+
+	selectTimelineObjects(objects) {
+		this.timelineControls.selectedTimelineItems = objects;
+		if (objects.length === 1) {
+			const object = objects[0];
+			this.canvasControls.transformerNodeIds = [object.commonState.id];
+			return;
+		}
+		this.canvasControls.transformerNodeIds = [];
 	}
 }
 

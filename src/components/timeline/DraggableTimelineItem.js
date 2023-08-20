@@ -88,12 +88,12 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
                     }
                 }
             }
-            uiStore.timelineControls.selectedTimelineItems = [...newSelectedTimelineItems];
+            uiStore.selectTimelineObjects([...newSelectedTimelineItems]);
         } else {
             if (index >= 0) {
-                uiStore.timelineControls.selectedTimelineItems = [];
+                uiStore.selectTimelineObjects([]);
             } else {
-                uiStore.timelineControls.selectedTimelineItems = [scene];
+                uiStore.selectTimelineObjects([scene]);
             }
         }
     });

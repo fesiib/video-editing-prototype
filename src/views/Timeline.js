@@ -71,6 +71,7 @@ const Timeline = observer(function Timeline() {
             (value) => value.commonState.id
         );
         domainStore.curIntent.deleteEdits(selectedSceneIds);
+		uiStore.selectTimelineObjects([]);
     });
 
     const onDeleteKeyDown = action((event) => {
@@ -78,13 +79,6 @@ const Timeline = observer(function Timeline() {
             ///delete key
             onDeleteTimelineItems();
         }
-    });
-
-    const onBackgroundClick = action((event) => {
-        uiStore.timelineControls.selectedTimelineItems = [];
-        if (uiStore.timelineControls.splitting) {
-        }
-        uiStore.timelineControls.splitting = false;
     });
 
     useEffect(
@@ -107,7 +101,7 @@ const Timeline = observer(function Timeline() {
     );
 
     return (
-        <div className="bg-slate-100" onClick={onBackgroundClick} onKeyDown={onDeleteKeyDown}>
+        <div className="bg-slate-100" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
                 <button className="bg-indigo-300 p-1" id="play_button" onClick={onPressPlay}>
                     {uiStore.timelineControls.tryPlaying ? "pause" : "play"}

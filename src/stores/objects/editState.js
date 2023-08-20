@@ -235,5 +235,5 @@ class EditState {
 		};
 	}
 }
-
+ 
 export default EditState;

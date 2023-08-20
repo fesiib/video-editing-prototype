@@ -178,13 +178,15 @@ class DomainStore {
 		this.intents.push(
 			new IntentState(this, "", "todo", 0)
 		);
+		this.rootStore.resetTempState();
 	}
 
 	cancelIntent() {
 		this.intents.pop();
-		this.intetnts.push(
+		this.intents.push(
 			new IntentState(this, "", "todo", 0)
 		);
+		this.rootStore.resetTempState();
 	}
 
     get transcripts() {

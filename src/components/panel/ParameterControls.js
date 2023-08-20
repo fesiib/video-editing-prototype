@@ -78,6 +78,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 
 	const onInputChange = action((event) => {
 		const value = event.target.value;
+		const number = parseFloat(value);
 		for (let edit of selectedEdits) {
 			let functionToCall = null;
 			if (metaKey === "custom") {
@@ -90,7 +91,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 				functionToCall = edit.setTemporalParameters;
 			}
 			functionToCall(unFlattenObject({
-				[parameterKey]: value
+				[parameterKey]: number
 			}));
 		}
 	});
@@ -181,6 +182,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
+
 	const onInputChange = action((newAlign) => {
 		for (let edit of selectedEdits) {
 			let functionToCall = null;
@@ -198,17 +200,17 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 			}));
 		}
 	});
-	return (<div className="my-1 flex justify-start gap-1">
+	return (<div id={inputId} className="my-1 flex justify-start gap-1">
 		<button 
-			className="w-5 bg-gray-200 hover:bg-gray-300"
+			className={"w-5 bg-gray-200 hover:bg-gray-300" + (parameter === "left" ? " bg-gray-300" : "")}
 			onClick={() => onInputChange("left")}
 		> L </button>
 		<button 
-			className="w-5 bg-gray-200 hover:bg-gray-300"
+			className={"w-5 bg-gray-200 hover:bg-gray-300" + (parameter === "center" ? " bg-gray-300" : "")}
 			onClick={() => onInputChange("center")}
 		> C </button>
 		<button 
-			className="w-5 bg-gray-200 hover:bg-gray-300"
+			className={"w-5 bg-gray-200 hover:bg-gray-300" + (parameter === "right" ? " bg-gray-300" : "")}
 			onClick={() => onInputChange("right")}
 		> R </button>
 	</div>);
@@ -221,7 +223,7 @@ const ParameterControls = observer(function ParameterControls({
 	const inputOperationMapping = domainStore.inputOperationMapping;
 	const dropdownOptions = domainStore.dropdownOptions;
 	const numberParameterRanges = domainStore.numberParameterRanges;
-	
+
 	if (inputOperationMapping.text.includes(parameterKey)) {
 		return (<TextInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
 	}

@@ -165,6 +165,11 @@ const TimelineTracks = observer(function TimelineTracks() {
         }
     });
 
+	const onBackgroundClick = action((event) => {
+        uiStore.selectTimelineObjects([]);
+        uiStore.timelineControls.splitting = false;
+    });
+
     useEffect(() => {
         let newTracks = [];
         for (let i = 0; i < trackCnt; i++) {
@@ -201,66 +206,70 @@ const TimelineTracks = observer(function TimelineTracks() {
         <div
 			ref={tracksContainer}
             className="bg-slate-300 m-5 flex-column overflow-scroll relative disable-select"
-            style={{
+			style={{
                 width: width,
             }}
         >
             <TimelineLabels />
-            <DndContext
-                sensors={useSensors(
-                    useSensor(PointerSensor, {
-                        activationConstraint: {
-                            distance: 10,
-                        },
-                    })
-                )}
-                modifiers={[restrictToFirstScrollableAncestor]}
-                collisionDetection={closestCorners}
-                onDragStart={onGenericDragStart}
-                onDragOver={onGenericDrageMove}
-                onDragEnd={onGenericDragEnd}
-            >
-                <SortableContext
-                    items={tracks.map(({ trackId }) => "sortable_track_" + trackId)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    {tracks.map(({ trackId, mainScenes, scenes }) => {
-                        const id = "track_" + trackId;
-                        return <SortableTimelineTrack 
-							key={id}
-							trackId={trackId}
-							mainScenes={mainScenes}
-							scenes={scenes}
-						/>;
-                    })}
-                </SortableContext>
-                <DragOverlay
-                    modifiers={!!activeTrackId ? [restrictToVerticalAxis] : []}
-                    dropAnimation={null}
-                >
-                    {activeTrackId ? (
-                        <TimelineTrack
-                            key={"track_overlay"}
-                            id={activeTrackId}
-                            title={"?"}
-							mainScenes={[]}
-                            scenes={[]}
-                            isOverlay={true}
-                            isOver={false}
-                        />
-                    ) : null}
-                    {activeItem ? (
-                        <TimelineItem
-                            key={"item_overlay"}
-                            scene={activeItem.data.current.scene}
-                            scenes={[]}
-                            transform={null}
-                            isOverlay={true}
-                            id={activeItem.id}
-                        />
-                    ) : null}
-                </DragOverlay>
-            </DndContext>
+			<div
+				onClick={onBackgroundClick}
+			>
+				<DndContext
+					sensors={useSensors(
+						useSensor(PointerSensor, {
+							activationConstraint: {
+								distance: 10,
+							},
+						})
+					)}
+					modifiers={[restrictToFirstScrollableAncestor]}
+					collisionDetection={closestCorners}
+					onDragStart={onGenericDragStart}
+					onDragOver={onGenericDrageMove}
+					onDragEnd={onGenericDragEnd}
+				>
+					<SortableContext
+						items={tracks.map(({ trackId }) => "sortable_track_" + trackId)}
+						strategy={verticalListSortingStrategy}
+					>
+						{tracks.map(({ trackId, mainScenes, scenes }) => {
+							const id = "track_" + trackId;
+							return <SortableTimelineTrack 
+								key={id}
+								trackId={trackId}
+								mainScenes={mainScenes}
+								scenes={scenes}
+							/>;
+						})}
+					</SortableContext>
+					<DragOverlay
+						modifiers={!!activeTrackId ? [restrictToVerticalAxis] : []}
+						dropAnimation={null}
+					>
+						{activeTrackId ? (
+							<TimelineTrack
+								key={"track_overlay"}
+								id={activeTrackId}
+								title={"?"}
+								mainScenes={[]}
+								scenes={[]}
+								isOverlay={true}
+								isOver={false}
+							/>
+						) : null}
+						{activeItem ? (
+							<TimelineItem
+								key={"item_overlay"}
+								scene={activeItem.data.current.scene}
+								scenes={[]}
+								transform={null}
+								isOverlay={true}
+								id={activeItem.id}
+							/>
+						) : null}
+					</DragOverlay>
+				</DndContext>
+			</div>
         </div>
     );
 });

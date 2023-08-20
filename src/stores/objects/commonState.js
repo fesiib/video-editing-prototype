@@ -108,6 +108,15 @@ class CommonState {
 		};
 	}
 
+	isVisible(playPosition) {
+        return (this.offset <= playPosition &&
+        	this.end > playPosition);
+	}
+
+	get isVisibleOnCanvas() {
+		return this.isVisible(this.domainStore.rootStore.uiStore.timelineControls.playPosition);
+	}
+
     get end() {
         // relative to timline
         return this.offset + (this.finish - this.start);

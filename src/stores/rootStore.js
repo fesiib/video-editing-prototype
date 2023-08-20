@@ -8,6 +8,10 @@ class RootStore {
         this.uiStore = new UIStore(this);
         this.domainStore = new DomainStore(this);
     }
+
+	resetTempState() {
+		this.uiStore.resetTempState();
+	}
 }
 
 export default RootStore;

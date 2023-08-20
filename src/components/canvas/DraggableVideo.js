@@ -18,11 +18,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     const imageElement = document.createElement("img");
     imageElement.src = "/logo192.png";
 
-    const left = curVideo.commonState.offset;
-    const right = curVideo.commonState.end;
-    const isVisible =
-        left <= uiStore.timelineControls.playPosition &&
-        right >= uiStore.timelineControls.playPosition;
+    const isVisible = curVideo.commonState.isVisible(uiStore.timelineControls.playPosition);
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
@@ -109,9 +105,28 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
         canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
     }, []);
 
-    useEffect(() => {
-        setIsSelected(uiStore.canvasControls.transformerNodes.indexOf(imageRef.current) >= 0);
-    }, [uiStore.canvasControls.transformerNodes]);
+	useEffect(action(() => {
+		if (!isVisible) {
+			uiStore.removeSelectedCanvasObject(imageRef.current.id());
+		}
+		else if (
+			uiStore.timelineControls.selectedTimelineItems.findIndex(
+				(item) => (item.commonState.id === imageRef.current.id())
+			) >= 0
+			&& 	uiStore.timelineControls.selectedTimelineItems.length === 1
+		) {
+			uiStore.addSelectedCanvasObject(imageRef.current.id());
+		}
+    }), [
+		isVisible,
+		uiStore.timelineControls.selectedTimelineItems,
+	]);
+
+    useEffect(action(() => {
+		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(imageRef.current.id()) >= 0);
+    }), [
+		uiStore.canvasControls.transformerNodeIds
+	]);
 
     useEffect(() => {
         if (!isVisible) {
@@ -153,6 +168,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     return (
         <Image
+			id={curVideo.commonState.id}
             name={uiStore.objectNames.video}
             ref={imageRef}
             image={videoElement}
@@ -166,7 +182,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             offsetY={curVideo.commonState.height / 2}
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
-            draggable={isSelected}
+            draggable={false}
             visible={isVisible}
             perfectDrawEnabled={false}
             onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
