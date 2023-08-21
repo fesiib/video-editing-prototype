@@ -54,3 +54,24 @@ export function isNumeric(value) {
 	}
 	return !isNaN(value) && !isNaN(parseFloat(value)) && isFinite(value);
 }
+
+export function roundNumber(value, decimals) {
+	return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
+}
+
+export function adaptCoordinate(coorindate, objectSize, projectSize, canvasSize) {
+	return (canvasSize / 2) + (coorindate + (objectSize / 2) - (projectSize / 2));
+	//return (canvasSize / 2) + (coorindate - (projectSize / 2));
+}
+
+export function groundCoordinate(coordinate, objectSize, projectSize, canvasSize) {
+	return coordinate - (canvasSize / 2) + (projectSize / 2) - (objectSize / 2);
+	//return coordinate - (canvasSize / 2) + (projectSize / 2);
+}
+
+export function rotatePoint({ x, y }, angle) {
+	const rad = angle * Math.PI / 180;
+	const rcos = Math.cos(rad);
+	const rsin = Math.sin(rad);
+	return { x: x * rcos - y * rsin, y: y * rcos + x * rsin };
+};

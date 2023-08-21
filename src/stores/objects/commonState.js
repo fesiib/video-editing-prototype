@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { groundCoordinate, roundNumber } from "../../utilities/genericUtilities";
 
 class CommonState {
     processing = false;
@@ -71,29 +72,57 @@ class CommonState {
         }
     }
 
-    onDrag(target) {
-        this.x = target.x();
-        this.y = target.y();
+    onDragMove(target) {
+		const projectWidth = this.domainStore.projectMetadata.width;
+		const projectHeight = this.domainStore.projectMetadata.height;
+		const canvasWidth = this.domainStore.rootStore.uiStore.canvasSize.width;
+		const canvasHeight = this.domainStore.rootStore.uiStore.canvasSize.height;
+		if (this.object.title === "Text"
+			|| this.object.title === "Image"
+		) {
+			this.x = roundNumber(groundCoordinate(target.x(), target.width(), projectWidth, canvasWidth), 0);
+        	this.y = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
+		}
+		// target.setAttrs({
+		// 	x: this.x,
+		// 	y: this.y,
+		// });
     }
 
     onTransform(target) {
-		if (this.object.title === "Text") {
-			const newWidth = this.width * target.scaleX();
-			const newHeight = this.height * target.scaleY();
+		const minWidth = this.domainStore.rootStore.uiStore.canvasConst.minWidth;
+		const projectWidth = this.domainStore.projectMetadata.width;
+		const projectHeight = this.domainStore.projectMetadata.height;
+		const canvasWidth = this.domainStore.rootStore.uiStore.canvasSize.width;
+		const canvasHeight = this.domainStore.rootStore.uiStore.canvasSize.height;
 
-			this.width = newWidth;
-			this.height = newHeight;
-			this.x = target.x();
-			this.y = target.y();
-			this.rotation = target.rotation();
+		if (this.object.title === "Text"
+			|| this.object.title === "Image"
+		) {
+			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);
+			const newHeight = Math.max(target.height() * target.scaleY(), minWidth);
+			
+			this.width = roundNumber(newWidth, 0);
+			this.height = roundNumber(newHeight, 0);
+
+			this.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+        	this.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+		
+
+			this.scaleX = 1;
+			this.scaleY = 1;
 		}
-		else {
-			this.scaleX = target.scaleX();
-			this.scaleY = target.scaleY();
-			this.x = target.x();
-			this.y = target.y();
-			this.rotation = target.rotation();
-		}
+		this.rotation = roundNumber(target.rotation(), 0);
+
+		target.setAttrs({
+			scaleX: this.scaleX,
+			scaleY: this.scaleY,
+			width: this.width,
+			height: this.height,
+			rotation: this.rotation,
+			x: target.x(),
+			y: target.y(),
+		});
     }
 
     offsetToNative(timestamp) {

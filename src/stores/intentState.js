@@ -17,10 +17,11 @@ class IntentState {
         this.domainStore = domainStore;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
-		this.editOperationIdx = -1;
+		this.editOperationIdx = 0;
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
+		const edit = this.addActiveEdit(0, 100);
     }
 
 	setTextCommand(textCommand) {
@@ -55,6 +56,7 @@ class IntentState {
 			offset: start,
 		});
 		this.activeEdits.push(newEdit);
+		return this.activeEdits[this.activeEdits.length - 1];
 	}
 
 	deleteEdits(selectedIds) {

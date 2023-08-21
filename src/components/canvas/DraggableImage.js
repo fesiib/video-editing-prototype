@@ -7,14 +7,24 @@ import { Image } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 
+import { adaptCoordinate } from "../../utilities/genericUtilities";
+
 const DraggableImage = observer(function DraggableImage({ curImage }) {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore } = useRootContext();
 
     const imageRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curImage.commonState.isVisible(uiStore.timelineControls.playPosition);
+
+	const canvasWidth = uiStore.canvasSize.width;
+	const canvasHeight = uiStore.canvasSize.height;
+	const projectWidth = domainStore.projectMetadata.width;
+    const projectHeight = domainStore.projectMetadata.height;
+
+	const x = adaptCoordinate(curImage.commonState.x, curImage.commonState.width, projectWidth, canvasWidth);
+	const y = adaptCoordinate(curImage.commonState.y, curImage.commonState.height, projectHeight, canvasHeight);
 
 	const imageObject = useMemo(() => {
         const element = document.createElement("img");
@@ -54,8 +64,8 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             ref={imageRef}
             image={imageObject}
 			//crop={curImage.customParameters.crop}
-            x={curImage.commonState.x}
-            y={curImage.commonState.y}
+            x={x}
+            y={y}
             width={curImage.commonState.width}
             height={curImage.commonState.height}
             offsetX={curImage.commonState.width / 2}
@@ -66,7 +76,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
-            onDragMove={action((event) => curImage.commonState.onDrag(event.target))}
+            onDragMove={action((event) => curImage.commonState.onDragMove(event.target))}
             onTransform={action((event) => curImage.commonState.onTransform(event.target))}
         />
 	</>

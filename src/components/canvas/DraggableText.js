@@ -6,15 +6,24 @@ import { action } from "mobx";
 import { Rect, Text } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
+import { adaptCoordinate } from "../../utilities/genericUtilities";
+
 
 const DraggableText = observer(function DraggableText({ curText }) {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore } = useRootContext();
 
     const textRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curText.commonState.isVisible(uiStore.timelineControls.playPosition);
+	const canvasWidth = uiStore.canvasSize.width;
+	const canvasHeight = uiStore.canvasSize.height;
+	const projectWidth = domainStore.projectMetadata.width;
+    const projectHeight = domainStore.projectMetadata.height;
+
+	const x = adaptCoordinate(curText.commonState.x, curText.commonState.width, projectWidth, canvasWidth);
+	const y = adaptCoordinate(curText.commonState.y, curText.commonState.height, projectHeight, canvasHeight);
 
     useEffect(action(() => {
 		if (!isVisible) {
@@ -39,13 +48,12 @@ const DraggableText = observer(function DraggableText({ curText }) {
 		uiStore.canvasControls.transformerNodeIds
 	]);
 
-
     return (<>
 		<Rect 
 			id={curText.commonState.id + "_background"}
-			name={uiStore.objectNames.text + "_background"}
-			x={curText.commonState.x}
-			y={curText.commonState.y}
+			name={uiStore.objectNames.text}
+			x={x}
+			y={y}
 			width={curText.commonState.width}
 			height={curText.commonState.height}
 			offsetX={curText.commonState.width / 2}
@@ -55,11 +63,11 @@ const DraggableText = observer(function DraggableText({ curText }) {
 			rotation={curText.commonState.rotation}
 			fill={curText.customParameters.background.fill}
 			opacity={curText.customParameters.background.alpha}
+			draggable={isSelected}
 			visible={isVisible}
 			perfectDrawEnabled={false}
-			draggable={false}
-			// onDragMove={action((event) => curText.commonState.onDrag(event.target))}
-			// onTransform={action((event) => curText.commonState.onTransform(event.target))}
+			onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
+			onTransform={action((event) => curText.commonState.onTransform(event.target))}
 		/>
 		<Text
 			id={curText.commonState.id}
@@ -67,8 +75,8 @@ const DraggableText = observer(function DraggableText({ curText }) {
             ref={textRef}
             text={curText.customParameters.content}
             {...curText.customParameters.style}
-            x={curText.commonState.x}
-            y={curText.commonState.y}
+            x={x}
+            y={y}
             width={curText.commonState.width}
             height={curText.commonState.height}
             offsetX={curText.commonState.width / 2}
@@ -79,7 +87,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
             draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
-            onDragMove={action((event) => curText.commonState.onDrag(event.target))}
+            onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
             onTransform={action((event) => curText.commonState.onTransform(event.target))}
         />
 	</>

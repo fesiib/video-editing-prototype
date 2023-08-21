@@ -7,15 +7,23 @@ import { Image } from "react-konva";
 import { Animation } from "konva/lib/Animation";
 
 import useRootContext from "../../hooks/useRootContext";
+import { adaptCoordinate } from "../../utilities/genericUtilities";
 
 const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore } = useRootContext();
 
     const imageRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curVideo.commonState.isVisible(uiStore.timelineControls.playPosition);
+	const canvasWidth = uiStore.canvasSize.width;
+	const canvasHeight = uiStore.canvasSize.height;
+	const projectWidth = domainStore.projectMetadata.width;
+    const projectHeight = domainStore.projectMetadata.height;
+
+	const x = adaptCoordinate(curVideo.commonState.x, curVideo.commonState.width, projectWidth, canvasWidth);
+	const y = adaptCoordinate(curVideo.commonState.y, curVideo.commonState.height, projectHeight, canvasHeight);
 
     const videoElement = useMemo(() => {
         const element = document.createElement("video");
@@ -29,12 +37,12 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     const onLoadedMetadata = action(() => {
         const metadata = {
             duration: videoElement.duration,
-            width: videoElement.videoWidth,
-            height: videoElement.videoHeight,
+            width: videoElement.videoWidth * (domainStore.projectMetadata.width / videoElement.videoWidth),
+            height: videoElement.videoHeight * (domainStore.projectMetadata.height / videoElement.videoHeight),
             scaleX: 1,
             scaleY: 1,
-            x: uiStore.canvasSize.width / 2,
-            y: uiStore.canvasSize.height / 2,
+            x: 0,
+            y: 0,
 			processing: false,
         };
         curVideo.commonState.setMetadata(metadata);
@@ -162,7 +170,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     // 		}));
     // 	}
     // }), [isVisible, videoElement, uiStore.timelineControls.tryPlaying]);
-
     return (
         <Image
 			id={curVideo.commonState.id}
@@ -171,19 +178,19 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             image={videoElement}
             //image={imageElement}
             stroke="black"
-            x={curVideo.commonState.x}
-            y={curVideo.commonState.y}
+            x={x}
+            y={y}
             width={curVideo.commonState.width}
             height={curVideo.commonState.height}
             offsetX={curVideo.commonState.width / 2}
             offsetY={curVideo.commonState.height / 2}
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
-            draggable={false}
+            draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
-            onDragEnd={(event) => curVideo.commonState.onDragEnd(event.target)}
-            onTransformEnd={(event) => curVideo.commonState.onTransformerEnd(event.target)}
+            onDragMove={(event) => curVideo.commonState.onDragMove(event.target)}
+            onTransform={(event) => curVideo.commonState.onTransformer(event.target)}
         />
     );
 });

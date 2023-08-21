@@ -164,7 +164,6 @@ class EditState {
 	}
 
 	setSpatialParameters(parameters) {
-		console.log(parameters)
 		this.commonState.setMetadata({ ...parameters });
 	}
 
@@ -196,11 +195,10 @@ class EditState {
 		return {
 			x: this.commonState.x,
 			y: this.commonState.y,
-			z: this.commonState.z,
 			width: this.commonState.width,
 			height: this.commonState.height,
-			scaleX: this.commonState.scaleX,
-			scaleY: this.commonState.scaleY,
+			// scaleX: this.commonState.scaleX,
+			// scaleY: this.commonState.scaleY,
 			rotation: this.commonState.rotation,
 		}
 	}

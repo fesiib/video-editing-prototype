@@ -197,28 +197,7 @@ const EditorCanvas = observer(function EditorCanvas() {
                         y={0}
                         width={uiStore.canvasSize.width}
                         height={uiStore.canvasSize.height}
-                        fill={"red"}
-                        name={uiStore.backgroundName}
-                    />
-                </Layer>
-                <Layer
-                    scaleX={uiStore.canvasScale}
-                    scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
-                >
-                    <Rect
-                        x={uiStore.canvasSize.width / 2}
-                        y={uiStore.canvasSize.height / 2}
-                        width={projectWidth}
-                        height={projectHeight}
-                        offsetX={projectWidth / 2}
-                        offsetY={projectHeight / 2}
-                        fill={"black"}
-                        scaleX={1}
-                        scaleY={1}
+                        fill={"gray"}
                         name={uiStore.backgroundName}
                     />
                 </Layer>
@@ -260,14 +239,56 @@ const EditorCanvas = observer(function EditorCanvas() {
                     x={uiStore.canvasSize.width / 2}
                     y={uiStore.canvasSize.height / 2}
                 >
+					<Rect
+                        x={uiStore.canvasSize.width / 2}
+                        y={uiStore.canvasSize.height / 2}
+                        width={projectWidth}
+                        height={projectHeight}
+                        offsetX={projectWidth / 2}
+                        offsetY={projectHeight / 2}
+                        fill={"black"}
+                        scaleX={1}
+                        scaleY={1}
+                        name={uiStore.backgroundName}
+                    />
                     {domainStore.videos.map((video) => (
                         <DraggableVideo key={video.commonState.id} curVideo={video} />
                     ))}
+                </Layer>
+				<Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
                     {domainStore.texts.map((text) => (
                         <DraggableText key={text.commonState.id} curText={text} />
                     ))}
+                </Layer>
+				<Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
                     {domainStore.images.map((image) => (
                         <DraggableImage key={image.commonState.id} curImage={image} />
+                    ))}
+                </Layer>
+				<Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
+                    {domainStore.shapes.map((shape) => (
+                        <DraggableImage key={shape.commonState.id} curImage={shape} />
                     ))}
                 </Layer>
                 <Layer>
@@ -275,7 +296,14 @@ const EditorCanvas = observer(function EditorCanvas() {
                         ref={transformerRef}
                         rotateAnchorOffset={60}
                         enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+						rotationSnaps={[0, 45, 90, 135, 180, 225, 270]}
 						keepRatio={false}
+						boundBoxFunc={(oldBox, newBox) => {
+							if (newBox.width < uiStore.canvasConst.minWidth) {
+							  	return oldBox;
+							}
+							return newBox;
+						}}
                     />
                     <Rect ref={selectionRectRef} fill={"rgba(0, 0, 255, 0.4"} visible={false} />
                 </Layer>
