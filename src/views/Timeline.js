@@ -109,7 +109,8 @@ const Timeline = observer(function Timeline() {
 
     useEffect(
         action(() => {
-            if (uiStore.timelineControls.playPosition >= domainStore.projectMetadata.duration) {
+            if (uiStore.timelineControls.isPlaying
+				&& uiStore.timelineControls.playPosition >= domainStore.projectMetadata.duration) {
 				// if (uiStore.timelineControls.intervalId !== -1) {
 				// 	clearInterval(uiStore.timelineControls.intervalId);
 				// }
@@ -129,7 +130,7 @@ const Timeline = observer(function Timeline() {
 			//uiStore.timelineControls.intervalId,
             uiStore.timelineControls.playPosition,
             domainStore.projectMetadata.duration,
-			//uiStore.timelineControls.isPlaying,
+			uiStore.timelineControls.isPlaying,
         ]
     );
 

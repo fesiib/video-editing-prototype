@@ -55,8 +55,10 @@ class EditState {
 	cropParameters = {
 		x: 0, // number input
 		y: 0, // number input
-		width: 0, // number input
-		height: 0, // number input
+		cropX: 0,
+		cropY: 0,
+		cropWidth: 0, // number input
+		cropHeight: 0, // number input
 	};
 
     constructor(domainStore, intent, trackId) {
@@ -66,6 +68,15 @@ class EditState {
 		this.intent = intent;
 		this.adjustedVideos = [];
 		this.excludedIds = [];
+
+		this.cropParameters = {
+			x: 0,
+			y: 0,
+			cropX: 0,
+			cropY: 0,
+			cropWidth: domainStore.projectMetadata.width,
+			cropHeight: domainStore.projectMetadata.height,
+		};
     }
 
 	getDeepCopy() {
@@ -248,6 +259,7 @@ class EditState {
 		}
 		if (this.title === "Cut"
 			|| this.title === "Blur"
+			|| this.title === "Crop"
 		) {
 			return {
 				spatial: null,
@@ -300,6 +312,9 @@ class EditState {
 	get numberParameterConfig() {
 		const canvasWidth =  this.domainStore.rootStore.uiStore.canvasSize.width;
 		const canvasHeight =  this.domainStore.rootStore.uiStore.canvasSize.height;
+
+		const projectWidth = this.domainStore.projectMetadata.width;
+		const projectHeight = this.domainStore.projectMetadata.height;
 
 		const leftLimit = this.leftTimelineLimit;
 		const rightLimit = this.rightTimelineLimit;
@@ -374,6 +389,26 @@ class EditState {
 				min: -180,
 				max: 180,
 				step: 10,
+			},
+			"cropX": {
+				min: 0,
+				max: projectWidth,
+				step: 1,
+			},
+			"cropY": {
+				min: 0,
+				max: projectHeight,
+				step: 1,
+			},
+			"cropWidth": {
+				min: 0,
+				max: projectWidth,
+				step: 1,
+			},
+			"cropHeight": {
+				min: 0,
+				max: projectHeight,
+				step: 1,
 			},
 		};
 	}

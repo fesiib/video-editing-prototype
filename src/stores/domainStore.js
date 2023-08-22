@@ -92,6 +92,13 @@ class DomainStore {
 			"scaleX",
 			"scaleY",
 			"rotation",
+			"cropX",
+			"cropY",
+			"cropWidth",
+			"cropHeight",
+		],
+		toggle: [
+			"cropped",
 		],
 		align: [
 			"style.align",
@@ -397,6 +404,22 @@ class DomainStore {
 					continue;
 				}
 				if (intent.editOperation.title === "Cut") {
+					result[result.length - 1].push(edit);
+				}
+			}
+		}
+		return result;
+	}
+
+	get crops() {
+		let result = [];
+		for (let intent of this.intents) {
+			result.push([]);
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Crop") {
 					result[result.length - 1].push(edit);
 				}
 			}

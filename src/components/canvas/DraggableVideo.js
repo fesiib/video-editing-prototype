@@ -267,7 +267,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             ref={videoRef}
             image={videoElement}
             //image={imageElement}
-            stroke="black"
             x={x}
             y={y}
             width={curVideo.commonState.width}
@@ -276,6 +275,12 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             offsetY={curVideo.commonState.height / 2}
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
+			crop={curVideo.commonState.cropped ? {
+				x: curVideo.commonState.cropX,
+				y: curVideo.commonState.cropY,
+				width: curVideo.commonState.cropWidth,
+				height: curVideo.commonState.cropHeight,
+			} : null}
             draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}

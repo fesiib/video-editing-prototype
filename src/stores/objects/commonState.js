@@ -22,6 +22,13 @@ class CommonState {
     scaleY = 1;
     rotation = 0; //deg
 
+	cropped = false;
+	cropX = 0;
+	cropY = 0;
+	cropWidth = 0;
+	cropHeight = 0;
+
+
     animation = {};
     filterMap = {
 		opacity: 1,
@@ -59,6 +66,12 @@ class CommonState {
         this.scaleX = metadata.scaleX !== undefined ? metadata.scaleX : this.scaleX;
         this.scaleY = metadata.scaleY !== undefined ? metadata.scaleY : this.scaleY;
         this.rotation = metadata.rotation !== undefined ? metadata.rotation : this.rotation;
+
+		this.cropped = metadata.cropped !== undefined ? metadata.cropped : this.cropped;
+		this.cropX = metadata.cropX !== undefined ? metadata.cropX : this.cropX;
+		this.cropY = metadata.cropY !== undefined ? metadata.cropY : this.cropY;
+		this.cropWidth = metadata.cropWidth !== undefined ? metadata.cropWidth : this.cropWidth;
+		this.cropHeight = metadata.cropHeight !== undefined ? metadata.cropHeight : this.cropHeight;
 
         this.animation = metadata.animation !== undefined ? 
 			{ ...this.animation, ...metadata.animation } : this.animation;

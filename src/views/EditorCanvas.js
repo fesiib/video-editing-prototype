@@ -11,6 +11,7 @@ import DraggableVideo from "../components/canvas/DraggableVideo";
 import DraggableText from "../components/canvas/DraggableText";
 import DraggableImage from "../components/canvas/DraggableImage";
 import SkippedConfig from "../components/canvas/SkippedConfig";
+import CropConfig from "../components/canvas/CropConfig";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -33,6 +34,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 	const images = domainStore.images;
 	const shapes = domainStore.shapes;
 	const skippedParts = linearizeEdits(domainStore.allSkippedParts);
+	const crops = linearizeEdits(domainStore.crops);
 
     const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
@@ -256,6 +258,9 @@ const EditorCanvas = observer(function EditorCanvas() {
 					{skippedParts.map((skipped) => (
                         <SkippedConfig key={skipped.commonState.id} skipped={skipped} />
                     ))}
+					{crops.map((crop) => (
+						<CropConfig key={crop.commonState.id} crop={crop} />
+					))}
 
                 </Layer>
 				{/* <Layer
@@ -276,7 +281,9 @@ const EditorCanvas = observer(function EditorCanvas() {
 						rotationSnaps={[0, 45, 90, 135, 180, 225, 270]}
 						keepRatio={false}
 						boundBoxFunc={(oldBox, newBox) => {
-							if (newBox.width < uiStore.canvasConst.minWidth) {
+							if (newBox.width < uiStore.canvasConst.minWidth
+								|| newBox.height < uiStore.canvasConst.minHeight	
+							) {
 							  	return oldBox;
 							}
 							return newBox;

@@ -78,6 +78,12 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             offsetY={curImage.commonState.height / 2}
             scaleX={curImage.commonState.scaleX}
             scaleY={curImage.commonState.scaleY}
+			crop={curImage.commonState.cropped ? {
+				x: curImage.commonState.cropX,
+				y: curImage.commonState.cropY,
+				width: curImage.commonState.cropWidth,
+				height: curImage.commonState.cropHeight,
+			} : null}
 			rotation={curImage.commonState.rotation}
             draggable={isSelected}
             visible={isVisible}

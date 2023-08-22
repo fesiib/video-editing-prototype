@@ -359,6 +359,39 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 	</div>);
 });
 
+const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parameter}) {
+	const {uiStore, domainStore} = useRootContext();
+	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const inputId = `${metaKey}-${parameterKey}-input`;
+
+	const onInputChange = action((event) => {
+		const value = event.target.value;
+		console.log(value);
+		const number = parseInt(value);
+		for (let edit of selectedEdits) {
+			let functionToCall = null;
+			if (metaKey === "custom") {
+				functionToCall = edit.setCustomParameters;
+			}
+			if (metaKey === "spatial") {
+				functionToCall = edit.setSpatialParameters;
+			}
+			if (metaKey === "temporal") {
+				functionToCall = edit.setTemporalParameters;
+			}
+			functionToCall(unFlattenObject({
+				[parameterKey]: number
+			}));
+		}
+	});
+
+	return (<div className="my-1 flex justify-between">
+		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<input className="w-1/2 border" id={inputId} type="checkbox" value={parameter} onChange={(event) => onInputChange(event)} />
+	</div>);
+});
+
 const ParameterControls = observer(function ParameterControls({
 	metaKey, parameterKey, parameter
 }) {
@@ -388,6 +421,9 @@ const ParameterControls = observer(function ParameterControls({
 	}
 	if (inputOperationMapping.file.includes(parameterKey)) {
 		return (<FileInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
+	}
+	if (inputOperationMapping.toggle.includes(parameterKey)) {
+		return (<ToggleInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
 	}
 	return (<div> no format for {metaKey}.{parameterKey} </div>);
 });
