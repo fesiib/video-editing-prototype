@@ -23,7 +23,11 @@ class CommonState {
     rotation = 0; //deg
 
     animation = {};
-    filterMap = {};
+    filterMap = {
+		opacity: 1,
+		brightness: 1,
+		blur: 0,
+	};
 
     transitionStart = {};
     transitionEnd = {};
@@ -56,8 +60,10 @@ class CommonState {
         this.scaleY = metadata.scaleY !== undefined ? metadata.scaleY : this.scaleY;
         this.rotation = metadata.rotation !== undefined ? metadata.rotation : this.rotation;
 
-        this.animation = metadata.animation !== undefined ? metadata.animation : this.animation;
-        this.filterMap = metadata.filterMap !== undefined ? metadata.filterMap : this.filterMap;
+        this.animation = metadata.animation !== undefined ? 
+			{ ...this.animation, ...metadata.animation } : this.animation;
+        this.filterMap = metadata.filterMap !== undefined ? 
+			{ ...this.filterMap, ...metadata.filterMap } : this.filterMap;
 
         this.transitionStart = {};
         this.transitionEnd = {};

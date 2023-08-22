@@ -121,9 +121,8 @@ class VideoState {
 		this.source = ADDR + response.data.source;
 		this.commonState.setMetadata({
 			thumbnails: [
+				"video",
 				this.commonState.id,
-				"misc",
-				"None",
 			],
 		});
 	}

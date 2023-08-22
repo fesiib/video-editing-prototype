@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -10,6 +10,7 @@ import { Util } from "konva/lib/Util";
 import DraggableVideo from "../components/canvas/DraggableVideo";
 import DraggableText from "../components/canvas/DraggableText";
 import DraggableImage from "../components/canvas/DraggableImage";
+import SkippedConfig from "../components/canvas/SkippedConfig";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -23,8 +24,15 @@ const EditorCanvas = observer(function EditorCanvas() {
     const projectWidth = domainStore.projectMetadata.width;
     const projectHeight = domainStore.projectMetadata.height;
 
+	const linearizeEdits = action((edits) => {
+		return domainStore.linearizeEdits(edits);
+	});
+
 	const videos = domainStore.videos;
 	const texts = domainStore.texts;
+	const images = domainStore.images;
+	const shapes = domainStore.shapes;
+	const skippedParts = linearizeEdits(domainStore.allSkippedParts);
 
     const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
@@ -168,7 +176,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 		}
 		transformerRef.current.nodes(nodes);
 	}, [
-		uiStore.canvasControls.transformerNodeIds,
+		JSON.stringify(uiStore.canvasControls.transformerNodeIds),
 		uiStore.timelineControls.playPosition,
 	]);
 
@@ -236,15 +244,19 @@ const EditorCanvas = observer(function EditorCanvas() {
                     x={uiStore.canvasSize.width / 2}
                     y={uiStore.canvasSize.height / 2}
                 >
-                    {texts.map((text) => {
-						return <DraggableText key={text.commonState.id} curText={text} />;
-					})}
-					{domainStore.images.map((image) => (
+                    {texts.map((text) => (
+						<DraggableText key={text.commonState.id} curText={text} />
+					))}
+					{images.map((image) => (
                         <DraggableImage key={image.commonState.id} curImage={image} />
                     ))}
-					 {domainStore.shapes.map((shape) => (
+					{shapes.map((shape) => (
                         <DraggableImage key={shape.commonState.id} curImage={shape} />
                     ))}
+					{skippedParts.map((skipped) => (
+                        <SkippedConfig key={skipped.commonState.id} skipped={skipped} />
+                    ))}
+
                 </Layer>
 				{/* <Layer
                     scaleX={uiStore.canvasScale}

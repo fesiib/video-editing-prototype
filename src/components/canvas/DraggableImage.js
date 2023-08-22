@@ -50,7 +50,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 		}
     }), [
 		isVisible,
-		uiStore.timelineControls.selectedTimelineItems,
+		uiStore.timelineControls.selectedTimelineItems.length,
 	]);
 
     useEffect(action(() => {
@@ -59,14 +59,14 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 		}
 		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(imageRef.current.id()) >= 0);
     }), [
-		uiStore.canvasControls.transformerNodeIds
+		JSON.stringify(uiStore.canvasControls.transformerNodeIds)
 	]);
 
 
-    return curImage.title !== domainStore.editOperations["Image"].title ? null : (<>
+    return curImage.title !== domainStore.editOperations[uiStore.objectNames.image].title ? null : (<>
 		<Image
 			id={curImage.commonState.id}
-            name={uiStore.objectNames.text}
+            name={uiStore.objectNames.image}
             ref={imageRef}
             image={imageObject}
 			//crop={curImage.customParameters.crop}

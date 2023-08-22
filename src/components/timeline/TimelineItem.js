@@ -8,12 +8,18 @@ import TrimWrapper from "./TrimWrapper";
 
 export const TimelineItem = observer(
     forwardRef(function TimelineItem(
-        { isMain, scene, scenes, transform, isOverlay, attributes, listeners, ...props },
+        { itemType, scene, scenes, transform, attributes, listeners, ...props },
         ref
     ) {
-        const { uiStore } = useRootContext();
+        const { uiStore, domainStore } = useRootContext();
 
-        const lowLabel = scene.lowLabel;
+        const lowLabel = scene.intent === undefined ?
+        	(scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "")
+			: scene.intent.editOperationKey;
+
+		const isOverlay = itemType === "overlay";
+		const isMain = itemType === "main";
+		const isSkipped = itemType === "skipped";
 
         const isSelected =
             uiStore.timelineControls.selectedTimelineItems.findIndex(
@@ -33,15 +39,27 @@ export const TimelineItem = observer(
                     : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
             width: uiStore.secToPx(scene.commonState.sceneDuration),
             //transition: `transform ${0.5}s`,
-            backgroundColor: uiStore.labelColorPalette[lowLabel],
+            backgroundColor: uiStore.editColorPalette[lowLabel],
             opacity: isOverlay ? 0.8 : 1,
         };
 
-		let outerClassName = (isMain ? "absolute bottom-0 z-10" :
-			(isSelected
+		let outerClassName = "";
+		let innerClassName = "";
+
+		if (isMain) {
+			outerClassName = "absolute bottom-0 z-10";
+			innerClassName = "h-6 bg-white";
+		}
+		else if (isSkipped) {
+			outerClassName = "absolute bottom-0 z-10";
+			innerClassName = "h-6 bg-gray-300";
+		}
+		else {
+			outerClassName = (isSelected
 				? "absolute bottom-6 z-10 border-2 border-red-600 brightness-50"
-				: "absolute bottom-6 z-10 border"));
-		let innerClassName = (isMain ? "h-6 bg-white" : "flex justify-between bg-orange-300");
+				: "absolute bottom-6 z-10 border");
+			innerClassName = "flex justify-between";
+		}
 
         return (
             <div
@@ -60,7 +78,7 @@ export const TimelineItem = observer(
                     </span>
                 ) : (
 					<div className={innerClassName}>
-						{isMain ? null
+						{ (isMain || isSkipped) ? null
 							: (
 								<TrimWrapper scene={scene} scenes={scenes}>
 									<span id={"label_" + scene.commonState.id}>

@@ -17,11 +17,10 @@ class IntentState {
         this.domainStore = domainStore;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
-		this.editOperationKey = "Text";
+		this.editOperationKey = "";
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
-		const edit = this.addActiveEdit(0, 100);
     }
 
 	setTextCommand(textCommand) {

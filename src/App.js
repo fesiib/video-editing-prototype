@@ -41,7 +41,7 @@ const App = observer(function App() {
 			];
 			domainStore.projectMetadata.trackCnt = 1;
         }),
-        [DUMMY_VIDEO_LINKS]
+        [JSON.stringify(DUMMY_VIDEO_LINKS)]
     );
 
     return (

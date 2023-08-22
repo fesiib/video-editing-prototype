@@ -42,7 +42,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
 		}
     }), [
 		isVisible,
-		uiStore.timelineControls.selectedTimelineItems,
+		uiStore.timelineControls.selectedTimelineItems.length,
 	]);
 
     useEffect(action(() => {
@@ -51,13 +51,13 @@ const DraggableText = observer(function DraggableText({ curText }) {
 		}
  		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(textRef.current.id()) >= 0);
     }), [
-		uiStore.canvasControls.transformerNodeIds
+		JSON.stringify(uiStore.canvasControls.transformerNodeIds)
 	]);
 
-    return curText.title !== domainStore.editOperations["Text"].title ? null : (<>
+    return curText.title !== domainStore.editOperations[uiStore.objectNames.text].title ? null : (<>
 		<Rect 
 			id={curText.commonState.id + "_background"}
-			name={uiStore.objectNames.text}
+			name={uiStore.objectNames.text + "_background"}
 			x={x}
 			y={y}
 			width={curText.commonState.width}

@@ -69,11 +69,23 @@ class UIStore {
         image: "image",
         text: "text",
 		shape: "shape",
+		cut: "cut",
 		zoom: "zoom",
 		crop: "crop",
 		blur: "blur",
     };
     backgroundName = "bg";
+
+	editColorPalette = {
+		"text": "#F6BD60",
+		"image": "#F5A7A6",
+		"shape": "#b19bbd",
+		"cut": "#abc7ff",
+		"zoom": "#A8D0C6",
+		"crop": "#DAF283",
+		"blur": "#b0e3ff",
+		"": "lightgray",
+	}
 
     labelColorPalette = {
         // high-level type

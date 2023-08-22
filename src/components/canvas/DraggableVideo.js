@@ -25,6 +25,8 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 	const x = adaptCoordinate(curVideo.commonState.x, curVideo.commonState.width, projectWidth, canvasWidth);
 	const y = adaptCoordinate(curVideo.commonState.y, curVideo.commonState.height, projectHeight, canvasHeight);
 
+	const filterMap = curVideo.commonState.filterMap;
+
 	const videoElement = useMemo(() => {
         const element = document.createElement("video");
 		console.log(curVideo.source)
@@ -108,18 +110,23 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     });
 
 	useEffect(() => {
+		console.log(filterMap.blur, filterMap.opacity, filterMap.brightness);
 		if (videoRef.current === null) {
 			return;
 		}
-        const opacity = 1;
-        const blur = 0;
-        const brightness = 1;
+        const opacity = filterMap.opacity;
+        const blur = filterMap.blur;
+        const brightness = filterMap.brightness;
         const canvas = videoRef.current.getLayer().getCanvas()._canvas;
         const filterBrightness = `brightness(${brightness * 100}%)`;
         const filterOpacity = `opacity(${opacity * 100}%)`;
         const filterBlur = `blur(${blur}px)`;
         canvas.style.filter = `${filterOpacity} ${filterBlur} ${filterBrightness}`;
-    }, []);
+    }, [
+		filterMap.opacity,
+		filterMap.blur,
+		filterMap.brightness,
+	]);
 
 	useEffect(action(() => {
 		if (videoRef.current === null) {
@@ -139,7 +146,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }), [
 		isVisible,
 		videoRef.current,
-		uiStore.timelineControls.selectedTimelineItems,
+		uiStore.timelineControls.selectedTimelineItems.length,
 	]);
 
     useEffect(action(() => {
@@ -149,7 +156,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(videoRef.current.id()) >= 0);
     }), [
 		videoRef.current,
-		uiStore.canvasControls.transformerNodeIds
+		JSON.stringify(uiStore.canvasControls.transformerNodeIds)
 	]);
 
     useEffect(action(() => {

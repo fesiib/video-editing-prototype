@@ -214,12 +214,11 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
     return (
         <TimelineItem
             id={scene.commonState.id}
+			itemType={"edit"}
             ref={setNodeRef}
-			isMain={false}
             scene={scene}
             scenes={scenes}
             transform={adjustedTransform}
-            isOverlay={false}
             onClick={onTimelineItemClick}
             onMouseMove={onTimelineItemMouseMove}
             onMouseEnter={onTimelineItemMouseEnter}

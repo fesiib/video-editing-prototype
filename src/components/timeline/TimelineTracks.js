@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -33,6 +33,14 @@ const TimelineTracks = observer(function TimelineTracks() {
     const [tracks, setTracks] = useState([]);
     const [activeTrackId, setActiveTrackId] = useState(null);
     const [activeItem, setActiveItem] = useState(null);
+
+	const linearizeEdits = action((edits) => {
+		return domainStore.linearizeEdits(edits);
+	});
+
+	const videos = domainStore.videos;
+	const skippedParts = linearizeEdits(domainStore.skippedParts);
+	const edits = domainStore.curIntent.activeEdits;
 
     const onGenericDragStart = action((event) => {
         const { active } = event;
@@ -175,19 +183,24 @@ const TimelineTracks = observer(function TimelineTracks() {
             newTracks.push({
                 trackId: i,
 				mainScenes: [],
+				skippedScenes: [],
                 scenes: [],
             });
         }
-		for (let video of domainStore.videos) {
+		for (let video of videos) {
 			const id = video.commonState.trackId;
             newTracks[id].mainScenes.push(video);
 		}
-        for (let edit of domainStore.curIntent.activeEdits) {
+		for (let skipped of skippedParts) {
+			const id = skipped.commonState.trackId;
+			newTracks[id].skippedScenes.push(skipped);
+		}
+        for (let edit of edits) {
             const id = edit.commonState.trackId;
             newTracks[id].scenes.push(edit);
         }
         setTracks(newTracks);
-    }, [domainStore.videos, domainStore.curIntent.activeEdits, trackCnt]);
+    }, [videos.length, skippedParts.length, edits.length, trackCnt]);
 
 	useEffect(() => {
 		if (tracksContainer.current) {
@@ -231,12 +244,13 @@ const TimelineTracks = observer(function TimelineTracks() {
 						items={tracks.map(({ trackId }) => "sortable_track_" + trackId)}
 						strategy={verticalListSortingStrategy}
 					>
-						{tracks.map(({ trackId, mainScenes, scenes }) => {
+						{tracks.map(({ trackId, mainScenes, skippedScenes, scenes }) => {
 							const id = "track_" + trackId;
 							return <SortableTimelineTrack 
 								key={id}
 								trackId={trackId}
 								mainScenes={mainScenes}
+								skippedScenes={skippedScenes}
 								scenes={scenes}
 							/>;
 						})}
@@ -251,6 +265,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 								id={activeTrackId}
 								title={"?"}
 								mainScenes={[]}
+								skippedScenes={[]}
 								scenes={[]}
 								isOverlay={true}
 								isOver={false}
@@ -262,7 +277,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 								scene={activeItem.data.current.scene}
 								scenes={[]}
 								transform={null}
-								isOverlay={true}
+								itemType={"overlay"}
 								id={activeItem.id}
 							/>
 						) : null}

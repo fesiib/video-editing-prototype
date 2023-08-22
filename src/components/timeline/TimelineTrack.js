@@ -7,16 +7,18 @@ import DraggableTimelineItem from "./DraggableTimelineItem";
 import useRootContext from "../../hooks/useRootContext";
 import EmptySpace from "./EmptySpace";
 import MainTimelineItem from "./MainTimelineItem";
+import SkippedTimelineItem from "./SkippedTimelineItem";
 
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(
-        { id, style, title, mainScenes, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
+        { id, style, title, mainScenes, skippedScenes, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
         ref
     ) {
         const { uiStore, domainStore } = useRootContext();
         const width = uiStore.trackWidthPx;
         const handlerWidth = uiStore.timelineConst.trackHandlerWidth;
 		mainScenes.sort((p1, p2) => p1.commonState.offset - p2.commonState.offset);
+		skippedScenes.sort((p1, p2) => p1.commonState.offset - p2.commonState.offset);
 		scenes.sort((p1, p2) => p1.commonState.offset - p2.commonState.offset);
 		// const emptySpaces = scenes.map((value, idx) => {
 		// 	const lastEnd = idx === 0 ? 0 : scenes[idx - 1].commonState.end;
@@ -70,6 +72,14 @@ const TimelineTrack = observer(
                             key={mainScene.commonState.id}
                             mainScene={mainScene}
                             mainScenes={mainScenes}
+							scenes={scenes}
+                        />
+                    ))}
+					{skippedScenes.map((skippedScene) => (
+                        <SkippedTimelineItem
+                            key={skippedScene.commonState.id}
+                            skippedScene={skippedScene}
+                            skippedScenes={skippedScenes}
 							scenes={scenes}
                         />
                     ))}

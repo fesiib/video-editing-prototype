@@ -128,11 +128,10 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
         <TimelineItem
             id={mainScene.commonState.id}
             ref={setNodeRef}
-			isMain={true}
+			itemType={"main"}
             scene={mainScene}
             scenes={mainScenes}
             transform={adjustedTransform}
-            isOverlay={false}
             onClick={onTimelineItemClick}
             onMouseMove={onTimelineItemMouseMove}
             onMouseEnter={onTimelineItemMouseEnter}

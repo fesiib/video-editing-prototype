@@ -269,6 +269,10 @@ class EditState {
 		return this.intent.editOperation.title;
 	}
 
+	get isActive() {
+		return this.intent.id === this.domainStore.curIntent.id;
+	}
+
 	get leftTimelineLimit() {
 		return this.intent.activeEdits.reduce((prev, otherEdit) => {
 			if (otherEdit.commonState.id === this.commonState.id) {

@@ -23,37 +23,37 @@ class DomainStore {
     };
 
 	editOperations = {
-		"Text": {
+		"text": {
 			title: "Text",
 			icon: null,
 			supported: true,
 		},
-		"Image": {
+		"image": {
 			title: "Image",
 			icon: null,
 			supported: true,
 		},
-		"Shape": {
+		"shape": {
 			title: "Shape",
 			icon: null,
 			supported: false,
 		},
-		"Cut": {
+		"cut": {
 			title: "Cut",
 			icon: null,
 			supported: true,
 		},
-		"Crop": {
+		"crop": {
 			title: "Crop",
 			icon: null,
 			supported: true,
 		},
-		"Zoom": {
+		"zoom": {
 			title: "Zoom",
 			icon: null,
 			supported: false,
 		},
-		"Blur": {
+		"blur": {
 			title: "Blur",
 			icon: null,
 			supported: false,
@@ -146,7 +146,7 @@ class DomainStore {
     }
 
 	confirmIntent() {
-		const excludedIds = this.curIntent.allExcludedIds;
+		// const excludedIds = this.curIntent.allExcludedIds;
 		// let newMainVideos = []
 		// let newTexts = [];
 		// let newImages = [];
@@ -205,6 +205,44 @@ class DomainStore {
 			new IntentState(this, "", "todo", 0)
 		);
 		this.rootStore.resetTempState();
+	}
+
+	linearizeEdits(editHierarchy) {
+		let result = [];
+		for (let edits of editHierarchy) {
+			for (let edit of edits) {
+				const editCopy = edit.getDeepCopy();
+				for (let prevEdit of result) {
+					const left = Math.max(prevEdit.commonState.offset, editCopy.commonState.offset);
+					const right = Math.min(prevEdit.commonState.end, editCopy.commonState.end);
+					if (left >= right) {
+						continue;
+					}
+					let metadataUpdate = {};
+					if (prevEdit.commonState.offset <= editCopy.commonState.offset) {
+						metadataUpdate = {
+							finish: editCopy.commonState.offset,
+						};
+					}
+					else if (prevEdit.commonState.end >= editCopy.commonState.end) {
+						metadataUpdate = {
+							start: editCopy.commonState.end,
+							offset: editCopy.commonState.end,
+						};
+					}
+					else {
+						metadataUpdate = {
+							start: 0,
+							offset: 0,
+							finish: 0,
+						}
+					}
+					prevEdit.commonState.setMetadata(metadataUpdate);
+				}
+				result.push(editCopy);
+			}
+		}
+		return result.filter((edit) => edit.commonState.sceneDuration > 0);
 	}
 
     get transcripts() {
@@ -330,6 +368,45 @@ class DomainStore {
 		}
 		return result;
 	}
+
+	get skippedParts() {
+		let result = [];
+		for (let intent of this.intents) {
+			if (intent.id === this.curIntent.id) {
+				continue;
+			}
+			result.push([]);
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Cut") {
+					result[result.length - 1].push(edit);
+				}
+			}
+		}
+		return result;
+	}
+
+	get allSkippedParts() {
+		let result = [];
+		for (let intent of this.intents) {
+			result.push([]);
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Cut") {
+					result[result.length - 1].push(edit);
+				}
+			}
+		}
+		return result;
+	}
+
+	// get activeEdits() {
+	// 	return this.curIntent.activeEdits;
+	// }
 
 	get curIntent() {
 		return this.intents[this.curIntentPos];

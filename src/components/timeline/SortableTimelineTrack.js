@@ -7,7 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import TimelineTrack from "./TimelineTrack";
 
-const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId, mainScenes, scenes }) {
+const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId, mainScenes, skippedScenes, scenes }) {
     const id = "track_" + trackId;
 
     const {
@@ -46,6 +46,7 @@ const SortableTimelineTrack = observer(function SortableTimelineTrack({ trackId,
             style={style}
             title={trackId}
 			mainScenes={mainScenes}
+			skippedScenes={skippedScenes}
             scenes={scenes}
             isOverlay={false}
             isOver={isSceneOver}
