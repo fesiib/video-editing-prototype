@@ -49,6 +49,7 @@ const SentenceBox = observer(function SentenceBox({
 	item,
 	isTimeSelected,
 	activeEdits,
+	skippedParts,
 }) {
     const { uiStore, domainStore } = useRootContext();
 
@@ -125,7 +126,7 @@ const SentenceBox = observer(function SentenceBox({
 				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
 				const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
 				const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
-				let innerClassName = "z-10 absolute bg-orange-300 flex";
+				let innerClassName = "z-10 absolute flex";
 				if (isLeftEnd && isRightEnd) {
 					innerClassName += " justify-between";
 				}
@@ -142,6 +143,7 @@ const SentenceBox = observer(function SentenceBox({
 					<div
 						className={innerClassName}
 						style={{
+							backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
 							marginLeft: `${left}%`,
 							width: `${width}%`,
 							height: `100%`,
@@ -168,10 +170,42 @@ const SentenceBox = observer(function SentenceBox({
 					</div>
 				</div>);
 			})}
+			{skippedParts.map((skipped, idx) => {
+				let start = Math.max(item.start, skipped.commonState.offset);
+				let finish = Math.min(item.finish, skipped.commonState.end);
+				const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
+				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
+				const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
+				const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
+				let innerClassName = "z-10 bg-gray-500 absolute flex";
+				if (isLeftEnd && isRightEnd) {
+					innerClassName += " justify-between";
+				}
+				else if (isRightEnd) {
+					innerClassName += " justify-end";
+				}
+				else if (isLeftEnd) {
+					innerClassName += " justify-start";
+				}
+				return(<div
+					key={`skipped-${index}-${skipped.commonState.id}`}
+					id={`skipped-${index}-${skipped.commonState.id}`}
+				>
+					<div
+						className={innerClassName}
+						style={{
+							marginLeft: `${left}%`,
+							width: `${width}%`,
+							height: `100%`,
+							opacity: 0.4, 
+						}}
+					> 
+					</div>
+				</div>);
+			})}
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }
 			<div className="text-left">
 				{item.text}
-				{/* {showTime ? (<span className={timeClassName}> {formattedFinish} </span>) : null } */}
 			</div>
 		</div>
     );
@@ -181,6 +215,13 @@ const TextWall = observer(function TextWall() {
     const { uiStore, domainStore } = useRootContext();
     const filteredScript = domainStore.transcripts;
 	const selectedIndex = domainStore.transcriptSelectedIndex;
+
+	const linearizeEdits = action((edits) => {
+		return domainStore.linearizeEdits(edits);
+	});
+
+	const activeEdits = domainStore.curIntent.activeEdits; 
+	const skippedParts = linearizeEdits(domainStore.skippedParts);
 
 	const [activeHandler, setActiveHandler] = useState(null);
 
@@ -258,18 +299,26 @@ const TextWall = observer(function TextWall() {
 						{filteredScript.map((item, index) => {
 							const isTimeSelected = selectedIndex === index;
 							const isEditSelected = false;
-							const activeEdits = domainStore.curIntent.activeEdits.filter((edit) => {
+							const relevantActiveEdits = activeEdits.filter((edit) => {
 								return (
 									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
 									|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
 									|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
 								);
 							});
+							const relevantSkippedParts = skippedParts.filter((skipped) => {
+								return (
+									(skipped.commonState.offset >= item.start && skipped.commonState.offset < item.finish)
+									|| (skipped.commonState.end > item.start && skipped.commonState.end < item.finish)
+									|| (skipped.commonState.offset < item.start && skipped.commonState.end >= item.finish)
+								);
+							});
 							return (<SentenceBox 
 								key={`script-${index}`}
 								index={index}
 								item={item}
-								activeEdits={activeEdits}
+								activeEdits={relevantActiveEdits}
+								skippedParts={relevantSkippedParts}
 								isTimeSelected={isTimeSelected}
 								isEditSelected={isEditSelected}
 							/>);

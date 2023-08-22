@@ -52,7 +52,7 @@ export const TimelineItem = observer(
 		}
 		else if (isSkipped) {
 			outerClassName = "absolute bottom-0 z-10";
-			innerClassName = "h-6 bg-gray-300";
+			innerClassName = "h-6 bg-gray-500";
 		}
 		else {
 			outerClassName = (isSelected
