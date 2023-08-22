@@ -10,7 +10,7 @@ import useRootContext from "../../hooks/useRootContext";
 import { adaptCoordinate } from "../../utilities/genericUtilities";
 
 const DraggableImage = observer(function DraggableImage({ curImage }) {
-    const { uiStore, domainStore } = useRootContext();
+	const { uiStore, domainStore } = useRootContext();
 
     const imageRef = useRef(null);
 
@@ -34,6 +34,9 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
     }, [curImage.source, curImage.commonState.id]);;
 
     useEffect(action(() => {
+		if (imageRef.current === null) {
+			return;
+		}
 		if (!isVisible) {
 			uiStore.removeSelectedCanvasObject(imageRef.current.id());
 		}
@@ -51,13 +54,16 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 	]);
 
     useEffect(action(() => {
+		if (imageRef.current === null) {
+			return;
+		}
 		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(imageRef.current.id()) >= 0);
     }), [
 		uiStore.canvasControls.transformerNodeIds
 	]);
 
 
-    return (<>
+    return curImage.title !== domainStore.editOperations["Image"].title ? null : (<>
 		<Image
 			id={curImage.commonState.id}
             name={uiStore.objectNames.text}
@@ -79,8 +85,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             onDragMove={action((event) => curImage.commonState.onDragMove(event.target))}
             onTransform={action((event) => curImage.commonState.onTransform(event.target))}
         />
-	</>
-    );
+	</>);
 });
 
 export default DraggableImage;

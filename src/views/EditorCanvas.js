@@ -23,6 +23,9 @@ const EditorCanvas = observer(function EditorCanvas() {
     const projectWidth = domainStore.projectMetadata.width;
     const projectHeight = domainStore.projectMetadata.height;
 
+	const videos = domainStore.videos;
+	const texts = domainStore.texts;
+
     const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
     });
@@ -201,36 +204,6 @@ const EditorCanvas = observer(function EditorCanvas() {
                         name={uiStore.backgroundName}
                     />
                 </Layer>
-                {/* {
-					domainStore.videos.map((video) => {
-						return (
-							<Layer
-								scaleX={uiStore.canvasScale}
-								scaleY={uiStore.canvasScale}
-								offsetX={uiStore.canvasSize.width / 2}
-								offsetY={uiStore.canvasSize.height / 2}
-								x={uiStore.canvasSize.width / 2}
-								y={uiStore.canvasSize.height / 2}
-							>
-								<DraggableVideo curVideo={video} />
-							</Layer>);
-					})
-				}
-				{
-					domainStore.texts.map((text) => {
-						return (
-						<Layer
-							scaleX={uiStore.canvasScale}
-							scaleY={uiStore.canvasScale}
-							offsetX={uiStore.canvasSize.width / 2}
-							offsetY={uiStore.canvasSize.height / 2}
-							x={uiStore.canvasSize.width / 2}
-							y={uiStore.canvasSize.height / 2}
-						>
-							<DraggableText curText={text} />
-						</Layer>);
-					})
-				} */}
                 <Layer
                     scaleX={uiStore.canvasScale}
                     scaleY={uiStore.canvasScale}
@@ -251,7 +224,7 @@ const EditorCanvas = observer(function EditorCanvas() {
                         scaleY={1}
                         name={uiStore.backgroundName}
                     />
-                    {domainStore.videos.map((video) => (
+                    {videos.map((video) => (
                         <DraggableVideo key={video.commonState.id} curVideo={video} />
                     ))}
                 </Layer>
@@ -263,34 +236,26 @@ const EditorCanvas = observer(function EditorCanvas() {
                     x={uiStore.canvasSize.width / 2}
                     y={uiStore.canvasSize.height / 2}
                 >
-                    {domainStore.texts.map((text) => (
-                        <DraggableText key={text.commonState.id} curText={text} />
-                    ))}
-                </Layer>
-				<Layer
-                    scaleX={uiStore.canvasScale}
-                    scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
-                >
-                    {domainStore.images.map((image) => (
+                    {texts.map((text) => {
+						return <DraggableText key={text.commonState.id} curText={text} />;
+					})}
+					{domainStore.images.map((image) => (
                         <DraggableImage key={image.commonState.id} curImage={image} />
                     ))}
-                </Layer>
-				<Layer
-                    scaleX={uiStore.canvasScale}
-                    scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
-                >
-                    {domainStore.shapes.map((shape) => (
+					 {domainStore.shapes.map((shape) => (
                         <DraggableImage key={shape.commonState.id} curImage={shape} />
                     ))}
                 </Layer>
+				{/* <Layer
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={uiStore.canvasSize.width / 2}
+                    offsetY={uiStore.canvasSize.height / 2}
+                    x={uiStore.canvasSize.width / 2}
+                    y={uiStore.canvasSize.height / 2}
+                >
+                    
+                </Layer> */}
                 <Layer>
                     <Transformer
                         ref={transformerRef}

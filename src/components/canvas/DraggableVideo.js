@@ -35,7 +35,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, [curVideo.source, curVideo.commonState.id]);
 
     const onLoadedMetadata = action((event) => {
-		console.log(event.target.id);
 		if (curVideo.commonState.duration === event.target.duration) {
 			return;
 		}
@@ -98,7 +97,10 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     // });
 
     const onCanPlay = action((event) => {
-        event.target.muted = true;
+		if (videoRef.current === null) {
+			return;
+		}
+        //event.target.muted = true;
         const layer = videoRef.current.getLayer();
         const anim = new Animation(() => {}, layer);
         anim.start();
@@ -106,6 +108,9 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     });
 
 	useEffect(() => {
+		if (videoRef.current === null) {
+			return;
+		}
         const opacity = 1;
         const blur = 0;
         const brightness = 1;
@@ -117,6 +122,9 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, []);
 
 	useEffect(action(() => {
+		if (videoRef.current === null) {
+			return;
+		}
 		if (!isVisible) {
 			uiStore.removeSelectedCanvasObject(videoRef.current.id());
 		}
@@ -135,6 +143,9 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 	]);
 
     useEffect(action(() => {
+		if (videoRef.current === null) {
+			return;
+		}
 		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(videoRef.current.id()) >= 0);
     }), [
 		videoRef.current,

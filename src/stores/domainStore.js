@@ -22,43 +22,43 @@ class DomainStore {
         trackCnt: 2,
     };
 
-	editOperations = [
-		{
+	editOperations = {
+		"Text": {
 			title: "Text",
 			icon: null,
 			supported: true,
 		},
-		{
+		"Image": {
 			title: "Image",
 			icon: null,
 			supported: true,
 		},
-		{
+		"Shape": {
 			title: "Shape",
 			icon: null,
 			supported: false,
 		},
-		{
+		"Cut": {
 			title: "Cut",
 			icon: null,
 			supported: true,
 		},
-		{
+		"Crop": {
 			title: "Crop",
 			icon: null,
 			supported: true,
 		},
-		{
+		"Zoom": {
 			title: "Zoom",
 			icon: null,
 			supported: false,
 		},
-		{
+		"Blur": {
 			title: "Blur",
 			icon: null,
 			supported: false,
 		},
-	];
+	};
 
 	inputOperationMapping = {
 		text: [
@@ -147,51 +147,51 @@ class DomainStore {
 
 	confirmIntent() {
 		const excludedIds = this.curIntent.allExcludedIds;
-		let newMainVideos = []
-		let newTexts = [];
-		let newImages = [];
-		let newShapes = [];
-		for (let video of this.in_mainVideos) {
-			if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
-				newMainVideos.push(video);
-			}
-		}
-		for (let text of this.in_texts) {
-			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-				newTexts.push(text);
-			}
-		}
-		for (let image of this.in_images) {
-			if (excludedIds.findIndex((excludedId) => excludedId === image.commonState.id) === -1) {
-				newImages.push(image);
-			}
-		}
-		for (let shape of this.in_shapes) {
-			if (excludedIds.findIndex((excludedId) => excludedId === shape.commonState.id) === -1) {
-				newShapes.push(shape);
-			}
-		}
-		for (let edit of this.curIntent.activeEdits) {
-			if (this.curIntent.editOperation === null) {
-				continue;
-			}
-			if (this.curIntent.editOperation.title === "Text") {
-				this.in_texts.push(edit);
-			}
-			if (this.curIntent.editOperation.title === "Image") {
-				this.in_images.push(edit);
-			}
-			if (this.curIntent.editOperation.title === "Shape") {
-				this.in_shapes.push(edit);
-			}
-			for (let object of edit.adjustedVideos) {
-				newMainVideos.push(object);
-			}
-		}
-		this.in_mainVideos = newMainVideos;
-		this.in_texts = newTexts;
-		this.in_images = newImages;
-		this.in_shapes = newShapes;
+		// let newMainVideos = []
+		// let newTexts = [];
+		// let newImages = [];
+		// let newShapes = [];
+		// for (let video of this.in_mainVideos) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
+		// 		newMainVideos.push(video);
+		// 	}
+		// }
+		// for (let text of this.in_texts) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+		// 		newTexts.push(text);
+		// 	}
+		// }
+		// for (let image of this.in_images) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === image.commonState.id) === -1) {
+		// 		newImages.push(image);
+		// 	}
+		// }
+		// for (let shape of this.in_shapes) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === shape.commonState.id) === -1) {
+		// 		newShapes.push(shape);
+		// 	}
+		// }
+		// for (let edit of this.curIntent.activeEdits) {
+		// 	if (this.curIntent.editOperation === null) {
+		// 		continue;
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Text") {
+		// 		this.in_texts.push(edit);
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Image") {
+		// 		this.in_images.push(edit);
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Shape") {
+		// 		this.in_shapes.push(edit);
+		// 	}
+		// 	for (let object of edit.adjustedVideos) {
+		// 		newMainVideos.push(object);
+		// 	}
+		// }
+		// this.in_mainVideos = newMainVideos;
+		// this.in_texts = newTexts;
+		// this.in_images = newImages;
+		// this.in_shapes = newShapes;
 		this.curIntentPos = this.intents.length;
 		this.intents.push(
 			new IntentState(this, "", "todo", 0)
@@ -228,74 +228,105 @@ class DomainStore {
 	}
 
 	get videos() {
-		let result = [];
-		const excludedIds = this.curIntent.allExcludedIds;
-		for (let video of this.in_mainVideos) {
-			if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
-				result.push(video);
-			}
-		}
-		for (let edit of this.curIntent.activeEdits) {
-			for (let object of edit.adjustedVideos) {
-				result.push(object);
-			}
-		}
-		return result;
+		// let result = [];
+		// const excludedIds = this.curIntent.allExcludedIds;
+		// for (let video of this.in_mainVideos) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
+		// 		result.push(video);
+		// 	}
+		// }
+		// for (let edit of this.curIntent.activeEdits) {
+		// 	for (let object of edit.adjustedVideos) {
+		// 		result.push(object);
+		// 	}
+		// }
+		// return result;
+		return this.in_mainVideos;
 	}
 
 	get texts() {
 		let result = [];
-		const excludedIds = this.curIntent.allExcludedIds;
-		for (let text of this.in_texts) {
-			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-				result.push(text);
-			}
-		}
-		for (let edit of this.curIntent.activeEdits) {
-			if (this.curIntent.editOperation === null) {
-				continue;
-			}
-			if (this.curIntent.editOperation.title === "Text") {
-				result.push(edit);
-			}
+		// const excludedIds = this.curIntent.allExcludedIds;
+		// for (let text of this.in_texts) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+		// 		result.push(text);
+		// 	}
+		// }
+		// for (let edit of this.curIntent.activeEdits) {
+		// 	if (this.curIntent.editOperation === null) {
+		// 		continue;
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Text") {
+		// 		result.push(edit);
+		// 	}
+		// }
+		for (let intent of this.intents) {
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Text") {
+					result.push(edit);
+				}
+			}	
 		}
 		return result;
 	}
 
 	get images() {
 		let result = [];
-		const excludedIds = this.curIntent.allExcludedIds;
-		for (let text of this.in_images) {
-			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-				result.push(text);
-			}
-		}
-		for (let edit of this.curIntent.activeEdits) {
-			if (this.curIntent.editOperation === null) {
-				continue;
-			}
-			if (this.curIntent.editOperation.title === "Image") {
-				result.push(edit);
-			}
+		// const excludedIds = this.curIntent.allExcludedIds;
+		// for (let text of this.in_images) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+		// 		result.push(text);
+		// 	}
+		// }
+		// for (let edit of this.curIntent.activeEdits) {
+		// 	if (this.curIntent.editOperation === null) {
+		// 		continue;
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Image") {
+		// 		result.push(edit);
+		// 	}
+		// }
+		for (let intent of this.intents) {
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Image") {
+					result.push(edit);
+				}
+			}	
 		}
 		return result;
 	}
 
 	get shapes() {
 		let result = [];
-		const excludedIds = this.curIntent.allExcludedIds;
-		for (let text of this.in_shapes) {
-			if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-				result.push(text);
-			}
-		}
-		for (let edit of this.curIntent.activeEdits) {
-			if (this.curIntent.editOperation === null) {
-				continue;
-			}
-			if (this.curIntent.editOperation.title === "Shape") {
-				result.push(edit);
-			}
+		// const excludedIds = this.curIntent.allExcludedIds;
+		// for (let text of this.in_shapes) {
+		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
+		// 		result.push(text);
+		// 	}
+		// }
+		// for (let edit of this.curIntent.activeEdits) {
+		// 	if (this.curIntent.editOperation === null) {
+		// 		continue;
+		// 	}
+		// 	if (this.curIntent.editOperation.title === "Shape") {
+		// 		result.push(edit);
+		// 	}
+		// }
+		for (let intent of this.intents) {
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Shape") {
+					result.push(edit);
+				}
+			}	
 		}
 		return result;
 	}

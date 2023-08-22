@@ -9,7 +9,7 @@ class IntentState {
 	sketchCommand = null;
 	trackId = 0;
 	activeEdits = [];
-	editOperationIdx = -1;
+	editOperationKey = "";
 	id = "";
 
     constructor(domainStore, textCommand, sketchCommand, trackId) {
@@ -17,7 +17,7 @@ class IntentState {
         this.domainStore = domainStore;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
-		this.editOperationIdx = 0;
+		this.editOperationKey = "Text";
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
@@ -32,16 +32,16 @@ class IntentState {
 		this.sketchCommand = sketchCommand;
 	}
 
-	setEditOperationIdx(newIdx) {
+	setEditOperationKey(newKey) {
 		this.domainStore.rootStore.resetTempState();
-		if (newIdx === -1) {
-			this.editOperationIdx = -1;
+		if (newKey === "") {
+			this.editOperationKey = "";
 			return;
 		}
-		if (!this.domainStore.editOperations[newIdx].supported) {
+		if (!this.domainStore.editOperations[newKey].supported) {
 			return;
 		}
-		this.editOperationIdx = newIdx;
+		this.editOperationKey = newKey;
 		//conversion between types should happen
 	}
 
@@ -92,10 +92,10 @@ class IntentState {
 	}
 
 	get editOperation() {
-		if (this.editOperationIdx === -1) {
+		if (this.editOperationKey === "") {
 			return null;
 		}
-		return this.domainStore.editOperations[this.editOperationIdx];
+		return this.domainStore.editOperations[this.editOperationKey];
 	}
 }
 

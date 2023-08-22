@@ -119,5 +119,5 @@ def process_video(video_link):
     
     subtitles = webvtt.read(subtitles_path)
     transcript = get_transcript(subtitles)
-
+    # transcript = get_transcript_each_word(subtitles)
     return transcript, moments, metadata

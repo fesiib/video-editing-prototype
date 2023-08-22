@@ -26,6 +26,9 @@ const DraggableText = observer(function DraggableText({ curText }) {
 	const y = adaptCoordinate(curText.commonState.y, curText.commonState.height, projectHeight, canvasHeight);
 
     useEffect(action(() => {
+		if (textRef.current === null) {
+			return;
+		}
 		if (!isVisible) {
 			uiStore.removeSelectedCanvasObject(textRef.current.id());
 		}
@@ -43,12 +46,15 @@ const DraggableText = observer(function DraggableText({ curText }) {
 	]);
 
     useEffect(action(() => {
-		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(textRef.current.id()) >= 0);
+		if (textRef.current === null) {
+			return;
+		}
+ 		setIsSelected(uiStore.canvasControls.transformerNodeIds.indexOf(textRef.current.id()) >= 0);
     }), [
 		uiStore.canvasControls.transformerNodeIds
 	]);
 
-    return (<>
+    return curText.title !== domainStore.editOperations["Text"].title ? null : (<>
 		<Rect 
 			id={curText.commonState.id + "_background"}
 			name={uiStore.objectNames.text}
@@ -90,8 +96,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
             onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
             onTransform={action((event) => curText.commonState.onTransform(event.target))}
         />
-	</>
-    );
+	</>);
 });
 
 export default DraggableText;
