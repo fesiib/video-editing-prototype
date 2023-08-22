@@ -41,7 +41,7 @@ class DomainStore {
 		{
 			title: "Cut",
 			icon: null,
-			supported: false,
+			supported: true,
 		},
 		{
 			title: "Crop",

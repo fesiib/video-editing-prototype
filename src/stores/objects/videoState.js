@@ -125,9 +125,6 @@ class VideoState {
 				"misc",
 				"None",
 			],
-			offset: 0,
-			start: 0,
-			finish: this.videoMetadata.duration,
 		});
 	}
 	
@@ -212,11 +209,8 @@ class VideoState {
 		return {
 			x: this.commonState.x,
 			y: this.commonState.y,
-			z: this.commonState.z,
 			width: this.commonState.width,
 			height: this.commonState.height,
-			scaleX: this.commonState.scaleX,
-			scaleY: this.commonState.scaleY,
 			rotation: this.commonState.rotation,
 		}
 	}

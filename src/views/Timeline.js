@@ -15,30 +15,30 @@ const Timeline = observer(function Timeline() {
     });
 
     const onPressPlay = action((event) => {
-        uiStore.timelineControls.tryPlaying = !uiStore.timelineControls.tryPlaying;
-        if (uiStore.timelineControls.intervalId !== -1) {
-            clearTimeout(uiStore.timelineControls.intervalId);
-            uiStore.timelineControls.intervalId = -1;
-        } else {
-            const updatePlayPosition = action((prevDate) => {
-                if (uiStore.timelineControls.intervalId === -1) {
-                    return;
-                }
-                const curDate = Date.now();
-                const time = curDate - prevDate;
-                uiStore.timelineControls.playPosition += time / 1000;
-                uiStore.timelineControls.intervalId = setTimeout(
-                    updatePlayPosition,
-                    uiStore.timelineConst.delay,
-                    curDate
-                );
-            });
-            uiStore.timelineControls.intervalId = setTimeout(
-                updatePlayPosition,
-                uiStore.timelineConst.delay,
-                Date.now()
-            );
-        }
+        uiStore.timelineControls.isPlaying = !uiStore.timelineControls.isPlaying;
+        // if (uiStore.timelineControls.intervalId !== -1) {
+        //     clearTimeout(uiStore.timelineControls.intervalId);
+        //     uiStore.timelineControls.intervalId = -1;
+        // } else {
+        //     const updatePlayPosition = action((prevDate) => {
+        //         if (uiStore.timelineControls.intervalId === -1) {
+        //             return;
+        //         }
+        //         const curDate = Date.now();
+        //         const time = curDate - prevDate;
+        //         uiStore.timelineControls.playPosition += time / 1000;
+        //         uiStore.timelineControls.intervalId = setTimeout(
+        //             updatePlayPosition,
+        //             uiStore.timelineConst.delay,
+        //             curDate
+        //         );
+        //     });
+        //     uiStore.timelineControls.intervalId = setTimeout(
+        //         updatePlayPosition,
+        //         uiStore.timelineConst.delay,
+        //         Date.now()
+        //     );
+        // }
     });
 
     const onPressSplit = action((event) => {
@@ -109,20 +109,27 @@ const Timeline = observer(function Timeline() {
 
     useEffect(
         action(() => {
-            if (uiStore.timelineControls.intervalId === -1) {
-                return;
-            }
             if (uiStore.timelineControls.playPosition >= domainStore.projectMetadata.duration) {
-                clearTimeout(uiStore.timelineControls.intervalId);
-                uiStore.timelineControls.intervalId = -1;
+				// if (uiStore.timelineControls.intervalId !== -1) {
+				// 	clearInterval(uiStore.timelineControls.intervalId);
+				// }
+                // uiStore.timelineControls.intervalId = -1;
                 uiStore.timelineControls.playPosition = 0;
-                uiStore.timelineControls.tryPlaying = false;
+                uiStore.timelineControls.isPlaying = false;
             }
+			// else {
+			// 	if (uiStore.timelineControls.intervalId === -1 && uiStore.timelineControls.isPlaying) {
+			// 		uiStore.timelineControls.intervalId = setInterval(action(() => {
+			// 			uiStore.timelineControls.playPosition += 0.1;
+			// 		}), 100);
+			// 	}
+			// }
         }),
         [
+			//uiStore.timelineControls.intervalId,
             uiStore.timelineControls.playPosition,
             domainStore.projectMetadata.duration,
-            uiStore.timelineControls.intervalId,
+			//uiStore.timelineControls.isPlaying,
         ]
     );
 
@@ -130,7 +137,7 @@ const Timeline = observer(function Timeline() {
         <div className="bg-slate-100" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
                 <button className="bg-indigo-300 p-1" id="play_button" onClick={onPressPlay}>
-                    {uiStore.timelineControls.tryPlaying ? "pause" : "play"}
+                    {uiStore.timelineControls.isPlaying ? "pause" : "play"}
                 </button>
                 <button
                     className={

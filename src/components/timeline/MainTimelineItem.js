@@ -100,7 +100,7 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
             const positionIndicatorLabelDiv = document.getElementById(
                 uiStore.timelineConst.positionIndicatorLabelId
             );
-            const videoElement = document.getElementById("video_element_" + mainScene.commonState.id);
+            //const videoElement = document.getElementById("video_element_" + mainScene.commonState.id);
 
             let offsetPx =
                 event.clientX -
@@ -109,16 +109,11 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
                 uiStore.timelineConst.trackHandlerWidth;
 
             const offset = uiStore.pxToSec(offsetPx);
-
             if (positionIndicatorDiv) {
                 positionIndicatorDiv.style.transform = `translate3d(${offsetPx}px, ${0}px, ${0}px)`;
             }
             if (positionIndicatorLabelDiv) {
                 positionIndicatorLabelDiv.innerHTML = playPositionToFormat(offset);
-            }
-            if (videoElement) {
-                videoElement.currentTime =
-                    offset - mainScene.commonState.offset + mainScene.commonState.start;
             }
         } else {
             return;

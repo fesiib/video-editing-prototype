@@ -5,11 +5,11 @@ class CommonState {
     processing = false;
     id = "test";
 
-    thumbnails = ["unknown"];
+    thumbnails = ["edit"];
 
     start = 0; // start after trimming relative to video
-    finish = 10; // finish after trimming relative to video
-    duration = 10; // total duration (should not change)
+    finish = 0; // finish after trimming relative to video
+    duration = 0; // total duration (should not change)
     offset = 0; // offset relative to timeline
     speed = 1;
 

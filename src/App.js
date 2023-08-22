@@ -30,13 +30,15 @@ const App = observer(function App() {
 
     useEffect(
         action(() => {
-			domainStore.in_mainVideos = [new VideoState(
-				domainStore,
-				domainStore.in_mainVideos,
-				DUMMY_VIDEO_LINKS[0],
-				0,
-				true,
-			)];
+			domainStore.in_mainVideos = [
+				new VideoState(
+					domainStore,
+					domainStore.in_mainVideos,
+					DUMMY_VIDEO_LINKS[0],
+					0,
+					true,
+				), 
+			];
 			domainStore.projectMetadata.trackCnt = 1;
         }),
         [DUMMY_VIDEO_LINKS]

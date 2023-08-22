@@ -33,7 +33,6 @@ class UIStore {
         pxPerSec: 10,
         playPosition: 0, //secs
         isPlaying: false,
-        tryPlaying: false,
         intervalId: -1,
 
         positionIndicatorVisibility: 0,
