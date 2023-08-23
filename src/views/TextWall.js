@@ -105,7 +105,7 @@ const SentenceBox = observer(function SentenceBox({
 	const outerClassName = "relative pr-2 my-1" + (
 		isTimeSelected ? " bg-red-400" : "");
 
-	const timeClassName = "z-20 absolute -top-2 text-xs text-black";
+	const timeClassName = "z-30 absolute -top-2 text-xs text-black";
 
 	const formattedStart = playPositionToFormat(item.start);
 	//const formattedFinish = playPositionToFormat(item.finish);
@@ -119,6 +119,43 @@ const SentenceBox = observer(function SentenceBox({
 			onMouseEnter={(event) => onMouseEnter()}
 			onMouseLeave={(event) => onMouseLeave()}
 		>	
+			<div>
+				<div className="relative z-10 text-left">
+					{item.text}
+				</div>	
+			</div>
+			{skippedParts.map((skipped, idx) => {
+				let start = Math.max(item.start, skipped.commonState.offset);
+				let finish = Math.min(item.finish, skipped.commonState.end);
+				const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
+				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
+				const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
+				const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
+				let innerClassName = "z-0 absolute inset-y-0 bg-gray-500 flex";
+				if (isLeftEnd && isRightEnd) {
+					innerClassName += " justify-between";
+				}
+				else if (isRightEnd) {
+					innerClassName += " justify-end";
+				}
+				else if (isLeftEnd) {
+					innerClassName += " justify-start";
+				}
+				return(<div
+					key={`skipped-${index}-${skipped.commonState.id}`}
+					id={`skipped-${index}-${skipped.commonState.id}`}
+				>
+					<div
+						className={innerClassName}
+						style={{
+							marginLeft: `${left}%`,
+							width: `${width}%`,
+							opacity: 1, 
+						}}
+					> 
+					</div>
+				</div>);
+			})}
 			{activeEdits.map((edit, idx) => {
 				let start = Math.max(item.start, edit.commonState.offset);
 				let finish = Math.min(item.finish, edit.commonState.end);
@@ -126,7 +163,7 @@ const SentenceBox = observer(function SentenceBox({
 				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
 				const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
 				const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
-				let innerClassName = "z-10 absolute flex";
+				let innerClassName = "z-20 inset-y-0 absolute flex";
 				if (isLeftEnd && isRightEnd) {
 					innerClassName += " justify-between";
 				}
@@ -146,7 +183,6 @@ const SentenceBox = observer(function SentenceBox({
 							backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
 							marginLeft: `${left}%`,
 							width: `${width}%`,
-							height: `100%`,
 							opacity: 0.4, 
 						}}
 						//onClick={(event) => handleEditClick(event, edit)}
@@ -170,43 +206,7 @@ const SentenceBox = observer(function SentenceBox({
 					</div>
 				</div>);
 			})}
-			{skippedParts.map((skipped, idx) => {
-				let start = Math.max(item.start, skipped.commonState.offset);
-				let finish = Math.min(item.finish, skipped.commonState.end);
-				const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
-				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
-				const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
-				const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
-				let innerClassName = "z-10 bg-gray-500 absolute flex";
-				if (isLeftEnd && isRightEnd) {
-					innerClassName += " justify-between";
-				}
-				else if (isRightEnd) {
-					innerClassName += " justify-end";
-				}
-				else if (isLeftEnd) {
-					innerClassName += " justify-start";
-				}
-				return(<div
-					key={`skipped-${index}-${skipped.commonState.id}`}
-					id={`skipped-${index}-${skipped.commonState.id}`}
-				>
-					<div
-						className={innerClassName}
-						style={{
-							marginLeft: `${left}%`,
-							width: `${width}%`,
-							height: `100%`,
-							opacity: 0.4, 
-						}}
-					> 
-					</div>
-				</div>);
-			})}
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }
-			<div className="text-left">
-				{item.text}
-			</div>
 		</div>
     );
 });
@@ -216,12 +216,8 @@ const TextWall = observer(function TextWall() {
     const filteredScript = domainStore.transcripts;
 	const selectedIndex = domainStore.transcriptSelectedIndex;
 
-	const linearizeEdits = action((edits) => {
-		return domainStore.linearizeEdits(edits);
-	});
-
 	const activeEdits = domainStore.curIntent.activeEdits; 
-	const skippedParts = linearizeEdits(domainStore.skippedParts);
+	const skippedParts = domainStore.skippedParts;
 
 	const [activeHandler, setActiveHandler] = useState(null);
 
@@ -278,7 +274,7 @@ const TextWall = observer(function TextWall() {
 
     return (
         <div 
-			className="bg-slate-100 overflow-y-scroll overflow-x-visible disable-select p-10"
+			className="overflow-y-scroll overflow-x-visible disable-select p-10"
 			style={{
                 height: uiStore.windowSize.height / 3 * 2
 			}}

@@ -213,23 +213,45 @@ class UIStore {
 
 	selectCanvasObjects(objects) {
 		const objectIds = objects.map((object) => object.id());
-		let selectedObjects = [];
+		const curIntent = this.rootStore.domainStore.curIntent;
+		
+		let selectedTimelineItems = [];
+		let selectedNodeIds = [];
 
 		for (const id of objectIds) {
-			const object = this.rootStore.domainStore.curIntent.getObjectById(id);
+			const object = curIntent.getCanvasObjectById(id);
 			if (object !== undefined) {
-				selectedObjects.push(object);
+				if (selectedTimelineItems.findIndex((obj) => obj.commonState.id === object.commonState.id) === -1) {
+					selectedTimelineItems.push(object);
+				}
+				else {
+					if (curIntent.editOperationKey === this.objectNames.crop) {
+						if (id.substring(0, 2) === "bg") {
+							continue;
+						}
+						if (id.substring(0, 2) === "fg") {
+							selectedNodeIds = selectedNodeIds.filter((nodeId) => nodeId !== "bg_" + id.substring(3));
+						}
+					}
+				}
 			}
+			selectedNodeIds.push(id);
 		}
-		this.canvasControls.transformerNodeIds = objectIds;
-		this.timelineControls.selectedTimelineItems = selectedObjects;
+		this.canvasControls.transformerNodeIds = selectedNodeIds;
+		this.timelineControls.selectedTimelineItems = selectedTimelineItems;
 	}
 
 	selectTimelineObjects(objects) {
 		this.timelineControls.selectedTimelineItems = objects;
+		const curIntent = this.rootStore.domainStore.curIntent;
 		if (objects.length === 1) {
 			const object = objects[0];
-			this.canvasControls.transformerNodeIds = [object.commonState.id];
+			if (curIntent.editOperationKey === this.objectNames.crop) {
+				this.canvasControls.transformerNodeIds = ["fg_" + object.commonState.id];
+			}
+			else {
+				this.canvasControls.transformerNodeIds = [object.commonState.id];
+			}
 			return;
 		}
 		this.canvasControls.transformerNodeIds = [];

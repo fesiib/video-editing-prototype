@@ -55,6 +55,7 @@ class IntentState {
 			offset: start,
 		});
 		this.activeEdits.push(newEdit);
+		//this.activeEdits.sort((a, b) => a.commonState.offset - b.commonState.offset);
 		return this.activeEdits[this.activeEdits.length - 1];
 	}
 
@@ -67,6 +68,14 @@ class IntentState {
 
 	getObjectById(id) {
 		return this.activeEdits.find((edit) => edit.commonState.id === id);
+	}
+
+	getCanvasObjectById(id) {
+		if (this.editOperationKey === "crop") {
+			const realId = id.substring(3);
+			return this.getObjectById(realId);
+		}
+		return this.getObjectById(id);
 	}
 	
 	get allExcludedIds() {
@@ -95,6 +104,10 @@ class IntentState {
 			return null;
 		}
 		return this.domainStore.editOperations[this.editOperationKey];
+	}
+
+	get intentPos() {
+		return this.domainStore.intents.findIndex((intent) => intent.id === this.id);
 	}
 }
 

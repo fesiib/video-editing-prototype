@@ -25,16 +25,12 @@ const EditorCanvas = observer(function EditorCanvas() {
     const projectWidth = domainStore.projectMetadata.width;
     const projectHeight = domainStore.projectMetadata.height;
 
-	const linearizeEdits = action((edits) => {
-		return domainStore.linearizeEdits(edits);
-	});
-
 	const videos = domainStore.videos;
 	const texts = domainStore.texts;
 	const images = domainStore.images;
 	const shapes = domainStore.shapes;
-	const skippedParts = linearizeEdits(domainStore.allSkippedParts);
-	const crops = linearizeEdits(domainStore.crops);
+	const skippedParts = domainStore.allSkippedParts;
+	const crops = domainStore.crops;
 
     const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
@@ -44,7 +40,7 @@ const EditorCanvas = observer(function EditorCanvas() {
         return target.name() === uiStore.backgroundName;
     };
     const isObject = (target) => {
-		const object = domainStore.curIntent.getObjectById(target.id());
+		const object = domainStore.curIntent.getCanvasObjectById(target.id());
 		if (object === undefined) {
 			return false;
 		}
@@ -121,13 +117,20 @@ const EditorCanvas = observer(function EditorCanvas() {
         if (selectionRectRef.current.visible()) {
             return;
         }
-        if (isBackground(event.target) || !isObject(event.target)) {
+        if (isBackground(event.target)) {
 			uiStore.selectCanvasObjects([]);
             return;
         }
-        if (!isObject(event.target)) {
+		// if (event.target.name() === uiStore.objectNames.video
+		// 	&& domainStore.curIntent.editOperationKey === uiStore.objectNames.crop
+		// ) {
+		// 	uiStore.selectCanvasObjects([event.target]);
+        //     return;
+		// }
+		if (!isObject(event.target)) {
+			uiStore.selectCanvasObjects([]);
             return;
-        }
+		}
 
         const metaPressed = event.evt.shiftKey || event.evt.ctrlKey || event.evt.metaKey;
         const isSelected = transformerRef.current.nodes().indexOf(event.target) >= 0;
@@ -168,11 +171,19 @@ const EditorCanvas = observer(function EditorCanvas() {
 	useEffect(() => {
 		let nodes = [];
 		for (let nodeId of uiStore.canvasControls.transformerNodeIds) {
-			const object = domainStore.curIntent.getObjectById(nodeId);
+			const object = domainStore.curIntent.getCanvasObjectById(nodeId);
 			const node = stageRef.current.findOne(`#${nodeId}`);
-			if (node !== undefined
-				&& object.commonState.isVisible(uiStore.timelineControls.playPosition)	
-			) {
+			if (node === undefined) {
+				continue;
+			}
+			// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
+			// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
+			// 		nodes.push(node);
+			// 	}
+			// 	continue;
+			// }
+			if (object !== undefined &&
+				object.isVisible(uiStore.timelineControls.playPosition)) {
 				nodes.push(node);
 			}
 		}

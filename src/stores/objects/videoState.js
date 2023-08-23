@@ -187,6 +187,15 @@ class VideoState {
 		this.parentList = [...newParentList];
 	}
 
+	isVisible(playPosition) {
+        return (this.commonState.offset <= playPosition &&
+			this.commonState.end > playPosition);
+	}
+
+	get title() {
+		return "Video";
+	}
+
     get adjustedTranscript() {
         const adjusted = [];
         for (let single of this.transcript) {

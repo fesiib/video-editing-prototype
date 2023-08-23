@@ -34,12 +34,8 @@ const TimelineTracks = observer(function TimelineTracks() {
     const [activeTrackId, setActiveTrackId] = useState(null);
     const [activeItem, setActiveItem] = useState(null);
 
-	const linearizeEdits = action((edits) => {
-		return domainStore.linearizeEdits(edits);
-	});
-
 	const videos = domainStore.videos;
-	const skippedParts = linearizeEdits(domainStore.skippedParts);
+	const skippedParts = domainStore.skippedParts;
 	const edits = domainStore.curIntent.activeEdits;
 
     const onGenericDragStart = action((event) => {

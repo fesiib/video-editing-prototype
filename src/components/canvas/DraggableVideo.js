@@ -16,7 +16,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
-    const isVisible = curVideo.commonState.isVisible(uiStore.timelineControls.playPosition);
+    const isVisible = curVideo.isVisible(uiStore.timelineControls.playPosition);
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
 	const projectWidth = domainStore.projectMetadata.width;
@@ -56,13 +56,19 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             duration: event.target.duration,
 			start: 0,
 			finish: event.target.duration,
-            width: event.target.videoWidth * (domainStore.projectMetadata.width / event.target.videoWidth),
-            height: event.target.videoHeight * (domainStore.projectMetadata.height / event.target.videoHeight),
-            scaleX: 1,
-            scaleY: 1,
+            width: domainStore.projectMetadata.width,
+            height: domainStore.projectMetadata.height,
+			scaleX: 1,
+			scaleY: 1,
             x: 0,
             y: 0,
+			cropX: 0,
+			cropY: 0,
+			cropWidth: event.target.videoWidth,
+			cropHeight: event.target.videoHeight,
 			processing: false,
+			originalWidth: event.target.videoWidth,
+			originalHeight: event.target.videoHeight,
         };
         curVideo.commonState.setMetadata(metadata);
     });
@@ -263,7 +269,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     return (
         <Image
 			id={curVideo.commonState.id}
-            name={uiStore.objectNames.video}
+            name={"video"}
             ref={videoRef}
             image={videoElement}
             //image={imageElement}
@@ -275,17 +281,15 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
             offsetY={curVideo.commonState.height / 2}
             scaleX={curVideo.commonState.scaleX}
             scaleY={curVideo.commonState.scaleY}
-			crop={curVideo.commonState.cropped ? {
-				x: curVideo.commonState.cropX,
-				y: curVideo.commonState.cropY,
-				width: curVideo.commonState.cropWidth,
-				height: curVideo.commonState.cropHeight,
-			} : null}
-            draggable={isSelected}
+			cropX={curVideo.commonState.cropX}
+			cropY={curVideo.commonState.cropY}
+			cropWidth={curVideo.commonState.cropWidth}
+			cropHeight={curVideo.commonState.cropHeight}
+			draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
-            onDragMove={(event) => curVideo.commonState.onDragMove(event.target)}
-            onTransform={(event) => curVideo.commonState.onTransformer(event.target)}
+            //onDragMove={(event) => curVideo.commonState.onDragMove(event.target)}
+            //onTransform={(event) => curVideo.commonState.onTransform(event.target)}
         />
     );
 });

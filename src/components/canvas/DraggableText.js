@@ -16,7 +16,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
-    const isVisible = curText.commonState.isVisible(uiStore.timelineControls.playPosition);
+    const isVisible = curText.isVisible(uiStore.timelineControls.playPosition);
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
 	const projectWidth = domainStore.projectMetadata.width;

@@ -6,7 +6,7 @@ import { action } from "mobx";
 import useRootContext from "../../hooks/useRootContext";
 import { Animation } from "konva/lib/Animation";
 
-const SkippedConfig = observer(function SkippedConfig({ skipped }) {
+const BlurConfig = observer(function BlurConfig({ skipped }) {
 	const { uiStore, domainStore } = useRootContext();
 
 	const skippedRef = useRef(null);
@@ -58,4 +58,4 @@ const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 	return <></>;
 });
 
-export default SkippedConfig;
+export default BlurConfig;

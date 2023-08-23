@@ -16,7 +16,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
-    const isVisible = curImage.commonState.isVisible(uiStore.timelineControls.playPosition);
+    const isVisible = curImage.isVisible(uiStore.timelineControls.playPosition);
 
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
@@ -78,12 +78,12 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             offsetY={curImage.commonState.height / 2}
             scaleX={curImage.commonState.scaleX}
             scaleY={curImage.commonState.scaleY}
-			crop={curImage.commonState.cropped ? {
-				x: curImage.commonState.cropX,
-				y: curImage.commonState.cropY,
-				width: curImage.commonState.cropWidth,
-				height: curImage.commonState.cropHeight,
-			} : null}
+			// crop={curImage.commonState.cropped ? {
+			// 	x: curImage.commonState.cropX,
+			// 	y: curImage.commonState.cropY,
+			// 	width: curImage.commonState.cropWidth,
+			// 	height: curImage.commonState.cropHeight,
+			// } : null}
 			rotation={curImage.commonState.rotation}
             draggable={isSelected}
             visible={isVisible}

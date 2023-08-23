@@ -2,6 +2,11 @@ import { makeAutoObservable } from "mobx";
 import { groundCoordinate, roundNumber } from "../../utilities/genericUtilities";
 
 class CommonState {
+	updateAuthorCrop = null;
+	updateAuthorCut = null;
+	updateAuthorBlur = null;
+	updateAuthorZoom = null;
+
     processing = false;
     id = "test";
 
@@ -28,6 +33,9 @@ class CommonState {
 	cropWidth = 0;
 	cropHeight = 0;
 
+	originalWidth = 0;
+	originalHeight = 0;
+
 
     animation = {};
     filterMap = {
@@ -51,7 +59,12 @@ class CommonState {
     }
 
     setMetadata(metadata) {
-        this.thumbnails = metadata.thumbnails !== undefined ? metadata.thumbnails : this.thumbnails;
+		this.updateAuthorCut = metadata.updateAuthorCut !== undefined ? metadata.updateAuthorCut : this.updateAuthorCut;
+		this.updateAuthorCrop = metadata.updateAuthorCrop !== undefined ? metadata.updateAuthorCrop : this.updateAuthorCrop;
+		this.updateAuthorBlur = metadata.updateAuthorBlur !== undefined ? metadata.updateAuthorBlur : this.updateAuthorBlur;
+		this.updateAuthorZoom = metadata.updateAuthorZoom !== undefined ? metadata.updateAuthorZoom : this.updateAuthorZoom;
+        
+		this.thumbnails = metadata.thumbnails !== undefined ? metadata.thumbnails : this.thumbnails;
         this.start = metadata.start !== undefined ? metadata.start : this.start;
         this.duration = metadata.duration !== undefined ? metadata.duration : this.duration;
         this.finish = metadata.finish !== undefined ? metadata.finish : this.finish;
@@ -72,6 +85,9 @@ class CommonState {
 		this.cropY = metadata.cropY !== undefined ? metadata.cropY : this.cropY;
 		this.cropWidth = metadata.cropWidth !== undefined ? metadata.cropWidth : this.cropWidth;
 		this.cropHeight = metadata.cropHeight !== undefined ? metadata.cropHeight : this.cropHeight;
+
+		this.originalWidth = metadata.originalWidth !== undefined ? metadata.originalWidth : this.originalWidth;
+		this.originalHeight	= metadata.originalHeight !== undefined ? metadata.originalHeight : this.originalHeight;
 
         this.animation = metadata.animation !== undefined ? 
 			{ ...this.animation, ...metadata.animation } : this.animation;
@@ -102,6 +118,16 @@ class CommonState {
 			this.x = roundNumber(groundCoordinate(target.x(), target.width(), projectWidth, canvasWidth), 0);
         	this.y = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
 		}
+		if (this.object.title === "Crop") {
+			if (target.id().substring(0, 2) === "bg") {
+				this.object.cropParameters.x = roundNumber(groundCoordinate(target.x(), target.width(), projectWidth, canvasWidth), 0);
+				this.object.cropParameters.y = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
+			}
+			if (target.id().substring(0, 2) === "fg") {
+				this.object.cropParameters.cropX = roundNumber(groundCoordinate(target.x(), target.width(), projectWidth, canvasWidth), 0);
+				this.object.cropParameters.cropY = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
+			}
+		}
 		// target.setAttrs({
 		// 	x: this.x,
 		// 	y: this.y,
@@ -110,16 +136,19 @@ class CommonState {
 
     onTransform(target) {
 		const minWidth = this.domainStore.rootStore.uiStore.canvasConst.minWidth;
+		const minHeight = this.domainStore.rootStore.uiStore.canvasConst.minHeight;
 		const projectWidth = this.domainStore.projectMetadata.width;
 		const projectHeight = this.domainStore.projectMetadata.height;
 		const canvasWidth = this.domainStore.rootStore.uiStore.canvasSize.width;
 		const canvasHeight = this.domainStore.rootStore.uiStore.canvasSize.height;
 
+		let targetAttrs = {};
+
 		if (this.object.title === "Text"
 			|| this.object.title === "Image"
 		) {
 			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);
-			const newHeight = Math.max(target.height() * target.scaleY(), minWidth);
+			const newHeight = Math.max(target.height() * target.scaleY(), minHeight);
 			
 			this.width = roundNumber(newWidth, 0);
 			this.height = roundNumber(newHeight, 0);
@@ -127,20 +156,51 @@ class CommonState {
 			this.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
         	this.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
 		
-
-			this.scaleX = 1;
-			this.scaleY = 1;
+			targetAttrs = {
+				width: this.width,
+				height: this.height,
+			};
 		}
+		if (this.object.title === "Crop") {
+			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);
+			const newHeight = Math.max(target.height() * target.scaleY(), minHeight);
+
+			if (target.id().substring(0, 2) === "bg") {
+				this.object.cropParameters.width = roundNumber(newWidth, 0);
+				this.object.cropParameters.height = roundNumber(newHeight, 0);
+	
+				this.object.cropParameters.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+				this.object.cropParameters.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+			
+				targetAttrs = {
+					width: this.object.cropParameters.width,
+					height: this.object.cropParameters.height,
+				};
+			}
+			if (target.id().substring(0, 2) === "fg") {
+				this.object.cropParameters.cropWidth = roundNumber(newWidth, 0);
+				this.object.cropParameters.cropHeight = roundNumber(newHeight, 0);
+	
+				this.object.cropParameters.cropX = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+				this.object.cropParameters.cropY = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+				
+				targetAttrs = {
+					width: this.object.cropParameters.cropWidth,
+					height: this.object.cropParameters.cropHeight,
+				};
+			}
+		}
+		this.scaleX = 1;
+		this.scaleY = 1;
 		this.rotation = roundNumber(target.rotation(), 0);
 
 		target.setAttrs({
 			scaleX: this.scaleX,
 			scaleY: this.scaleY,
-			width: this.width,
-			height: this.height,
 			rotation: this.rotation,
 			x: target.x(),
 			y: target.y(),
+			...targetAttrs,
 		});
     }
 
@@ -167,15 +227,6 @@ class CommonState {
 			left,
 			right
 		};
-	}
-
-	isVisible(playPosition) {
-        return (this.offset <= playPosition &&
-        	this.end > playPosition);
-	}
-
-	get isVisibleOnCanvas() {
-		return this.isVisible(this.domainStore.rootStore.uiStore.timelineControls.playPosition);
 	}
 
     get end() {

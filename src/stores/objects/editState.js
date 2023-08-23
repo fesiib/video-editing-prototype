@@ -55,6 +55,8 @@ class EditState {
 	cropParameters = {
 		x: 0, // number input
 		y: 0, // number input
+		width: 0,
+		height: 0,
 		cropX: 0,
 		cropY: 0,
 		cropWidth: 0, // number input
@@ -72,6 +74,8 @@ class EditState {
 		this.cropParameters = {
 			x: 0,
 			y: 0,
+			width: domainStore.projectMetadata.width,
+			height: domainStore.projectMetadata.height,
 			cropX: 0,
 			cropY: 0,
 			cropWidth: domainStore.projectMetadata.width,
@@ -283,6 +287,28 @@ class EditState {
 
 	get isActive() {
 		return this.intent.id === this.domainStore.curIntent.id;
+	}
+
+	isVisible(playPosition) {
+		if (this.commonState.offset > playPosition || this.commonState.end <= playPosition) {
+			return false;
+		}
+		if (this.intent.editOperation === null || this.intent.editOperation.linearize === false) {
+			return true;
+		}
+		const intents = this.domainStore.intents;
+		for (let intentIdx = this.intent.intentPos + 1; intentIdx < intents.length; intentIdx++) {
+			const intent = intents[intentIdx];
+			if (intent.editOperation === null || intent.editOperationKey !== this.intent.editOperationKey) {
+				continue;
+			}
+			for (let edit of intent.activeEdits) {
+				if (edit.commonState.offset <= playPosition && edit.commonState.end > playPosition) {
+					return false;
+				}
+			}
+		}
+        return true;
 	}
 
 	get leftTimelineLimit() {
