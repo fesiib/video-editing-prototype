@@ -44,6 +44,15 @@ class EditState {
 
 	shapeParameters = {
 		type: "rectangle", // dropdown
+		background: {
+			fill: "#ffffff", // color picker
+			alpha: 1, // range slider
+		},
+		stroke: {
+			width: 2,
+			fill: "#000000", // color picker
+			alpha: 1, // range slider
+		}
 	};
 
 	zoomParameters = {};
@@ -151,7 +160,15 @@ class EditState {
 		if (this.title === "Shape") {
 			this.shapeParameters = {
 				...this.shapeParameters,
-				...parameters
+				...parameters,
+				background: {
+					...this.shapeParameters.background,
+					...parameters.background,
+				},
+				stroke: {
+					...this.shapeParameters.stroke,
+					...parameters.stroke,
+				},
 			};
 		}
 		if (this.title === "Zoom") {
@@ -351,6 +368,16 @@ class EditState {
 		const rightLimit = this.rightTimelineLimit;
 
 		return {
+			"stroke.width": {
+				min: 0,
+				max: 100,
+				step: 1,
+			},
+			"stroke.alpha": {
+				min: 0,
+				max: 1,
+				step: 0.1,
+			},
 			"background.alpha": {
 				min: 0,
 				max: 1,

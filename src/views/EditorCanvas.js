@@ -13,6 +13,7 @@ import DraggableImage from "../components/canvas/DraggableImage";
 import SkippedConfig from "../components/canvas/SkippedConfig";
 import CropConfig from "../components/canvas/CropConfig";
 import BlurConfig from "../components/canvas/BlurConfig";
+import DraggableShape from "../components/canvas/DraggableShape";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -279,7 +280,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 							<DraggableImage key={image.commonState.id} curImage={image} />
 						))}
 						{shapes.map((shape) => (
-							<DraggableImage key={shape.commonState.id} curImage={shape} />
+							<DraggableShape key={shape.commonState.id} curShape={shape} />
 						))}
 						{skippedParts.map((skipped) => (
 							<SkippedConfig key={skipped.commonState.id} skipped={skipped} />

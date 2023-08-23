@@ -38,7 +38,7 @@ class DomainStore {
 		"shape": {
 			title: "Shape",
 			icon: null,
-			supported: false,
+			supported: true,
 			linearize: false,
 		},
 		"cut": {
@@ -81,11 +81,14 @@ class DomainStore {
 		color: [
 			"style.fill",
 			"background.fill",
+			"stroke.fill",
 		],
 		range: [
 			"background.alpha",
+			"stroke.alpha",
 		],
 		number: [
+			"stroke.width",
 			"style.fontSize",
 			"x",
 			"y",
