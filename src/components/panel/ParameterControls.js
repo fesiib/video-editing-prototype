@@ -59,7 +59,8 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 			<input className="" 
 				id={inputId + "_url"} 
 				type="url"
-				value={parameter}
+				value={parameter === "mixed" ? "" : parameter}
+				placeholder={parameter === "mixed" ? "mixed" : ""}
 				onChange={(event) => onUrlInputChange(event)} 
 			/>
 			<input className=""
@@ -78,7 +79,6 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
-
 	const onInputChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
@@ -99,7 +99,14 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 	});
 	return (<div className="my-1 flex flex-col items-start">
 		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
-		<input className="w-full border" id={inputId} type="text" value={parameter} onChange={(event) => onInputChange(event)} />
+		<input 
+			className="w-full border"
+			id={inputId}
+			type="text"
+			value={parameter === "mixed" ? "" : parameter}
+			placeholder={parameter === "mixed" ? "mixed" : "text"}
+			onChange={(event) => onInputChange(event)} 
+		/>
 	</div>);
 });
 
@@ -156,7 +163,13 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 	});
 
 	const onStepClick = action((step) => {
-		let newValue = parameter + step;
+		let newValue = step;
+		if (!isNumeric(parameter.toString())) {
+			newValue += defaultMin;
+		}
+		else {
+			newValue += parseFloat(parameter);
+		}
 		if (newValue < defaultMin) {
 			newValue = defaultMin;
 		}
@@ -189,7 +202,8 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 				className="w-1/2 border"
 				id={inputId}
 				type="text"
-				value={parameter}
+				value={parameter === "mixed" ? "" : parameter}
+				placeholder={parameter === "mixed" ? "mixed" : "number"}
 				onClick={(event) => {event.target.select()}}
 				onChange={(event) => onInputChange(event)}
 			/>
@@ -232,7 +246,13 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 
 	return (<div className="my-1 flex justify-between">
 		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
-		<select className="w-1/2 border" id={inputId} value={parameter} onChange={(event) => onSelectChange(event)}>
+		<select 
+			className="w-1/2 border"
+			id={inputId}
+			value={parameter === "mixed" ? null : parameter}
+			placeholder={parameter === "mixed" ? "mixed" : parameterKey}
+			onChange={(event) => onSelectChange(event)}
+		>
 			{options.map((option) => {
 				return (<option key={inputId + option} value={option}> {option} </option>);
 			})}
@@ -243,6 +263,8 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 const ColorInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const inputId = `${metaKey}-${parameterKey}-input`;
 
 	const onInputChange = action((event) => {
 		const value = event.target.value;
@@ -265,14 +287,22 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 	});
 
 	return (<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor="colorInput"> {parameterKey} </label>
-		<input className="w-1/4 border" id="colorInput" type="color" value={parameter} onChange={(event) => onInputChange(event)} />
+		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<input 
+			className="w-1/4 border"
+			id={inputId}
+			type="color"
+			value={parameter === "mixed" ? "#000000" : parameter}
+			onChange={(event) => onInputChange(event)} 
+		/>
 	</div>);
 });
 
 const RangeInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const inputId = `${metaKey}-${parameterKey}-input`;
 
 	const defaultStep = selectedEdits.length === 0 ? 1 
 		: selectedEdits[0].numberParameterConfig[parameterKey].step;
@@ -315,8 +345,16 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 
 	return (defaultMin === null || defaultMax === null || defaultMin > defaultMax) ? null : (
 	<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor="opacityInput"> {parameterKey} </label>
-		<input className="w-1/2 border" id="opacityInput" type="range" min={defaultMin} max={defaultMax} step={defaultStep} value={parameter} onChange={(event) => onInputChange(event)}/>
+		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<input 
+			className="w-1/2 border"
+			id={inputId}
+			type="range"
+			min={defaultMin}
+			max={defaultMax}
+			step={defaultStep}
+			value={parameter}
+			onChange={(event) => onInputChange(event)}/>
 	</div>);
 });
 
@@ -327,7 +365,6 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
-
 
 	const onInputChange = action((newAlign) => {
 		for (let edit of selectedEdits) {

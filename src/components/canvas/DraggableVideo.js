@@ -116,7 +116,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     });
 
 	useEffect(() => {
-		console.log(filterMap.blur, filterMap.opacity, filterMap.brightness);
+		//console.log(filterMap.blur, filterMap.opacity, filterMap.brightness);
 		if (videoRef.current === null) {
 			return;
 		}

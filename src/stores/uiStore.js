@@ -21,8 +21,8 @@ class UIStore {
     };
     canvasConst = {
         margin: 2,
-		minWidth: 100,
-		minHeight: 100,
+		minWidth: 10,
+		minHeight: 10,
     };
 
     timelineSize = {

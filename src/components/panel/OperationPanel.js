@@ -24,7 +24,9 @@ const OperationPanel = observer(function OperationPanel() {
 					continue;
 				}
 				if (parameterKey in acc[metaKey]) {
-					acc[metaKey][parameterKey] = "mixed";
+					if (acc[metaKey][parameterKey] !== parameters[parameterKey]) {
+						acc[metaKey][parameterKey] = "mixed";
+					}
 				}
 				else {
 					acc[metaKey][parameterKey] = parameters[parameterKey];

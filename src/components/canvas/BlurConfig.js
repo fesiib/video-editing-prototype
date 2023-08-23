@@ -6,15 +6,15 @@ import { action } from "mobx";
 import useRootContext from "../../hooks/useRootContext";
 import { Animation } from "konva/lib/Animation";
 
-const BlurConfig = observer(function BlurConfig({ skipped }) {
+const BlurConfig = observer(function BlurConfig({ blur }) {
 	const { uiStore, domainStore } = useRootContext();
 
-	const skippedRef = useRef(null);
+	const blurRef = useRef(null);
 
-	const isVisible = skipped.isVisible(uiStore.timelineControls.playPosition);
+	const isVisible = blur.isVisible(uiStore.timelineControls.playPosition);
 	const mainVideos = domainStore.videos.filter((video) => {
-		const left = Math.max(video.commonState.offset, skipped.commonState.offset);
-		const right = Math.min(video.commonState.end, skipped.commonState.end);
+		const left = Math.max(video.commonState.offset, blur.commonState.offset);
+		const right = Math.min(video.commonState.end, blur.commonState.end);
 		return left < right;
 	});
 
@@ -22,36 +22,30 @@ const BlurConfig = observer(function BlurConfig({ skipped }) {
 		if (!isVisible) {
 			return;
 		}
-		if (uiStore.timelineControls.isPlaying) {
-			uiStore.timelineControls.playPosition = skipped.commonState.end;	
-		}
-		else {
-			for (const video of mainVideos) {
-				video.commonState.setMetadata({
-					updateAuthorCut: skipped.commonState.id,
-					filterMap: {
-						opacity: 0.2,
-					}
-				});
-			}
+		for (const video of mainVideos) {
+			video.commonState.setMetadata({
+				updateAuthorBlur: blur.commonState.id,
+				filterMap: {
+					blur: blur.customParameters.blur,
+				}
+			});
 		}
 		return action(() => {
 			for (const video of mainVideos) {
-				if (video.commonState.updateAuthorCut !== skipped.commonState.id) {
+				if (video.commonState.updateAuthorBlur !== blur.commonState.id) {
 					continue;
 				}
 				video.commonState.setMetadata({
-					updateAuthorCut: null,
+					updateAuthorBlur: null,
 					filterMap: {
-						opacity: 1,
+						blur: 0,
 					}
 				});
 			}
 		});
 	}), [
 		isVisible,
-		//uiStore.timelineControls.playPosition,
-		uiStore.timelineControls.isPlaying,
+		blur.customParameters?.blur,
 		mainVideos.length,
 	]);
 

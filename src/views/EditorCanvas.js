@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 
-import { Layer, Rect, Stage, Transformer } from "react-konva";
+import { Layer, Rect, Stage, Transformer, Group } from "react-konva";
 
 import useRootContext from "../hooks/useRootContext";
 import { Util } from "konva/lib/Util";
@@ -12,6 +12,7 @@ import DraggableText from "../components/canvas/DraggableText";
 import DraggableImage from "../components/canvas/DraggableImage";
 import SkippedConfig from "../components/canvas/SkippedConfig";
 import CropConfig from "../components/canvas/CropConfig";
+import BlurConfig from "../components/canvas/BlurConfig";
 
 const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
@@ -31,6 +32,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 	const shapes = domainStore.shapes;
 	const skippedParts = domainStore.allSkippedParts;
 	const crops = domainStore.crops;
+	const blurs = domainStore.blurs;
 
     const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
@@ -233,21 +235,28 @@ const EditorCanvas = observer(function EditorCanvas() {
                     x={uiStore.canvasSize.width / 2}
                     y={uiStore.canvasSize.height / 2}
                 >
-					<Rect
-                        x={uiStore.canvasSize.width / 2}
-                        y={uiStore.canvasSize.height / 2}
-                        width={projectWidth}
-                        height={projectHeight}
-                        offsetX={projectWidth / 2}
-                        offsetY={projectHeight / 2}
-                        fill={"black"}
-                        scaleX={1}
-                        scaleY={1}
-                        name={uiStore.backgroundName}
-                    />
-                    {videos.map((video) => (
-                        <DraggableVideo key={video.commonState.id} curVideo={video} />
-                    ))}
+					<Group
+						clipX={uiStore.canvasSize.width / 2 - projectWidth / 2}
+						clipY={uiStore.canvasSize.height / 2 - projectHeight / 2}
+						clipWidth={projectWidth}
+						clipHeight={projectHeight}
+					>
+						<Rect
+							x={uiStore.canvasSize.width / 2}
+							y={uiStore.canvasSize.height / 2}
+							width={projectWidth}
+							height={projectHeight}
+							offsetX={projectWidth / 2}
+							offsetY={projectHeight / 2}
+							fill={"black"}
+							scaleX={1}
+							scaleY={1}
+							name={uiStore.backgroundName}
+						/>
+						{videos.map((video) => (
+							<DraggableVideo key={video.commonState.id} curVideo={video} />
+						))}
+					</Group>
                 </Layer>
 				<Layer
                     scaleX={uiStore.canvasScale}
@@ -257,21 +266,31 @@ const EditorCanvas = observer(function EditorCanvas() {
                     x={uiStore.canvasSize.width / 2}
                     y={uiStore.canvasSize.height / 2}
                 >
-                    {texts.map((text) => (
-						<DraggableText key={text.commonState.id} curText={text} />
-					))}
-					{images.map((image) => (
-                        <DraggableImage key={image.commonState.id} curImage={image} />
-                    ))}
-					{shapes.map((shape) => (
-                        <DraggableImage key={shape.commonState.id} curImage={shape} />
-                    ))}
-					{skippedParts.map((skipped) => (
-                        <SkippedConfig key={skipped.commonState.id} skipped={skipped} />
-                    ))}
-					{crops.map((crop) => (
-						<CropConfig key={crop.commonState.id} crop={crop} />
-					))}
+					<Group
+						clipX={uiStore.canvasSize.width / 2 - projectWidth / 2}
+						clipY={uiStore.canvasSize.height / 2 - projectHeight / 2}
+						clipWidth={projectWidth}
+						clipHeight={projectHeight}
+					>
+						{texts.map((text) => (
+							<DraggableText key={text.commonState.id} curText={text} />
+						))}
+						{images.map((image) => (
+							<DraggableImage key={image.commonState.id} curImage={image} />
+						))}
+						{shapes.map((shape) => (
+							<DraggableImage key={shape.commonState.id} curImage={shape} />
+						))}
+						{skippedParts.map((skipped) => (
+							<SkippedConfig key={skipped.commonState.id} skipped={skipped} />
+						))}
+						{crops.map((crop) => (
+							<CropConfig key={crop.commonState.id} crop={crop} />
+						))}
+						{blurs.map((blur) => (
+							<BlurConfig key={blur.commonState.id} blur={blur} />
+						))}
+					</Group>
 
                 </Layer>
 				{/* <Layer

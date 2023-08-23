@@ -2,7 +2,7 @@ import { makeAutoObservable } from "mobx";
 
 import CommonState from "./commonState";
 
-import { randomUUID } from "../../utilities/genericUtilities";
+import { randomUUID, roundNumber } from "../../utilities/genericUtilities";
 
 /*
 
@@ -48,7 +48,9 @@ class EditState {
 
 	zoomParameters = {};
 
-	blurParameters = {};
+	blurParameters = {
+		blur: 6, // range slider
+	};
 
 	cutParameters = {};
 
@@ -339,6 +341,9 @@ class EditState {
 		const canvasWidth =  this.domainStore.rootStore.uiStore.canvasSize.width;
 		const canvasHeight =  this.domainStore.rootStore.uiStore.canvasSize.height;
 
+		const minWidth = this.domainStore.rootStore.uiStore.canvasConst.minWidth;
+		const minHeight = this.domainStore.rootStore.uiStore.canvasConst.minHeight;
+
 		const projectWidth = this.domainStore.projectMetadata.width;
 		const projectHeight = this.domainStore.projectMetadata.height;
 
@@ -357,14 +362,14 @@ class EditState {
 				step: 1,
 			},
 			"x": {
-				min: -this.commonState.width,
-				max: canvasWidth,
-				step: Math.min(canvasWidth, canvasHeight) / 100,
+				min: -projectWidth,
+				max: projectWidth,
+				step: roundNumber(projectWidth / 100, 0),
 			},
 			"y": {
-				min: -this.commonState.height,
-				max: canvasHeight,
-				step: Math.min(canvasWidth, canvasHeight) / 100,
+				min: -projectHeight,
+				max: projectHeight,
+				step: roundNumber(projectHeight / 100, 0),
 			},
 			"z": {
 				min: 0,
@@ -372,14 +377,14 @@ class EditState {
 				step: 1,
 			},
 			"width": {
-				min: 0,
+				min: minWidth,
 				max: canvasWidth,
-				step: Math.min(canvasWidth, canvasHeight) / 100,
+				step: roundNumber(canvasWidth / 100, 0),
 			},
 			"height": {
-				min: 0,
+				min: minHeight,
 				max: canvasHeight,
-				step: Math.min(canvasWidth, canvasHeight) / 100,
+				step: roundNumber(canvasHeight / 100, 0),
 			},
 			"start": {
 				min: leftLimit,
@@ -417,24 +422,29 @@ class EditState {
 				step: 10,
 			},
 			"cropX": {
-				min: 0,
+				min: -projectWidth,
 				max: projectWidth,
 				step: 1,
 			},
 			"cropY": {
-				min: 0,
+				min: -projectHeight,
 				max: projectHeight,
 				step: 1,
 			},
 			"cropWidth": {
-				min: 0,
+				min: minWidth,
 				max: projectWidth,
 				step: 1,
 			},
 			"cropHeight": {
-				min: 0,
+				min: minHeight,
 				max: projectHeight,
 				step: 1,
+			},
+			"blur": {
+				min: 0,
+				max: 30,
+				step: 2,
 			},
 		};
 	}

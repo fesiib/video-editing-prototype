@@ -62,7 +62,7 @@ class DomainStore {
 		"blur": {
 			title: "Blur",
 			icon: null,
-			supported: false,
+			supported: true,
 			linearize: true,
 		},
 	};
@@ -103,6 +103,7 @@ class DomainStore {
 			"cropY",
 			"cropWidth",
 			"cropHeight",
+			"blur",
 		],
 		toggle: [
 			"cropped",
@@ -465,6 +466,21 @@ class DomainStore {
 					continue;
 				}
 				if (intent.editOperation.title === "Crop") {
+					result.push(edit);
+				}
+			}
+		}
+		return result;
+	}
+
+	get blurs() {
+		let result = [];
+		for (let intent of this.intents) {
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Blur") {
 					result.push(edit);
 				}
 			}
