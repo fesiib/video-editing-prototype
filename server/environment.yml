@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - pip=21.3.1=pyhd8ed1ab_0
   - anyio=3.5.0=py39hecd8cb5_0
   - appdirs=1.4.4=pyhd3eb1b0_0
   - appnope=0.1.2=py39hecd8cb5_1001
