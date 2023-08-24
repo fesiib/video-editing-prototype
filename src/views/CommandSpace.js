@@ -90,7 +90,7 @@ const CommandSpace = observer(function CommandSpace() {
 					onClick={() => onCancelClick()}
 					disabled={curIntent.activeEdits.length === 0}
 				>
-					Cancel
+					Delete
 				</button>
 				<button 
 					className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
@@ -122,12 +122,10 @@ const CommandSpace = observer(function CommandSpace() {
 							</button>
 							{reversedIntents.length - 1 === idx ? (
 								null
-							) : (
-								<button
-									className="text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
-									onClick={() => onCopyClick(idx)}
-								> Copy </button>
-							)}
+							) : (<button
+								className="text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
+								onClick={() => onCopyClick(idx)}
+							> Copy </button>)}
 						</div>
 					}))
 				}

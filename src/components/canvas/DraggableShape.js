@@ -12,6 +12,8 @@ import { adaptCoordinate } from "../../utilities/genericUtilities";
 const DraggableShape = observer(function DraggableShape({ curShape }) {
     const { uiStore, domainStore } = useRootContext();
 
+	const shapeTitleConst = domainStore.editOperations[uiStore.objectNames.shape].title;
+
     const shapeRef = useRef(null);
 	const bgRef = useRef(null);
 
@@ -55,7 +57,7 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
 		JSON.stringify(uiStore.canvasControls.transformerNodeIds)
 	]);
 
-    return curShape.title !== domainStore.editOperations[uiStore.objectNames.shape].title ? null : (<>
+    return curShape.title !== shapeTitleConst ? null : (<>
 		<Rect
 			id={curShape.commonState.id + "_bg"}
 			name={uiStore.objectNames.shape}

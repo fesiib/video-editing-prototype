@@ -9,11 +9,16 @@ import { Animation } from "konva/lib/Animation";
 const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 	const { uiStore, domainStore } = useRootContext();
 
+	const skippedTitleConst = domainStore.editOperations[uiStore.objectNames.skipped].title;
+
 	const skippedRef = useRef(null);
 
 	const isVisible = skipped.isVisible(uiStore.timelineControls.playPosition);
 
 	useEffect(action(() => {
+		if (skipped.title !== skippedTitleConst) {
+			return;
+		}
 		if (!isVisible) {
 			return;
 		}

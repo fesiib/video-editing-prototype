@@ -12,6 +12,8 @@ import { adaptCoordinate } from "../../utilities/genericUtilities";
 const DraggableImage = observer(function DraggableImage({ curImage }) {
 	const { uiStore, domainStore } = useRootContext();
 
+	const imageTitleConst = domainStore.editOperations[uiStore.objectNames.image].title;
+
     const imageRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
@@ -63,7 +65,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 	]);
 
 
-    return curImage.title !== domainStore.editOperations[uiStore.objectNames.image].title ? null : (<>
+    return curImage.title !== imageTitleConst ? null : (<>
 		<Image
 			id={curImage.commonState.id}
             name={uiStore.objectNames.image}

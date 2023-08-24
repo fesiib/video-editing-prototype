@@ -14,6 +14,8 @@ const EditorCanvas = observer(function EditorCanvas() {
     const stageRef = useRef(null);
 	const videoLayerRef = useRef(null);
 	const objectsLayerRef = useRef(null);
+	const videoGroupRef = useRef(null);
+	const objectsGroupRef = useRef(null);
     const transformerRef = useRef(null);
     const selectionRectRef = useRef(null);
 
@@ -21,6 +23,8 @@ const EditorCanvas = observer(function EditorCanvas() {
 
     const { uiStore, domainStore } = useRootContext();
 
+	const canvasWidth = uiStore.canvasSize.width;
+	const canvasHeight = uiStore.canvasSize.height;
     const projectWidth = domainStore.projectMetadata.width;
     const projectHeight = domainStore.projectMetadata.height;
 
@@ -151,8 +155,8 @@ const EditorCanvas = observer(function EditorCanvas() {
 
     useEffect(
         action(() => {
-            const minWindowHeight = uiStore.canvasSize.height - uiStore.canvasConst.margin;
-            const minWindowWidth = uiStore.canvasSize.width - uiStore.canvasConst.margin;
+            const minWindowHeight = canvasHeight - uiStore.canvasConst.margin;
+            const minWindowWidth = canvasWidth - uiStore.canvasConst.margin;
             while (
                 (projectHeight * uiStore.canvasScale > minWindowHeight ||
                     projectWidth * uiStore.canvasScale > minWindowWidth) &&
@@ -220,8 +224,8 @@ const EditorCanvas = observer(function EditorCanvas() {
             </div>
             <Stage
                 ref={stageRef}
-                width={uiStore.canvasSize.width}
-                height={uiStore.canvasSize.height}
+                width={canvasWidth}
+                height={canvasHeight}
                 onMouseDown={onStageMouseDown}
                 onMouseMove={onStageMouseMove}
                 onMouseUp={onStageMouseUp}
@@ -231,30 +235,29 @@ const EditorCanvas = observer(function EditorCanvas() {
                     <Rect
                         x={0}
                         y={0}
-                        width={uiStore.canvasSize.width}
-                        height={uiStore.canvasSize.height}
+                        width={canvasWidth}
+                        height={canvasHeight}
                         fill={"gray"}
                         name={uiStore.backgroundName}
                     />
                 </Layer>
-                <Layer
-					ref={videoLayerRef}
+				<Layer
                     scaleX={uiStore.canvasScale}
                     scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
+                    offsetX={canvasWidth / 2}
+                    offsetY={canvasHeight / 2}
+                    x={canvasWidth / 2}
+                    y={canvasHeight / 2}
                 >
 					<Group
-						clipX={uiStore.canvasSize.width / 2 - projectWidth / 2}
-						clipY={uiStore.canvasSize.height / 2 - projectHeight / 2}
+						clipX={canvasWidth / 2 - projectWidth / 2}
+						clipY={canvasHeight / 2 - projectHeight / 2}
 						clipWidth={projectWidth}
 						clipHeight={projectHeight}
 					>
 						<Rect
-							x={uiStore.canvasSize.width / 2}
-							y={uiStore.canvasSize.height / 2}
+							x={canvasWidth / 2}
+							y={canvasHeight / 2}
 							width={projectWidth}
 							height={projectHeight}
 							offsetX={projectWidth / 2}
@@ -264,43 +267,78 @@ const EditorCanvas = observer(function EditorCanvas() {
 							scaleY={1}
 							name={uiStore.backgroundName}
 						/>
-						{videos.map((video) => (
-							<DraggableVideo key={video.commonState.id} curVideo={video} />
-						))}
+					</Group>
+				</Layer>
+                <Layer
+					ref={videoLayerRef}
+                    scaleX={uiStore.canvasScale}
+                    scaleY={uiStore.canvasScale}
+                    offsetX={canvasWidth / 2}
+                    offsetY={canvasHeight / 2}
+                    x={canvasWidth / 2}
+                    y={canvasHeight / 2}
+                >
+					<Group
+						clipX={canvasWidth / 2 - projectWidth / 2}
+						clipY={canvasHeight / 2 - projectHeight / 2}
+						clipWidth={projectWidth}
+						clipHeight={projectHeight}
+					>
+						<Group
+							ref={videoGroupRef}
+							scaleX={1}
+							scaleY={1}
+							x={0}
+							y={0}
+						>
+							{videos.map((video) => (
+								<DraggableVideo key={video.commonState.id} curVideo={video} />
+							))}
+						</Group>
 					</Group>
                 </Layer>
 				<Layer
 					ref={objectsLayerRef}
                     scaleX={uiStore.canvasScale}
                     scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
+                    offsetX={canvasWidth / 2}
+                    offsetY={canvasHeight / 2}
+                    x={canvasWidth / 2}
+                    y={canvasHeight / 2}
                 >
 					<Group
-						clipX={uiStore.canvasSize.width / 2 - projectWidth / 2}
-						clipY={uiStore.canvasSize.height / 2 - projectHeight / 2}
+						clipX={canvasWidth / 2 - projectWidth / 2}
+						clipY={canvasHeight / 2 - projectHeight / 2}
 						clipWidth={projectWidth}
 						clipHeight={projectHeight}
 					>
-						{orderedObjects.map((item) => {
-							return (<CanvasItem 
-								key={item.commonState.id}
-								item={item}
-								stageRef={stageRef.current}
-								transformerRef={transformerRef.current}
-							/>)
-						})}
+						<Group
+							ref={objectsGroupRef}
+							scaleX={1}
+							scaleY={1}
+							x={0}
+							y={0}
+						>
+							{orderedObjects.map((item) => {
+								return (<CanvasItem 
+									key={item.commonState.id}
+									item={item}
+									stageRef={stageRef.current}
+									transformerRef={transformerRef.current}
+									videoGroupRef={videoGroupRef.current}
+									objectsGroupRef={objectsGroupRef.current}
+								/>)
+							})}
+						</Group>
 					</Group>
                 </Layer>
 				{/* <Layer
                     scaleX={uiStore.canvasScale}
                     scaleY={uiStore.canvasScale}
-                    offsetX={uiStore.canvasSize.width / 2}
-                    offsetY={uiStore.canvasSize.height / 2}
-                    x={uiStore.canvasSize.width / 2}
-                    y={uiStore.canvasSize.height / 2}
+                    offsetX={canvasWidth / 2}
+                    offsetY={canvasHeight / 2}
+                    x={canvasWidth / 2}
+                    y={canvasHeight / 2}
                 >
                     
                 </Layer> */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -47,7 +47,6 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
 const SentenceBox = observer(function SentenceBox({ 
 	index,
 	item,
-	isTimeSelected,
 	activeEdits,
 	skippedParts,
 }) {
@@ -102,13 +101,27 @@ const SentenceBox = observer(function SentenceBox({
 		setShowTime(false);
 	});
 
-	const outerClassName = "relative pr-2 my-1" + (
-		isTimeSelected ? " bg-red-400" : "");
+	const outerClassName = "relative pr-2 my-1";
 
 	const timeClassName = "z-30 absolute -top-2 text-xs text-black";
 
 	const formattedStart = playPositionToFormat(item.start);
 	//const formattedFinish = playPositionToFormat(item.finish);
+
+	useEffect(() => {
+		const div = document.getElementById(`script-${index}`);
+		if (domainStore.transcriptSelectedIndex === index) {
+			div.scrollIntoView({
+				behavior: "smooth",
+				block: "center",
+				inline: "center",
+			});
+			div.className = outerClassName + " bg-red-200";
+		}
+		else {
+			div.className = outerClassName;
+		}
+	}, [domainStore.transcriptSelectedIndex]);
 
     return (
 		<div
@@ -116,8 +129,8 @@ const SentenceBox = observer(function SentenceBox({
 			id={"script-" + index}
 			className={outerClassName}
 			onClick={(event) => handleClick(event)}
-			onMouseEnter={(event) => onMouseEnter()}
-			onMouseLeave={(event) => onMouseLeave()}
+			onMouseEnter={() => onMouseEnter()}
+			onMouseLeave={() => onMouseLeave()}
 		>	
 			<div>
 				<div className="relative z-10 text-left">
@@ -214,7 +227,6 @@ const SentenceBox = observer(function SentenceBox({
 const TextWall = observer(function TextWall() {
     const { uiStore, domainStore } = useRootContext();
     const filteredScript = domainStore.transcripts;
-	const selectedIndex = domainStore.transcriptSelectedIndex;
 
 	const activeEdits = domainStore.curIntent.activeEdits; 
 	const skippedParts = domainStore.skippedParts;
@@ -293,8 +305,6 @@ const TextWall = observer(function TextWall() {
 				) : (
 					<div className="flex flex-wrap ">
 						{filteredScript.map((item, index) => {
-							const isTimeSelected = selectedIndex === index;
-							const isEditSelected = false;
 							const relevantActiveEdits = activeEdits.filter((edit) => {
 								return (
 									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
@@ -315,8 +325,6 @@ const TextWall = observer(function TextWall() {
 								item={item}
 								activeEdits={relevantActiveEdits}
 								skippedParts={relevantSkippedParts}
-								isTimeSelected={isTimeSelected}
-								isEditSelected={isEditSelected}
 							/>);
 						})}
 						{/* {domainStore.curIntent.activeEdits.map((edit, index) => {

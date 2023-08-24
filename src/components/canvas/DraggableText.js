@@ -12,6 +12,8 @@ import { adaptCoordinate } from "../../utilities/genericUtilities";
 const DraggableText = observer(function DraggableText({ curText }) {
     const { uiStore, domainStore } = useRootContext();
 
+	const textTitleConst = domainStore.editOperations[uiStore.objectNames.text].title;
+
     const textRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
@@ -54,7 +56,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
 		JSON.stringify(uiStore.canvasControls.transformerNodeIds)
 	]);
 
-    return curText.title !== domainStore.editOperations[uiStore.objectNames.text].title ? null : (<>
+    return curText.title !== textTitleConst ? null : (<>
 		<Rect 
 			id={curText.commonState.id + "_background"}
 			name={uiStore.objectNames.text + "_background"}

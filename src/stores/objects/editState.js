@@ -179,6 +179,9 @@ class EditState {
 				...this.zoomParameters,
 				...parameters,
 			};
+			if (this.zoomParameters.zoomDurationEnd + this.zoomParameters.zoomDurationStart > this.commonState.sceneDuration) {
+				this.zoomParameters.zoomDurationEnd = this.commonState.sceneDuration - this.zoomParameters.zoomDurationStart;
+			}
 		}
 		if (this.title === "Crop") {
 			this.cropParameters = {

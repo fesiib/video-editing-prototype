@@ -10,6 +10,8 @@ import { adaptCoordinate } from "../../utilities/genericUtilities";
 const CropConfig = observer(function CropConfig({ crop }) {
 	const { uiStore, domainStore } = useRootContext();
 
+	const cropTitleConst = domainStore.editOperations[uiStore.objectNames.crop].title;
+
 	const cropFgRef = useRef(null);
 	const cropBgRef = useRef(null);
 
@@ -81,6 +83,9 @@ const CropConfig = observer(function CropConfig({ crop }) {
 	]);
 
 	useEffect(action(() => {
+		if (cropFgRef.current === null || cropBgRef.current === null) {
+			return;
+		}
 		if (!isVisible) {
 			return;
 		}
@@ -147,7 +152,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 		mainVideos.length,
 	]);
 
-	return crop.title !== domainStore.editOperations[uiStore.objectNames.crop].title ? null : (<>
+	return crop.title !== cropTitleConst ? null : (<>
 		<Rect 
 			id={"bg_" + crop.commonState.id}
 			name={uiStore.objectNames.crop}

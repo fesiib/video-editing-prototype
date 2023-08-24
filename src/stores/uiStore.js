@@ -20,6 +20,7 @@ class UIStore {
         transformerNodeIds: [],
 		opacity: 1,
 		opacityAuthor: null,
+		zoomAuthor: null,
     };
     canvasConst = {
         margin: 2,

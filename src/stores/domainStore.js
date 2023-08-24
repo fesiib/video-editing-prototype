@@ -166,65 +166,41 @@ class DomainStore {
     }
 
 	confirmIntent() {
-		// const excludedIds = this.curIntent.allExcludedIds;
-		// let newMainVideos = []
-		// let newTexts = [];
-		// let newImages = [];
-		// let newShapes = [];
-		// for (let video of this.in_mainVideos) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
-		// 		newMainVideos.push(video);
-		// 	}
-		// }
-		// for (let text of this.in_texts) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-		// 		newTexts.push(text);
-		// 	}
-		// }
-		// for (let image of this.in_images) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === image.commonState.id) === -1) {
-		// 		newImages.push(image);
-		// 	}
-		// }
-		// for (let shape of this.in_shapes) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === shape.commonState.id) === -1) {
-		// 		newShapes.push(shape);
-		// 	}
-		// }
-		// for (let edit of this.curIntent.activeEdits) {
-		// 	if (this.curIntent.editOperation === null) {
-		// 		continue;
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Text") {
-		// 		this.in_texts.push(edit);
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Image") {
-		// 		this.in_images.push(edit);
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Shape") {
-		// 		this.in_shapes.push(edit);
-		// 	}
-		// 	for (let object of edit.adjustedVideos) {
-		// 		newMainVideos.push(object);
-		// 	}
-		// }
-		// this.in_mainVideos = newMainVideos;
-		// this.in_texts = newTexts;
-		// this.in_images = newImages;
-		// this.in_shapes = newShapes;
-		this.curIntentPos = this.intents.length;
-		this.intents.push(
-			new IntentState(this, "", "todo", 0)
-		);
+		if (this.curIntentPos === this.intents.length - 1) {
+			this.curIntentPos = this.intents.length;
+			this.intents.push(
+				new IntentState(this, "", "todo", 0)
+			);
+		}
+		else {
+			this.curIntentPos = this.intents.length - 1;
+		}
 		this.rootStore.resetTempState();
 	}
 
 	cancelIntent() {
-		this.intents.pop();
-		this.curIntentPos = this.intents.length;
-		this.intents.push(
-			new IntentState(this, "", "todo", 0)
-		);
+		if (this.curIntentPos === this.intents.length - 1) {
+			this.intents.pop();
+			this.curIntentPos = this.intents.length;
+			this.intents.push(
+				new IntentState(this, "", "todo", 0)
+			);
+		}
+		else {
+			this.intents = this.intents.filter((intent, idx) => idx !== this.curIntentPos);
+			this.intents = this.intents.map((intent, idx) => {
+				if (idx < this.curIntentPos) {
+					return intent;
+				}
+				for (let edit of intent.activeEdits) {
+					edit.commonState.setMetadata({
+						z: idx + 1,
+					});
+				}
+				return intent;
+			});
+			this.curIntentPos = this.intents.length - 1;
+		}
 		this.rootStore.resetTempState();
 	}
 

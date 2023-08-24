@@ -12,10 +12,9 @@ import BlurConfig from "./BlurConfig";
 import DraggableShape from "./DraggableShape";
 import ZoomConfig from "./ZoomConfig";
 
-const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef }) {
+const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef, videoGroupRef, objectsGroupRef }) {
     const { uiStore, domainStore } = useRootContext();
 	const type = item.intent.editOperationKey;
-
 	const isVisible = item.isVisible(uiStore.timelineControls.playPosition);
 
 	useEffect(() => {
@@ -46,14 +45,13 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 	]);
 
     return (<>
-		{type === uiStore.objectNames.text && <DraggableText curText={item} />}
-		{type === uiStore.objectNames.image && <DraggableImage curImage={item} />}
-		{type === uiStore.objectNames.shape && <DraggableShape curShape={item} />}
-		{/* {type === uiStore.objectNames.video && <DraggableVideo curVideo={item} />} */}
-		{type === uiStore.objectNames.cut && <SkippedConfig skipped={item} />}
-		{type === uiStore.objectNames.crop && <CropConfig crop={item} />}
-		{type === uiStore.objectNames.zoom && <ZoomConfig zoom={item} />}
-		{type === uiStore.objectNames.blur && <BlurConfig blur={item} />}
+		{type === uiStore.objectNames.text ? <DraggableText curText={item} /> : null}
+		{type === uiStore.objectNames.image ? <DraggableImage curImage={item} /> : null}
+		{type === uiStore.objectNames.shape ? <DraggableShape curShape={item} /> : null}
+		{type === uiStore.objectNames.cut ? <SkippedConfig skipped={item} /> : null}
+		{type === uiStore.objectNames.crop ? <CropConfig crop={item} /> : null}
+		{type === uiStore.objectNames.zoom ? <ZoomConfig zoom={item} videoGroupRef={videoGroupRef} objectsGroupRef={objectsGroupRef} /> : null}
+		{type === uiStore.objectNames.blur ? <BlurConfig blur={item} /> : null}
 	</>);
 });
 

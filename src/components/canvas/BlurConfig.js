@@ -9,6 +9,8 @@ import { Animation } from "konva/lib/Animation";
 const BlurConfig = observer(function BlurConfig({ blur }) {
 	const { uiStore, domainStore } = useRootContext();
 
+	const blurTitleConst = domainStore.editOperations[uiStore.objectNames.blur].title;
+
 	const blurRef = useRef(null);
 
 	const isVisible = blur.isVisible(uiStore.timelineControls.playPosition);
@@ -19,7 +21,7 @@ const BlurConfig = observer(function BlurConfig({ blur }) {
 	});
 
 	useEffect(action(() => {
-		if (!isVisible) {
+		if (!isVisible || blur.title !== blurTitleConst) {
 			return;
 		}
 		for (const video of mainVideos) {
