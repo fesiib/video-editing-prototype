@@ -146,17 +146,19 @@ const Timeline = observer(function Timeline() {
 	// 	uiStore.timelineControls.splitting
 	// ]);
 
+	const buttonClassName = " hover:bg-indigo-400 text-black py-2 px-4 rounded";
+
     return (
         <div className="bg-slate-100" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
-                <button className="bg-indigo-300 p-1 hover:bg-indigo-400" id="play_button" onClick={onPressPlay}>
+                <button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
                     {uiStore.timelineControls.isPlaying ? "pause" : "play"}
                 </button>
                 <button
                     className={
                         (uiStore.timelineControls.splitting
                             ? "bg-indigo-500"
-                            : "bg-indigo-300") + " p-1 hover:bg-indigo-400"
+                            : "bg-indigo-300") + buttonClassName
                     }
                     onClick={onPressSplit}
                     id="split_button"
@@ -167,7 +169,7 @@ const Timeline = observer(function Timeline() {
                     className={
                         (uiStore.timelineControls.rangeSelectingTimeline
                             ? "bg-indigo-500"
-                            : "bg-indigo-300") + " p-1 hover:bg-indigo-400"
+                            : "bg-indigo-300") + buttonClassName
                     }
                     onClick={onPressRangeSelect}
                     id="intentselect_button"
@@ -175,7 +177,7 @@ const Timeline = observer(function Timeline() {
                     {uiStore.timelineControls.rangeSelectingTimeline ? "Range Selecting" : "Range Select"}
                 </button>
                 <button
-                    className={"bg-indigo-300 p-1 hover:bg-indigo-400"}
+                    className={"bg-indigo-300" + buttonClassName}
                     id="delete_button"
                     onClick={onDeleteTimelineItems}
                 >
@@ -212,14 +214,14 @@ const Timeline = observer(function Timeline() {
             <TimelineTracks />
 			<div className="flex justify-end gap-2">
 				<button
-                    className={"bg-indigo-300 p-1"}
+                    className={"bg-indigo-300" + buttonClassName}
                     id="prev_button"
                     onClick={() => onNavigationClick("prev")}
                 >
                     Previous
                 </button>
 				<button
-                    className={"bg-indigo-300 p-1"}
+                    className={"bg-indigo-300" + buttonClassName}
                     id="next_button"
                     onClick={() => onNavigationClick("next")}
                 >

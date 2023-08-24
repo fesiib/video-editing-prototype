@@ -37,6 +37,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 	const videos = domainStore.videos;
 	const skippedParts = domainStore.skippedParts;
 	const edits = domainStore.curIntent.activeEdits;
+	const editIds = edits.map((edit) => edit.commonState.id);
 
     const onGenericDragStart = action((event) => {
         const { active } = event;
@@ -196,7 +197,13 @@ const TimelineTracks = observer(function TimelineTracks() {
             newTracks[id].scenes.push(edit);
         }
         setTracks(newTracks);
-    }, [videos.length, skippedParts.length, edits.length, trackCnt]);
+    }, [
+		videos.length,
+		skippedParts.length,
+		JSON.stringify(editIds),
+		trackCnt,
+		domainStore.curIntentPos,
+	]);
 
 	useEffect(() => {
 		if (tracksContainer.current) {

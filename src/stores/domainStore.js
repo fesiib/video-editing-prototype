@@ -219,9 +219,34 @@ class DomainStore {
 
 	cancelIntent() {
 		this.intents.pop();
+		this.curIntentPos = this.intents.length;
 		this.intents.push(
 			new IntentState(this, "", "todo", 0)
 		);
+		this.rootStore.resetTempState();
+	}
+
+	copyIntentToCurrent(intentPos) {
+		if (intentPos >= this.intents.length - 1 || intentPos < 0) {
+			return;
+		}
+		const deepCopy = this.intents[intentPos].getDeepCopy();
+		this.intents.pop();
+		this.curIntentPos = this.intents.length;
+		this.intents.push(deepCopy);
+		for (let edit of deepCopy.activeEdits) {
+			edit.commonState.setMetadata({
+				z: this.curIntentPos + 1,
+			});
+		}
+		this.rootStore.resetTempState();
+	}
+
+	setCurIntent(intentPos) {
+		if (intentPos >= this.intents.length || intentPos < 0) {
+			return;
+		}
+		this.curIntentPos = intentPos;
 		this.rootStore.resetTempState();
 	}
 

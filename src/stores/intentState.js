@@ -23,6 +23,13 @@ class IntentState {
 		this.trackId = trackId;
     }
 
+	getDeepCopy() {
+		let newIntent = new IntentState(this.domainStore, this.textCommand, this.sketchCommand, this.trackId);
+		newIntent.editOperationKey = this.editOperationKey;
+		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => edit.getDeepCopy());
+		return newIntent;
+	}
+
 	setTextCommand(textCommand) {
 		this.textCommand = textCommand;
 	}

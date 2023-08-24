@@ -174,7 +174,7 @@ class UIStore {
 		this.canvasControls.transformerNodeIds = [];
 		this.timelineControls.selectedTimelineItems = [];
 		this.timelineControls.splitting = false;
-		this.timelineControls.rangeSelectingTimeline = true;
+		this.timelineControls.rangeSelectingTimeline = false;
 		this.timelineControls.rangeSelectingFirstPx = -1;
 		this.timelineControls.positionIndicatorVisibility = 0;
 	}
