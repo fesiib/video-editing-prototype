@@ -31,7 +31,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
         element.src = curImage.customParameters.source;
         element.id = "image_element_" + curImage.commonState.id;
         return element;
-    }, [curImage.source, curImage.commonState.id]);;
+    }, [curImage.customParameters.source, curImage.commonState.id]);;
 
     useEffect(action(() => {
 		if (imageRef.current === null) {

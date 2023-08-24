@@ -293,7 +293,6 @@ const EditorCanvas = observer(function EditorCanvas() {
 							/>)
 						})}
 					</Group>
-
                 </Layer>
 				{/* <Layer
                     scaleX={uiStore.canvasScale}

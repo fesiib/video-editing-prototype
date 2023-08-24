@@ -56,7 +56,7 @@ class DomainStore {
 		"zoom": {
 			title: "Zoom",
 			icon: null,
-			supported: false,
+			supported: true,
 			linearize: true,
 		},
 		"blur": {
@@ -88,6 +88,8 @@ class DomainStore {
 			"stroke.alpha",
 		],
 		number: [
+			"zoomDurationStart",
+			"zoomDurationEnd",
 			"stroke.width",
 			"style.fontSize",
 			"x",
@@ -501,6 +503,21 @@ class DomainStore {
 		return result;
 	}
 
+	get zooms() {
+		let result = [];
+		for (let intent of this.intents) {
+			for (let edit of intent.activeEdits) {
+				if (intent.editOperation === null) {
+					continue;
+				}
+				if (intent.editOperation.title === "Zoom") {
+					result.push(edit);
+				}
+			}
+		}
+		return result;
+	}
+
 	get blurs() {
 		let result = [];
 		for (let intent of this.intents) {
@@ -522,8 +539,9 @@ class DomainStore {
 		const shapes = this.shapes;
 		const skippedParts = this.allSkippedParts;
 		const crops = this.crops;
+		const zooms = this.zooms;
 		const blurs = this.blurs;
-		const objects = [...texts, ...images, ...shapes, ...skippedParts, ...crops, ...blurs];
+		const objects = [...texts, ...images, ...shapes, ...skippedParts, ...crops, ...zooms, ...blurs];
 		objects.sort((a, b) => a.commonState.z - b.commonState.z);
 		return objects;
 	}

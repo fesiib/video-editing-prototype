@@ -55,7 +55,10 @@ class EditState {
 		}
 	};
 
-	zoomParameters = {};
+	zoomParameters = {
+		zoomDurationStart: 0,
+		zoomDurationEnd: 0,
+	};
 
 	blurParameters = {
 		blur: 6, // range slider
@@ -174,7 +177,7 @@ class EditState {
 		if (this.title === "Zoom") {
 			this.zoomParameters = {
 				...this.zoomParameters,
-				...parameters
+				...parameters,
 			};
 		}
 		if (this.title === "Crop") {
@@ -242,7 +245,7 @@ class EditState {
 			start: this.commonState.offset,
 			finish: this.commonState.end,
 			duration: this.commonState.sceneDuration,
-			speed: this.commonState.speed,
+			//speed: this.commonState.speed,
 		};
 	}
 
@@ -368,6 +371,16 @@ class EditState {
 		const rightLimit = this.rightTimelineLimit;
 
 		return {
+			"zoomDurationStart": {
+				min: 0,
+				max: this.commonState.sceneDuration,
+				step: 1,
+			},
+			"zoomDurationEnd": {
+				min: 0,
+				max: this.commonState.sceneDuration,
+				step: 1,
+			},
 			"stroke.width": {
 				min: 0,
 				max: 100,

@@ -10,6 +10,7 @@ import SkippedConfig from "./SkippedConfig";
 import CropConfig from "./CropConfig";
 import BlurConfig from "./BlurConfig";
 import DraggableShape from "./DraggableShape";
+import ZoomConfig from "./ZoomConfig";
 
 const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef }) {
     const { uiStore, domainStore } = useRootContext();
@@ -51,6 +52,7 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 		{/* {type === uiStore.objectNames.video && <DraggableVideo curVideo={item} />} */}
 		{type === uiStore.objectNames.cut && <SkippedConfig skipped={item} />}
 		{type === uiStore.objectNames.crop && <CropConfig crop={item} />}
+		{type === uiStore.objectNames.zoom && <ZoomConfig zoom={item} />}
 		{type === uiStore.objectNames.blur && <BlurConfig blur={item} />}
 	</>);
 });

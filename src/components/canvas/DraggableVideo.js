@@ -288,6 +288,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 			draggable={isSelected}
             visible={isVisible}
             perfectDrawEnabled={false}
+			
             //onDragMove={(event) => curVideo.commonState.onDragMove(event.target)}
             //onTransform={(event) => curVideo.commonState.onTransform(event.target)}
         />

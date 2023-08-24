@@ -115,6 +115,7 @@ class CommonState {
 		if (this.object.title === "Text"
 			|| this.object.title === "Image"
 			|| this.object.title === "Shape"
+			|| this.object.title === "Zoom"
 		) {
 			this.x = roundNumber(groundCoordinate(target.x(), target.width(), projectWidth, canvasWidth), 0);
         	this.y = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
@@ -148,6 +149,7 @@ class CommonState {
 		if (this.object.title === "Text"
 			|| this.object.title === "Image"
 			|| this.object.title === "Shape"
+			|| this.object.title === "Zoom"
 		) {
 			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);
 			const newHeight = Math.max(target.height() * target.scaleY(), minHeight);

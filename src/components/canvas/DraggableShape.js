@@ -13,6 +13,7 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
     const { uiStore, domainStore } = useRootContext();
 
     const shapeRef = useRef(null);
+	const bgRef = useRef(null);
 
     const [isSelected, setIsSelected] = useState(false);
 
@@ -58,6 +59,7 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
 		<Rect
 			id={curShape.commonState.id + "_bg"}
 			name={uiStore.objectNames.shape}
+			ref={bgRef}
 			x={x}
 			y={y}
 			width={curShape.commonState.width}

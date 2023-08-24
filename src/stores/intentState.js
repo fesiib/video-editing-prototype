@@ -26,7 +26,11 @@ class IntentState {
 	getDeepCopy() {
 		let newIntent = new IntentState(this.domainStore, this.textCommand, this.sketchCommand, this.trackId);
 		newIntent.editOperationKey = this.editOperationKey;
-		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => edit.getDeepCopy());
+		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
+			const newEdit = edit.getDeepCopy();
+			newEdit.intent = newIntent;
+			return newEdit;
+		});
 		return newIntent;
 	}
 
