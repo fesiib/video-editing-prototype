@@ -6,7 +6,7 @@ import { randomUUID } from "../utilities/genericUtilities";
 
 class IntentState {
     textCommand = "";
-	sketchCommand = null;
+	sketchCommand = [];
 	trackId = 0;
 	activeEdits = [];
 	editOperationKey = "";

@@ -160,7 +160,7 @@ class DomainStore {
 		this.in_shapes = [];
 
         this.intents = [
-				new IntentState(this, "", "todo", 0)
+				new IntentState(this, "", [], 0)
 		];
 		this.curIntentPos = 0;
     }
@@ -169,7 +169,7 @@ class DomainStore {
 		if (this.curIntentPos === this.intents.length - 1) {
 			this.curIntentPos = this.intents.length;
 			this.intents.push(
-				new IntentState(this, "", "todo", 0)
+				new IntentState(this, "", [], 0)
 			);
 		}
 		else {
@@ -178,16 +178,16 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
-	cancelIntent() {
-		if (this.curIntentPos === this.intents.length - 1) {
+	cancelIntent(intentPos) {
+		if (intentPos === this.intents.length - 1) {
 			this.intents.pop();
 			this.curIntentPos = this.intents.length;
 			this.intents.push(
-				new IntentState(this, "", "todo", 0)
+				new IntentState(this, "", [], 0)
 			);
 		}
 		else {
-			this.intents = this.intents.filter((intent, idx) => idx !== this.curIntentPos);
+			this.intents = this.intents.filter((intent, idx) => idx !== intentPos);
 			this.intents = this.intents.map((intent, idx) => {
 				if (idx < this.curIntentPos) {
 					return intent;
@@ -205,13 +205,11 @@ class DomainStore {
 	}
 
 	copyIntentToCurrent(intentPos) {
-		if (intentPos >= this.intents.length - 1 || intentPos < 0) {
+		if (intentPos >= this.intents.length || intentPos < 0) {
 			return;
 		}
 		const deepCopy = this.intents[intentPos].getDeepCopy();
-		this.intents.pop();
-		this.curIntentPos = this.intents.length;
-		this.intents.push(deepCopy);
+		this.intents[this.curIntentPos] = deepCopy;
 		for (let edit of deepCopy.activeEdits) {
 			edit.commonState.setMetadata({
 				z: this.curIntentPos + 1,
@@ -226,6 +224,10 @@ class DomainStore {
 		}
 		this.curIntentPos = intentPos;
 		this.rootStore.resetTempState();
+	}
+
+	processIntent() {
+
 	}
 
 	// linearizeEdits(editHierarchy) {

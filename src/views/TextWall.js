@@ -101,27 +101,13 @@ const SentenceBox = observer(function SentenceBox({
 		setShowTime(false);
 	});
 
-	const outerClassName = "relative pr-2 my-1";
+	const outerClassName = "relative pr-2 my-1" + (domainStore.transcriptSelectedIndex !== index ?
+		"" : " bg-red-200");
 
 	const timeClassName = "z-30 absolute -top-2 text-xs text-black";
 
 	const formattedStart = playPositionToFormat(item.start);
 	//const formattedFinish = playPositionToFormat(item.finish);
-
-	useEffect(() => {
-		const div = document.getElementById(`script-${index}`);
-		if (domainStore.transcriptSelectedIndex === index) {
-			div.scrollIntoView({
-				behavior: "smooth",
-				block: "center",
-				inline: "center",
-			});
-			div.className = outerClassName + " bg-red-200";
-		}
-		else {
-			div.className = outerClassName;
-		}
-	}, [domainStore.transcriptSelectedIndex]);
 
     return (
 		<div
@@ -283,6 +269,16 @@ const TextWall = observer(function TextWall() {
 		}
 		return;
     });
+
+	useEffect(() => {
+		const index = domainStore.transcriptSelectedIndex;
+		const div = document.getElementById(`script-${index}`);
+		div.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+			inline: "center",
+		});
+	}, [domainStore.transcriptSelectedIndex]);
 
     return (
         <div 

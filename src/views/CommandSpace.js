@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
+import SketchCanvas from "../components/command-space/SketchCanvas";
 
 
 
@@ -20,8 +21,8 @@ const CommandSpace = observer(function CommandSpace() {
 		domainStore.confirmIntent();
 	});
 
-	const onCancelClick = action(() => {
-		domainStore.cancelIntent();
+	const onCancelClick = action((intentPos) => {
+		domainStore.cancelIntent(intentPos);
 	});
 
 	const onCopyClick = action((intentPos) => {
@@ -32,6 +33,10 @@ const CommandSpace = observer(function CommandSpace() {
 		domainStore.setCurIntent(intentPos);
 	});
 
+	const onProcessClick = action(() => {
+		domainStore.processIntent();
+	});
+
 	return (<div className="flex justify-between my-5">
 		<div className="w-2/3 flex flex-col items-center mx-2">
 			<h2> Describe your edit: </h2>
@@ -39,13 +44,14 @@ const CommandSpace = observer(function CommandSpace() {
 				className="w-full border p-2"
 				onChange={onChangeTextCommand} 
 			/>
-			<div className="w-fit flex gap-2 justify-center my-2 p-2 border">
+			<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border">
+				<SketchCanvas />
 				<button 
-					className="bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
-					//onClick={() => onCancelClick()}
-					//disabled={curIntent.activeEdits.length === 0}
+					className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+					onClick={() => onProcessClick()}
+					disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
 				>
-					Sketch
+					Process
 				</button>
 			</div>
 			{/* <div className="flex flex-col">
@@ -84,22 +90,6 @@ const CommandSpace = observer(function CommandSpace() {
 				</div>
 				<div> <span style={{fontWeight: "bold"}}> Sketch: </span> {curIntent.sketchCommand} </div>
 			</div> */}
-			<div className="w-fit flex gap-2 justify-center my-2 p-2 border">
-				<button 
-					className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-					onClick={() => onCancelClick()}
-					disabled={curIntent.activeEdits.length === 0}
-				>
-					Delete
-				</button>
-				<button 
-					className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-					onClick={() => onConfirmClick()} 
-					disabled={curIntent.activeEdits.length === 0}
-				>
-					Confirm
-				</button>
-			</div>
 		</div>
 		<div className="w-1/3">
 			<h2> Edits: </h2>
@@ -120,12 +110,26 @@ const CommandSpace = observer(function CommandSpace() {
 							>
 								{idx + 1} - {`[${title}]`}: "{intent.textCommand}"
 							</button>
-							{reversedIntents.length - 1 === idx ? (
-								null
-							) : (<button
-								className="text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
-								onClick={() => onCopyClick(idx)}
-							> Copy </button>)}
+							<div className="w-fit flex gap-2 justify-center p-2">
+								<button 
+									className="w-fit bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+									onClick={() => onCancelClick(idx)}
+									disabled={curIntent.activeEdits.length === 0}
+								>
+									Delete
+								</button>
+								{domainStore.curIntentPos === idx ? (<button 
+									className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+									onClick={() => onConfirmClick()} 
+									disabled={curIntent.activeEdits.length === 0}
+								>
+									Confirm
+								</button>) 
+								: (<button
+									className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
+									onClick={() => onCopyClick(idx)}
+								> Copy </button>)}
+							</div>
 						</div>
 					}))
 				}
