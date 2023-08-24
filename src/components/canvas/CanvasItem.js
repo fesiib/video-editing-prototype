@@ -1,26 +1,58 @@
+import React, { useEffect } from "react";
+
 import { observer } from "mobx-react-lite";
-import React from "react";
+
 import useRootContext from "../../hooks/useRootContext";
+
 import DraggableText from "./DraggableText";
-import DraggableVideo from "./DraggableVideo";
+import DraggableImage from "./DraggableImage";
+import SkippedConfig from "./SkippedConfig";
+import CropConfig from "./CropConfig";
+import BlurConfig from "./BlurConfig";
+import DraggableShape from "./DraggableShape";
 
-const CanvasItem = observer(function CanvasItem({ item, type }) {
-    const { uiStore } = useRootContext();
+const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef }) {
+    const { uiStore, domainStore } = useRootContext();
+	const type = item.intent.editOperationKey;
 
-    const left = item.commonState.offset;
-    const right = item.commonState.end;
-    const playPosition = uiStore.timelineControls.playPosition;
-    const isVisible = left <= playPosition && right >= playPosition;
+	const isVisible = item.isVisible(uiStore.timelineControls.playPosition);
 
-    return (
-        <div className={!isVisible ? "invisible" : ""}>
-            {type === "video" ? (
-                <DraggableVideo curVideo={item} />
-            ) : type === "text" ? (
-                <DraggableText curText={item} />
-            ) : null}
-        </div>
-    );
+	useEffect(() => {
+		if (stageRef === null || transformerRef === null) {
+			return;
+		}
+		let nodes = [];
+		for (let nodeId of uiStore.canvasControls.transformerNodeIds) {
+			const object = domainStore.curIntent.getCanvasObjectById(nodeId);
+			const node = stageRef.findOne(`#${nodeId}`);
+			if (node === undefined) {
+				continue;
+			}
+			// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
+			// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
+			// 		nodes.push(node);
+			// 	}
+			// 	continue;
+			// }
+			if (object !== undefined &&
+				object.isVisible(uiStore.timelineControls.playPosition)) {
+				nodes.push(node);
+			}
+		}
+		transformerRef.nodes(nodes);
+	}, [
+		isVisible,
+	]);
+
+    return (<>
+		{type === uiStore.objectNames.text && <DraggableText curText={item} />}
+		{type === uiStore.objectNames.image && <DraggableImage curImage={item} />}
+		{type === uiStore.objectNames.shape && <DraggableShape curShape={item} />}
+		{/* {type === uiStore.objectNames.video && <DraggableVideo curVideo={item} />} */}
+		{type === uiStore.objectNames.cut && <SkippedConfig skipped={item} />}
+		{type === uiStore.objectNames.crop && <CropConfig crop={item} />}
+		{type === uiStore.objectNames.blur && <BlurConfig blur={item} />}
+	</>);
 });
 
 export default CanvasItem;

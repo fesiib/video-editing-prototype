@@ -491,6 +491,18 @@ class DomainStore {
 		return result;
 	}
 
+	get orderedAllObjects() {
+		const texts = this.texts;
+		const images = this.images;
+		const shapes = this.shapes;
+		const skippedParts = this.allSkippedParts;
+		const crops = this.crops;
+		const blurs = this.blurs;
+		const objects = [...texts, ...images, ...shapes, ...skippedParts, ...crops, ...blurs];
+		objects.sort((a, b) => a.commonState.z - b.commonState.z);
+		return objects;
+	}
+
 	// get activeEdits() {
 	// 	return this.curIntent.activeEdits;
 	// }

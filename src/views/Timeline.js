@@ -134,17 +134,29 @@ const Timeline = observer(function Timeline() {
         ]
     );
 
+	// useEffect(action(() => {
+	// 	if (uiStore.timelineControls.selectedTimelineItems.length === 0 
+	// 		&& !uiStore.timelineControls.splitting
+	// 	) {
+	// 		uiStore.timelineControls.rangeSelectingTimeline = true;
+	// 		uiStore.timelineControls.rangeSelectingFirstPx = -1;
+	// 	}
+	// }), [
+	// 	uiStore.timelineControls.selectedTimelineItems.length,
+	// 	uiStore.timelineControls.splitting
+	// ]);
+
     return (
         <div className="bg-slate-100" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
-                <button className="bg-indigo-300 p-1" id="play_button" onClick={onPressPlay}>
+                <button className="bg-indigo-300 p-1 hover:bg-indigo-400" id="play_button" onClick={onPressPlay}>
                     {uiStore.timelineControls.isPlaying ? "pause" : "play"}
                 </button>
                 <button
                     className={
-                        uiStore.timelineControls.splitting
-                            ? "bg-indigo-500 p-1"
-                            : "bg-indigo-300 p-1"
+                        (uiStore.timelineControls.splitting
+                            ? "bg-indigo-500"
+                            : "bg-indigo-300") + " p-1 hover:bg-indigo-400"
                     }
                     onClick={onPressSplit}
                     id="split_button"
@@ -153,9 +165,9 @@ const Timeline = observer(function Timeline() {
                 </button>
 				<button
                     className={
-                        uiStore.timelineControls.rangeSelectingTimeline
-                            ? "bg-indigo-500 p-1"
-                            : "bg-indigo-300 p-1"
+                        (uiStore.timelineControls.rangeSelectingTimeline
+                            ? "bg-indigo-500"
+                            : "bg-indigo-300") + " p-1 hover:bg-indigo-400"
                     }
                     onClick={onPressRangeSelect}
                     id="intentselect_button"
@@ -163,7 +175,7 @@ const Timeline = observer(function Timeline() {
                     {uiStore.timelineControls.rangeSelectingTimeline ? "Range Selecting" : "Range Select"}
                 </button>
                 <button
-                    className={"bg-indigo-300 p-1"}
+                    className={"bg-indigo-300 p-1 hover:bg-indigo-400"}
                     id="delete_button"
                     onClick={onDeleteTimelineItems}
                 >

@@ -51,24 +51,16 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
 					finish = Math.min(finish, scene.commonState.offset);
 				}
 			}
-			domainStore.curIntent.addActiveEdit(offset, finish);
+			const newEdit = domainStore.curIntent.addActiveEdit(offset, finish);
 			uiStore.timelineControls.rangeSelectingTimeline = false;
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;
-
-			// const first = uiStore.timelineControls.rangeSelectingFirstPx;
-			// if (first === -1) {
-			// 	uiStore.timelineControls.rangeSelectingFirstPx = offsetPx;
-			// }
-			// else {
-			// 	const second = offsetPx;
-			// 	// create editState between "first" and "second"
-			// 	domainStore.curIntent.addActiveEdit(uiStore.pxToSec(first), uiStore.pxToSec(second));
-			// 	uiStore.timelineControls.rangeSelectingTimeline = false;
-			// 	uiStore.timelineControls.rangeSelectingFirstPx = -1;
-			// 	uiStore.timelineControls.positionIndicatorVisibility -= 1;
-			// }
-            return;
+			uiStore.selectTimelineObjects([newEdit]);
+			uiStore.timelineControls.playPosition = offset;
+			return;
+		}
+		else {
+			uiStore.selectTimelineObjects([]);
 		}
     });
 

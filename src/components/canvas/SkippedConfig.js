@@ -12,11 +12,6 @@ const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 	const skippedRef = useRef(null);
 
 	const isVisible = skipped.isVisible(uiStore.timelineControls.playPosition);
-	const mainVideos = domainStore.videos.filter((video) => {
-		const left = Math.max(video.commonState.offset, skipped.commonState.offset);
-		const right = Math.min(video.commonState.end, skipped.commonState.end);
-		return left < right;
-	});
 
 	useEffect(action(() => {
 		if (!isVisible) {
@@ -26,33 +21,20 @@ const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 			uiStore.timelineControls.playPosition = skipped.commonState.end;	
 		}
 		else {
-			for (const video of mainVideos) {
-				video.commonState.setMetadata({
-					updateAuthorCut: skipped.commonState.id,
-					filterMap: {
-						opacity: 0.2,
-					}
-				});
-			}
+			uiStore.canvasControls.opacity = 0.5;
+			uiStore.canvasControls.opacityAuthor = skipped.commonState.id;
+			console.log(uiStore.canvasControls.opacity);
 		}
 		return action(() => {
-			for (const video of mainVideos) {
-				if (video.commonState.updateAuthorCut !== skipped.commonState.id) {
-					continue;
-				}
-				video.commonState.setMetadata({
-					updateAuthorCut: null,
-					filterMap: {
-						opacity: 1,
-					}
-				});
+			if (uiStore.canvasControls.opacityAuthor === skipped.commonState.id) {
+				uiStore.canvasControls.opacity = 1;
+				uiStore.canvasControls.opacityAuthor = null;
 			}
 		});
 	}), [
 		isVisible,
 		//uiStore.timelineControls.playPosition,
 		uiStore.timelineControls.isPlaying,
-		mainVideos.length,
 	]);
 
 	return <></>;

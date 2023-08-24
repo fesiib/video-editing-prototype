@@ -18,6 +18,8 @@ class UIStore {
     canvasControls = {
         scalePos: 4,
         transformerNodeIds: [],
+		opacity: 1,
+		opacityAuthor: null,
     };
     canvasConst = {
         margin: 2,
@@ -172,8 +174,9 @@ class UIStore {
 		this.canvasControls.transformerNodeIds = [];
 		this.timelineControls.selectedTimelineItems = [];
 		this.timelineControls.splitting = false;
-		this.timelineControls.rangeSelectingTimeline = false;
+		this.timelineControls.rangeSelectingTimeline = true;
 		this.timelineControls.rangeSelectingFirstPx = -1;
+		this.timelineControls.positionIndicatorVisibility = 0;
 	}
 
     setWindowSize({ width, height }) {

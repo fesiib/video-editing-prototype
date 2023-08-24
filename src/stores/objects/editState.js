@@ -26,7 +26,7 @@ class EditState {
 	textParameters = {
 		content: "HELLO", // text input
 		style: {
-			fill: "#4aa23a", // color picker
+			fill: "#000000", // color picker
 			fontSize: 50, // number input & +/- buttons
 			fontFamily: "Arial", // dropdown
 			align: "center", // 3 align icons

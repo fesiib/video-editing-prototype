@@ -53,6 +53,7 @@ class IntentState {
 			start: start,
 			finish: finish, 
 			offset: start,
+			z: this.intentPos + 1,
 		});
 		this.activeEdits.push(newEdit);
 		//this.activeEdits.sort((a, b) => a.commonState.offset - b.commonState.offset);
@@ -108,6 +109,15 @@ class IntentState {
 
 	get intentPos() {
 		return this.domainStore.intents.findIndex((intent) => intent.id === this.id);
+	}
+
+	get activeObjectsVisibility() {
+		const playPosition = this.domainStore.rootStore.uiStore.timelineControls.playPosition;
+		let result = [];
+		for (let edit of this.activeEdits) {
+			result.push(edit.isVisible(playPosition));
+		}
+		return result;
 	}
 }
 

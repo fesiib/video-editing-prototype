@@ -51,7 +51,9 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         }
 
 		if (uiStore.timelineControls.rangeSelectingTimeline) {
-			return;
+			uiStore.timelineControls.rangeSelectingTimeline = false;
+			uiStore.timelineControls.rangeSelectingFirstPx = -1;
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
 		}
 
         const index = uiStore.timelineControls.selectedTimelineItems.findIndex(

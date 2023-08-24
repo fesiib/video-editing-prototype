@@ -139,12 +139,12 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 			return;
 		}
 		let number = parseFloat(value);
-		if (number < defaultMin) {
-			return;
-		}
-		if (number > defaultMax) {
-			return;
-		}
+		// if (number < defaultMin) {
+		// 	return;
+		// }
+		// if (number > defaultMax) {
+		// 	return;
+		// }
 		for (let edit of selectedEdits) {
 			let functionToCall = null;
 			if (metaKey === "custom") {

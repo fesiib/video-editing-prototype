@@ -87,8 +87,8 @@ const CommandSpace = observer(function CommandSpace() {
 				if (intent.id === curIntent.id) {
 					return null;
 				}
-				return <div key={"intent" + idx}>
-					Intent {idx + 1}: "{intent.textCommand}" #{intent.activeEdits.length}
+				return <div key={"intent" + idx} className="my-2 p-1 text-left bg-indigo-300 hover:bg-indigo-400">
+					Intent {idx + 1} {`[${intent.editOperation.title}]`}: "{intent.textCommand}"
 				</div>
 			})}
 		</div>
