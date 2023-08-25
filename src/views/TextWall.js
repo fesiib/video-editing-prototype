@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
@@ -217,6 +217,8 @@ const TextWall = observer(function TextWall() {
 	const activeEdits = domainStore.curIntent.activeEdits; 
 	const skippedParts = domainStore.skippedParts;
 
+	const textWallRef = useRef(null);
+
 	const [activeHandler, setActiveHandler] = useState(null);
 
 	const onHandlerDragStart = action((event) => {
@@ -273,15 +275,24 @@ const TextWall = observer(function TextWall() {
 	useEffect(() => {
 		const index = domainStore.transcriptSelectedIndex;
 		const div = document.getElementById(`script-${index}`);
+		if (div === null) {
+			return;
+		}
 		div.scrollIntoView({
 			behavior: "smooth",
-			block: "center",
-			inline: "center",
-		});
+			block: "nearest",
+			inline: "nearest",
+		})
+		// const rect = div.getBoundingClientRect();
+		// textWallRef.current.scrollTo({
+		// 	top: rect.top - 100,
+		// 	behavior: "smooth",
+		// });
 	}, [domainStore.transcriptSelectedIndex]);
 
     return (
         <div 
+			ref={textWallRef}
 			className="overflow-y-scroll overflow-x-visible disable-select p-10"
 			style={{
                 height: uiStore.windowSize.height / 3 * 2

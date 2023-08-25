@@ -162,7 +162,7 @@ class DomainStore {
 
 		this.projectMetadata.totalIntentCnt = 1;
         this.intents = [
-				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], 0)
+				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		];
 		this.curIntentPos = 0;
     }
@@ -171,7 +171,7 @@ class DomainStore {
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		this.intents.push(
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], 0)
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		);
 		this.rootStore.resetTempState();
 	}
@@ -551,6 +551,13 @@ class DomainStore {
 
 	get curIntent() {
 		return this.intents[this.curIntentPos];
+	}
+
+	get curVideo() {
+		if (this.in_mainVideos.length === 0) {
+			return null;
+		}
+		return this.in_mainVideos[0];
 	}
 }
 

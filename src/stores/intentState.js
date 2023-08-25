@@ -7,6 +7,7 @@ import { randomUUID } from "../utilities/genericUtilities";
 class IntentState {
     textCommand = "";
 	sketchCommand = [];
+	sketchPlayPosition = -1;
 	trackId = 0;
 	activeEdits = [];
 	editOperationKey = "";
@@ -18,12 +19,13 @@ class IntentState {
 		hasSketch: true,
 	};
 
-    constructor(domainStore, idx, textCommand, sketchCommand, trackId) {
+    constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
 		this.idx = idx;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
+		this.sketchPlayPosition = sketchPlayPosition;
 		this.editOperationKey = "";
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
@@ -32,12 +34,19 @@ class IntentState {
 		this.requestParameters = {
 			considerEdits: true,
 			hasText: textCommand !== "",
-			hasSketch: sketchCommand.length !== 0,
+			hasSketch: sketchPlayPosition >= 0,
 		};
     }
 
 	getDeepCopy() {
-		let newIntent = new IntentState(this.domainStore, this.idx, this.textCommand, this.sketchCommand, this.trackId);
+		let newIntent = new IntentState(
+			this.domainStore,
+			this.idx,
+			this.textCommand,
+			this.sketchCommand,
+			this.sketchPlayPosition,
+			this.trackId
+		);
 		newIntent.editOperationKey = this.editOperationKey;
 		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
 			const newEdit = edit.getDeepCopy();
@@ -54,7 +63,11 @@ class IntentState {
 
 	setSketchCommand(sketchCommand) {
 		this.sketchCommand = sketchCommand;
-		this.requestParameters.hasSketch = sketchCommand.length !== 0;
+	}
+
+	setSketchPlayPosition(sketchPlayPosition) {
+		this.sketchPlayPosition = sketchPlayPosition;
+		this.requestParameters.hasSketch = sketchPlayPosition >= 0;
 	}
 
 	setEditOperationKey(newKey) {
