@@ -284,7 +284,11 @@ class EditState {
 
 	get metaParameters() {
 		if (this.intent.editOperation === null) {
-			return {};
+			return {
+				spatial: this.spatialParameters,
+				temporal: this.temporalParameters,
+				custom: null,
+			};
 		}
 		if (this.title === "Cut"
 			|| this.title === "Blur"
@@ -490,6 +494,23 @@ class EditState {
 				step: 2,
 			},
 		};
+	}
+
+	get requestBody() {
+		const requestBody = {
+			id: this.commonState.id,
+			textParameters: this.textParameters,
+			imageParameters: this.imageParameters,
+			shapeParameters: this.shapeParameters,
+			zoomParameters: this.zoomParameters,
+			cropParameters: this.cropParameters,
+			cutParameters: this.cutParameters,
+			blurParameters: this.blurParameters,
+			spatialParameters: this.spatialParameters,
+			temporalParameters: this.temporalParameters,
+			numberParameterConfig: this.numberParameterConfig,
+		};
+		return requestBody;
 	}
 }
  

@@ -6,6 +6,7 @@ class UIStore {
     // Session Info
     accountId = "test";
     projectId = "test";
+	systemSetting = "default"; // baseline
     windowSize = {
         width: window.innerWidth,
         height: window.innerHeight,

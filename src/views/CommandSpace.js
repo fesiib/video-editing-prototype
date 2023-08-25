@@ -17,12 +17,12 @@ const CommandSpace = observer(function CommandSpace() {
 		curIntent.setTextCommand(event.target.value);
 	}
 
-	const onConfirmClick = action(() => {
-		domainStore.confirmIntent();
+	const onAddClick = action(() => {
+		domainStore.addIntent();
 	});
 
-	const onCancelClick = action((intentPos) => {
-		domainStore.cancelIntent(intentPos);
+	const onDeleteClick = action((intentPos) => {
+		domainStore.deleteIntent(intentPos);
 	});
 
 	const onCopyClick = action((intentPos) => {
@@ -34,13 +34,17 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessClick = action(() => {
-		domainStore.processIntent();
+		console.log(JSON.stringify(domainStore.processIntent()));
 	});
 
 	return (<div className="flex justify-between my-5">
 		<div className="w-2/3 flex flex-col items-center mx-2">
-			<h2> Describe your edit: </h2>
-			<input id="textCommand" type="text" placeholder="intent" 
+			<h2> Edit #{curIntent.idx} </h2>
+			<input 
+				id="textCommand" 
+				type="text"
+				placeholder="description"
+				value={curIntent.textCommand}
 				className="w-full border p-2"
 				onChange={onChangeTextCommand} 
 			/>
@@ -49,86 +53,52 @@ const CommandSpace = observer(function CommandSpace() {
 				<button 
 					className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
 					onClick={() => onProcessClick()}
-					disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
+					//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
 				>
 					Process
 				</button>
 			</div>
-			{/* <div className="flex flex-col">
-				<div> <span style={{fontWeight: "bold"}}> Text Command: </span> {curIntent.textCommand} </div>
-				<div> <span style={{fontWeight: "bold"}}> Selected Transcript: </span>
-					<div style={{
-						display: "grid"
-					}}>
-					{
-						curIntent.selectedTranscript.reduce((prevVal, curVal, idx) => {
-							return prevVal + " " + curVal.text;
-						}, "")
-					}
-					{
-						curIntent.selectedTranscript.map((item, idx) => {
-							return <span key={"selected_transcript" + idx}>
-								{item.video.commonState.id} {item.start} - {item.finish}
-							</span>
-						})
-					}
-					</div>
-				</div>
-				<div> 
-					<span style={{fontWeight: "bold"}}> Selected Periods: </span>
-					<div style={{
-						display: "grid"
-					}}>
-						{
-							curIntent.selectedPeriods.map((item, idx) => {
-								return <span key={"selected_period" + idx}>
-									{item.video.commonState.id} {item.start} - {item.finish}
-								</span>
-							})
-						}
-					</div>
-				</div>
-				<div> <span style={{fontWeight: "bold"}}> Sketch: </span> {curIntent.sketchCommand} </div>
-			</div> */}
 		</div>
 		<div className="w-1/3">
 			<h2> Edits: </h2>
 			<div className="border p-2">
+				<button 
+					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+					onClick={() => onAddClick()} 
+					// disabled={curIntent.activeEdits.length === 0}
+				>
+					+ 
+				</button> 
 				{reversedIntents.length === 0 ? (
 					<div> No edits </div>
 					) : (
 					reversedIntents.map((intent, revIdx) => {
 						const idx = reversedIntents.length - revIdx - 1;
+						const titleIdx = intent.idx;
 						const title = intent.editOperation === null ? "None" : intent.editOperation.title;
 						return <div  key={"intent" + idx} className="my-2 flex justify-between gap-2">
 							<button
-								className={(domainStore.curIntentPos === idx ? "bg-indigo-500 " : "bg-indigo-300  hover:bg-indigo-400 ")
+								className={(curIntent.idx === titleIdx ? "bg-indigo-500 " : "bg-indigo-300  hover:bg-indigo-400 ")
 									+ "text-left text-black font-bold py-2 px-4 rounded"
 								}
-								disabled={domainStore.curIntentPos === idx}
+								disabled={curIntent.idx === titleIdx}
 								onClick={() => onIntentClick(idx)}
 							>
-								{idx + 1} - {`[${title}]`}: "{intent.textCommand}"
+								{titleIdx} - {`[${title}]`}: "{intent.textCommand}"
 							</button>
 							<div className="w-fit flex gap-2 justify-center p-2">
-								<button 
-									className="w-fit bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-									onClick={() => onCancelClick(idx)}
-									disabled={curIntent.activeEdits.length === 0}
-								>
-									Delete
-								</button>
-								{domainStore.curIntentPos === idx ? (<button 
-									className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-									onClick={() => onConfirmClick()} 
-									disabled={curIntent.activeEdits.length === 0}
-								>
-									Confirm
-								</button>) 
+								{curIntent.idx === titleIdx ? null
 								: (<button
 									className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
 									onClick={() => onCopyClick(idx)}
+									// copy confirm
 								> Copy </button>)}
+								<button 
+									className="w-fit bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+									onClick={() => onDeleteClick(idx)}
+									// disabled={curIntent.activeEdits.length === 0}
+									// confirm delete
+								> Delete </button>
 							</div>
 						</div>
 					}))

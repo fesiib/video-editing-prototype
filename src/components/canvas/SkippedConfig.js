@@ -9,7 +9,7 @@ import { Animation } from "konva/lib/Animation";
 const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 	const { uiStore, domainStore } = useRootContext();
 
-	const skippedTitleConst = domainStore.editOperations[uiStore.objectNames.skipped].title;
+	const skippedTitleConst = domainStore.editOperations[uiStore.objectNames.cut].title;
 
 	const skippedRef = useRef(null);
 
@@ -28,7 +28,6 @@ const SkippedConfig = observer(function SkippedConfig({ skipped }) {
 		else {
 			uiStore.canvasControls.opacity = 0.5;
 			uiStore.canvasControls.opacityAuthor = skipped.commonState.id;
-			console.log(uiStore.canvasControls.opacity);
 		}
 		return action(() => {
 			if (uiStore.canvasControls.opacityAuthor === skipped.commonState.id) {

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 
-import { Layer, Line, Stage } from "react-konva";
+import { Image, Layer, Line, Stage } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 
@@ -13,29 +13,30 @@ const SketchCanvas = observer(function SketchCanvas() {
 	const sketching = uiStore.canvasControls.sketching;
 	const [isDrawing, setIsDrawing] = useState(false);
 
+
+
 	const onSketchClick = action(() => {
 		uiStore.canvasControls.sketching = !uiStore.canvasControls.sketching;
 	});
 
 	return (<div>
-		<div className="flex flex-row justify-between">
+		<div className="flex flex-row gap-2 justify-between">
 			<button
 				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
 				onClick={onSketchClick}
 			>
 				{!sketching ? "Sketch" : "Done"}
 			</button>
-			{!sketching ? null : (
-				<button
-					className="w-fit bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-					onClick={action(() => {
-						setIsDrawing(false);
-						curIntent.sketchCommand = [];
-					})}
-				>
-					Clear
-				</button>
-			)}
+			<button
+				className="w-fit bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+				onClick={action(() => {
+					setIsDrawing(false);
+					curIntent.setSketchCommand([]);
+				})}
+				disabled={curIntent.sketchCommand.length === 0}
+			>
+				{curIntent.sketchCommand.length === 0 ? "No Sketch" : "Clear"}
+			</button>
 		</div>
 		{!sketching ? null : (
 			<Stage
@@ -61,7 +62,7 @@ const SketchCanvas = observer(function SketchCanvas() {
 						lineCap: "round",
 						lineJoin: "round",
 					};
-					curIntent.sketchCommand.push(newLine);
+					curIntent.setSketchCommand([...curIntent.sketchCommand, newLine]);
 				})}
 				onMouseMove={action((event) => {
 					if (!sketching) {
@@ -87,6 +88,11 @@ const SketchCanvas = observer(function SketchCanvas() {
 					lastLine.points = lastLine.points.concat([x, y]);
 				})}
 			>
+				<Layer>
+					<Image
+						image={null}
+					/>
+				</Layer>
 				<Layer>
 					{curIntent.sketchCommand.map((line, i) => {
 						return <Line

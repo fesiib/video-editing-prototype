@@ -20,6 +20,7 @@ class DomainStore {
         height: 480, //720p
         duration: 10, // seconds
         trackCnt: 2,
+		totalIntentCnt: 0,
     };
 
 	editOperations = {
@@ -159,49 +160,47 @@ class DomainStore {
 		this.in_images = [];
 		this.in_shapes = [];
 
+		this.projectMetadata.totalIntentCnt = 1;
         this.intents = [
-				new IntentState(this, "", [], 0)
+				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], 0)
 		];
 		this.curIntentPos = 0;
     }
 
-	confirmIntent() {
-		if (this.curIntentPos === this.intents.length - 1) {
-			this.curIntentPos = this.intents.length;
-			this.intents.push(
-				new IntentState(this, "", [], 0)
-			);
+	addIntent() {
+		this.curIntentPos = this.intents.length;
+		this.projectMetadata.totalIntentCnt += 1;
+		this.intents.push(
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], 0)
+		);
+		this.rootStore.resetTempState();
+	}
+
+	deleteIntent(intentPos) {
+		if (intentPos >= this.intents.length || intentPos < 0) {
+			return;
 		}
-		else {
-			this.curIntentPos = this.intents.length - 1;
+		this.intents = this.intents.filter((intent, idx) => idx !== intentPos);
+		this.intents = this.intents.map((intent, idx) => {
+			if (idx < intentPos) {
+				return intent;
+			}
+			for (let edit of intent.activeEdits) {
+				edit.commonState.setMetadata({
+					z: idx + 1,
+				});
+			}
+			return intent;
+		});
+		this.curIntentPos = this.intents.length - 1;
+		if (this.curIntentPos < 0) {
+			this.addIntent();
 		}
 		this.rootStore.resetTempState();
 	}
 
-	cancelIntent(intentPos) {
-		if (intentPos === this.intents.length - 1) {
-			this.intents.pop();
-			this.curIntentPos = this.intents.length;
-			this.intents.push(
-				new IntentState(this, "", [], 0)
-			);
-		}
-		else {
-			this.intents = this.intents.filter((intent, idx) => idx !== intentPos);
-			this.intents = this.intents.map((intent, idx) => {
-				if (idx < this.curIntentPos) {
-					return intent;
-				}
-				for (let edit of intent.activeEdits) {
-					edit.commonState.setMetadata({
-						z: idx + 1,
-					});
-				}
-				return intent;
-			});
-			this.curIntentPos = this.intents.length - 1;
-		}
-		this.rootStore.resetTempState();
+	moveIntent(intentPos, newPos) {
+		console.log("moving", intentPos, newPos);
 	}
 
 	copyIntentToCurrent(intentPos) {
@@ -209,6 +208,7 @@ class DomainStore {
 			return;
 		}
 		const deepCopy = this.intents[intentPos].getDeepCopy();
+		deepCopy.idx = this.intents[this.curIntentPos].idx;
 		this.intents[this.curIntentPos] = deepCopy;
 		for (let edit of deepCopy.activeEdits) {
 			edit.commonState.setMetadata({
@@ -227,7 +227,28 @@ class DomainStore {
 	}
 
 	processIntent() {
-
+		const requestData = {
+			projectId: "",
+			projectMetadata: {},
+			edits: [],
+			requestParameters: {},
+			editParameterOptions: this.dropdownOptions,
+			editOperations: Object.keys(this.editOperations),
+		};
+		requestData.projectId = this.projectMetadata.projectId;
+		requestData.projectMetadata = {
+			width: this.projectMetadata.width,
+			height: this.projectMetadata.height,
+			duration: this.projectMetadata.duration,
+		};
+		requestData.edits = this.curIntent.activeEdits.splice(0).map((edit) => {
+			return edit.requestBody;
+		});
+		requestData.requestParameters = {
+			...this.curIntent.requestParameters,
+			editOperation: this.curIntent.editOperationKey,
+		};
+		return requestData;
 	}
 
 	// linearizeEdits(editHierarchy) {

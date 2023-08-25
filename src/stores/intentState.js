@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, set } from "mobx";
 
 import EditState from "./objects/editState";
 
@@ -11,20 +11,33 @@ class IntentState {
 	activeEdits = [];
 	editOperationKey = "";
 	id = "";
+	idx = 0;
+	requestParameters = {
+		considerEdits: true,
+		hasText: true,
+		hasSketch: true,
+	};
 
-    constructor(domainStore, textCommand, sketchCommand, trackId) {
+    constructor(domainStore, idx, textCommand, sketchCommand, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
+		this.idx = idx;
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.editOperationKey = "";
 		this.activeEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
+
+		this.requestParameters = {
+			considerEdits: true,
+			hasText: textCommand !== "",
+			hasSketch: sketchCommand.length !== 0,
+		};
     }
 
 	getDeepCopy() {
-		let newIntent = new IntentState(this.domainStore, this.textCommand, this.sketchCommand, this.trackId);
+		let newIntent = new IntentState(this.domainStore, this.idx, this.textCommand, this.sketchCommand, this.trackId);
 		newIntent.editOperationKey = this.editOperationKey;
 		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
 			const newEdit = edit.getDeepCopy();
@@ -36,10 +49,12 @@ class IntentState {
 
 	setTextCommand(textCommand) {
 		this.textCommand = textCommand;
+		this.requestParameters.hasText = textCommand !== "";
 	}
 
 	setSketchCommand(sketchCommand) {
 		this.sketchCommand = sketchCommand;
+		this.requestParameters.hasSketch = sketchCommand.length !== 0;
 	}
 
 	setEditOperationKey(newKey) {
@@ -53,6 +68,13 @@ class IntentState {
 		}
 		this.editOperationKey = newKey;
 		//conversion between types should happen
+	}
+
+	setRequestParameters(requestParameters) {
+		this.requestParameters = {
+			...this.requestParameters,
+			...requestParameters,
+		};
 	}
 
 	addActiveEdit(first, second) {
