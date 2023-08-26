@@ -104,7 +104,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 	// 	return () => {};
     // });
 
-    const onCanPlay = action((event) => {
+    const onCanPlay = ((event) => {
 		if (videoRef.current === null) {
 			return;
 		}
