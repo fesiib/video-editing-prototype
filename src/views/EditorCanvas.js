@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import { action } from "mobx";
+import { action, autorun } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { Layer, Rect, Stage, Transformer, Group } from "react-konva";
@@ -210,6 +210,27 @@ const EditorCanvas = observer(function EditorCanvas() {
 		uiStore.canvasControls.opacity,
 	]);
 
+	useEffect(() => autorun(() => {
+		if (transformerRef.current === null) {
+			return;
+		}
+		if (uiStore.timelineControls.selectedTimelineItems.length > 0
+			&& uiStore.timelineControls.selectedTimelineItems[0].isSuggested
+		) {
+			transformerRef.current.anchorStroke("green");
+			transformerRef.current.anchorStrokeWidth(3);
+			transformerRef.current.borderStroke("green");
+			transformerRef.current.borderStrokeWidth(3);
+		}
+		else {
+			transformerRef.current.anchorStroke("blue");
+			transformerRef.current.anchorStrokeWidth(1);
+			transformerRef.current.borderStroke("blue");
+			transformerRef.current.borderStrokeWidth(1);
+		}
+	}), []);
+
+
     return (
         <>
             <div>
@@ -359,6 +380,9 @@ const EditorCanvas = observer(function EditorCanvas() {
 							return newBox;
 						}}
 						flipEnabled={false}
+						anchorStroke="blue"
+						anchorStrokeWidth={1}
+						borderStroke="blue"
                     />
                     <Rect ref={selectionRectRef} fill={"rgba(0, 0, 255, 0.4"} visible={false} />
                 </Layer>

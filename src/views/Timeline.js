@@ -72,6 +72,11 @@ const Timeline = observer(function Timeline() {
 		if (decision === "accept") {
 			// TODO: add selectedSuggestedEdits to active edits
 			// change isSuggested to false
+			for (const edit of selectedSuggestedEdits) {
+				domainStore.curIntent.addEditFromSuggested(edit.commonState.id);
+			}
+			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
+			domainStore.curIntent.deleteEdits(deleteEditIds);
 			return;
 		}
 		else if (decision === "reject") {

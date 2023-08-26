@@ -15,6 +15,8 @@ const OperationPanel = observer(function OperationPanel() {
 	
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
+	const haveSuggested = selectedEdits.some((edit) => edit.isSuggested);
+
 	const metaParameters = selectedEdits.reduce((acc, edit) => {
 		for (let metaKey of Object.keys(edit.metaParameters)) {
 			const parameters = flattenObject(edit.metaParameters[metaKey]);
@@ -39,7 +41,9 @@ const OperationPanel = observer(function OperationPanel() {
 		spatial: {},
 		temporal: {},
 	});
-	return (<div className="flex flex-col items-center p-2 border">
+	return (<div className={"flex flex-col items-center p-2 border"
+		+ (haveSuggested ? " bg-green-200 opacity-50" : "")
+	}>
 		<h2> Operation Panel</h2>
 		{ selectedOperation === null ? 
 			<div> No Operation Selected </div> : 

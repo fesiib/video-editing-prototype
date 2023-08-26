@@ -18,6 +18,9 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 	const onFileInputChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -37,6 +40,9 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 	const onUrlInputChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -82,6 +88,9 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 	const onInputChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -146,6 +155,9 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 		// 	return;
 		// }
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -178,6 +190,9 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 		}
 
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -228,6 +243,9 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 	const onSelectChange = action((event) => {
 		const value = event.target.value;
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -270,6 +288,9 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 		const value = event.target.value;
 		const fillColor = value;
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -327,6 +348,9 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 		const value = event.target.value;
 		const number = parseFloat(value);
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -368,6 +392,9 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 
 	const onInputChange = action((newAlign) => {
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;
@@ -407,6 +434,9 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 		console.log(value);
 		const number = parseInt(value);
 		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
 			let functionToCall = null;
 			if (metaKey === "custom") {
 				functionToCall = edit.setCustomParameters;

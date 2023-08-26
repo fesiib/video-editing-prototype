@@ -10,9 +10,11 @@ const EditOperations = observer(function EditOperations() {
 	const { uiStore, domainStore } = useRootContext();
 
 	const inactiveButtonClassName = "w-full h-10 m-2 bg-indigo-300 hover:bg-indigo-400";
+	const suggestedButtonClassName = "w-full h-10 m-2 bg-green-200 hover:bg-indigo-300 border-2 border-green-600";
 	const activeButtonClassName = "w-full h-10 m-2 bg-indigo-500";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
+	const suggestedOperationKey = domainStore.curIntent.suggestedEditOperationKey;
 
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {
@@ -26,10 +28,15 @@ const EditOperations = observer(function EditOperations() {
 		<h2> Edit Operations</h2>
 		{Object.keys(domainStore.editOperations).map((operationKey) => {
 			const operation = domainStore.editOperations[operationKey];
+			let currentClassName = inactiveButtonClassName;
+			if (selectedOperationKey === operationKey) {
+				currentClassName = activeButtonClassName;
+			} else if (suggestedOperationKey === operationKey) {
+				currentClassName = suggestedButtonClassName;
+			}
 			return (<button 
 				key={"title_" + operation.title}
-				className={(operationKey === selectedOperationKey ?
-					activeButtonClassName : inactiveButtonClassName)}
+				className={currentClassName}
 				onClick={(event) => handleButtonClick(operationKey)}
 			>
 				{operation.title}

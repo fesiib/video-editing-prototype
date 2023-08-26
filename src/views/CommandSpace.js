@@ -42,6 +42,10 @@ const CommandSpace = observer(function CommandSpace() {
 		console.log(JSON.stringify(domainStore.processIntent()));
 	});
 
+	const onConsiderEditsClick = action(() => {
+		curIntent.considerEdits = !curIntent.considerEdits;
+	});
+
 	return (<div className="flex justify-between my-5">
 		<div className="w-2/3 flex flex-col items-center mx-2">
 			<h2> Edit #{curIntent.idx} </h2>
@@ -55,13 +59,18 @@ const CommandSpace = observer(function CommandSpace() {
 			/>
 			<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border">
 				<SketchCanvas />
-				<button 
-					className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
-					onClick={() => onProcessClick()}
-					//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
-				>
-					Process
-				</button>
+				<div>
+					<label htmlFor={"considerEdits"}> iterate </label>
+					<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
+				
+					<button 
+						className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+						onClick={() => onProcessClick()}
+						//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
+					>
+						Process
+					</button>
+				</div>
 			</div>
 		</div>
 		<div className="w-1/3">

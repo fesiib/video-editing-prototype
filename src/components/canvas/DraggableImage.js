@@ -87,6 +87,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 			// 	width: curImage.commonState.cropWidth,
 			// 	height: curImage.commonState.cropHeight,
 			// } : null}
+			//opacity={isSuggested ? 0.5 : 1}
 			rotation={curImage.commonState.rotation}
             draggable={isSelected && !isSuggested}
             visible={isVisible}

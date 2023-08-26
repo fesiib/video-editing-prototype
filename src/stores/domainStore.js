@@ -177,7 +177,7 @@ class DomainStore {
 		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
 
 		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
-
+		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomConsiderEdits = Math.random() > 0.5;
 		const randomTextCommand = Math.random() > 0.5 ? "add" : "remove";
 		const randomSketchCommand = Math.random() > 0.5 ? [
@@ -186,6 +186,7 @@ class DomainStore {
 		const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
 		
 		newIntent.setEditOperationKey(randomEditOperationKey);
+		newIntent.suggestedEditOperationKey = randomSuggestedEditOperationKey;
 		newIntent.considerEdits = randomConsiderEdits;
 		newIntent.textCommand = randomTextCommand;
 		newIntent.sketchCommand = randomSketchCommand;
@@ -288,6 +289,7 @@ class DomainStore {
 
 		// response
 		// make sure zIndex is fine
+		// make sure to edit suggesteEditOperationKey and remove it if they are equal
 
 		this.curIntent.suggestedEdits = [];
 		const parseData = {

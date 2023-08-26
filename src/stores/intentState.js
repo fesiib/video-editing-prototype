@@ -16,6 +16,7 @@ class IntentState {
 	
 	considerEdits = true;
 	suggestedEdits = [];
+	suggestedEditOperationKey = "";
 
     constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -25,6 +26,7 @@ class IntentState {
 		this.sketchCommand = sketchCommand;
 		this.sketchPlayPosition = sketchPlayPosition;
 		this.editOperationKey = "";
+		this.suggestedEditOperationKey = "";
 		this.activeEdits = [];
 		this.suggestedEdits = [];
 		this.id = `intent-${randomUUID()}`;
@@ -42,6 +44,7 @@ class IntentState {
 			this.trackId
 		);
 		newIntent.editOperationKey = this.editOperationKey;
+		newIntent.suggestedEditOperationKey = this.suggestedEditOperationKey;
 		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
 			const newEdit = edit.getDeepCopy();
 			newEdit.intent = newIntent;
@@ -70,6 +73,9 @@ class IntentState {
 
 	setEditOperationKey(newKey) {
 		this.domainStore.rootStore.resetTempState();
+		if (newKey === this.suggestedEditOperationKey) {
+			this.suggestedEditOperationKey = "";
+		}
 		if (newKey === "") {
 			this.editOperationKey = "";
 			return;
@@ -95,6 +101,53 @@ class IntentState {
 		this.activeEdits.push(newEdit);
 		//this.activeEdits.sort((a, b) => a.commonState.offset - b.commonState.offset);
 		return this.activeEdits[this.activeEdits.length - 1];
+	}
+
+	addEditFromSuggested(suggestedEditId) {
+		const suggestedEdit = this.suggestedEdits.find((edit) => edit.commonState.id === suggestedEditId);
+		if (suggestedEdit === undefined) {
+			return;
+		}
+		const newEdit = suggestedEdit.getDeepCopy();
+		newEdit.isSuggested = false;
+		let deleteIds = [];
+		let newEdits = [newEdit];
+		for (let edit of this.activeEdits) {
+			const left = Math.max(edit.commonState.offset, newEdit.commonState.offset);
+			const right = Math.min(edit.commonState.end, newEdit.commonState.end);
+			if (left < right) {
+				if (left === edit.commonState.offset && right === edit.commonState.end) {
+					deleteIds.push(edit.commonState.id);
+				}
+				else if (left === edit.commonState.offset) {
+					edit.commonState.setMetadata({
+						start: (right - edit.commonState.offset) + edit.commonState.start,
+						offset: right,
+					});
+				}
+				else if (right === edit.commonState.end) {
+					edit.commonState.setMetadata({
+						finish: (left - edit.commonState.offset) + edit.commonState.start,
+					});
+				}
+				else {
+					let editCopy = edit.getDeepCopy();
+					editCopy.commonState.setMetadata({
+						start: (right - edit.commonState.offset) + edit.commonState.start,
+						offset: right,
+					});
+					edit.commonState.setMetadata({
+						finish: (left - edit.commonState.offset) + edit.commonState.start,
+					});
+					newEdits.push(editCopy);
+					console.log(newEdit.commonState.offset, newEdit.commonState.end);
+					console.log(edit.commonState.offset, edit.commonState.end, editCopy.commonState.offset, editCopy.commonState.end);
+				}
+			}
+		}
+		this.deleteEdits(deleteIds);
+		this.activeEdits.push(...newEdits);
+		return newEdit;
 	}
 
 	addRandomEdit(suggested) {
