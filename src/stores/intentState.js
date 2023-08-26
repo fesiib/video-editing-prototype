@@ -97,10 +97,10 @@ class IntentState {
 		return this.activeEdits[this.activeEdits.length - 1];
 	}
 
-	addRandomEdit(suggestion) {
+	addRandomEdit(suggested) {
 		const maxEditDuration = 120;
 
-		const edits = suggestion ? this.suggestedEdits : this.activeEdits;
+		const edits = suggested ? this.suggestedEdits : this.activeEdits;
 
 		let start = Math.floor(Math.random() * maxEditDuration);
 		let maxDuration = maxEditDuration;
@@ -135,7 +135,7 @@ class IntentState {
 		let height = Math.abs(y1 - y2);
 
 
-		let newEdit = new EditState(this.domainStore, this, suggestion, 0);
+		let newEdit = new EditState(this.domainStore, this, suggested, 0);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -147,7 +147,7 @@ class IntentState {
 			height: height,
 			z: this.intentPos + 1,
 		});
-		if (suggestion) {
+		if (suggested) {
 			this.suggestedEdits.push(newEdit);
 			return this.suggestedEdits[this.suggestedEdits.length - 1];
 		}
@@ -164,10 +164,20 @@ class IntentState {
 			const isSelected = selectedIds.includes(edit.commonState.id);
 			return !isSelected;
 		});
+		this.domainStore.rootStore.uiStore.selectTimelineObjects(
+			this.domainStore.rootStore.uiStore.timelineControls.selectedTimelineItems.filter((item) => {
+				return !selectedIds.includes(item?.commonState?.id);
+			})
+		); 
 	}
 
 	getObjectById(id) {
-		return this.activeEdits.find((edit) => edit.commonState.id === id);
+		const fromActive = this.activeEdits.find((edit) => edit.commonState.id === id);
+		const fromSuggested = this.suggestedEdits.find((edit) => edit.commonState.id === id);
+		if (fromActive !== undefined) {
+			return fromActive;
+		}
+		return fromSuggested;
 	}
 
 	getCanvasObjectById(id) {

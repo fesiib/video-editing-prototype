@@ -20,7 +20,7 @@ export const TimelineItem = observer(
 		const isOverlay = itemType === "overlay";
 		const isMain = itemType === "main";
 		const isSkipped = itemType === "skipped";
-		const isSuggestion = itemType === "suggestion";
+		const isSuggested = itemType === "suggested";
 
         const isSelected =
             uiStore.timelineControls.selectedTimelineItems.findIndex(
@@ -55,9 +55,11 @@ export const TimelineItem = observer(
 			outerClassName = "absolute bottom-0 z-10";
 			innerClassName = "h-6 bg-gray-500";
 		}
-		else if (isSuggestion) {
-			outerClassName = "absolute bottom-6 z-20 border";
-			innerClassName = "h-6 bg-green-500";
+		else if (isSuggested) {
+			outerClassName = (isSelected
+				? "absolute bottom-6 z-20 border-2 border-red-600 brightness-50"
+				: "absolute bottom-6 z-20 border");
+			innerClassName = "h-4 bg-green-500";
 		}
 		else {
 			outerClassName = (isSelected
@@ -83,7 +85,7 @@ export const TimelineItem = observer(
                     </span>
                 ) : (
 					<div className={innerClassName}>
-						{ (isMain || isSkipped || isSuggestion) ? null
+						{ (isMain || isSkipped || isSuggested) ? null
 							: (
 								<TrimWrapper scene={scene} scenes={scenes}>
 									<span id={"label_" + scene.commonState.id}>

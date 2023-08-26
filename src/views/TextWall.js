@@ -205,7 +205,7 @@ const SentenceBox = observer(function SentenceBox({
 
 	const outerClassName = ("relative pr-2 my-1");
 
-	const timeClassName = "z-30 absolute -top-2 text-xs text-black";
+	const timeClassName = "z-30 absolute -top-2 text-xs";
 
 	const formattedStart = playPositionToFormat(item.start);
 	//const formattedFinish = playPositionToFormat(item.finish);
@@ -217,15 +217,21 @@ const SentenceBox = observer(function SentenceBox({
 		}
 		const disposer = reaction(() => domainStore.transcriptSelectedIndex, (selectedIndex, prevIndex) => {
 			if (selectedIndex === index) {
-				div.style.backgroundColor = "red";
+				div.style.textDecoration = "underline";
+				div.style.textDecorationColor = "red";
+				div.style.fontWeight = "bold";
+				div.style.color = "red";
 				div.scrollIntoView({
 					behavior: "smooth",
-					block: "nearest",
-					inline: "nearest",
+					block: "center",
+					inline: "center",
 				})
 			}
 			else {
-				div.style.backgroundColor = "";
+				div.style.textDecoration = "";
+				div.style.textDecorationColor = "";
+				div.style.fontWeight = "";
+				div.style.color = "black";
 			}
 		});
 		return () => {

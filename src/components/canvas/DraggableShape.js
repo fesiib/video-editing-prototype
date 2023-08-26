@@ -20,6 +20,8 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curShape.isVisible(uiStore.timelineControls.playPosition);
+	const isSuggested = curShape.isSuggested;
+
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
 	const projectWidth = domainStore.projectMetadata.width;
@@ -73,7 +75,7 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
 			rotation={curShape.commonState.rotation}
 			fill={curShape.customParameters.background.fill}
 			opacity={curShape.customParameters.background.alpha}
-			draggable={isSelected}
+			draggable={isSelected && !isSuggested}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
@@ -95,7 +97,7 @@ const DraggableShape = observer(function DraggableShape({ curShape }) {
 			stroke={curShape.customParameters.stroke.fill}
 			strokeWidth={curShape.customParameters.stroke.width}
 			opacity={curShape.customParameters.stroke.alpha}
-			draggable={isSelected}
+			draggable={isSelected && !isSuggested}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}

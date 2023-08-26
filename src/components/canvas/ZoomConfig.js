@@ -19,6 +19,7 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 
 	const isVisible = zoom.isVisible(uiStore.timelineControls.playPosition);
 	const isActive = zoom.isActive;
+	const isSuggested = zoom.isSuggested;
 
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
@@ -184,7 +185,7 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 			rotation={zoom.commonState.rotation}
 			stroke={"red"}
 			strokeWidth={isVisible && isActive ? 2 : 0}
-			draggable={isSelected}
+			draggable={isSelected && !isSuggested}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => zoom.commonState.onDragMove(event.target))}

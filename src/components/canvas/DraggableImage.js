@@ -19,6 +19,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curImage.isVisible(uiStore.timelineControls.playPosition);
+	const isSuggested = curImage.isSuggested;
 
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
@@ -87,7 +88,7 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 			// 	height: curImage.commonState.cropHeight,
 			// } : null}
 			rotation={curImage.commonState.rotation}
-            draggable={isSelected}
+            draggable={isSelected && !isSuggested}
             visible={isVisible}
             perfectDrawEnabled={false}
             onDragMove={action((event) => curImage.commonState.onDragMove(event.target))}

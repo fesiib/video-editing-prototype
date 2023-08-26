@@ -222,15 +222,26 @@ class UIStore {
 	selectCanvasObjects(objects) {
 		const objectIds = objects.map((object) => object.id());
 		const curIntent = this.rootStore.domainStore.curIntent;
+		const edits = objectIds.map((id) => curIntent.getCanvasObjectById(id));
+
+		const onlySuggested = edits.some((edit) => {
+			if (edit === undefined) {
+				return false;
+			}
+			return edit.isSuggested;
+		});
 		
 		let selectedTimelineItems = [];
 		let selectedNodeIds = [];
 
 		for (const id of objectIds) {
-			const object = curIntent.getCanvasObjectById(id);
-			if (object !== undefined) {
-				if (selectedTimelineItems.findIndex((obj) => obj.commonState.id === object.commonState.id) === -1) {
-					selectedTimelineItems.push(object);
+			const edit = curIntent.getCanvasObjectById(id);
+			if (edit !== undefined) {
+				if (onlySuggested && edit.isSuggested === false) {
+					continue;
+				}
+				if (selectedTimelineItems.findIndex((obj) => obj.commonState.id === edit.commonState.id) === -1) {
+					selectedTimelineItems.push(edit);
 				}
 				else {
 					if (curIntent.editOperationKey === this.objectNames.crop) {
@@ -242,8 +253,8 @@ class UIStore {
 						}
 					}
 				}
+				selectedNodeIds.push(id);
 			}
-			selectedNodeIds.push(id);
 		}
 		this.canvasControls.transformerNodeIds = selectedNodeIds;
 		this.timelineControls.selectedTimelineItems = selectedTimelineItems;

@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { groundCoordinate, roundNumber } from "../../utilities/genericUtilities";
+import { adaptCoordinate, groundCoordinate, roundNumber } from "../../utilities/genericUtilities";
 
 class CommonState {
 	updateAuthorCrop = null;
@@ -112,6 +112,25 @@ class CommonState {
 		const projectHeight = this.domainStore.projectMetadata.height;
 		const canvasWidth = this.domainStore.rootStore.uiStore.canvasSize.width;
 		const canvasHeight = this.domainStore.rootStore.uiStore.canvasSize.height;
+		if (this.object.isSuggested) {
+			let oldX = this.x;
+			let oldY = this.y;
+			if (this.object.title === "Crop") {
+				if (target.id().substring(0, 2) === "bg") {
+					oldX = this.object.cropParameters.x;
+					oldY = this.object.cropParameters.y;
+				}
+				if (target.id().substring(0, 2) === "fg") {
+					oldX = this.object.cropParameters.cropX;
+					oldY = this.object.cropParameters.cropY;
+				}
+			}
+			target.setAttrs({
+				x: roundNumber(adaptCoordinate(oldX, target.width(), projectWidth, canvasWidth), 0),
+				y: roundNumber(adaptCoordinate(oldY, target.height(), projectHeight, canvasHeight), 0),
+			});
+			return;
+		}
 		if (this.object.title === "Text"
 			|| this.object.title === "Image"
 			|| this.object.title === "Shape"
@@ -130,13 +149,37 @@ class CommonState {
 				this.object.cropParameters.cropY = roundNumber(groundCoordinate(target.y(), target.height(), projectHeight, canvasHeight), 0);
 			}
 		}
-		// target.setAttrs({
-		// 	x: this.x,
-		// 	y: this.y,
-		// });
     }
 
     onTransform(target) {
+		if (this.object.isSuggested) {
+			this.onDragMove(target);
+			let oldAttrs = {
+				width: this.width,
+				height: this.height,
+			};
+			if (this.object.title === "Crop") {
+				if (target.id().substring(0, 2) === "bg") {
+					oldAttrs = {
+						width: this.object.cropParameters.width,
+						height: this.object.cropParameters.height,
+					};
+				}
+				if (target.id().substring(0, 2) === "fg") {
+					oldAttrs = {
+						width: this.object.cropParameters.cropWidth,
+						height: this.object.cropParameters.cropHeight,
+					};
+				}
+			}
+			target.setAttrs({
+				scaleX: this.scaleX,
+				scaleY: this.scaleY,
+				rotation: this.rotation,
+				...oldAttrs,
+			});
+			return;
+		}
 		const minWidth = this.domainStore.rootStore.uiStore.canvasConst.minWidth;
 		const minHeight = this.domainStore.rootStore.uiStore.canvasConst.minHeight;
 		const projectWidth = this.domainStore.projectMetadata.width;

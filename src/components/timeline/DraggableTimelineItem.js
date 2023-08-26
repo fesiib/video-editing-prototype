@@ -60,12 +60,13 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             (value) => value.commonState.id === scene.commonState.id
         );
         const areItemsSelected = uiStore.timelineControls.selectedTimelineItems.length > 0;
+		const areItemsSuggested = areItemsSelected ? uiStore.timelineControls.selectedTimelineItems[0].isSuggested : false;
         const sameTrack = areItemsSelected
             ? scene.commonState.trackId ===
               uiStore.timelineControls.selectedTimelineItems[0].commonState.trackId
             : true;
         const metaKey = event.metaKey;
-        if (metaKey && areItemsSelected && sameTrack) {
+        if (metaKey && areItemsSelected && sameTrack && !areItemsSuggested) {
             let newSelectedTimelineItems = [];
             if (index >= 0) {
                 const rightMostEnd = scene.commonState.end;

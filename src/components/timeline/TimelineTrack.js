@@ -97,7 +97,7 @@ const TimelineTrack = observer(
 							staticScene={staticScene}
 							staticScenes={staticScenes}
 							scenes={scenes}
-							itemType={"suggestion"}
+							itemType={"suggested"}
 						/>
 					))}
 					{/* {emptySpaces.map((space) => (

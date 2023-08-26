@@ -358,6 +358,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 							}
 							return newBox;
 						}}
+						flipEnabled={false}
                     />
                     <Rect ref={selectionRectRef} fill={"rgba(0, 0, 255, 0.4"} visible={false} />
                 </Layer>

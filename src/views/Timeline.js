@@ -10,10 +10,14 @@ import useRootContext from "../hooks/useRootContext";
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
 
-	const selectedSuggestedEdits = domainStore.curIntent.suggestedEdits.filter((edit) => {
-		return uiStore.timelineControls.selectedTimelineItems.findIndex((item) => {
-			return item.commonState.id === edit.commonState.id;
-		}) >= 0;
+	// const selectedSuggestedEdits = domainStore.curIntent.suggestedEdits.filter((edit) => {
+	// 	return uiStore.timelineControls.selectedTimelineItems.findIndex((item) => {
+	// 		return item.commonState.id === edit.commonState.id;
+	// 	}) >= 0;
+	// });
+
+	const selectedSuggestedEdits = uiStore.timelineControls.selectedTimelineItems.filter((item) => {
+		return item.isSuggested;
 	});
 
     const onZoomChange = action((event) => {
@@ -72,13 +76,18 @@ const Timeline = observer(function Timeline() {
 		}
 		else if (decision === "reject") {
 			// TODO: delete selectedSuggestedEdits
+			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
+			domainStore.curIntent.deleteEdits(deleteEditIds);
+			onNavigationClick("next");
 			return;
 		}
 	});
 
 	const onNavigationClick = action((direction) => {
+		const edits = (domainStore.curIntent.suggestedEdits.length > 0 ?
+			domainStore.curIntent.suggestedEdits : domainStore.curIntent.activeEdits);
 		if (direction === "prev") {
-			const prevEdit = domainStore.curIntent.activeEdits.reduce((acc, edit, idx) => {
+			const prevEdit = edits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset < uiStore.timelineControls.playPosition
 					&& edit.commonState.offset >= acc.offset) {
 					return {
@@ -93,10 +102,10 @@ const Timeline = observer(function Timeline() {
 			});
 			if (prevEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = prevEdit.offset;
-				uiStore.selectTimelineObjects([domainStore.curIntent.activeEdits[prevEdit.editIdx]]);
+				uiStore.selectTimelineObjects([edits[prevEdit.editIdx]]);
 			}
 		} else if (direction === "next") {
-			const nextEdit = domainStore.curIntent.activeEdits.reduce((acc, edit, idx) => {
+			const nextEdit = edits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset > uiStore.timelineControls.playPosition
 					&& edit.commonState.offset <= acc.offset) {
 					return {
@@ -111,7 +120,7 @@ const Timeline = observer(function Timeline() {
 			});
 			if (nextEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = nextEdit.offset;
-				uiStore.selectTimelineObjects([domainStore.curIntent.activeEdits[nextEdit.editIdx]]);
+				uiStore.selectTimelineObjects([edits[nextEdit.editIdx]]);
 			}
 		}
 	});
@@ -156,9 +165,10 @@ const Timeline = observer(function Timeline() {
 	// ]);
 
 	const buttonClassName = " hover:bg-indigo-400 text-black py-2 px-4 rounded";
+	const decisionClassName = " text-black py-2 px-4 rounded";
 
     return (
-        <div className="bg-slate-100" onKeyDown={onDeleteKeyDown}>
+        <div className="bg-slate-100 disable-select" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
                 <button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
                     {uiStore.timelineControls.isPlaying ? "pause" : "play"}
@@ -221,26 +231,8 @@ const Timeline = observer(function Timeline() {
             </div>
 
             <TimelineTracks />
-			<div className="flex flex-col justify-center gap-2">
-				{selectedSuggestedEdits.length === 0 ? null : (
-					<div>
-						<button
-							className={"bg-green-300" + buttonClassName}
-							id="accept_button"
-							onClick={() => onDecisionClick("accept")}
-						>
-							Accept
-						</button>
-						<button
-							className={"bg-red-300" + buttonClassName}
-							id="reject_button"
-							onClick={() => onDecisionClick("reject")}
-						>
-							Reject
-						</button>
-					</div>
-				)}
-				<div>
+			<div className="flex flex-col justify-center gap-1">
+				<div className="flex gap-1 justify-center">
 					<button
 						className={"bg-indigo-300" + buttonClassName}
 						id="prev_button"
@@ -256,6 +248,29 @@ const Timeline = observer(function Timeline() {
 						{"->"}
 					</button>
 				</div>
+				{selectedSuggestedEdits.length === 0 ? null : (
+					<div className="flex gap-1 justify-center">
+						<button
+							className={"bg-green-300 hover:bg-green-500" + decisionClassName}
+							id="accept_button"
+							onClick={() => onDecisionClick("accept")}
+						>
+							Accept {selectedSuggestedEdits.length > 1 ? "All" : ""}
+						</button>
+						<button
+							className={"bg-red-300 hover:bg-red-500" + decisionClassName}
+							id="reject_button"
+							onClick={() => onDecisionClick("reject")}
+						>
+							Reject {selectedSuggestedEdits.length > 1 ? "All" : ""}
+						</button>
+					</div>
+				)}
+				{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
+					<div className="flex gap-1 justify-center">
+						<span> # of suggested edits: </span> <span> {domainStore.curIntent.suggestedEdits.length} </span>
+					</div>
+				)}
 			</div>
         </div>
     );

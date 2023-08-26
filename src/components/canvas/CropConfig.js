@@ -20,6 +20,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 
 	const isVisible = crop.isVisible(uiStore.timelineControls.playPosition);
 	const isActive = crop.isActive;
+	const isSuggested = crop.isSuggested;
 
 	const mainVideos = domainStore.videos.filter((video) => {
 		const left = Math.max(video.commonState.offset, crop.commonState.offset);
@@ -169,7 +170,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 			stroke={"blue"}
 			strokeWidth={isVisible && isActive ? 4 : 0}
 			//opacity={crop.customParameters.background.alpha}
-			draggable={isSelectedBg && !isSelectedFg}
+			draggable={!isSuggested && (isSelectedBg && !isSelectedFg)}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => crop.commonState.onDragMove(event.target))}
@@ -190,7 +191,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 			rotation={crop.commonState.rotation}
 			stroke={"red"}
 			strokeWidth={isVisible && isActive ? 2 : 0}
-			draggable={isSelectedFg && !isSelectedBg}
+			draggable={!isSuggested && (isSelectedFg && !isSelectedBg)}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => crop.commonState.onDragMove(event.target))}

@@ -19,6 +19,8 @@ const DraggableText = observer(function DraggableText({ curText }) {
     const [isSelected, setIsSelected] = useState(false);
 
     const isVisible = curText.isVisible(uiStore.timelineControls.playPosition);
+	const isSuggested = curText.isSuggested;
+
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
 	const projectWidth = domainStore.projectMetadata.width;
@@ -71,7 +73,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
 			rotation={curText.commonState.rotation}
 			fill={curText.customParameters.background.fill}
 			opacity={curText.customParameters.background.alpha}
-			draggable={isSelected}
+			draggable={isSelected && !isSuggested}
 			visible={isVisible}
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
@@ -92,7 +94,7 @@ const DraggableText = observer(function DraggableText({ curText }) {
             scaleX={curText.commonState.scaleX}
             scaleY={curText.commonState.scaleY}
 			rotation={curText.commonState.rotation}
-            draggable={isSelected}
+            draggable={isSelected && !isSuggested}
             visible={isVisible}
             perfectDrawEnabled={false}
             onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
