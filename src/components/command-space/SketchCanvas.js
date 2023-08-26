@@ -20,6 +20,7 @@ const SketchCanvas = observer(function SketchCanvas() {
 
 	const sketchRef = createRef(null);
 	const stageRef = createRef(null);
+	const sketchLayerRef = createRef(null);
 	
 	const [stageWidth, setStageWidth] = useState(0);
 	const [curRect, setCurRect] = useState(null);
@@ -31,23 +32,9 @@ const SketchCanvas = observer(function SketchCanvas() {
         element.src = video?.source;
         element.loop = false;
         element.id = "sketch_element_" + video?.commonState?.id;
-		// element.oncanplay = (event) => {
-		// 	if (sketchRef.current === null) {
-		// 		return;
-		// 	}
-		// 	event.target.muted = true;
-		// 	const layer = sketchRef.current.getLayer();
-		// 	const anim = new Animation(() => {}, layer);
-		// 	anim.start();
-		// 	console.log("anim start")
-		// 	return () => {
-		// 		console.log("return");
-		// 		anim.stop()
-		// 	};
-		// };
 		return element;
     }, [
-		sketchPlayPosition
+		video?.source, video?.commonState?.id
 	]);
 
 	const onSketchClick = action(() => {
@@ -61,9 +48,27 @@ const SketchCanvas = observer(function SketchCanvas() {
 			video.commonState.offset + video.commonState.start;
 		videoElement.currentTime = adaptedPlayPosition;
 		curIntent.setSketchPlayPosition(adaptedPlayPosition);
-		//sketchRef.current.getLayer().draw();
-		sketchRef.current.getLayer().getStage().draw();
+		window.requestAnimationFrame(() => {
+			console.log("capture", sketchLayerRef.current);
+			sketchLayerRef.current.draw();
+		});
+		return (() => {
+		});
 	});
+
+	useEffect(() => {
+		if (video === null || sketchPlayPosition < 0) {
+			return;
+		}
+		videoElement.currentTime = sketchPlayPosition;
+		window.requestAnimationFrame(() => {
+			console.log("update", sketchLayerRef.current);
+			sketchLayerRef.current.draw();
+		});
+		return (() => {
+			
+		});
+	}, [curIntent.idx, video]);
 
 	useEffect(() => {
 		if (video === null) {
@@ -76,14 +81,6 @@ const SketchCanvas = observer(function SketchCanvas() {
 		}
 		setStageWidth((div.clientWidth - 20) / 10);		
 	}, [sketching, video]);
-
-	useEffect(() => {
-		if (video === null || sketchPlayPosition < 0) {
-			return;
-		}
-		videoElement.currentTime = sketchPlayPosition;
-		sketchRef.current.getLayer().getStage().draw();
-	}, [curIntent.idx, video]);
 
 	return (<div id={sketchCanvasId} className="w-full border p-2">
 		<div className="flex flex-row gap-2 justify-start">
@@ -148,12 +145,18 @@ const SketchCanvas = observer(function SketchCanvas() {
 						return;
 					}
 					if (curRect !== null) {
+						const stageHeight = stageWidth / video.commonState.width * video.commonState.height;
+
 						const pos = event.target.getStage().getPointerPosition();
 						const x = pos.x;
 						const y = pos.y;
 						let newRect = {...curRect};
 						newRect.width = x - curRect.x;
 						newRect.height = y - curRect.y;
+						newRect.x = Math.max(0, newRect.x);
+						newRect.y = Math.max(0, newRect.y);
+						newRect.width = Math.min(stageWidth - newRect.x, newRect.width);
+						newRect.height = Math.min(stageHeight - newRect.y, newRect.height);
 						setCurRect(newRect);
 					}
 				})}
@@ -169,7 +172,6 @@ const SketchCanvas = observer(function SketchCanvas() {
 						let newRect = {...curRect};
 						newRect.width = x - curRect.x;
 						newRect.height = y - curRect.y;
-
 						if (newRect.width < 0) {
 							newRect.x = newRect.x + newRect.width;
 							newRect.width = -newRect.width;
@@ -178,7 +180,17 @@ const SketchCanvas = observer(function SketchCanvas() {
 							newRect.y = newRect.y + newRect.height;
 							newRect.height = -newRect.height;
 						}
+						const stageHeight = stageWidth / video.commonState.width * video.commonState.height;
 
+						newRect.x = Math.max(0, newRect.x);
+						newRect.y = Math.max(0, newRect.y);
+						newRect.width = Math.min(stageWidth - newRect.x, newRect.width);
+						newRect.height = Math.min(stageHeight - newRect.y, newRect.height);
+
+						newRect.x = newRect.x / stageWidth * video.commonState.width;
+						newRect.y = newRect.y / stageHeight * video.commonState.height;
+						newRect.width = newRect.width / stageWidth * video.commonState.width;
+						newRect.height = newRect.height / stageHeight * video.commonState.height;						
 						if (newRect.width < minWidth || newRect.height < minHeight) {
 							setCurRect(null);
 							return;
@@ -189,26 +201,29 @@ const SketchCanvas = observer(function SketchCanvas() {
 				})}
 			>
 				<Layer
-					clearBeforeDraw={false}
+					ref={sketchLayerRef}
 				>
+					<Rect
+						x={0}
+						y={0}
+						width={stageWidth}
+						height={stageWidth / video.commonState.width * video.commonState.height}
+						fill="black"
+						draggable={false}
+						visible={true}
+						perfectDrawEnabled={false}
+					/>
 					<Image
 						id={"sketch" + video.commonState.id}
 						name={"video"}
 						ref={sketchRef}
 						image={videoElement}
-						//image={imageElement}
 						x={0}
 						y={0}
 						width={stageWidth}
 						height={stageWidth / video.commonState.width * video.commonState.height}
-						// offsetX={video.commonState.width / 2}
-						// offsetY={video.commonState.height / 2}
 						scaleX={video.commonState.scaleX}
 						scaleY={video.commonState.scaleY}
-						// cropX={curVideo.commonState.cropX}
-						// cropY={curVideo.commonState.cropY}
-						// cropWidth={curVideo.commonState.cropWidth}
-						// cropHeight={curVideo.commonState.cropHeight}
 						draggable={false}
 						visible={true}
 						perfectDrawEnabled={false}
@@ -216,16 +231,27 @@ const SketchCanvas = observer(function SketchCanvas() {
 				</Layer>
 				<Layer>
 					{curIntent.sketchCommand.map((rect, i) => {
+						const stageHeight = stageWidth / video.commonState.width * video.commonState.height;
+						const adaptedRect = {
+							x: rect.x / video.commonState.width * stageWidth,
+							y: rect.y / video.commonState.height * stageHeight,
+							width: rect.width / video.commonState.width * stageWidth,
+							height: rect.height / video.commonState.height * stageHeight,
+							stroke: rect.stroke,
+							strokeWidth: rect.strokeWidth,
+							lineCap: rect.lineCap,
+							lineJoin: rect.lineJoin,
+						};
 						return <Rect
-							key={i}
-							x={rect.x}
-							y={rect.y}
-							width={rect.width}
-							height={rect.height}
-							stroke={rect.stroke}
-							strokeWidth={rect.strokeWidth}
-							lineCap={rect.lineCap}
-							lineJoin={rect.lineJoin}
+							key={`rect${i}`}
+							x={adaptedRect.x}
+							y={adaptedRect.y}
+							width={adaptedRect.width}
+							height={adaptedRect.height}
+							stroke={adaptedRect.stroke}
+							strokeWidth={adaptedRect.strokeWidth}
+							lineCap={adaptedRect.lineCap}
+							lineJoin={adaptedRect.lineJoin}
 						/>
 					})}
 					{curRect === null ? null : (

@@ -248,6 +248,45 @@ class DomainStore {
 			...this.curIntent.requestParameters,
 			editOperation: this.curIntent.editOperationKey,
 		};
+
+		const parseData = {
+			projectId: "",
+			edits: [{
+				textParameters: {
+				},
+				imageParameters: {
+				},
+				shapeParameters: {
+				},
+				zoomParameters: {
+				},
+				cropParameters: {
+				},
+				cutParameters: {
+				},
+				blurParameters: {
+				},
+				spatialParameters: {
+					x: 0,
+					y: 0,
+					width: 200,
+					height: 200,
+					rotation: 0,
+				},
+				temporalParameters: {
+					start: 0,
+					finish: 10,
+					duration: 10,
+				},
+			}],
+			requestParameters: {
+				considerEdits: true,
+				hasText: true,
+				hasSketch: true,
+				editOperation: "text",
+			},
+		};
+
 		return requestData;
 	}
 

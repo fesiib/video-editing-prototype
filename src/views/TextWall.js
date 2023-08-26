@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action } from "mobx";
+import { action, autorun, reaction, when } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
 import { playPositionToFormat } from "../utilities/timelineUtilities";
@@ -44,6 +44,108 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
 	</div>
 });
 
+const SentenceActiveParts = observer(function SentenceActiveParts({
+	parts,
+	index,
+	item
+}) {
+	
+    const { uiStore } = useRootContext();
+	return (<>
+		{parts.map((edit, idx) => {
+			let start = Math.max(item.start, edit.commonState.offset);
+			let finish = Math.min(item.finish, edit.commonState.end);
+			const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
+			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
+			const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
+			const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
+			let innerClassName = "z-20 inset-y-0 absolute flex";
+			if (isLeftEnd && isRightEnd) {
+				innerClassName += " justify-between";
+			}
+			else if (isRightEnd) {
+				innerClassName += " justify-end";
+			}
+			else if (isLeftEnd) {
+				innerClassName += " justify-start";
+			}
+			return(<div
+				key={`script-${index}-${edit.commonState.id}`}
+				id={`script-${index}-${edit.commonState.id}`}
+			>
+				<div
+					className={innerClassName}
+					style={{
+						backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
+						marginLeft: `${left}%`,
+						width: `${width}%`,
+						opacity: 0.4, 
+					}}
+					//onClick={(event) => handleEditClick(event, edit)}
+				> 
+					{isLeftEnd ?
+						<DraggableHandle 
+							edit={edit} 
+							isLeftHandler={true}
+							isOverlay={false}
+						/>
+						: null
+					}
+					{isRightEnd ?
+						<DraggableHandle
+							edit={edit} 
+							isLeftHandler={false}
+							isOverlay={false}
+						/>
+						: null
+					}
+				</div>
+			</div>);
+		})}
+	</>);
+});
+
+const SentenceSkippedParts = observer(function SentenceSkippedParts({
+	parts,
+	index,
+	item
+}) {
+	return (<>
+		{parts.map((skipped) => {
+			let start = Math.max(item.start, skipped.commonState.offset);
+			let finish = Math.min(item.finish, skipped.commonState.end);
+			const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
+			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
+			const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
+			const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
+			let innerClassName = "z-0 absolute inset-y-0 bg-gray-500 flex";
+			if (isLeftEnd && isRightEnd) {
+				innerClassName += " justify-between";
+			}
+			else if (isRightEnd) {
+				innerClassName += " justify-end";
+			}
+			else if (isLeftEnd) {
+				innerClassName += " justify-start";
+			}
+			return(<div
+				key={`skipped-${index}-${skipped.commonState.id}`}
+				id={`skipped-${index}-${skipped.commonState.id}`}
+			>
+				<div
+					className={innerClassName}
+					style={{
+						marginLeft: `${left}%`,
+						width: `${width}%`,
+						opacity: 1, 
+					}}
+				> 
+				</div>
+			</div>);
+		})}
+	</>);
+});
+
 const SentenceBox = observer(function SentenceBox({ 
 	index,
 	item,
@@ -64,7 +166,6 @@ const SentenceBox = observer(function SentenceBox({
     });
 
 	const [showTime, setShowTime] = useState(false);
-
 	const handleClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
@@ -101,14 +202,38 @@ const SentenceBox = observer(function SentenceBox({
 		setShowTime(false);
 	});
 
-	const outerClassName = "relative pr-2 my-1" + (domainStore.transcriptSelectedIndex !== index ?
-		"" : " bg-red-200");
+	const outerClassName = ("relative pr-2 my-1");
 
 	const timeClassName = "z-30 absolute -top-2 text-xs text-black";
 
 	const formattedStart = playPositionToFormat(item.start);
 	//const formattedFinish = playPositionToFormat(item.finish);
 
+	useEffect(() => {
+		const div = document.getElementById(`script-${index}`);
+		if (div === null) {
+			return;
+		}
+		const disposer = reaction(() => domainStore.transcriptSelectedIndex, (selectedIndex, prevIndex) => {
+			if (selectedIndex === index) {
+				div.style.backgroundColor = "red";
+				div.scrollIntoView({
+					behavior: "smooth",
+					block: "nearest",
+					inline: "nearest",
+				})
+			}
+			else {
+				div.style.backgroundColor = "";
+			}
+		});
+		return () => {
+			if (div === null) {
+				return;
+			}
+			disposer();
+		}
+	}, []);
     return (
 		<div
 			ref={setNodeRef}
@@ -123,88 +248,16 @@ const SentenceBox = observer(function SentenceBox({
 					{item.text}
 				</div>	
 			</div>
-			{skippedParts.map((skipped, idx) => {
-				let start = Math.max(item.start, skipped.commonState.offset);
-				let finish = Math.min(item.finish, skipped.commonState.end);
-				const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
-				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
-				const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
-				const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
-				let innerClassName = "z-0 absolute inset-y-0 bg-gray-500 flex";
-				if (isLeftEnd && isRightEnd) {
-					innerClassName += " justify-between";
-				}
-				else if (isRightEnd) {
-					innerClassName += " justify-end";
-				}
-				else if (isLeftEnd) {
-					innerClassName += " justify-start";
-				}
-				return(<div
-					key={`skipped-${index}-${skipped.commonState.id}`}
-					id={`skipped-${index}-${skipped.commonState.id}`}
-				>
-					<div
-						className={innerClassName}
-						style={{
-							marginLeft: `${left}%`,
-							width: `${width}%`,
-							opacity: 1, 
-						}}
-					> 
-					</div>
-				</div>);
-			})}
-			{activeEdits.map((edit, idx) => {
-				let start = Math.max(item.start, edit.commonState.offset);
-				let finish = Math.min(item.finish, edit.commonState.end);
-				const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
-				const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
-				const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
-				const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
-				let innerClassName = "z-20 inset-y-0 absolute flex";
-				if (isLeftEnd && isRightEnd) {
-					innerClassName += " justify-between";
-				}
-				else if (isRightEnd) {
-					innerClassName += " justify-end";
-				}
-				else if (isLeftEnd) {
-					innerClassName += " justify-start";
-				}
-				return(<div
-					key={`script-${index}-${edit.commonState.id}`}
-					id={`script-${index}-${edit.commonState.id}`}
-				>
-					<div
-						className={innerClassName}
-						style={{
-							backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
-							marginLeft: `${left}%`,
-							width: `${width}%`,
-							opacity: 0.4, 
-						}}
-						//onClick={(event) => handleEditClick(event, edit)}
-					> 
-						{isLeftEnd ?
-							<DraggableHandle 
-								edit={edit} 
-								isLeftHandler={true}
-								isOverlay={false}
-							/>
-							: null
-						}
-						{isRightEnd ?
-							<DraggableHandle
-								edit={edit} 
-								isLeftHandler={false}
-								isOverlay={false}
-							/>
-							: null
-						}
-					</div>
-				</div>);
-			})}
+			<SentenceSkippedParts
+				parts = {skippedParts}
+				index = {index}
+				item = {item}
+			/>
+			<SentenceActiveParts
+				parts = {activeEdits}
+				index = {index}
+				item = {item}
+			/>
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }
 		</div>
     );
@@ -272,24 +325,6 @@ const TextWall = observer(function TextWall() {
 		return;
     });
 
-	useEffect(() => {
-		const index = domainStore.transcriptSelectedIndex;
-		const div = document.getElementById(`script-${index}`);
-		if (div === null) {
-			return;
-		}
-		div.scrollIntoView({
-			behavior: "smooth",
-			block: "nearest",
-			inline: "nearest",
-		})
-		// const rect = div.getBoundingClientRect();
-		// textWallRef.current.scrollTo({
-		// 	top: rect.top - 100,
-		// 	behavior: "smooth",
-		// });
-	}, [domainStore.transcriptSelectedIndex]);
-
     return (
         <div 
 			ref={textWallRef}
@@ -334,20 +369,6 @@ const TextWall = observer(function TextWall() {
 								skippedParts={relevantSkippedParts}
 							/>);
 						})}
-						{/* {domainStore.curIntent.activeEdits.map((edit, index) => {
-							const leftScript = filteredScript.find((item) => {
-								return item.start <= edit.commonState.offset && item.end >= edit.commonState.offset;
-							});
-							const rightScript = filteredScript.find((item) => {
-								return item.start < edit.commonState.end && item.end >= edit.commonState.end;
-							});
-							return <ScriptTrimmer 
-								key={`trimmer-${index}`}
-								edit={edit}
-								leftScript={leftScript}
-								rightScript={rightScript}
-							/>;
-						})} */}
 					</div>
 				)}
 				<DragOverlay

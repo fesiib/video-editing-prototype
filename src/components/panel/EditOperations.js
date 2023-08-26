@@ -27,7 +27,7 @@ const EditOperations = observer(function EditOperations() {
 		{Object.keys(domainStore.editOperations).map((operationKey) => {
 			const operation = domainStore.editOperations[operationKey];
 			return (<button 
-				key={operation.title}
+				key={"title_" + operation.title}
 				className={(operationKey === selectedOperationKey ?
 					activeButtonClassName : inactiveButtonClassName)}
 				onClick={(event) => handleButtonClick(operationKey)}

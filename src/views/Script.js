@@ -166,7 +166,7 @@ const Script = observer(function Script() {
 						const isIntentSelected = curIntent.selectedTranscriptIndex(filteredScript[index]) !== -1;
                         return (
                             <div
-                                key={index}
+                                key={"script" + index}
                                 id={"script" + index}
                                 className={isSelected ? "bg-red-400" : (
 									isIntentSelected ? "bg-yellow-300" : "bg-slate-300"
