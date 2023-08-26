@@ -132,6 +132,7 @@ const EditorCanvas = observer(function EditorCanvas() {
             return;
 		}
 
+
         const metaPressed = event.evt.shiftKey || event.evt.ctrlKey || event.evt.metaKey;
         const isSelected = transformerRef.current.nodes().indexOf(event.target) >= 0;
 

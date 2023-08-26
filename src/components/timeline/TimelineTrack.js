@@ -7,11 +7,11 @@ import DraggableTimelineItem from "./DraggableTimelineItem";
 import useRootContext from "../../hooks/useRootContext";
 import EmptySpace from "./EmptySpace";
 import MainTimelineItem from "./MainTimelineItem";
-import SkippedTimelineItem from "./SkippedTimelineItem";
+import StaticTimelineItem from "./StaticTimelineItem";
 
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(
-        { id, style, title, mainScenes, skippedScenes, scenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
+        { id, style, title, mainScenes, skippedScenes, scenes, staticScenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
         ref
     ) {
         const { uiStore, domainStore } = useRootContext();
@@ -76,11 +76,12 @@ const TimelineTrack = observer(
                         />
                     ))}
 					{skippedScenes.map((skippedScene) => (
-                        <SkippedTimelineItem
+                        <StaticTimelineItem
                             key={skippedScene.commonState.id}
-                            skippedScene={skippedScene}
-                            skippedScenes={skippedScenes}
+                            staticScene={skippedScene}
+                            staticScenes={skippedScenes}
 							scenes={scenes}
+							itemType={"skipped"}
                         />
                     ))}
                     {scenes.map((scene) => (
@@ -90,6 +91,15 @@ const TimelineTrack = observer(
                             scenes={scenes}
                         />
                     ))}
+					{staticScenes.map((staticScene) => (
+						<StaticTimelineItem
+							key={staticScene.commonState.id}
+							staticScene={staticScene}
+							staticScenes={staticScenes}
+							scenes={scenes}
+							itemType={"suggestion"}
+						/>
+					))}
 					{/* {emptySpaces.map((space) => (
 						<EmptySpace
 							key={space.key}

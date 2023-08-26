@@ -21,6 +21,11 @@ const CommandSpace = observer(function CommandSpace() {
 		domainStore.addIntent();
 	});
 
+	const onAddRandomClick = action(() => {
+		domainStore.addRandomIntent();
+	});
+
+
 	const onDeleteClick = action((intentPos) => {
 		domainStore.deleteIntent(intentPos);
 	});
@@ -63,12 +68,19 @@ const CommandSpace = observer(function CommandSpace() {
 			<h2> Edits: </h2>
 			<div className="border p-2">
 				<button 
-					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
 					onClick={() => onAddClick()} 
 					// disabled={curIntent.activeEdits.length === 0}
 				>
 					+ 
 				</button> 
+				<button
+					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+					onClick={() => onAddRandomClick(curIntent.idx)}
+					// disabled={curIntent.activeEdits.length === 0}
+				>
+					+ Random
+				</button>
 				{reversedIntents.length === 0 ? (
 					<div> No edits </div>
 					) : (

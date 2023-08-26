@@ -10,35 +10,18 @@ import useRootContext from "../hooks/useRootContext";
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
 
+	const selectedSuggestedEdits = domainStore.curIntent.suggestedEdits.filter((edit) => {
+		return uiStore.timelineControls.selectedTimelineItems.findIndex((item) => {
+			return item.commonState.id === edit.commonState.id;
+		}) >= 0;
+	});
+
     const onZoomChange = action((event) => {
         uiStore.timelineControls.pxPerSec = event.target.value / 10;
     });
 
     const onPressPlay = action((event) => {
         uiStore.timelineControls.isPlaying = !uiStore.timelineControls.isPlaying;
-        // if (uiStore.timelineControls.intervalId !== -1) {
-        //     clearTimeout(uiStore.timelineControls.intervalId);
-        //     uiStore.timelineControls.intervalId = -1;
-        // } else {
-        //     const updatePlayPosition = action((prevDate) => {
-        //         if (uiStore.timelineControls.intervalId === -1) {
-        //             return;
-        //         }
-        //         const curDate = Date.now();
-        //         const time = curDate - prevDate;
-        //         uiStore.timelineControls.playPosition += time / 1000;
-        //         uiStore.timelineControls.intervalId = setTimeout(
-        //             updatePlayPosition,
-        //             uiStore.timelineConst.delay,
-        //             curDate
-        //         );
-        //     });
-        //     uiStore.timelineControls.intervalId = setTimeout(
-        //         updatePlayPosition,
-        //         uiStore.timelineConst.delay,
-        //         Date.now()
-        //     );
-        // }
     });
 
     const onPressSplit = action((event) => {
@@ -81,29 +64,55 @@ const Timeline = observer(function Timeline() {
         }
     });
 
+	const onDecisionClick = action((decision) => {
+		if (decision === "accept") {
+			// TODO: add selectedSuggestedEdits to active edits
+			// change isSuggested to false
+			return;
+		}
+		else if (decision === "reject") {
+			// TODO: delete selectedSuggestedEdits
+			return;
+		}
+	});
+
 	const onNavigationClick = action((direction) => {
 		if (direction === "prev") {
-			const prevEditStart = domainStore.curIntent.activeEdits.reduce((acc, edit) => {
+			const prevEdit = domainStore.curIntent.activeEdits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset < uiStore.timelineControls.playPosition
-					&& edit.commonState.offset > acc) {
-					return edit.commonState.offset;
+					&& edit.commonState.offset >= acc.offset) {
+					return {
+						offset: edit.commonState.offset,
+						editIdx: idx,
+					};
 				}
-				else {
-					return acc;
-				}
-			}, 0);
-			uiStore.timelineControls.playPosition = prevEditStart;
+				return acc;
+			}, {
+				offset: 0,
+				editIdx: -1,
+			});
+			if (prevEdit.editIdx !== -1) {
+				uiStore.timelineControls.playPosition = prevEdit.offset;
+				uiStore.selectTimelineObjects([domainStore.curIntent.activeEdits[prevEdit.editIdx]]);
+			}
 		} else if (direction === "next") {
-			const nextEditStart = domainStore.curIntent.activeEdits.reduce((acc, edit) => {
+			const nextEdit = domainStore.curIntent.activeEdits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset > uiStore.timelineControls.playPosition
-					&& edit.commonState.offset < acc) {
-					return edit.commonState.offset;
+					&& edit.commonState.offset <= acc.offset) {
+					return {
+						offset: edit.commonState.offset,
+						editIdx: idx,
+					};
 				}
-				else {
-					return acc;
-				}
-			}, domainStore.projectMetadata.duration);
-			uiStore.timelineControls.playPosition = nextEditStart;
+				return acc;
+			}, {
+				offset: domainStore.projectMetadata.duration,
+				editIdx: -1,
+			});
+			if (nextEdit.editIdx !== -1) {
+				uiStore.timelineControls.playPosition = nextEdit.offset;
+				uiStore.selectTimelineObjects([domainStore.curIntent.activeEdits[nextEdit.editIdx]]);
+			}
 		}
 	});
 
@@ -212,21 +221,41 @@ const Timeline = observer(function Timeline() {
             </div>
 
             <TimelineTracks />
-			<div className="flex justify-end gap-2">
-				<button
-                    className={"bg-indigo-300" + buttonClassName}
-                    id="prev_button"
-                    onClick={() => onNavigationClick("prev")}
-                >
-                    Previous
-                </button>
-				<button
-                    className={"bg-indigo-300" + buttonClassName}
-                    id="next_button"
-                    onClick={() => onNavigationClick("next")}
-                >
-                    Next
-                </button>
+			<div className="flex flex-col justify-center gap-2">
+				{selectedSuggestedEdits.length === 0 ? null : (
+					<div>
+						<button
+							className={"bg-green-300" + buttonClassName}
+							id="accept_button"
+							onClick={() => onDecisionClick("accept")}
+						>
+							Accept
+						</button>
+						<button
+							className={"bg-red-300" + buttonClassName}
+							id="reject_button"
+							onClick={() => onDecisionClick("reject")}
+						>
+							Reject
+						</button>
+					</div>
+				)}
+				<div>
+					<button
+						className={"bg-indigo-300" + buttonClassName}
+						id="prev_button"
+						onClick={() => onNavigationClick("prev")}
+					>
+						{"<-"}
+					</button>
+					<button
+						className={"bg-indigo-300" + buttonClassName}
+						id="next_button"
+						onClick={() => onNavigationClick("next")}
+					>
+						{"->"}
+					</button>
+				</div>
 			</div>
         </div>
     );

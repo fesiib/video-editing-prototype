@@ -44,10 +44,11 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
 	</div>
 });
 
-const SentenceActiveParts = observer(function SentenceActiveParts({
+const DraggableParts = observer(function DraggableParts({
 	parts,
 	index,
-	item
+	item,
+	className,
 }) {
 	
     const { uiStore } = useRootContext();
@@ -59,7 +60,7 @@ const SentenceActiveParts = observer(function SentenceActiveParts({
 			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
 			const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
 			const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
-			let innerClassName = "z-20 inset-y-0 absolute flex";
+			let innerClassName = className;
 			if (isLeftEnd && isRightEnd) {
 				innerClassName += " justify-between";
 			}
@@ -70,8 +71,8 @@ const SentenceActiveParts = observer(function SentenceActiveParts({
 				innerClassName += " justify-start";
 			}
 			return(<div
-				key={`script-${index}-${edit.commonState.id}`}
-				id={`script-${index}-${edit.commonState.id}`}
+				key={`draggable-${index}-${edit.commonState.id}`}
+				id={`draggable-${index}-${edit.commonState.id}`}
 			>
 				<div
 					className={innerClassName}
@@ -79,7 +80,6 @@ const SentenceActiveParts = observer(function SentenceActiveParts({
 						backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
 						marginLeft: `${left}%`,
 						width: `${width}%`,
-						opacity: 0.4, 
 					}}
 					//onClick={(event) => handleEditClick(event, edit)}
 				> 
@@ -105,20 +105,21 @@ const SentenceActiveParts = observer(function SentenceActiveParts({
 	</>);
 });
 
-const SentenceSkippedParts = observer(function SentenceSkippedParts({
+const StaticParts = observer(function StaticParts({
 	parts,
 	index,
-	item
+	item,
+	className,
 }) {
 	return (<>
-		{parts.map((skipped) => {
-			let start = Math.max(item.start, skipped.commonState.offset);
-			let finish = Math.min(item.finish, skipped.commonState.end);
+		{parts.map((part) => {
+			let start = Math.max(item.start, part.commonState.offset);
+			let finish = Math.min(item.finish, part.commonState.end);
 			const left = Math.round((start - item.start) / (item.finish - item.start) * 100);
 			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
-			const isLeftEnd = (item.start <= skipped.commonState.offset && item.finish > skipped.commonState.offset);
-			const isRightEnd = (item.start < skipped.commonState.end && item.finish >= skipped.commonState.end);
-			let innerClassName = "z-0 absolute inset-y-0 bg-gray-500 flex";
+			const isLeftEnd = (item.start <= part.commonState.offset && item.finish > part.commonState.offset);
+			const isRightEnd = (item.start < part.commonState.end && item.finish >= part.commonState.end);
+			let innerClassName = className;
 			if (isLeftEnd && isRightEnd) {
 				innerClassName += " justify-between";
 			}
@@ -129,15 +130,14 @@ const SentenceSkippedParts = observer(function SentenceSkippedParts({
 				innerClassName += " justify-start";
 			}
 			return(<div
-				key={`skipped-${index}-${skipped.commonState.id}`}
-				id={`skipped-${index}-${skipped.commonState.id}`}
+				key={`static-${index}-${part.commonState.id}`}
+				id={`static-${index}-${part.commonState.id}`}
 			>
 				<div
 					className={innerClassName}
 					style={{
 						marginLeft: `${left}%`,
 						width: `${width}%`,
-						opacity: 1, 
 					}}
 				> 
 				</div>
@@ -150,6 +150,7 @@ const SentenceBox = observer(function SentenceBox({
 	index,
 	item,
 	activeEdits,
+	suggestedEdits,
 	skippedParts,
 }) {
     const { uiStore, domainStore } = useRootContext();
@@ -248,15 +249,23 @@ const SentenceBox = observer(function SentenceBox({
 					{item.text}
 				</div>	
 			</div>
-			<SentenceSkippedParts
+			<StaticParts
 				parts = {skippedParts}
 				index = {index}
 				item = {item}
+				className = {"z-0 opacity-100 absolute inset-y-0 bg-gray-500 flex"}
 			/>
-			<SentenceActiveParts
+			<DraggableParts
 				parts = {activeEdits}
 				index = {index}
 				item = {item}
+				className = {"z-20 opacity-40 inset-y-0 absolute flex"}
+			/>
+			<StaticParts
+				parts = {suggestedEdits}
+				index = {index}
+				item = {item}
+				className = {"z-0 opacity-40 absolute inset-y-0 bg-green-500 flex"}
 			/>
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }
 		</div>
@@ -267,7 +276,8 @@ const TextWall = observer(function TextWall() {
     const { uiStore, domainStore } = useRootContext();
     const filteredScript = domainStore.transcripts;
 
-	const activeEdits = domainStore.curIntent.activeEdits; 
+	const activeEdits = domainStore.curIntent.activeEdits;
+	const suggestedEdits = domainStore.curIntent.suggestedEdits;
 	const skippedParts = domainStore.skippedParts;
 
 	const textWallRef = useRef(null);
@@ -354,6 +364,13 @@ const TextWall = observer(function TextWall() {
 									|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
 								);
 							});
+							const relevantSuggestedEdits = suggestedEdits.filter((edit) => {
+								return (
+									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
+									|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
+									|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
+								);
+							});
 							const relevantSkippedParts = skippedParts.filter((skipped) => {
 								return (
 									(skipped.commonState.offset >= item.start && skipped.commonState.offset < item.finish)
@@ -366,6 +383,7 @@ const TextWall = observer(function TextWall() {
 								index={index}
 								item={item}
 								activeEdits={relevantActiveEdits}
+								suggestedEdits={relevantSuggestedEdits}
 								skippedParts={relevantSkippedParts}
 							/>);
 						})}

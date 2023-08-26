@@ -20,8 +20,8 @@ change the video properties
 */
 
 class EditState {
-	adjustedVideos = [];
-	excludedIds = [];
+
+	isSuggested = false;
 
 	textParameters = {
 		content: "HELLO", // text input
@@ -77,13 +77,13 @@ class EditState {
 		cropHeight: 0, // number input
 	};
 
-    constructor(domainStore, intent, trackId) {
+    constructor(domainStore, intent, isSuggested, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
 		this.intent = intent;
-		this.adjustedVideos = [];
-		this.excludedIds = [];
+		
+		this.isSuggested = isSuggested;
 
 		this.cropParameters = {
 			x: 0,
@@ -98,10 +98,8 @@ class EditState {
     }
 
 	getDeepCopy() {
-		const newEdit = new EditState(this.domainStore, this.intent, this.commonState.trackId);
+		const newEdit = new EditState(this.domainStore, this.intent, this.isSuggested, this.commonState.trackId);
 		newEdit.commonState.setMetadata(this.commonState.metadata);
-		newEdit.adjustedVideos = [...this.adjustedVideos];
-		newEdit.excludedIds = [...this.excludedIds];
 		
 		newEdit.textParameters = {...this.textParameters};
 		newEdit.imageParameters = {...this.imageParameters};
@@ -131,9 +129,15 @@ class EditState {
     }
 
 	replaceSelf(edits) {
+		if (!this.isSuggested) {
+			this.intent.activeEdits = [
+				...this.intent.activeEdits, ...edits];
+		}
+		if (this.isSuggested) {
+			this.intent.suggestedEdits = [
+				...this.intent.suggestedEdits, ...edits];
+		}
 		this.intent.deleteEdits([this.commonState.id]);
-		this.intent.activeEdits = [
-			...this.intent.activeEdits, ...edits];
 	}
 
 	setCustomParameters(parameters) {
@@ -325,6 +329,32 @@ class EditState {
 		if (this.intent.editOperation === null || this.intent.editOperation.linearize === false) {
 			return true;
 		}
+		if (this.isSuggested && this.intent.idx === this.domainStore.curIntent.idx) {
+			return true;
+		}
+		// if (this.domainStore.rootStore.uiStore.timelineControls.selectedTimelineItems.findIndex(item => item.commonState.id === this.commonState.id) >= 0) {
+		// 	return true;
+		// }
+		// for (const item of this.domainStore.rootStore.uiStore.timelineControls.selectedTimelineItems) {
+		// 	if (item.commonState.id !== this.commonState.id) {
+		// 		continue;
+		// 	}
+		// 	if (item.intent.editOperation === null || item.intent.editOperationKey !== this.intent.editOperationKey) {
+		// 		continue;
+		// 	}
+		// 	if (item.commonState.offset <= playPosition && item.commonState.end > playPosition) {
+		// 		return false;
+		// 	}
+		// }
+
+		if (this.domainStore.curIntent.editOperationKey === this.intent.editOperationKey) {
+			for (let suggestedEdit of this.domainStore.curIntent.suggestedEdits) {
+				if (suggestedEdit.commonState.offset <= playPosition && suggestedEdit.commonState.end > playPosition) {
+					return false;
+				}
+			}
+		}
+
 		const intents = this.domainStore.intents;
 		for (let intentIdx = this.intent.intentPos + 1; intentIdx < intents.length; intentIdx++) {
 			const intent = intents[intentIdx];

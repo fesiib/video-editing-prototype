@@ -12,14 +12,16 @@ import {
     playPositionToFormat,
 } from "../../utilities/timelineUtilities";
 
-const SkippedTimelineItem = observer(function SkippedTimelineItem({ skippedScene, skippedScenes, scenes }) {
+const StaticTimelineItem = observer(function StaticTimelineItem({
+		staticScene, staticScenes, scenes, itemType 
+}) {
 	const { uiStore, domainStore } = useRootContext();
 
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: skippedScene.commonState.id,
+        id: staticScene.commonState.id,
         data: {
             type: "scene",
-            scene: skippedScene,
+            scene: staticScene,
         },
         disabled: true,
     });
@@ -39,11 +41,11 @@ const SkippedTimelineItem = observer(function SkippedTimelineItem({ skippedScene
 
     return (
         <TimelineItem
-            id={skippedScene.commonState.id}
+            id={staticScene.commonState.id}
             ref={setNodeRef}
-			itemType={"skipped"}
-            scene={skippedScene}
-            scenes={skippedScenes}
+			itemType={itemType}
+            scene={staticScene}
+            scenes={staticScenes}
             transform={adjustedTransform}
             onClick={onTimelineItemClick}
             onMouseMove={null}
@@ -55,4 +57,4 @@ const SkippedTimelineItem = observer(function SkippedTimelineItem({ skippedScene
     );
 });
 
-export default SkippedTimelineItem;
+export default StaticTimelineItem;

@@ -1,13 +1,10 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, toJS } from "mobx";
 
 import VideoState from "./objects/videoState";
 import IntentState from "./intentState";
 
 class DomainStore {
 	in_mainVideos = [];
-	in_texts = [];
-	in_images = [];
-	in_shapes = [];
 	
 	intents = [];
 	curIntentPos = 0;
@@ -156,9 +153,6 @@ class DomainStore {
         this.rootStore = rootStore;
 
 		this.in_mainVideos = [];
-		this.in_texts = [];
-		this.in_images = [];
-		this.in_shapes = [];
 
 		this.projectMetadata.totalIntentCnt = 1;
         this.intents = [
@@ -173,6 +167,41 @@ class DomainStore {
 		this.intents.push(
 			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		);
+
+		this.rootStore.resetTempState();
+	}
+	
+	addRandomIntent() {
+		this.curIntentPos = this.intents.length;
+		this.projectMetadata.totalIntentCnt += 1;
+		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
+
+		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
+
+		const randomConsiderEdits = Math.random() > 0.5;
+		const randomTextCommand = Math.random() > 0.5 ? "add" : "remove";
+		const randomSketchCommand = Math.random() > 0.5 ? [
+			{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
+		] : [];
+		const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
+		
+		newIntent.setEditOperationKey(randomEditOperationKey);
+		newIntent.considerEdits = randomConsiderEdits;
+		newIntent.textCommand = randomTextCommand;
+		newIntent.sketchCommand = randomSketchCommand;
+		newIntent.sketchPlayPosition = randomSketchPlayPosition;
+		
+		const randomEditsLength = Math.floor(Math.random() * 5);
+		const randomSuggestedEditsLength = Math.floor(Math.random() * 5);
+		for (let i = 0; i < randomEditsLength; i++) {
+			newIntent.addRandomEdit(false);
+		}
+		for (let i = 0; i < randomSuggestedEditsLength; i++) {
+			newIntent.addRandomEdit(true);
+		}
+
+		this.intents.push(newIntent);
+
 		this.rootStore.resetTempState();
 	}
 
@@ -186,6 +215,11 @@ class DomainStore {
 				return intent;
 			}
 			for (let edit of intent.activeEdits) {
+				edit.commonState.setMetadata({
+					z: idx + 1,
+				});
+			}
+			for (let edit of intent.suggestedEdits) {
 				edit.commonState.setMetadata({
 					z: idx + 1,
 				});
@@ -215,6 +249,11 @@ class DomainStore {
 				z: this.curIntentPos + 1,
 			});
 		}
+		for (let edit of deepCopy.suggestedEdits) {
+			edit.commonState.setMetadata({
+				z: this.curIntentPos + 1,
+			});
+		}
 		this.rootStore.resetTempState();
 	}
 
@@ -227,28 +266,30 @@ class DomainStore {
 	}
 
 	processIntent() {
+		// request
 		const requestData = {
 			projectId: "",
 			projectMetadata: {},
 			edits: [],
 			requestParameters: {},
-			editParameterOptions: this.dropdownOptions,
-			editOperations: Object.keys(this.editOperations),
+			editParameterOptions: toJS({ ...this.dropdownOptions }),
+			editOperations: Object.keys(toJS(this.editOperations)),
 		};
-		requestData.projectId = this.projectMetadata.projectId;
-		requestData.projectMetadata = {
-			width: this.projectMetadata.width,
-			height: this.projectMetadata.height,
-			duration: this.projectMetadata.duration,
-		};
-		requestData.edits = this.curIntent.activeEdits.splice(0).map((edit) => {
-			return edit.requestBody;
+		requestData.projectId = toJS(this.projectMetadata.projectId);
+		requestData.projectMetadata = toJS({
+			...this.projectMetadata
 		});
-		requestData.requestParameters = {
+		requestData.edits = [...this.curIntent.activeEdits].map((edit) => {
+			return toJS(edit.requestBody);
+		});
+		requestData.requestParameters = toJS({
 			...this.curIntent.requestParameters,
-			editOperation: this.curIntent.editOperationKey,
-		};
+		});
 
+		// response
+		// make sure zIndex is fine
+
+		this.curIntent.suggestedEdits = [];
 		const parseData = {
 			projectId: "",
 			edits: [{
@@ -280,13 +321,13 @@ class DomainStore {
 				},
 			}],
 			requestParameters: {
-				considerEdits: true,
-				hasText: true,
-				hasSketch: true,
+				consdierEdits: true,
+				text: "",
+				sketchRectangles: [],
+				sketchFrameTimestamp: -1,
 				editOperation: "text",
 			},
 		};
-
 		return requestData;
 	}
 
@@ -390,38 +431,11 @@ class DomainStore {
 	}
 
 	get videos() {
-		// let result = [];
-		// const excludedIds = this.curIntent.allExcludedIds;
-		// for (let video of this.in_mainVideos) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === video.commonState.id) === -1) {
-		// 		result.push(video);
-		// 	}
-		// }
-		// for (let edit of this.curIntent.activeEdits) {
-		// 	for (let object of edit.adjustedVideos) {
-		// 		result.push(object);
-		// 	}
-		// }
-		// return result;
 		return this.in_mainVideos;
 	}
 
 	get texts() {
 		let result = [];
-		// const excludedIds = this.curIntent.allExcludedIds;
-		// for (let text of this.in_texts) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-		// 		result.push(text);
-		// 	}
-		// }
-		// for (let edit of this.curIntent.activeEdits) {
-		// 	if (this.curIntent.editOperation === null) {
-		// 		continue;
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Text") {
-		// 		result.push(edit);
-		// 	}
-		// }
 		for (let intent of this.intents) {
 			for (let edit of intent.activeEdits) {
 				if (intent.editOperation === null) {
@@ -430,27 +444,21 @@ class DomainStore {
 				if (intent.editOperation.title === "Text") {
 					result.push(edit);
 				}
-			}	
+			}
+		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Text") {
+				result.push(edit);
+			}
 		}
 		return result;
 	}
 
 	get images() {
 		let result = [];
-		// const excludedIds = this.curIntent.allExcludedIds;
-		// for (let text of this.in_images) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-		// 		result.push(text);
-		// 	}
-		// }
-		// for (let edit of this.curIntent.activeEdits) {
-		// 	if (this.curIntent.editOperation === null) {
-		// 		continue;
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Image") {
-		// 		result.push(edit);
-		// 	}
-		// }
 		for (let intent of this.intents) {
 			for (let edit of intent.activeEdits) {
 				if (intent.editOperation === null) {
@@ -461,25 +469,19 @@ class DomainStore {
 				}
 			}	
 		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Image") {
+				result.push(edit);
+			}
+		}
 		return result;
 	}
 
 	get shapes() {
 		let result = [];
-		// const excludedIds = this.curIntent.allExcludedIds;
-		// for (let text of this.in_shapes) {
-		// 	if (excludedIds.findIndex((excludedId) => excludedId === text.commonState.id) === -1) {
-		// 		result.push(text);
-		// 	}
-		// }
-		// for (let edit of this.curIntent.activeEdits) {
-		// 	if (this.curIntent.editOperation === null) {
-		// 		continue;
-		// 	}
-		// 	if (this.curIntent.editOperation.title === "Shape") {
-		// 		result.push(edit);
-		// 	}
-		// }
 		for (let intent of this.intents) {
 			for (let edit of intent.activeEdits) {
 				if (intent.editOperation === null) {
@@ -489,6 +491,14 @@ class DomainStore {
 					result.push(edit);
 				}
 			}	
+		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Shape") {
+				result.push(edit);
+			}
 		}
 		return result;
 	}
@@ -523,6 +533,14 @@ class DomainStore {
 				}
 			}
 		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Cut") {
+				result.push(edit);
+			}
+		}
 		return result;
 	}
 
@@ -536,6 +554,14 @@ class DomainStore {
 				if (intent.editOperation.title === "Crop") {
 					result.push(edit);
 				}
+			}
+		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Crop") {
+				result.push(edit);
 			}
 		}
 		return result;
@@ -553,6 +579,14 @@ class DomainStore {
 				}
 			}
 		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Zoom") {
+				result.push(edit);
+			}
+		}
 		return result;
 	}
 
@@ -568,6 +602,14 @@ class DomainStore {
 				}
 			}
 		}
+		for (let edit of this.curIntent.suggestedEdits) {
+			if (this.curIntent.editOperation === null) {
+				continue;
+			}
+			if (this.curIntent.editOperation.title === "Blur") {
+				result.push(edit);
+			}
+		}
 		return result;
 	}
 
@@ -579,14 +621,22 @@ class DomainStore {
 		const crops = this.crops;
 		const zooms = this.zooms;
 		const blurs = this.blurs;
-		const objects = [...texts, ...images, ...shapes, ...skippedParts, ...crops, ...zooms, ...blurs];
+		const objects = [
+			...texts,
+			...images,
+			...shapes,
+			...skippedParts,
+			...crops,
+			...zooms,
+			...blurs
+		].filter((object) => object.intent.idx !== this.curIntent.idx);
 		objects.sort((a, b) => a.commonState.z - b.commonState.z);
+		
+		if (this.curIntent.editOperation !== null) {
+			return [...objects, ...this.curIntent.activeEdits, ...this.curIntent.suggestedEdits];
+		}
 		return objects;
 	}
-
-	// get activeEdits() {
-	// 	return this.curIntent.activeEdits;
-	// }
 
 	get curIntent() {
 		return this.intents[this.curIntentPos];

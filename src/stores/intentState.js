@@ -13,11 +13,9 @@ class IntentState {
 	editOperationKey = "";
 	id = "";
 	idx = 0;
-	requestParameters = {
-		considerEdits: true,
-		hasText: true,
-		hasSketch: true,
-	};
+	
+	considerEdits = true;
+	suggestedEdits = [];
 
     constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -28,14 +26,10 @@ class IntentState {
 		this.sketchPlayPosition = sketchPlayPosition;
 		this.editOperationKey = "";
 		this.activeEdits = [];
+		this.suggestedEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
-
-		this.requestParameters = {
-			considerEdits: true,
-			hasText: textCommand !== "",
-			hasSketch: sketchPlayPosition >= 0,
-		};
+		this.considerEdits = true;
     }
 
 	getDeepCopy() {
@@ -53,12 +47,17 @@ class IntentState {
 			newEdit.intent = newIntent;
 			return newEdit;
 		});
+		newIntent.suggestedEdits = this.suggestedEdits.slice(0).map((edit) => {
+			const newEdit = edit.getDeepCopy();
+			newEdit.intent = newIntent;
+			return newEdit;
+		});
+		newIntent.considerEdits = this.considerEdits;
 		return newIntent;
 	}
 
 	setTextCommand(textCommand) {
 		this.textCommand = textCommand;
-		this.requestParameters.hasText = textCommand !== "";
 	}
 
 	setSketchCommand(sketchCommand) {
@@ -67,7 +66,6 @@ class IntentState {
 
 	setSketchPlayPosition(sketchPlayPosition) {
 		this.sketchPlayPosition = sketchPlayPosition;
-		this.requestParameters.hasSketch = sketchPlayPosition >= 0;
 	}
 
 	setEditOperationKey(newKey) {
@@ -83,17 +81,10 @@ class IntentState {
 		//conversion between types should happen
 	}
 
-	setRequestParameters(requestParameters) {
-		this.requestParameters = {
-			...this.requestParameters,
-			...requestParameters,
-		};
-	}
-
 	addActiveEdit(first, second) {
 		const start = Math.min(first, second);
 		const finish = Math.max(first, second);
-		let newEdit = new EditState(this.domainStore, this, 0);
+		let newEdit = new EditState(this.domainStore, this, false, 0);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -106,11 +97,73 @@ class IntentState {
 		return this.activeEdits[this.activeEdits.length - 1];
 	}
 
+	addRandomEdit(suggestion) {
+		const maxEditDuration = 120;
+
+		const edits = suggestion ? this.suggestedEdits : this.activeEdits;
+
+		let start = Math.floor(Math.random() * maxEditDuration);
+		let maxDuration = maxEditDuration;
+		while (true) {
+			let within = false;
+			for (let edit of edits) {
+				if (edit.commonState.offset <= start && edit.commonState.end > start) {
+					within = true;
+					break
+				}
+				if (edit.commonState.offset > start) {
+					maxDuration = Math.min(edit.commonState.offset - start, maxDuration);
+				}
+			}
+			if (within === true) {
+				start = Math.floor(Math.random() * maxEditDuration);
+				maxDuration = maxEditDuration
+				continue;
+			}
+			break;
+		}
+		maxDuration = Math.min(maxDuration, 30);
+		let finish = start + Math.floor(Math.random() * maxDuration);
+
+		let x1 = Math.floor(Math.random() * this.domainStore.projectMetadata.width);
+		let y1 = Math.floor(Math.random() * this.domainStore.projectMetadata.height);
+		let x2 = Math.floor(Math.random() * this.domainStore.projectMetadata.width);
+		let y2 = Math.floor(Math.random() * this.domainStore.projectMetadata.height);
+		let x = Math.min(x1, x2);
+		let y = Math.min(y1, y2);
+		let width = Math.abs(x1 - x2);
+		let height = Math.abs(y1 - y2);
+
+
+		let newEdit = new EditState(this.domainStore, this, suggestion, 0);
+		newEdit.commonState.setMetadata({
+			duration: this.domainStore.projectMetadata.duration,
+			start: start,
+			finish: finish,
+			offset: start,
+			x: x,
+			y: y,
+			width: width,
+			height: height,
+			z: this.intentPos + 1,
+		});
+		if (suggestion) {
+			this.suggestedEdits.push(newEdit);
+			return this.suggestedEdits[this.suggestedEdits.length - 1];
+		}
+		this.activeEdits.push(newEdit);
+		return this.activeEdits[this.activeEdits.length - 1];
+	}
+
 	deleteEdits(selectedIds) {
 		this.activeEdits = this.activeEdits.filter((edit) => {
             const isSelected = selectedIds.includes(edit.commonState.id);
             return !isSelected;
         });
+		this.suggestedEdits = this.suggestedEdits.filter((edit) => {
+			const isSelected = selectedIds.includes(edit.commonState.id);
+			return !isSelected;
+		});
 	}
 
 	getObjectById(id) {
@@ -123,14 +176,6 @@ class IntentState {
 			return this.getObjectById(realId);
 		}
 		return this.getObjectById(id);
-	}
-	
-	get allExcludedIds() {
-		let result = [];
-		for (let edit of this.activeEdits) {
-			result.push(...edit.excludedIds);
-		}
-		return result;
 	}
 
 	get selectedPeriods() {
@@ -164,6 +209,18 @@ class IntentState {
 			result.push(edit.isVisible(playPosition));
 		}
 		return result;
+	}
+
+	get requestParameters() {
+		return {
+			consdierEdits: this.considerEdits,
+			hasText: this.textCommand !== "",
+			hasSketch: this.sketchCommand.length > 0,
+			text: this.textCommand,
+			sketchRectangles: [...this.sketchCommand],
+			sketchFrameTimestamp: this.sketchPlayPosition,
+			editOperation: this.editOperationKey,
+		}
 	}
 }
 
