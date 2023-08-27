@@ -13,6 +13,8 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 	const { uiStore, domainStore } = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
+	const operationName = domainStore.operationNameMapping[parameterKey];
+
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
 	const onFileInputChange = action((event) => {
@@ -59,8 +61,8 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 		}
 	});
 
-	return (<div className="">
-		{/* <label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label> */}
+	return (<div className="flex flex-col">
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label> 
 		<div id={inputId} className="border grid">
 			<input className="" 
 				id={inputId + "_url"} 
@@ -82,6 +84,8 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}) {
 	
 	const { uiStore, domainStore } = useRootContext();
+	const operationName = domainStore.operationNameMapping[parameterKey];
+
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -107,9 +111,9 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 		}
 	});
 	return (<div className="my-1 flex flex-col items-start">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<label className="text-left text-xs w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
-			className="w-full border"
+			className="h-8 w-full border"
 			id={inputId}
 			type="text"
 			value={parameter === "mixed" ? "" : parameter}
@@ -122,6 +126,9 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 const NumberInput = observer(function NumberInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const operationName = domainStore.operationNameMapping[parameterKey];
+
 	const inputId = `${metaKey}-${parameterKey}-input`;
 	const defaultStep = selectedEdits.length === 0 ? 1 
 		: selectedEdits[0].numberParameterConfig[parameterKey].step;
@@ -211,8 +218,8 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 
 	return ((defaultMin === null || defaultMax === null || defaultMin >= defaultMax) ? null :
 	<div className="flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
-		<div className="flex justify-end">
+		<label className="text-left text-sm" htmlFor={inputId}> {operationName} </label>
+		<div className="flex justify-end w-1/2">
 			<input 
 				className="w-1/2 border"
 				id={inputId}
@@ -237,6 +244,8 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, parameter, options}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 	
@@ -263,7 +272,7 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 	});
 
 	return (<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<select 
 			className="w-1/2 border"
 			id={inputId}
@@ -281,6 +290,7 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 const ColorInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -308,7 +318,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 	});
 
 	return (<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
 			className="w-1/4 border"
 			id={inputId}
@@ -322,6 +332,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 const RangeInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -369,7 +380,7 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 
 	return (defaultMin === null || defaultMax === null || defaultMin > defaultMax) ? null : (
 	<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
 			className="w-1/2 border"
 			id={inputId}
@@ -387,6 +398,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 	
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -426,6 +438,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -454,7 +467,7 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 	});
 
 	return (<div className="my-1 flex justify-between">
-		<label className="text-left w-1/2" htmlFor={inputId}> {parameterKey} </label>
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input className="w-1/2 border" id={inputId} type="checkbox" value={parameter} onChange={(event) => onInputChange(event)} />
 	</div>);
 });

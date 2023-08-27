@@ -116,6 +116,42 @@ class DomainStore {
 			"style.verticalAlign",
 		],
 	};
+
+	operationNameMapping = {
+		"content": "Text",
+		"source": "Image",
+		"type": "Shape",
+		"style.fontFamily": "Font Family",
+		"style.fill": "Color",
+		"background.fill": "BG Color",
+		"stroke.fill": "Stroke Color",
+		"background.alpha": "BG Opacity",
+		"stroke.alpha": "Stroke Opacity",
+		"stroke.width": "Stroke Width",
+		"style.fontSize": "Font Size",
+		"x": "X",
+		"y": "Y",
+		"z": "Z",
+		"width": "Width",
+		"height": "Height",
+		"start": "Start",
+		"finish": "Finish",
+		"duration": "Duration",
+		"speed": "Speed",
+		"scaleX": "Scale X",
+		"scaleY": "Scale Y",
+		"rotation": "Rotation",
+		"cropX": "Crop X",
+		"cropY": "Crop Y",
+		"cropWidth": "Crop Width",
+		"cropHeight": "Crop Height",
+		"blur": "Blur",
+		"cropped": "Cropped",
+		"style.align": "Align",
+		"style.verticalAlign": "Vertical Align",
+		"zoomDurationStart": "Zoom Duration Beg.",
+		"zoomDurationEnd": "Zoom Duration End",
+	};
 	
 	dropdownOptions = {
 		"style.fontFamily": [
