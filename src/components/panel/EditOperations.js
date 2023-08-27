@@ -14,7 +14,7 @@ const EditOperations = observer(function EditOperations() {
 	const activeButtonClassName = "w-full h-10 m-2 bg-indigo-500";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
-	const suggestedOperationKey = domainStore.curIntent.suggestedEditOperationKey;
+	const suggestedOperationKey = uiStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
 
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {

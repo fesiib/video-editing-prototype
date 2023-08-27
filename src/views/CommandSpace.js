@@ -10,6 +10,7 @@ import SketchCanvas from "../components/command-space/SketchCanvas";
 
 const CommandSpace = observer(function CommandSpace() {
 	const { uiStore, domainStore } = useRootContext();
+	const systemSetting = uiStore.systemSetting;
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = [...domainStore.intents].reverse();
 
@@ -49,29 +50,31 @@ const CommandSpace = observer(function CommandSpace() {
 	return (<div className="flex justify-between my-5">
 		<div className="w-2/3 flex flex-col items-center mx-2">
 			<h2> Edit #{curIntent.idx} </h2>
-			<input 
-				id="textCommand" 
-				type="text"
-				placeholder="description"
-				value={curIntent.textCommand}
-				className="w-full border p-2"
-				onChange={onChangeTextCommand} 
-			/>
-			<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border">
-				<SketchCanvas />
-				<div>
-					<label htmlFor={"considerEdits"}> iterate </label>
-					<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
-				
-					<button 
-						className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
-						onClick={() => onProcessClick()}
-						//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
-					>
-						Process
-					</button>
+			{systemSetting ? (<>
+				<input 
+					id="textCommand" 
+					type="text"
+					placeholder="description"
+					value={curIntent.textCommand}
+					className="w-full border p-2"
+					onChange={onChangeTextCommand} 
+				/>
+				<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border">
+					<SketchCanvas />
+					<div>
+						<label htmlFor={"considerEdits"}> iterate </label>
+						<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
+					
+						<button 
+							className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+							onClick={() => onProcessClick()}
+							//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
+						>
+							Process
+						</button>
+					</div>
 				</div>
-			</div>
+			</>) : null}
 		</div>
 		<div className="w-1/3">
 			<h2> Edits: </h2>

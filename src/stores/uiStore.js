@@ -6,7 +6,7 @@ class UIStore {
     // Session Info
     accountId = "test";
     projectId = "test";
-	systemSetting = "default"; // baseline
+	systemSetting = 1; // 0 - baseline
     windowSize = {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -89,9 +89,9 @@ class UIStore {
 		"shape": "#b19bbd",
 		"cut": "#abc7ff",
 		"zoom": "#A8D0C6",
-		"crop": "#DAF283",
+		"crop": "#E19898",
 		"blur": "#b0e3ff",
-		"": "lightgray",
+		"": "#3F1D38",
 	}
 
     labelColorPalette = {

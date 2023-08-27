@@ -208,6 +208,7 @@ class DomainStore {
 	}
 	
 	addRandomIntent() {
+		const systemSetting = this.rootStore.uiStore.systemSetting;
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
@@ -229,7 +230,7 @@ class DomainStore {
 		newIntent.sketchPlayPosition = randomSketchPlayPosition;
 		
 		const randomEditsLength = Math.floor(Math.random() * 5);
-		const randomSuggestedEditsLength = Math.floor(Math.random() * 5);
+		const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
 		for (let i = 0; i < randomEditsLength; i++) {
 			newIntent.addRandomEdit(false);
 		}
@@ -484,6 +485,9 @@ class DomainStore {
 				}
 			}
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -507,6 +511,10 @@ class DomainStore {
 				}
 			}	
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -530,6 +538,10 @@ class DomainStore {
 				}
 			}	
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -571,6 +583,10 @@ class DomainStore {
 				}
 			}
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -594,6 +610,10 @@ class DomainStore {
 				}
 			}
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -617,6 +637,10 @@ class DomainStore {
 				}
 			}
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -640,6 +664,10 @@ class DomainStore {
 				}
 			}
 		}
+		if (!this.rootStore.uiStore.systemSetting) {
+			return result;
+		}
+		
 		for (let edit of this.curIntent.suggestedEdits) {
 			if (this.curIntent.editOperation === null) {
 				continue;
@@ -671,6 +699,9 @@ class DomainStore {
 		objects.sort((a, b) => a.commonState.z - b.commonState.z);
 		
 		if (this.curIntent.editOperation !== null) {
+			if (!this.rootStore.uiStore.systemSetting) {
+				return [...objects, ...this.curIntent.activeEdits];
+			}	
 			return [...objects, ...this.curIntent.activeEdits, ...this.curIntent.suggestedEdits];
 		}
 		return objects;

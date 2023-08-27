@@ -402,7 +402,7 @@ const TextWall = observer(function TextWall() {
     const filteredScript = domainStore.transcripts;
 
 	const activeEdits = domainStore.curIntent.activeEdits;
-	const suggestedEdits = domainStore.curIntent.suggestedEdits;
+	const suggestedEdits = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
 	const skippedParts = domainStore.skippedParts;
 
 	const textWallRef = useRef(null);

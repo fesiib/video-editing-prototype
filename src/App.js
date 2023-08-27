@@ -46,6 +46,9 @@ const App = observer(function App() {
 
     return (
         <div className="App">
+			<div>
+				Add Features: <input type="checkbox" checked={uiStore.systemSetting} onChange={action(() => uiStore.systemSetting = !uiStore.systemSetting)} />
+			</div>
             <div className="grid grid-cols-7 grid-rows-4">
 				<div className="col-span-1 row-span-4 flex flex-col">
 					<EditPanel />

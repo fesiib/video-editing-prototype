@@ -37,7 +37,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 	const videos = domainStore.videos;
 	const skippedParts = domainStore.skippedParts;
 	const edits = domainStore.curIntent.activeEdits;
-	const suggestedEdits = domainStore.curIntent.suggestedEdits;
+	const suggestedEdits = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
 	const editIds = edits.map((edit) => toJS(edit.commonState.id));
 	const suggestedEditIds = suggestedEdits.map((edit) => toJS(edit.commonState.id));
 
