@@ -6,6 +6,7 @@ import { observer } from "mobx-react-lite";
 import TimelineTracks from "../components/timeline/TimelineTracks";
 
 import useRootContext from "../hooks/useRootContext";
+import { roundNumber } from "../utilities/genericUtilities";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
@@ -21,7 +22,10 @@ const Timeline = observer(function Timeline() {
 	});
 
     const onZoomChange = action((event) => {
-        uiStore.timelineControls.pxPerSec = event.target.value / 10;
+		// 0 -> minPxToSec
+		// 100 -> maxPxToSec
+		// value * (maxPxToSec - minPxToSec) / 100 + minPxToSec
+        uiStore.timelineControls.pxPerSec = uiStore.adaptZoomValue(event.target.value);
     });
 
     const onPressPlay = action((event) => {
@@ -218,14 +222,16 @@ const Timeline = observer(function Timeline() {
                 <div>
                     <label htmlFor="timelinen_zoom">
                         {" "}
-                        Pixels per second {uiStore.timelineControls.pxPerSec}{" "}
+                        Zoom {
+							`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`
+						}{" "}
                     </label>
                     <input
                         id="timeline_zoom"
                         type={"range"}
-                        min={10}
-                        max={1000}
-                        value={uiStore.timelineControls.pxPerSec * 10}
+                        min={0}
+                        max={100}
+                        value={uiStore.adaptPxPerSec(uiStore.timelineControls.pxPerSec)}
                         onChange={onZoomChange}
                         step={5}
                     />

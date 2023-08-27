@@ -234,7 +234,7 @@ const EditorCanvas = observer(function EditorCanvas() {
     return (
         <>
             <div>
-                <label htmlFor="canvas_zoom"> Zoom {uiStore.canvasZoom} </label>
+                <label htmlFor="canvas_zoom"> Canvas Zoom {uiStore.canvasZoom}% </label>
                 <input
                     id="canvas_zoom"
                     type={"range"}

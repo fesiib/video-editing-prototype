@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { roundNumber } from "../utilities/genericUtilities";
 
 const ZOOM_PERCENTAGES = [15, 25, 30, 50, 60, 70, 80, 100, 125, 150, 200];
 
@@ -58,9 +59,9 @@ class UIStore {
         positionIndicatorWidth: 8,
         labelIntervalPx: 100, //px
 
-        trackHandlerWidth: 20, //px
+        trackHandlerWidth: 0, //px
 
-        trackMaxDuration: 60 * 20, //seconds
+        trackMaxDuration: 60 * 5, //seconds
         trackMinDuration: 0, //seconds
         delay: 0.1,
 
@@ -194,6 +195,7 @@ class UIStore {
             width: width / 7 * 3,
             height: 80 * this.rootStore.domainStore.projectMetadata.trackCnt,
         };
+		this.timelineControls.pxPerSec = this.adaptZoomValue(0);
     }
 
     secToPx(seconds) {
@@ -203,6 +205,21 @@ class UIStore {
     pxToSec(px) {
         return Math.round((px / this.timelineControls.pxPerSec) * 100) / 100;
 	}
+
+	adaptZoomValue(value) {
+		const trackMaxDuration = this.timelineConst.trackMaxDuration;
+		const width = this.timelineSize.width;
+		const minPxToSec = width / trackMaxDuration;
+		const maxPxToSec = width / 60;
+		return value * (maxPxToSec - minPxToSec) / 100 + minPxToSec
+	}
+	adaptPxPerSec(pxPerSec) {
+		const trackMaxDuration = this.timelineConst.trackMaxDuration;
+		const width = this.timelineSize.width;
+		const minPxToSec = width / trackMaxDuration;
+		const maxPxToSec = width / 60;
+		return (pxPerSec - minPxToSec) * 100 / (maxPxToSec - minPxToSec)
+	};
 
 	removeSelectedCanvasObject(objectId) {
 		this.canvasControls.transformerNodeIds = 
