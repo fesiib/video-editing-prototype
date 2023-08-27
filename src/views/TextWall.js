@@ -45,39 +45,25 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
 });
 
 const DraggableParts = observer(function DraggableParts({
-	parts,
+	type,
 	index,
 	item,
 	className,
 	onDoubleClick,
 }) {
-    const { uiStore } = useRootContext();
+    const { uiStore, domainStore } = useRootContext();
 
-	// useEffect(() => reaction(() => {
-	// 	return {
-	// 		//partsOffsets: parts.map((part) => part.commonState.offset),
-	// 		partsEnds: parts.map((part) => part.commonState.end),
-	// 		selectedItems: uiStore.timelineControls.selectedTimelineItems
-	// 	};
-	// }, ({ selectedItems }) => {
-	// 	for (const part of parts) {
-	// 		const div = document.getElementById(`draggable-${index}-${part.commonState.id}`);
-	// 		if (div === null) {
-	// 			continue;
-	// 		}
-	// 		const childDiv = div.children[0];
-	// 		if (childDiv === null) {
-	// 			continue;
-	// 		}
-	// 		if (selectedItems.findIndex((selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1) {
-	// 			childDiv.className = className + " border-y-2 border-red-600 brightness-50";
-	// 		}
-	// 		else {
-	// 			childDiv.className = className;
-	// 		}
-	// 	}
-	// }), [parts.length]);
-
+	let parts = []
+	
+	if (type === "active") {
+		parts = domainStore.curIntent.activeEdits.filter((edit) => {
+			return (
+				(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
+				|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
+				|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
+			);
+		});
+	}
 	return (<>
 		{parts.map((edit, idx) => {
 			let start = Math.max(item.start, edit.commonState.offset);
@@ -140,32 +126,53 @@ const DraggableParts = observer(function DraggableParts({
 });
 
 const StaticParts = observer(function StaticParts({
-	parts,
+	type,
 	index,
 	item,
 	className,
 	onDoubleClick,
 }) {
-	const { uiStore } = useRootContext();
+	const { uiStore, domainStore } = useRootContext();
 
-	useEffect(() => reaction(() => uiStore.timelineControls.selectedTimelineItems, (selectedItems) => {
-		for (const part of parts) {
-			const div = document.getElementById(`static-${index}-${part.commonState.id}`);
-			if (div === null) {
-				continue;
-			}
-			const childDiv = div.children[0];
-			if (childDiv === null) {
-				continue;
-			}
-			if (selectedItems.findIndex((selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1) {
-				childDiv.className = className + " border-y-2 border-red-600 brightness-50";
-			}
-			else {
-				childDiv.className = className;
-			}
-		}
-	}), []);
+	let parts = [];
+
+	if (type === "skipped") {
+		parts = domainStore.skippedParts.filter((skipped) => {
+			return (
+				(skipped.commonState.offset >= item.start && skipped.commonState.offset < item.finish)
+				|| (skipped.commonState.end > item.start && skipped.commonState.end < item.finish)
+				|| (skipped.commonState.offset < item.start && skipped.commonState.end >= item.finish)
+			);
+		});
+	}
+	else if (type === "suggested") {
+		parts = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits.filter((edit) => {
+			return (
+				(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
+				|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
+				|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
+			);
+		}) : [];
+	}
+	// useEffect(() => reaction(() => uiStore.timelineControls.selectedTimelineItems, (selectedItems) => {
+	// 	console.log("applying style");
+	// 	for (const part of parts) {
+	// 		const div = document.getElementById(`static-${index}-${part.commonState.id}`);
+	// 		if (div === null) {
+	// 			continue;
+	// 		}
+	// 		const childDiv = div.children[0];
+	// 		if (childDiv === null) {
+	// 			continue;
+	// 		}
+	// 		if (selectedItems.findIndex((selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1) {
+	// 			childDiv.className = className + " border-y-2 border-red-600 brightness-50";
+	// 		}
+	// 		else {
+	// 			childDiv.className = className;
+	// 		}
+	// 	}
+	// }), []);
 
 	return (<>
 		{parts.map((part) => {
@@ -184,6 +191,11 @@ const StaticParts = observer(function StaticParts({
 			}
 			else if (isLeftEnd) {
 				innerClassName += " justify-start";
+			}
+			if (uiStore.timelineControls.selectedTimelineItems.findIndex(
+				(selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1
+			) {
+				innerClassName += " border-y-2 border-red-600 brightness-50";
 			}
 			return(<div
 				key={`static-${index}-${part.commonState.id}`}
@@ -206,9 +218,6 @@ const StaticParts = observer(function StaticParts({
 const SentenceBox = observer(function SentenceBox({ 
 	index,
 	item,
-	activeEdits,
-	suggestedEdits,
-	skippedParts,
 }) {
     const { uiStore, domainStore } = useRootContext();
 
@@ -288,7 +297,7 @@ const SentenceBox = observer(function SentenceBox({
 		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
 			let offset = item.start;
 			let finish = item.finish;
-			for (let edit of activeEdits) {
+			for (let edit of domainStore.curIntent.activeEdits) {
 				if (edit.commonState.offset > offset) {
 					finish = Math.min(finish, edit.commonState.offset);
 				}
@@ -372,21 +381,21 @@ const SentenceBox = observer(function SentenceBox({
 				</div>	
 			</div>
 			<StaticParts
-				parts = {skippedParts}
+				type="skipped"
 				index = {index}
 				item = {item}
 				className = {"z-0 opacity-100 absolute inset-y-0 bg-gray-500 flex"}
 				onDoubleClick={null}
 			/>
 			<DraggableParts
-				parts = {activeEdits}
+				type="active"
 				index = {index}
 				item = {item}
 				className = {"z-20 opacity-40 inset-y-0 absolute flex"}
 				onDoubleClick={onPartDoubleClick}
 			/>
 			<StaticParts
-				parts = {suggestedEdits}
+				type="suggested"
 				index = {index}
 				item = {item}
 				className = {"z-30 opacity-40 absolute inset-y-0 bg-green-500 flex"}
@@ -400,10 +409,6 @@ const SentenceBox = observer(function SentenceBox({
 const TextWall = observer(function TextWall() {
     const { uiStore, domainStore } = useRootContext();
     const filteredScript = domainStore.transcripts;
-
-	const activeEdits = domainStore.curIntent.activeEdits;
-	const suggestedEdits = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
-	const skippedParts = domainStore.skippedParts;
 
 	const textWallRef = useRef(null);
 
@@ -482,34 +487,10 @@ const TextWall = observer(function TextWall() {
 				) : (
 					<div className="flex flex-wrap ">
 						{filteredScript.map((item, index) => {
-							const relevantActiveEdits = activeEdits.filter((edit) => {
-								return (
-									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
-									|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
-									|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
-								);
-							});
-							const relevantSuggestedEdits = suggestedEdits.filter((edit) => {
-								return (
-									(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
-									|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
-									|| (edit.commonState.offset < item.start && edit.commonState.end >= item.finish)
-								);
-							});
-							const relevantSkippedParts = skippedParts.filter((skipped) => {
-								return (
-									(skipped.commonState.offset >= item.start && skipped.commonState.offset < item.finish)
-									|| (skipped.commonState.end > item.start && skipped.commonState.end < item.finish)
-									|| (skipped.commonState.offset < item.start && skipped.commonState.end >= item.finish)
-								);
-							});
 							return (<SentenceBox 
 								key={`script-${index}`}
 								index={index}
 								item={item}
-								activeEdits={relevantActiveEdits}
-								suggestedEdits={relevantSuggestedEdits}
-								skippedParts={relevantSkippedParts}
 							/>);
 						})}
 					</div>

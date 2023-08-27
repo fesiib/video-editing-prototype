@@ -155,10 +155,10 @@ def process_video(video_link):
     moments = get_moments(video_cap)
     video_cap.release()
     
-    # subtitles = webvtt.read(subtitles_path)
-    # transcript = get_transcript(subtitles)
+    subtitles = webvtt.read(subtitles_path)
+    transcript = get_transcript(subtitles)
 
-    transcript = format_transcript(subtitles_path)
+    # transcript = format_transcript(subtitles_path)
 
     # transcript = get_transcript_each_word(subtitles)
     return transcript, moments, metadata
