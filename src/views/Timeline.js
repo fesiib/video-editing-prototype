@@ -70,8 +70,6 @@ const Timeline = observer(function Timeline() {
 
 	const onDecisionClick = action((decision) => {
 		if (decision === "accept") {
-			// TODO: add selectedSuggestedEdits to active edits
-			// change isSuggested to false
 			for (const edit of selectedSuggestedEdits) {
 				domainStore.curIntent.addEditFromSuggested(edit.commonState.id);
 			}
@@ -80,7 +78,6 @@ const Timeline = observer(function Timeline() {
 			return;
 		}
 		else if (decision === "reject") {
-			// TODO: delete selectedSuggestedEdits
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
 			domainStore.curIntent.deleteEdits(deleteEditIds);
 			onNavigationClick("next");
@@ -234,7 +231,9 @@ const Timeline = observer(function Timeline() {
                     />
                 </div>
             </div>
-
+			<div className="flex gap-1 justify-start px-2">
+					<span> Selected: </span> <span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
+				</div>
             <TimelineTracks />
 			<div className="flex flex-col justify-center gap-1">
 				<div className="flex gap-1 justify-center">
@@ -273,7 +272,7 @@ const Timeline = observer(function Timeline() {
 				)}
 				{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
 					<div className="flex gap-1 justify-center">
-						<span> # of suggested edits: </span> <span> {domainStore.curIntent.suggestedEdits.length} </span>
+						<span> Suggested: </span> <span> {domainStore.curIntent.suggestedEdits.length} </span>
 					</div>
 				)}
 			</div>

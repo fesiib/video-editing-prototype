@@ -49,9 +49,35 @@ const DraggableParts = observer(function DraggableParts({
 	index,
 	item,
 	className,
+	onDoubleClick,
 }) {
-	
     const { uiStore } = useRootContext();
+
+	// useEffect(() => reaction(() => {
+	// 	return {
+	// 		//partsOffsets: parts.map((part) => part.commonState.offset),
+	// 		partsEnds: parts.map((part) => part.commonState.end),
+	// 		selectedItems: uiStore.timelineControls.selectedTimelineItems
+	// 	};
+	// }, ({ selectedItems }) => {
+	// 	for (const part of parts) {
+	// 		const div = document.getElementById(`draggable-${index}-${part.commonState.id}`);
+	// 		if (div === null) {
+	// 			continue;
+	// 		}
+	// 		const childDiv = div.children[0];
+	// 		if (childDiv === null) {
+	// 			continue;
+	// 		}
+	// 		if (selectedItems.findIndex((selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1) {
+	// 			childDiv.className = className + " border-y-2 border-red-600 brightness-50";
+	// 		}
+	// 		else {
+	// 			childDiv.className = className;
+	// 		}
+	// 	}
+	// }), [parts.length]);
+
 	return (<>
 		{parts.map((edit, idx) => {
 			let start = Math.max(item.start, edit.commonState.offset);
@@ -69,10 +95,18 @@ const DraggableParts = observer(function DraggableParts({
 			}
 			else if (isLeftEnd) {
 				innerClassName += " justify-start";
+			};
+
+			if (uiStore.timelineControls.selectedTimelineItems.findIndex(
+				(selectedItem) => selectedItem.commonState.id === edit.commonState.id) !== -1
+			) {
+				innerClassName += " border-y-2 border-red-600 brightness-50";
 			}
+
 			return(<div
 				key={`draggable-${index}-${edit.commonState.id}`}
 				id={`draggable-${index}-${edit.commonState.id}`}
+				onDoubleClick={(event) => onDoubleClick(event, edit)}
 			>
 				<div
 					className={innerClassName}
@@ -110,7 +144,29 @@ const StaticParts = observer(function StaticParts({
 	index,
 	item,
 	className,
+	onDoubleClick,
 }) {
+	const { uiStore } = useRootContext();
+
+	useEffect(() => reaction(() => uiStore.timelineControls.selectedTimelineItems, (selectedItems) => {
+		for (const part of parts) {
+			const div = document.getElementById(`static-${index}-${part.commonState.id}`);
+			if (div === null) {
+				continue;
+			}
+			const childDiv = div.children[0];
+			if (childDiv === null) {
+				continue;
+			}
+			if (selectedItems.findIndex((selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1) {
+				childDiv.className = className + " border-y-2 border-red-600 brightness-50";
+			}
+			else {
+				childDiv.className = className;
+			}
+		}
+	}), []);
+
 	return (<>
 		{parts.map((part) => {
 			let start = Math.max(item.start, part.commonState.offset);
@@ -132,6 +188,7 @@ const StaticParts = observer(function StaticParts({
 			return(<div
 				key={`static-${index}-${part.commonState.id}`}
 				id={`static-${index}-${part.commonState.id}`}
+				onDoubleClick={(event) => onDoubleClick(event, part)}
 			>
 				<div
 					className={innerClassName}
@@ -167,7 +224,65 @@ const SentenceBox = observer(function SentenceBox({
     });
 
 	const [showTime, setShowTime] = useState(false);
-	const handleClick = action((event) => {
+
+	const onPartDoubleClick = action((event, part) => {
+		event.preventDefault();
+		event.stopPropagation();
+		if (uiStore.timelineControls.rangeSelectingTimeline) {
+			uiStore.timelineControls.rangeSelectingTimeline = false;
+			uiStore.timelineControls.rangeSelectingFirstPx = -1;
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
+		}
+
+		const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
+			(value) => value.commonState.id === part.commonState.id
+		);
+		const isSuggested = part.isSuggested;
+		const areItemsSelected = uiStore.timelineControls.selectedTimelineItems.length > 0;
+		const areItemsSuggested = areItemsSelected ? uiStore.timelineControls.selectedTimelineItems[0].isSuggested : false;
+		const sameTrack = areItemsSelected
+			? part.commonState.trackId ===
+			  uiStore.timelineControls.selectedTimelineItems[0].commonState.trackId
+			: true;
+		const metaKey = event.metaKey;
+		if (metaKey && areItemsSelected && sameTrack && areItemsSuggested === isSuggested) {
+			let newSelectedTimelineItems = [];
+			if (index >= 0) {
+				const rightMostEnd = part.commonState.end;
+				for (let otherScene of uiStore.timelineControls.selectedTimelineItems) {
+					if (otherScene.commonState.end < rightMostEnd) {
+						newSelectedTimelineItems.push(otherScene);
+					}
+				}
+			} else {
+				let leftMostOffset = part.commonState.offset;
+				let rightMostEnd = part.commonState.end;
+				for (let otherScene of uiStore.timelineControls.selectedTimelineItems) {
+					leftMostOffset = Math.min(leftMostOffset, otherScene.commonState.offset);
+					rightMostEnd = Math.max(rightMostEnd, otherScene.commonState.end);
+				}
+				const allParts = isSuggested ?
+					domainStore.curIntent.suggestedEdits : domainStore.curIntent.activeEdits;
+				for (let somePart of allParts) {
+					if (
+						somePart.commonState.offset >= leftMostOffset &&
+						somePart.commonState.end <= rightMostEnd
+					) {
+						newSelectedTimelineItems.push(somePart);
+					}
+				}
+			}
+			uiStore.selectTimelineObjects([...newSelectedTimelineItems]);
+		} else {
+			if (index >= 0) {
+				uiStore.selectTimelineObjects([]);
+			} else {
+				uiStore.selectTimelineObjects([part]);
+			}
+		}
+	});
+
+	const onClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
 		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
@@ -192,7 +307,7 @@ const SentenceBox = observer(function SentenceBox({
 		else {
 			uiStore.timelineControls.playPosition = item.start;
 		}
-    });
+	});
 
 	const onMouseEnter = action(() => {
 		setShowTime(true);
@@ -222,9 +337,9 @@ const SentenceBox = observer(function SentenceBox({
 				div.style.fontWeight = "bold";
 				div.style.color = "red";
 				div.scrollIntoView({
-					behavior: "smooth",
-					block: "center",
-					inline: "center",
+					behavior: "instant",
+					block: "nearest",
+					inline: "nearest",
 				})
 			}
 			else {
@@ -246,7 +361,8 @@ const SentenceBox = observer(function SentenceBox({
 			ref={setNodeRef}
 			id={"script-" + index}
 			className={outerClassName}
-			onClick={(event) => handleClick(event)}
+			//onDoubleClick={(event) => onDoubleClick(event)}
+			onClick={(event) => onClick(event)}
 			onMouseEnter={() => onMouseEnter()}
 			onMouseLeave={() => onMouseLeave()}
 		>	
@@ -260,18 +376,21 @@ const SentenceBox = observer(function SentenceBox({
 				index = {index}
 				item = {item}
 				className = {"z-0 opacity-100 absolute inset-y-0 bg-gray-500 flex"}
+				onDoubleClick={null}
 			/>
 			<DraggableParts
 				parts = {activeEdits}
 				index = {index}
 				item = {item}
 				className = {"z-20 opacity-40 inset-y-0 absolute flex"}
+				onDoubleClick={onPartDoubleClick}
 			/>
 			<StaticParts
 				parts = {suggestedEdits}
 				index = {index}
 				item = {item}
-				className = {"z-0 opacity-40 absolute inset-y-0 bg-green-500 flex"}
+				className = {"z-30 opacity-40 absolute inset-y-0 bg-green-500 flex"}
+				onDoubleClick={onPartDoubleClick}
 			/>
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }
 		</div>
