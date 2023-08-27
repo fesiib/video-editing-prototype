@@ -52,7 +52,16 @@ class EditState {
 			width: 2,
 			fill: "#000000", // color picker
 			alpha: 1, // range slider
-		}
+		},
+		// circle: {
+		// 	// radiusX: 50, // number input & +/- buttons
+		// 	// radiusY: 50, // number input & +/- buttons
+		// },
+		star: {
+			numPoints: 6,
+			innerRadius: 100,
+			//outerRadius: 70,
+		},
 	};
 
 	zoomParameters = {
@@ -176,6 +185,14 @@ class EditState {
 					...this.shapeParameters.stroke,
 					...parameters.stroke,
 				},
+				// circle: {
+				// 	...this.shapeParameters.circle,
+				// 	...parameters.circle,
+				// },
+				star: {
+					...this.shapeParameters.star,
+					...parameters.star,
+				},
 			};
 		}
 		if (this.title === "Zoom") {
@@ -208,6 +225,28 @@ class EditState {
 	}
 
 	setSpatialParameters(parameters) {
+		if (parameters.circle !== undefined) {
+			if (parameters.circle.radiusX !== undefined) {
+				this.commonState.setMetadata({
+					width: parameters.circle.radiusX * 2,
+				});
+			}
+			if (parameters.circle.radiusY !== undefined) {
+				this.commonState.setMetadata({
+					height: parameters.circle.radiusY * 2,
+				});
+			}
+			delete parameters.circle;
+		}
+		if (parameters.star !== undefined) {
+			console.log(parameters.star.outerRadius);
+			if (parameters.star.outerRadius !== undefined) {
+				this.commonState.setMetadata({
+					width: parameters.star.outerRadius * 2,
+				});
+			}
+			delete parameters.star;
+		}
 		this.commonState.setMetadata({ ...parameters });
 	}
 
@@ -236,6 +275,25 @@ class EditState {
 	}
 
 	get spatialParameters() {
+		if (this.title === "Shape") {
+			if (this.shapeParameters.type === "circle") {
+				return {
+					x: this.commonState.x,
+					y: this.commonState.y,
+					"circle.radiusX": this.commonState.width / 2,
+					"circle.radiusY": this.commonState.height / 2,
+					rotation: this.commonState.rotation,
+				}
+			}
+			if (this.shapeParameters.type === "star") {
+				return {
+					x: this.commonState.x,
+					y: this.commonState.y,
+					"star.outerRadius": this.commonState.width / 2,
+					rotation: this.commonState.rotation,
+				}
+			}
+		}
 		return {
 			x: this.commonState.x,
 			y: this.commonState.y,
@@ -267,7 +325,16 @@ class EditState {
 			return this.imageParameters;
 		}
 		if (this.title === "Shape") {
-			return this.shapeParameters;
+			let shapeParameters = {
+				...this.shapeParameters
+			};
+			if (this.shapeParameters.type === "rectangle") {
+				delete shapeParameters.star;
+			}
+			if (this.shapeParameters.type === "circle") {
+				delete shapeParameters.star;
+			}
+			return shapeParameters;
 		}
 
 		if (this.title === "Zoom") {
@@ -408,6 +475,32 @@ class EditState {
 		const rightLimit = this.rightTimelineLimit;
 
 		return {
+			"circle.radiusX": {
+				min: minWidth / 2,
+				max: Math.min(canvasWidth, canvasHeight) / 2,
+				step: roundNumber(projectWidth / 100, 0),
+			},
+			"circle.radiusY": {
+				min: minHeight / 2,
+				max: Math.min(canvasWidth, canvasHeight) / 2,
+				step: roundNumber(projectHeight / 100, 0),
+			},
+			"star.numPoints": {
+				min: 3,
+				max: 100,
+				step: 1,
+			},
+			"star.innerRadius": {
+				min: 0,
+				min: this.shapeParameters.star.outerRadius,
+				step: roundNumber(projectWidth / 100, 0),
+			},
+			"star.outerRadius": {
+				min: this.shapeParameters.star.innerRadius,
+				max: Math.min(canvasWidth, canvasHeight) / 2,
+				step: roundNumber(projectWidth / 100, 0),
+			},
+
 			"zoomDurationStart": {
 				min: 0,
 				max: this.commonState.sceneDuration,

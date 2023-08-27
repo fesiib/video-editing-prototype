@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import { action, autorun } from "mobx";
+import { action, autorun, reaction, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { Layer, Rect, Stage, Transformer, Group } from "react-konva";
@@ -169,29 +169,34 @@ const EditorCanvas = observer(function EditorCanvas() {
         [projectHeight, projectWidth]
     );
 
-	useEffect(() => {
-		let nodes = [];
-		for (let nodeId of uiStore.canvasControls.transformerNodeIds) {
-			const object = domainStore.curIntent.getCanvasObjectById(nodeId);
-			const node = stageRef.current.findOne(`#${nodeId}`);
-			if (node === undefined) {
-				continue;
-			}
-			// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
-			// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
-			// 		nodes.push(node);
-			// 	}
-			// 	continue;
-			// }
-			if (object !== undefined &&
-				object.isVisible(uiStore.timelineControls.playPosition)) {
-				nodes.push(node);
-			}
+	useEffect(() => reaction(() => {
+		return{
+			nodeIds: uiStore.canvasControls.transformerNodeIds,
+			editOperationKey: domainStore.curIntent.editOperationKey,
 		}
-		transformerRef.current.nodes(nodes);
-	}, [
-		JSON.stringify(uiStore.canvasControls.transformerNodeIds),
-	]);
+	}, 
+		({ nodeIds }) => {
+			let nodes = [];
+			for (let nodeId of nodeIds) {
+				const object = domainStore.curIntent.getCanvasObjectById(nodeId);
+				const node = stageRef.current.findOne(`#${nodeId}`);
+				if (node === undefined) {
+					continue;
+				}
+				// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
+				// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
+				// 		nodes.push(node);
+				// 	}
+				// 	continue;
+				// }
+				if (object !== undefined &&
+					object.isVisible(uiStore.timelineControls.playPosition)) {
+					nodes.push(node);
+				}
+			}
+			transformerRef.current.nodes(nodes);
+		}
+	), []);
 
 	useEffect(() => {
         const opacity = uiStore.canvasControls.opacity;

@@ -73,7 +73,6 @@ class DomainStore {
 			"source",
 		],
 		dropdown: [
-			"type",
 			"style.fontFamily",
 		],
 		color: [
@@ -86,6 +85,11 @@ class DomainStore {
 			"stroke.alpha",
 		],
 		number: [
+			"star.numPoints",
+			"star.innerRadius",
+			"star.outerRadius",
+			"circle.radiusX",
+			"circle.radiusY",
 			"zoomDurationStart",
 			"zoomDurationEnd",
 			"stroke.width",
@@ -112,6 +116,7 @@ class DomainStore {
 			"cropped",
 		],
 		align: [
+			"type",
 			"style.align",
 			"style.verticalAlign",
 		],
@@ -151,6 +156,11 @@ class DomainStore {
 		"style.verticalAlign": "Vertical Align",
 		"zoomDurationStart": "Zoom Duration Beg.",
 		"zoomDurationEnd": "Zoom Duration End",
+		"star.numPoints": "Points",
+		"star.innerRadius": "Inner Radius",
+		"star.outerRadius": "Outer Radius",
+		"circle.radiusX": "Radius X",
+		"circle.radiusY": "Radius Y",
 	};
 	
 	dropdownOptions = {

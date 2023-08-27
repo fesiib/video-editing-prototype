@@ -172,6 +172,24 @@ class CommonState {
 					};
 				}
 			}
+			if (this.object.tiel === "Shape") {
+				// if (target.id().substring(0, 2) === "re") {
+
+				// }
+				if (target.id().substring(0, 2) === "ci") {
+					oldAttrs = {
+						radiusX: this.width / 2,
+						radiusY: this.height / 2,
+					};
+				}
+				if (target.id().substring(0, 2) === "st") {
+					oldAttrs = {
+						outerRadius: this.width / 2,
+						innerRadius: this.object.shapeParameters.star.innerRadius,
+						numPoints: this.object.shapeParameters.star.numPoints,
+					}
+				}
+			}
 			target.setAttrs({
 				scaleX: this.scaleX,
 				scaleY: this.scaleY,
@@ -188,10 +206,54 @@ class CommonState {
 		const canvasHeight = this.domainStore.rootStore.uiStore.canvasSize.height;
 
 		let targetAttrs = {};
+		if (this.object.title === "Shape") {
+			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);
+			const newHeight = Math.max(target.height() * target.scaleY(), minHeight);
+			
+			if (target.id().substring(0, 2) === "re") {
+				this.width = roundNumber(newWidth, 0);
+				this.height = roundNumber(newHeight, 0);
 
+				this.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+				this.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+			
+				targetAttrs = {
+					width: this.width,
+					height: this.height,
+				};
+			}
+			if (target.id().substring(0, 2) === "ci") {
+				this.width = roundNumber(newWidth, 0);
+				this.height = roundNumber(newHeight, 0);
+
+				this.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+				this.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+		
+				targetAttrs = {
+					height: this.height,
+					width: this.width,
+					radiusX: this.width / 2,
+					radiusY: this.height / 2,
+				};
+			}
+			if (target.id().substring(0, 2) === "st") {
+				this.width = roundNumber(newWidth, 0);
+
+				this.x = roundNumber(groundCoordinate(target.x(), newWidth, projectWidth, canvasWidth), 0);
+				this.y = roundNumber(groundCoordinate(target.y(), newHeight, projectHeight, canvasHeight), 0);
+				targetAttrs = {
+					height: this.width,
+					width: this.width,
+					outerRadius: this.width / 2,
+					innerRadius: this.object.shapeParameters.star.innerRadius,
+					numPoints: this.object.shapeParameters.star.numPoints,
+					x: adaptCoordinate(this.x, this.width, projectWidth, canvasWidth),
+					y: adaptCoordinate(this.y, this.width, projectHeight, canvasHeight),
+				};
+			}
+		}
 		if (this.object.title === "Text"
 			|| this.object.title === "Image"
-			|| this.object.title === "Shape"
 			|| this.object.title === "Zoom"
 		) {
 			const newWidth = Math.max(target.width() * target.scaleX(), minWidth);

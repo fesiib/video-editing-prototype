@@ -234,7 +234,7 @@ class IntentState {
 	}
 
 	getCanvasObjectById(id) {
-		if (this.editOperationKey === "crop") {
+		if (this.editOperationKey === "crop" || this.editOperationKey === "shape") {
 			const realId = id.substring(3);
 			return this.getObjectById(realId);
 		}
