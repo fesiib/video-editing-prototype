@@ -29,7 +29,12 @@ const Timeline = observer(function Timeline() {
     });
 
     const onPressPlay = action((event) => {
+		event.preventDefault();
+		event.stopPropagation();
         uiStore.timelineControls.isPlaying = !uiStore.timelineControls.isPlaying;
+		uiStore.logData("play", {
+			isPlaying: uiStore.timelineControls.isPlaying,
+		});
     });
 
     const onPressSplit = action((event) => {

@@ -246,6 +246,109 @@ class VideoState {
 			custom: this.customParameters,
 		};
 	}
+
+	fetchedFromFirebase(video) {
+		this.source = video.source;
+		this.transcript = [...video.transcript];
+		this.moments = [...video.moments];
+		this.videoMetadata = {
+			...video.videoMetadata,
+		}
+		this.commonState = new CommonState(
+			this.domainStore,
+			this,
+			video.commonState.id,
+			video.commonState.trackId,
+		);
+		this.highLabel = video.highLabel;
+		this.lowLabel = video.lowLabel;
+		this.videoLink = video.videoLink;
+	}
+
+	// saveFirebase(userId, taskIdx) {
+	// 	const domainStore = this.domainStore;
+	// 	const projectId = domainStore.projectMetadata.projectId;
+	// 	const projectCollection = collection(firestore, domainStore.rootStore.collection, userId, projectId);
+	// 	const videoDoc = doc(
+	// 		projectCollection, domainStore.domainDoc, "in_mainVideos", 
+	// 	).withConverter(videoStateConverter);		
+	// 	return new Promise((resolve, reject) => {
+	// 		setDoc(videoDoc, this, {merge: true}).then(() => {
+	// 			resolve();
+	// 		}).catch((error) => {
+	// 			reject("domain save error: " + error.message);
+	// 		});
+	// 	});
+	// }
+
+	// fetchFirebase(userId, taskIdx) {
+	// 	const projectId = this.projectMetadata.projectId;
+	// 	const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
+	// 	const projectDoc = doc(projectCollection, this.domainDoc).withConverter(domainStoreConverter);
+	// 	return new Promise((resolve, reject) => {
+	// 		getDoc(projectDoc).then((fetchedDomainStore) => {
+	// 			if (fetchedDomainStore.exists()) {
+	// 				const data = fetchedDomainStore.data();
+	// 				this.in_mainVideos = [];
+	// 				this.intents = [];
+	// 				for (let video of data.in_mainVideos) {
+	// 					const newVideo = new VideoState(
+	// 						this,
+	// 						this.in_mainVideos,
+	// 						video.videoLink,
+	// 						video.trackId,
+	// 						true,
+	// 					);
+	// 					newVideo.fetchedFromFirebase(video);
+	// 					this.in_mainVideos.push(newVideo);
+	// 				}
+	// 				for (let intent of data.intents) {
+	// 					const newIntent = new IntentState(
+	// 						this,
+	// 						intent.idx,
+	// 						intent.textCommand,
+	// 						intent.sketchCommand,
+	// 						intent.sketchPlayPosition,
+	// 						intent.trackId, 
+	// 					);
+	// 					newIntent.fetchedFromFirebase(intent);
+	// 					this.intents.push(newIntent);
+	// 				}
+	// 				this.in_mainVideos = data.in_mainVideos;
+	// 				this.projectMetadata = data.projectMetadata;
+	// 				this.intents = data.intents;
+	// 				this.curIntentPos = data.curIntentPos;
+	// 			}
+	// 			else {
+	// 				this.resetAll();
+	// 			}
+	// 			resolve();
+	// 		}).catch((error) => {
+	// 			reject("domain fetch error: " + error.message);
+	// 		});
+	// 	});
+	// }
+
+	videoStateConverter = {
+		toFirestore: function(videoState) {
+			const data = {
+				source: videoState.source,
+				transcript: videoState.transcript,
+				moments: videoState.moments,
+				videoMetadata: {
+					...videoState.videoMetadata,
+				},
+				commonState: videoState.commonState.commonStateConverter.toFirestore(videoState.commonState),
+				highLabel: videoState.highLabel,
+				lowLabel: videoState.lowLabel,
+			}
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		},
+	};
 }
 
 export default VideoState;

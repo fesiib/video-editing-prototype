@@ -285,6 +285,68 @@ class IntentState {
 			editOperation: this.editOperationKey,
 		}
 	}
+
+	fetchedFromFirebase(intent) {
+		/*
+			intent.idx,
+			intent.textCommand,
+			intent.sketchCommand,
+			intent.sketchPlayPosition,
+			intent.trackId, 
+		*/
+		this.idx = intent.idx;
+		this.textCommand = intent.textCommand;
+		this.sketchCommand = intent.sketchCommand;
+		this.sketchPlayPosition = intent.sketchPlayPosition;
+		this.trackId = intent.trackId;
+		this.id = intent.id;
+		this.editOperationKey = intent.editOperationKey;
+		this.suggestedEditOperationKey = intent.suggestedEditOperationKey;
+		this.activeEdits = intent.activeEdits.map((edit) => {
+			const newEdit = new EditState(this.domainStore, this, false, 0);
+			newEdit.fetchedFromFirebase(edit);
+			return newEdit;
+		});
+		this.suggestedEdits = intent.suggestedEdits.map((edit) => {
+			const newEdit = new EditState(this.domainStore, this, true, 0);
+			newEdit.fetchedFromFirebase(edit);
+			return newEdit;
+		});
+		this.considerEdits = intent.considerEdits;
+	}
+	
+	intentStateConverter = {
+		toFirestore: function(intent) {
+			const data = {
+				textCommand: intent.textCommand,
+				sketchCommand: intent.sketchCommand,
+				sketchPlayPosition: intent.sketchPlayPosition,
+				trackId: intent.trackId,
+				editOperationKey: intent.editOperationKey,
+				suggestedEditOperationKey: intent.suggestedEditOperationKey,
+				activeEdits: [],
+				suggestedEdits: [],
+				id: intent.id,
+				idx: intent.idx,
+				considerEdits: intent.considerEdits,
+			};
+	
+			for (let edit of intent.activeEdits) {
+				const editData = edit.editStateConverter.toFirestore(edit);
+				data.activeEdits.push(editData);
+			}
+			for (let edit of intent.suggestedEdits) {
+				const editData = edit.editStateConverter.toFirestore(edit);
+				data.suggestedEdits.push(editData);
+			}
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		},
+	};
+	
 }
 
 export default IntentState;

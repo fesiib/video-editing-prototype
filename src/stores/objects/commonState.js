@@ -350,6 +350,16 @@ class CommonState {
 
 	get metadata() {
 		return {
+			// updateAuthorCut: this.updateAuthorCut,
+			// updateAuthorCrop: this.updateAuthorCrop,
+			// updateAuthorBlur: this.updateAuthorBlur,
+			// updateAuthorZoom: this.updateAuthorZoom,
+
+			updateAuthorCut: null,
+			updateAuthorCrop: null,
+			updateAuthorBlur: null,
+			updateAuthorZoom: null,
+
 			thumbnails: [...this.thumbnails],
         	start: this.start,
         	duration: this.duration,
@@ -366,6 +376,15 @@ class CommonState {
         	scaleY: this.scaleY,
         	rotation: this.rotation,
 
+			cropped: this.cropped,
+			cropX: this.cropX,
+			cropY: this.cropY,
+			cropWidth: this.cropWidth,
+			cropHeight: this.cropHeight,
+
+			originalWidth: this.originalWidth,
+			originalHeight: this.originalHeight,
+
         	animation: { ...this.animation},
         	filterMap: { ...this.filterMap },
 
@@ -377,6 +396,29 @@ class CommonState {
 			processing: this.processing,
 		};
 	}
+
+	fetchedFromFirebase(commonState) {
+		this.id = commonState.id;
+		this.trackId = commonState.trackId;
+		this.processing = commonState.processing;
+		this.setMetadata(commonState);
+	}
+
+	commonStateConverter = {
+		toFirestore: function(commonState) {
+			const data = {
+				id: commonState.id,
+				trackId: commonState.trackId,
+				processsing: commonState.processing,
+				...commonState.metadata,
+			};
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		},
+	};
 
 }
 

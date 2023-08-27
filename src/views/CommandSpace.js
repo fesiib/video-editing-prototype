@@ -9,8 +9,8 @@ import SketchCanvas from "../components/command-space/SketchCanvas";
 
 
 const CommandSpace = observer(function CommandSpace() {
-	const { uiStore, domainStore } = useRootContext();
-	const systemSetting = uiStore.systemSetting;
+	const { userStore, domainStore } = useRootContext();
+	const systemSetting = userStore.systemSetting;
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = [...domainStore.intents].reverse();
 

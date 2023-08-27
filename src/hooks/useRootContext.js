@@ -6,6 +6,7 @@ function useRootContext() {
     return {
         uiStore: rootStore.uiStore,
         domainStore: rootStore.domainStore,
+		userStore: rootStore.userStore,
     };
 }
 

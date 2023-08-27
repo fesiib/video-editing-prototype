@@ -132,7 +132,7 @@ const StaticParts = observer(function StaticParts({
 	className,
 	onDoubleClick,
 }) {
-	const { uiStore, domainStore } = useRootContext();
+	const { userStore, uiStore, domainStore } = useRootContext();
 
 	let parts = [];
 
@@ -146,7 +146,7 @@ const StaticParts = observer(function StaticParts({
 		});
 	}
 	else if (type === "suggested") {
-		parts = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits.filter((edit) => {
+		parts = userStore.systemSetting ? domainStore.curIntent.suggestedEdits.filter((edit) => {
 			return (
 				(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
 				|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)

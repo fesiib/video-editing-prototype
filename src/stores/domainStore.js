@@ -2,8 +2,12 @@ import { makeAutoObservable, toJS } from "mobx";
 
 import VideoState from "./objects/videoState";
 import IntentState from "./intentState";
+import { firestore } from "../services/firebase";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 class DomainStore {
+	domainDoc = "domain";
+
 	in_mainVideos = [];
 	
 	intents = [];
@@ -207,18 +211,50 @@ class DomainStore {
 		this.curIntentPos = 0;
     }
 
+	loadVideo(videoLink, videoId) {
+		this.resetAll();
+		this.projectMetadata.projectId = videoId;
+        this.in_mainVideos = [
+			new VideoState(
+				this,
+				this.in_mainVideos,
+				videoLink,
+				0,
+				true,
+			),
+		];
+		this.projectMetadata.trackCnt = 1;
+	}
+
+	resetAll() {
+		this.in_mainVideos = [];
+		this.projectMetadata = {
+			projectId: "test",
+			title: "TEST",
+			fps: 25,
+			width: 854,
+			height: 480, //720p
+			duration: 10, // seconds
+			trackCnt: 1,
+			totalIntentCnt: 1,
+		};
+		this.intents = [
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+		];
+		this.curIntentPos = 0;
+	}
+
 	addIntent() {
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		this.intents.push(
 			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		);
-
 		this.rootStore.resetTempState();
 	}
 	
 	addRandomIntent() {
-		const systemSetting = this.rootStore.uiStore.systemSetting;
+		const systemSetting = this.rootStore.userStore.systemSetting;
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
@@ -506,7 +542,7 @@ class DomainStore {
 				}
 			}
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		for (let edit of this.curIntent.suggestedEdits) {
@@ -532,7 +568,7 @@ class DomainStore {
 				}
 			}	
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -559,7 +595,7 @@ class DomainStore {
 				}
 			}	
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -604,7 +640,7 @@ class DomainStore {
 				}
 			}
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -631,7 +667,7 @@ class DomainStore {
 				}
 			}
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -658,7 +694,7 @@ class DomainStore {
 				}
 			}
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -685,7 +721,7 @@ class DomainStore {
 				}
 			}
 		}
-		if (!this.rootStore.uiStore.systemSetting) {
+		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
 		
@@ -720,7 +756,7 @@ class DomainStore {
 		objects.sort((a, b) => a.commonState.z - b.commonState.z);
 		
 		if (this.curIntent.editOperation !== null) {
-			if (!this.rootStore.uiStore.systemSetting) {
+			if (!this.rootStore.userStore.systemSetting) {
 				return [...objects, ...this.curIntent.activeEdits];
 			}	
 			return [...objects, ...this.curIntent.activeEdits, ...this.curIntent.suggestedEdits];
@@ -738,6 +774,96 @@ class DomainStore {
 		}
 		return this.in_mainVideos[0];
 	}
+
+
+	saveSession(userId, taskIdx) {
+		const projectId = this.projectMetadata.projectId;
+		const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
+		const projectDoc = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
+		return new Promise((resolve, reject) => {
+			setDoc(projectDoc, this, {merge: true}).then(() => {
+				resolve();
+			}).catch((error) => {
+				reject("domain save error: " + error.message);
+			});
+		});
+	}
+
+	fetchLastSession(userId, taskIdx) {
+		const projectId = this.projectMetadata.projectId;
+		const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
+		const projectDoc = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
+		return new Promise((resolve, reject) => {
+			getDoc(projectDoc).then((fetchedDomainStore) => {
+				if (fetchedDomainStore.exists()) {
+					const data = fetchedDomainStore.data();
+					this.in_mainVideos = [];
+					this.intents = [];
+					for (let video of data.in_mainVideos) {
+						const newVideo = new VideoState(
+							this,
+							this.in_mainVideos,
+							video.videoLink,
+							video.trackId,
+							true,
+						);
+						newVideo.fetchedFromFirebase(video);
+						this.in_mainVideos.push(newVideo);
+					}
+					for (let intent of data.intents) {
+						const newIntent = new IntentState(
+							this,
+							intent.idx,
+							intent.textCommand,
+							intent.sketchCommand,
+							intent.sketchPlayPosition,
+							intent.trackId, 
+						);
+						newIntent.fetchedFromFirebase(intent);
+						this.intents.push(newIntent);
+					}
+					this.in_mainVideos = data.in_mainVideos;
+					this.projectMetadata = data.projectMetadata;
+					this.intents = data.intents;
+					this.curIntentPos = data.curIntentPos;
+				}
+				else {
+					this.resetAll();
+				}
+				resolve();
+			}).catch((error) => {
+				reject("domain fetch error: " + error.message);
+			});
+		});
+	}
+
+	domainStoreConverter = {
+		toFirestore: function(domainStore) {
+			const data = {
+				in_mainVideos: [],
+				projectMetadata: {
+					...domainStore.projectMetadata
+				},
+				intents: [],
+				curIntentPos: domainStore.curIntentPos,
+			};
+			for (let video of domainStore.in_mainVideos) {
+				const convertedVideo = video.videoStateConverter.toFirestore(video);
+				data.in_mainVideos.push(convertedVideo);
+			}
+			for (let intent of domainStore.intents) {
+				const convertedIntent = intent.intentStateConverter.toFirestore(intent);
+				data.intents.push(convertedIntent);
+			}
+			console.log(data);
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		}	
+	};
+	
 }
 
 export default DomainStore;

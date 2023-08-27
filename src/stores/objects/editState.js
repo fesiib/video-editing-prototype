@@ -635,6 +635,45 @@ class EditState {
 		};
 		return requestBody;
 	}
+
+	fetchedFromFirebase(edit) {
+		/* domainStore, intent, isSuggested, trackId */
+		this.textParameters = { ...edit.textParameters };
+		this.imageParameters = { ...edit.imageParameters };
+		this.shapeParameters = { ...edit.shapeParameters };
+		this.zoomParameters = { ...edit.zoomParameters };
+		this.cropParameters = { ...edit.cropParameters };
+		this.cutParameters = { ...edit.cutParameters };
+		this.blurParameters = { ...edit.blurParameters };
+		this.commonState = new CommonState(
+			this.domainStore,
+			this,
+			edit.commonState.id,
+			edit.commonState.trackId,
+		);
+		this.isSuggested = edit.isSuggested;
+	}
+
+	editStateConverter = {
+		toFirestore: function(editState) {
+			const data = {
+				textParameters: { ...editState.textParameters },
+				imageParameters: { ...editState.imageParameters },
+				shapeParameters: { ...editState.shapeParameters },
+				zoomParameters: { ...editState.zoomParameters },
+				cropParameters: { ...editState.cropParameters },
+				cutParameters: { ...editState.cutParameters },
+				blurParameters: { ...editState.blurParameters },
+				commonState: editState.commonState.commonStateConverter.toFirestore(editState.commonState),
+				isSuggested: editState.isSuggested,
+			};
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		}
+	}
 }
  
 export default EditState;

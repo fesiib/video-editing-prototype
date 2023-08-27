@@ -7,14 +7,14 @@ import { action } from "mobx";
 
 const EditOperations = observer(function EditOperations() {
 
-	const { uiStore, domainStore } = useRootContext();
+	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const inactiveButtonClassName = "w-full h-10 m-2 bg-indigo-300 hover:bg-indigo-400";
 	const suggestedButtonClassName = "w-full h-10 m-2 bg-green-200 hover:bg-indigo-300 border-2 border-green-600";
 	const activeButtonClassName = "w-full h-10 m-2 bg-indigo-500";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
-	const suggestedOperationKey = uiStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
+	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
 
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {

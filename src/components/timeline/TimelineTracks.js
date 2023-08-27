@@ -23,7 +23,7 @@ import useRootContext from "../../hooks/useRootContext";
 import { preventCollisionDragMultiple } from "../../utilities/timelineUtilities";
 
 const TimelineTracks = observer(function TimelineTracks() {
-    const { uiStore, domainStore } = useRootContext();
+    const { userStore, uiStore, domainStore } = useRootContext();
 
     const width = uiStore.timelineSize.width;
     const trackCnt = domainStore.projectMetadata.trackCnt;
@@ -37,7 +37,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 	const videos = domainStore.videos;
 	const skippedParts = domainStore.skippedParts;
 	const edits = domainStore.curIntent.activeEdits;
-	const suggestedEdits = uiStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
+	const suggestedEdits = userStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
 	const editIds = edits.map((edit) => toJS(edit.commonState.id));
 	const suggestedEditIds = suggestedEdits.map((edit) => toJS(edit.commonState.id));
 

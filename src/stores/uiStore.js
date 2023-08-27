@@ -7,7 +7,6 @@ class UIStore {
     // Session Info
     accountId = "test";
     projectId = "test";
-	systemSetting = 1; // 0 - baseline
     windowSize = {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -175,6 +174,35 @@ class UIStore {
         return this.timelineConst.trackMaxDuration * this.timelineControls.pxPerSec;
     }
 
+	resetAll() {
+		this.canvasControls ={
+			scalePos: 4,
+			transformerNodeIds: [],
+			opacity: 1,
+			opacityAuthor: null,
+			zoomAuthor: null,
+	
+			sketching: false,
+		}
+		this.timelineControls = {
+			numberOfRows: 3,
+			pxPerSec: 10,
+			playPosition: 0, //secs
+			isPlaying: false,
+			intervalId: -1,
+	
+			positionIndicatorVisibility: 0,
+			positionIndicatorSec: 0,
+	
+			selectedTimelineItems: [],
+	
+			splitting: false,
+			rangeSelectingTimeline: false,
+			rangeSelectingFirstPx: -1,
+		};
+		this.timelineConst.trackMaxDuration = 60 * 5;
+	}
+
 	resetTempState() {
 		this.canvasControls.transformerNodeIds = [];
 		this.canvasControls.sketching = false;
@@ -291,6 +319,11 @@ class UIStore {
 			return;
 		}
 		this.canvasControls.transformerNodeIds = [];
+	}
+
+	logData(msg, data) {
+		console.log(msg);
+		this.rootStore.logData(msg, data);
 	}
 }
 
