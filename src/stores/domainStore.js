@@ -423,6 +423,17 @@ class DomainStore {
 	}
 
     get transcripts() {
+
+		const needPause = (prevEnd, nextStart) => {
+			if (prevEnd === nextStart) {
+				return false;
+			}
+			if (prevEnd === this.projectMetadata.duration) {
+				return false;
+			}
+			return nextStart - prevEnd > 3;
+		}
+
         let transcript = [];
         for (let video of this.videos) {
             transcript = [...transcript, ...video.adjustedTranscript];
@@ -431,7 +442,7 @@ class DomainStore {
 		let transcript_with_pauses = [];
 		for (let i = 0; i < transcript.length; i++) {
 			const curTranscript = transcript[i];
-			if (i === 0 && curTranscript.start > 0) {
+			if (i === 0 && needPause(0, curTranscript.start)) {
 				transcript_with_pauses.push({
 					start: 0,
 					finish: curTranscript.start,
@@ -440,7 +451,7 @@ class DomainStore {
 			}
 			if (i > 0) {
 				const lastTranscript = transcript_with_pauses[transcript_with_pauses.length - 1];
-				if (lastTranscript.finish < curTranscript.start) {
+				if (needPause(lastTranscript.finish, curTranscript.start)) {
 					transcript_with_pauses.push({
 						start: lastTranscript.finish,
 						finish: curTranscript.start,

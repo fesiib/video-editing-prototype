@@ -70,6 +70,7 @@ def display_video(filename):
 
 def test_video(video_link):
     transcript, moments, metadata = process_video(video_link)
+    print(transcript)
     #print(transcript)
     #print(moments)
 

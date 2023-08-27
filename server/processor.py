@@ -2,6 +2,7 @@ import cv2
 import json
 import webvtt
 import os
+import re
 
 
 from yt_dlp import YoutubeDL
@@ -51,7 +52,44 @@ def download_video(video_link):
         else:
             print(f"Video '{video_title}' already exists in the directory.")
         return metadata
-        
+
+def extract_words(s):
+    # Match words that are between >< or outside of any tags
+    words = re.findall(r'>([^<]+)<|([^<>\s]+)', s)
+    # Flatten the list of tuples and remove empty strings
+    result = [word for tup in words for word in tup if word]
+    return result
+def format_transcript(transcript_file):
+    result = []
+    with open(transcript_file, 'r', encoding='utf-8') as f:
+        transcript = f.read()
+        # Split the transcript into line groups
+        line_groups = transcript.strip().split("\n\n")
+        # Filter out line groups that don't have a line containing '</c>'
+        filtered_line_groups = [group for group in line_groups if any('</c>' in line for line in group.split("\n"))]
+        filtered_transcript = ''
+        for group in filtered_line_groups:
+            first_line = group.split("\n")[0]
+            last_line = group.split("\n")[2]
+            pattern = r"(\d{2}:\d{2}:\d{2}\.\d{3}) --> (\d{2}:\d{2}:\d{2}\.\d{3})"
+            match = re.search(pattern, first_line)
+            if match:
+                start_timecode = match.group(1)
+                end_timecode = match.group(2)
+                filtered_line = '<' + start_timecode + '>' + last_line + '<' + end_timecode + '>'
+                cleaned_string = filtered_line.replace('<c>', '').replace('</c>', '')
+                words = extract_words(cleaned_string)
+                idx = 0
+                while idx + 2 < len(words):
+                    new_arr = words[idx:idx + 3]
+                    timecoded_words = {"start": new_arr[0], "finish": new_arr[2], "text": new_arr[1]}
+                    result.append(timecoded_words)
+                    #print(timecoded_words)
+                    idx += 2
+            else:
+                print("No timecodes found.")
+    return result
+
 def get_transcript(subtitles):
     transcript = []
     for caption in subtitles:
@@ -117,7 +155,10 @@ def process_video(video_link):
     moments = get_moments(video_cap)
     video_cap.release()
     
-    subtitles = webvtt.read(subtitles_path)
-    transcript = get_transcript(subtitles)
+    # subtitles = webvtt.read(subtitles_path)
+    # transcript = get_transcript(subtitles)
+
+    transcript = format_transcript(subtitles_path)
+
     # transcript = get_transcript_each_word(subtitles)
     return transcript, moments, metadata
