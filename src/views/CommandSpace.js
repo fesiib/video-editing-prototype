@@ -26,7 +26,6 @@ const CommandSpace = observer(function CommandSpace() {
 		domainStore.addRandomIntent();
 	});
 
-
 	const onDeleteClick = action((intentPos) => {
 		domainStore.deleteIntent(intentPos);
 	});
@@ -40,7 +39,7 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessClick = action(() => {
-		console.log(JSON.stringify(domainStore.processIntent()));
+		domainStore.processIntent();
 	});
 
 	const onConsiderEditsClick = action(() => {
@@ -50,31 +49,37 @@ const CommandSpace = observer(function CommandSpace() {
 	return (<div className="flex justify-between my-5 max-h-96">
 		<div className="w-2/3 flex flex-col items-center mx-2">
 			<h2> Edit #{curIntent.idx} </h2>
-			{systemSetting ? (<>
-				<input 
-					id="textCommand" 
-					type="text"
-					placeholder="description"
-					value={curIntent.textCommand}
-					className="w-full border p-2"
-					onChange={onChangeTextCommand} 
-				/>
-				<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border  bg-gray-100">
-					<SketchCanvas />
-					<div>
-						<label htmlFor={"considerEdits"}> iterate </label>
-						<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
-					
-						<button 
-							className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
-							onClick={() => onProcessClick()}
-							//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
-						>
-							Process
-						</button>
-					</div>
-				</div>
-			</>) : null}
+			{systemSetting ? (
+				domainStore.processingIntent ? (
+					<div> Processing... </div>
+				) : (
+					<>
+						<input 
+							id="textCommand" 
+							type="text"
+							placeholder="description"
+							value={curIntent.textCommand}
+							className="w-full border p-2"
+							onChange={onChangeTextCommand} 
+						/>
+						<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border  bg-gray-100">
+							<SketchCanvas />
+							<div>
+								<label htmlFor={"considerEdits"}> iterate </label>
+								<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
+							
+								<button 
+									className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+									onClick={() => onProcessClick()}
+									//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
+								>
+									Process
+								</button>
+							</div>
+						</div>
+					</>
+				)
+			) : null}
 		</div>
 		<div className="w-1/3">
 			<h2> Edits: </h2>
@@ -108,7 +113,7 @@ const CommandSpace = observer(function CommandSpace() {
 								disabled={curIntent.idx === titleIdx}
 								onClick={() => onIntentClick(idx)}
 							>
-								{titleIdx} - {`[${title}]`}: "{intent.textCommand}"
+								{titleIdx} - {`[${title}]`}: {intent.summary}
 							</button>
 							<div className="w-fit flex gap-2 justify-center p-2">
 								{curIntent.idx === titleIdx ? null

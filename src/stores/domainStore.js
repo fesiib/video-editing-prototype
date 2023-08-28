@@ -4,9 +4,13 @@ import VideoState from "./objects/videoState";
 import IntentState from "./intentState";
 import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { requestSuggestions, requestSummary } from "../services/pipeline";
+import EditState from "./objects/editState";
 
 class DomainStore {
 	domainDoc = "domain";
+
+	processingIntent = false;
 
 	in_mainVideos = [];
 	
@@ -272,6 +276,7 @@ class DomainStore {
 		newIntent.suggestedEditOperationKey = randomSuggestedEditOperationKey;
 		newIntent.considerEdits = randomConsiderEdits;
 		newIntent.textCommand = randomTextCommand;
+		newIntent.summary = randomTextCommand;
 		newIntent.sketchCommand = randomSketchCommand;
 		newIntent.sketchPlayPosition = randomSketchPlayPosition;
 		
@@ -350,6 +355,10 @@ class DomainStore {
 	}
 
 	processIntent() {
+		if (this.processingIntent) {
+			return;
+		}
+		this.processingIntent = true;
 		// request
 		const requestData = {
 			projectId: "",
@@ -359,7 +368,8 @@ class DomainStore {
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
 		};
-		requestData.projectId = toJS(this.projectMetadata.projectId);
+		console.log("request projectid", this.projectMetadata.title);
+		requestData.projectId = toJS(this.projectMetadata.title);
 		requestData.projectMetadata = toJS({
 			...this.projectMetadata
 		});
@@ -375,45 +385,47 @@ class DomainStore {
 		// make sure to edit suggesteEditOperationKey and remove it if they are equal
 
 		this.curIntent.suggestedEdits = [];
-		const parseData = {
-			projectId: "",
-			edits: [{
-				textParameters: {
-				},
-				imageParameters: {
-				},
-				shapeParameters: {
-				},
-				zoomParameters: {
-				},
-				cropParameters: {
-				},
-				cutParameters: {
-				},
-				blurParameters: {
-				},
-				spatialParameters: {
-					x: 0,
-					y: 0,
-					width: 200,
-					height: 200,
-					rotation: 0,
-				},
-				temporalParameters: {
-					start: 0,
-					finish: 10,
-					duration: 10,
-				},
-			}],
-			requestParameters: {
-				consdierEdits: true,
-				text: "",
-				sketchRectangles: [],
-				sketchFrameTimestamp: -1,
-				editOperation: "text",
-			},
-		};
-		return requestData;
+
+		requestSummary({
+			input: requestData.requestParameters.text,
+		}).then(action((responseData) => {
+			if (responseData === null || responseData.summary === undefined) {
+				this.processingIntent = false;
+				return;
+			}
+			const summary = responseData.summary;
+			this.curIntent.summary = summary;
+			requestSuggestions(requestData).then(action((responseData) => {
+				if (responseData === null || responseData.edits === undefined) {
+					this.processingIntent = false;
+					return;
+				}
+				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
+				const suggestedEdits = responseData.edits;
+				this.curIntent.suggestedEdits = suggestedEdits.map((edit) => {
+					const newEdit = new EditState(this, this.curIntent, true, this.curIntent.trackId);
+					newEdit.commonState.setMetadata({
+						duration: this.projectMetadata.duration,
+						z: this.curIntent.intentPos + 1,
+					});
+					newEdit.setResponseBody(edit);
+					return newEdit;
+				});
+				if (suggestedEditOperationKey !== this.curIntent.editOperationKey) {
+					this.curIntent.suggestedEditOperationKey = suggestedEditOperationKey;
+				}
+				else {
+					this.curIntent.suggestedEditOperationKey = "";
+				}
+				this.processingIntent = false;
+			})).catch(action((error) => {
+				console.log("error", error);
+				this.processingIntent = false;
+			}));
+		})).catch(action((error) => {
+			console.log("error", error);
+			this.processingIntent = false;
+		}));
 	}
 
 	// linearizeEdits(editHierarchy) {

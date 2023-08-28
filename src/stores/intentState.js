@@ -7,6 +7,7 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 
 class IntentState {
+	summary = "";
     textCommand = "";
 	sketchCommand = [];
 	sketchPlayPosition = -1;
@@ -24,6 +25,7 @@ class IntentState {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
 		this.idx = idx;
+		this.summary = ""
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.sketchPlayPosition = sketchPlayPosition;
@@ -45,6 +47,7 @@ class IntentState {
 			this.sketchPlayPosition,
 			this.trackId
 		);
+		newIntent.summary = this.summary;
 		newIntent.editOperationKey = this.editOperationKey;
 		newIntent.suggestedEditOperationKey = this.suggestedEditOperationKey;
 		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
@@ -328,6 +331,7 @@ class IntentState {
 
 				this.idx = data.idx;
 				this.textCommand = data.textCommand;
+				this.summary = data.dummary;
 				this.sketchCommand = data.sketchCommand;
 				this.sketchPlayPosition = data.sketchPlayPosition;
 				this.trackId = data.trackId;
@@ -384,6 +388,7 @@ class IntentState {
 		toFirestore: function(intent) {
 			const data = {
 				textCommand: intent.textCommand,
+				summary: intent.summary,
 				sketchCommand: toJS(intent.sketchCommand),
 				sketchPlayPosition: intent.sketchPlayPosition,
 				trackId: intent.trackId,

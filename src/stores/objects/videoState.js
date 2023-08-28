@@ -123,6 +123,8 @@ class VideoState {
 		this.moments = response.data.moments;
 		this.videoMetadata = response.data.metadata;
 		this.source = ADDR + response.data.source;
+		//this.domainStore.projectMetadata.title = this.videoMetadata.id;
+		this.domainStore.projectMetadata.title = "test";
 		this.commonState.setMetadata({
 			thumbnails: [
 				"video",

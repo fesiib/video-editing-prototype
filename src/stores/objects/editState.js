@@ -637,6 +637,18 @@ class EditState {
 		return requestBody;
 	}
 
+	setResponseBody(responseBody) {
+		this.textParameters = { ...responseBody.textParameters };
+		this.imageParameters = { ...responseBody.imageParameters };
+		this.shapeParameters = { ...responseBody.shapeParameters };
+		this.zoomParameters = { ...responseBody.zoomParameters };
+		this.cropParameters = { ...responseBody.cropParameters };
+		this.cutParameters = { ...responseBody.cutParameters };
+		this.blurParameters = { ...responseBody.blurParameters };
+		this.setSpatialParameters(responseBody.spatialParameters);
+		this.setTemporalParameters(responseBody.temporalParameters);
+	}
+
 	fetchedFromFirebase(edit) {
 		/* domainStore, intent, isSuggested, trackId */
 		this.textParameters = { ...edit.textParameters };
