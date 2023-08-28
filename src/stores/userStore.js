@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, toJS } from "mobx";
+import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 
@@ -8,6 +8,8 @@ class UserStore {
 	email = null;
 	token = null;
 
+	loading = false;
+
 	curSessionIdx = -1;
 	curVideoIdx = -1;
 
@@ -16,7 +18,8 @@ class UserStore {
 		"video-2": "https://youtu.be/ZSt9tm3RoUU",
 		"video-3": "https://youtu.be/ZSt9tm3RoUU",
 		"video-4": "https://youtu.be/ZSt9tm3RoUU",
-		"tutorial": "https://youtu.be/ZSt9tm3RoUU",
+		"tutorial1": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
+		"tutorial": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 	}
 
 	taskAssignments = {
@@ -76,19 +79,29 @@ class UserStore {
 	}
 
 	login(userId, userName, email, token) {
+		if (userId === this.userId) {
+			return;
+		}
+		if (this.loading === true) return;
+		this.loading = true;
+		console.log(this.userId, userId);
 		this.userId = userId;
 		this.userName = userName;
 		this.email = email;
 		this.token = token;
 		this.clearTask();
 		this.rootStore.resetAll();
-		this.rootStore.fetchLastSession().then(() => {
+		this.rootStore.fetchFirebase().then(action(() => {
+			console.log("fetched last session");
 			if (this.taskAssignments[userId] === undefined) {
 				this.taskAssignments[userId] = this.randomizeTasks();
 			}
-		}).catch((error) => {
+			this.loading = false;
+		})).catch(action((error) => {
 			console.log(error);
-		});
+			this.taskAssignments[userId] = this.randomizeTasks();
+			this.loading = false;
+		}));
 	}
 
 	logout() {
@@ -105,51 +118,107 @@ class UserStore {
 		this.curVideoIdx = -1;	
 	}
 
-	chooseTutorial() {
+	async chooseTutorial() {
 		if (this.userId === null) {
 			return;
 		}
-		this.rootStore.resetAll();
-		this.curSessionIdx = 2;
-		this.curVideoIdx = 0;
+
+		if (this.loading === true) return;
+		this.loading = true;
+		if (this.taskIdx >= 0) {
+			await this.rootStore.saveFirebase().then(action(() => {
+				this.rootStore.resetAll();
+			})).catch((error) => {
+				console.log(error);
+			});
+		}
+		else {
+			this.rootStore.resetAll();
+		}
+		runInAction(async () => {
+			this.curSessionIdx = 2;
+			this.curVideoIdx = 0;
+			try {
+				await this.rootStore.fetchTask(this.userId, this.taskIdx);
+			} catch (error) {
+				runInAction(() => {
+					this.rootStore.domainStore.loadVideo(this.videoUrl, this.videoId);
+					console.log(error);
+				});
+			}
+			runInAction(async () => {
+				this.loading = false;
+				await this.saveFirebase();
+			});
+		});
 	}
 
-	chooseTask(taskIdx) {
+	async chooseTask(taskIdx) {
 		if (this.userId === null) {
 			return;
 		}
-		if (taskIdx < 0 || taskIdx > 3 || taskIdx === this.taskIdx) {
+		if (taskIdx < 0 || taskIdx > 3) {
 			return;
 		}
-		this.rootStore.resetAll();
-		this.curSessionIdx = Math.floor(taskIdx / 2);
-		this.curVideoIdx = taskIdx % 2;
-		this.rootStore.domainStore.loadVideo(this.videoUrl, this.videoId);
-		this.saveSession();
+		if (this.loading === true) return;
+		this.loading = true;
+		if (this.taskIdx >= 0) {
+			await this.rootStore.saveFirebase().then(action(() => {
+				this.rootStore.resetAll();
+			})).catch((error) => {
+				console.log(error);
+			});
+		}
+		else {
+			this.rootStore.resetAll();
+		}
+		runInAction(async () => {
+			this.curSessionIdx = Math.floor(taskIdx / 2);
+			this.curVideoIdx = taskIdx % 2;
+			try {
+				await this.rootStore.fetchTask(this.userId, this.taskIdx);
+			} catch (error) {
+				runInAction(() => {
+					this.rootStore.domainStore.loadVideo(this.videoUrl, this.videoId);
+					console.log(error);
+				});
+			}
+			runInAction(async () => {
+				this.loading = false;
+				await this.saveFirebase();
+			});
+		});
 	}
 
-	taskDone() {
+	async taskDone() {
 		if (this.userId === null || this.curSessionIdx === -1 || this.curVideoIdx === -1) {
 			return;
 		}
-		this.rootStore.saveSession().then(() => {
-			this.clearTask();
-			this.rootStore.resetAll();
-			this.saveSession();
-		}).catch((error) => {
+		if (this.loading === true) return;
+		this.loading = true;
+		try {
+			await this.rootStore.saveFirebase();
+			runInAction(action(() => {
+				this.clearTask();
+				this.rootStore.resetAll();
+			}));
+		} catch (error) {
 			console.log(error);
+		}
+		runInAction(async () => {
+			this.loading = false;
+			await this.saveFirebase();
 		});
-
 	}
 
-	saveSession() {
+	saveFirebase() {
 		if (this.userId === null) {
 			return;
 		}
 		const rootCollection = collection(firestore, this.rootStore.collection);
 		const curUserStore = doc(rootCollection, this.userId).withConverter(userStoreConverter);
 		return new Promise((resolve, reject) => {
-			setDoc(curUserStore, this, {merge: true}).then(() => {
+			setDoc(curUserStore, this, {merge: false}).then(() => {
 				resolve(this.taskIdx);
 			}).catch((error) => {
 				reject("user save error: " + error.message);
@@ -157,7 +226,7 @@ class UserStore {
 		});
 	}
 
-	fetchLastSession() {
+	fetchFirebase() {
 		if (this.userId === null) {
 			return;
 		}
@@ -165,13 +234,16 @@ class UserStore {
 		const userDoc = doc(pilots, this.userId).withConverter(userStoreConverter);	
 		return new Promise((resolve, reject) => {
 			getDoc(userDoc).then(action((fetchedUserStore) => {
-				if (fetchedUserStore.exists()) {
-					const data = fetchedUserStore.data();
-					if (data.userId === null || data.userId === undefined) {
-						this.clearTask();
-						resolve(null);
-						return;
+				const data = fetchedUserStore.exists() ? fetchedUserStore.data() : null;
+				if (data.userId === null || data.userId === undefined) {
+					this.clearTask();
+					if (this.taskAssignments[this.userid] === undefined) {
+						this.taskAssignments[this.userId] = this.randomizeTasks();
 					}
+					resolve(null);
+					return;
+				}
+				else {
 					this.userId = data.userId;
 					this.userName = data.userName;
 					this.email = data.email;
@@ -180,10 +252,6 @@ class UserStore {
 					this.curVideoIdx = data.curVideoIdx;
 					this.taskAssignments[this.userId] = data.taskAssignment;
 					resolve(this.taskIdx);
-				} 
-				else {
-					this.clearTask();
-					resolve(null);
 				}
 			})).catch((error) => {
 				reject("user fetch error: " + error.message);
@@ -197,6 +265,10 @@ class UserStore {
 
 	get isTaskChosen() {
 		return this.curVideoIdx !== -1;
+	}
+
+	get isTutorial() {
+		return this.curSessionIdx === 2 && this.curVideoIdx === 0;
 	}
 
 	get videoId() {
@@ -217,7 +289,7 @@ class UserStore {
 
 	get taskIdx() {
 		if (this.userId === null || this.curSessionIdx === -1 || this.curVideoIdx === -1) {
-			return null;
+			return -1;
 		}
 		return this.curSessionIdx * 2 + this.curVideoIdx;
 	}
@@ -240,7 +312,7 @@ const userStoreConverter = {
 			token: userStore.token,
 			curSessionIdx: userStore.curSessionIdx,
 			curVideoIdx: userStore.curVideoIdx,
-			taskAssignment: userStore.taskAssignments[userStore.userId],
+			taskAssignment: toJS(userStore.taskAssignments[userStore.userId]),
 		};
 	},
 	fromFirestore: action((snapshot, options) => {

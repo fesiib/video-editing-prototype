@@ -444,7 +444,6 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 
 	const onInputChange = action((event) => {
 		const value = event.target.value;
-		console.log(value);
 		const number = parseInt(value);
 		for (let edit of selectedEdits) {
 			if (edit.isSuggested) {

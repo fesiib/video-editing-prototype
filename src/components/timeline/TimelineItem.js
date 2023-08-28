@@ -57,9 +57,9 @@ export const TimelineItem = observer(
 		}
 		else if (isSuggested) {
 			outerClassName = (isSelected
-				? "absolute bottom-6 z-20 border-2 border-red-600 brightness-50"
-				: "absolute bottom-6 z-20 border");
-			innerClassName = "h-4 bg-green-500";
+				? "absolute bottom-0 z-20 border-2 border-red-600 brightness-50"
+				: "absolute bottom-0 z-20 border");
+			innerClassName = "h-5 bg-green-500";
 		}
 		else {
 			outerClassName = (isSelected

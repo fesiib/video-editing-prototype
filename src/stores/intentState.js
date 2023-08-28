@@ -1,8 +1,10 @@
-import { makeAutoObservable, set } from "mobx";
+import { action, makeAutoObservable, runInAction, set, toJS } from "mobx";
 
 import EditState from "./objects/editState";
 
 import { randomUUID } from "../utilities/genericUtilities";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { firestore } from "../services/firebase";
 
 class IntentState {
     textCommand = "";
@@ -90,7 +92,7 @@ class IntentState {
 	addActiveEdit(first, second) {
 		const start = Math.min(first, second);
 		const finish = Math.max(first, second);
-		let newEdit = new EditState(this.domainStore, this, false, 0);
+		let newEdit = new EditState(this.domainStore, this, false, this.trackId);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -140,8 +142,8 @@ class IntentState {
 						finish: (left - edit.commonState.offset) + edit.commonState.start,
 					});
 					newEdits.push(editCopy);
-					console.log(newEdit.commonState.offset, newEdit.commonState.end);
-					console.log(edit.commonState.offset, edit.commonState.end, editCopy.commonState.offset, editCopy.commonState.end);
+					//console.log(newEdit.commonState.offset, newEdit.commonState.end);
+					//console.log(edit.commonState.offset, edit.commonState.end, editCopy.commonState.offset, editCopy.commonState.end);
 				}
 			}
 		}
@@ -188,7 +190,7 @@ class IntentState {
 		let height = Math.abs(y1 - y2);
 
 
-		let newEdit = new EditState(this.domainStore, this, suggested, 0);
+		let newEdit = new EditState(this.domainStore, this, suggested, this.trackId);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -286,40 +288,103 @@ class IntentState {
 		}
 	}
 
-	fetchedFromFirebase(intent) {
-		/*
-			intent.idx,
-			intent.textCommand,
-			intent.sketchCommand,
-			intent.sketchPlayPosition,
-			intent.trackId, 
-		*/
-		this.idx = intent.idx;
-		this.textCommand = intent.textCommand;
-		this.sketchCommand = intent.sketchCommand;
-		this.sketchPlayPosition = intent.sketchPlayPosition;
-		this.trackId = intent.trackId;
-		this.id = intent.id;
-		this.editOperationKey = intent.editOperationKey;
-		this.suggestedEditOperationKey = intent.suggestedEditOperationKey;
-		this.activeEdits = intent.activeEdits.map((edit) => {
-			const newEdit = new EditState(this.domainStore, this, false, 0);
-			newEdit.fetchedFromFirebase(edit);
-			return newEdit;
+	saveFirebase(userId, taskIdx) {
+		const intentCollection = collection(firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.intentCollection);
+		const intentId = this.id;
+		const intentDoc = doc(intentCollection, intentId).withConverter(this.intentStateConverter);
+		return new Promise(async (resolve, reject) => {
+			try {
+				let allEditPromises = [];
+				for (let edit of this.activeEdits) {
+					allEditPromises.push(edit.saveFirebase(userId, taskIdx));
+				}	
+				for (let edit of this.suggestedEdits) {
+					allEditPromises.push(edit.saveFirebase(userId, taskIdx));	
+				}
+				await Promise.all(allEditPromises);
+			} catch (error) {
+				reject("edit save error: " + error.message);
+			}
+			setDoc(intentDoc, this, {merge: false}).then(() => {
+				//console.log("saved intent: ", intentId);
+				resolve();
+			}).catch((error) => {
+				reject("intent save error: " + error);
+			});
 		});
-		this.suggestedEdits = intent.suggestedEdits.map((edit) => {
-			const newEdit = new EditState(this.domainStore, this, true, 0);
-			newEdit.fetchedFromFirebase(edit);
-			return newEdit;
+	}
+
+	fetchFirebase(userId, taskIdx, intentId) {
+		const intentCollection = collection(firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.intentCollection);
+		const intentDoc = doc(intentCollection, intentId).withConverter(this.intentStateConverter);
+		return new Promise((resolve, reject) => {
+			getDoc(intentDoc).then(action(async (fetchedIntentState) => {
+				const data = fetchedIntentState.exists() ? fetchedIntentState.data() : null;
+				if (data === null || data.id === undefined) {
+					resolve(false);
+				}
+				this.activeEdits = [];
+				this.suggestedEdits = [];
+
+				this.idx = data.idx;
+				this.textCommand = data.textCommand;
+				this.sketchCommand = data.sketchCommand;
+				this.sketchPlayPosition = data.sketchPlayPosition;
+				this.trackId = data.trackId;
+				this.id = data.id;
+				this.editOperationKey = data.editOperationKey;
+				this.suggestedEditOperationKey = data.suggestedEditOperationKey;
+				
+				this.considerEdits = data.considerEdits;
+
+				for (let editId of data.activeEdits) {
+					const newEdit = new EditState(
+						this.domainStore,
+						this,
+						false,
+						this.trackId,
+					);
+					try {
+						const success = await newEdit.fetchFirebase(userId, taskIdx, editId);
+						if (success) {
+							runInAction(() => {
+								this.activeEdits.push(newEdit);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+				for (let editId of data.suggestedEdits) {
+					const newEdit = new EditState(
+						this.domainStore,
+						this,
+						true,
+						this.trackId,
+					);
+					try {
+						const success = await newEdit.fetchFirebase(userId, taskIdx, editId);
+						if (success) {
+							runInAction(() => {
+								this.suggestedEdits.push(newEdit);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+				resolve(true);
+			})).catch((error) => {
+				reject("domain fetch error: " + error.message);
+			});
 		});
-		this.considerEdits = intent.considerEdits;
 	}
 	
 	intentStateConverter = {
 		toFirestore: function(intent) {
 			const data = {
 				textCommand: intent.textCommand,
-				sketchCommand: intent.sketchCommand,
+				sketchCommand: toJS(intent.sketchCommand),
 				sketchPlayPosition: intent.sketchPlayPosition,
 				trackId: intent.trackId,
 				editOperationKey: intent.editOperationKey,
@@ -332,17 +397,17 @@ class IntentState {
 			};
 	
 			for (let edit of intent.activeEdits) {
-				const editData = edit.editStateConverter.toFirestore(edit);
-				data.activeEdits.push(editData);
+				data.activeEdits.push(edit.commonState.id);
 			}
 			for (let edit of intent.suggestedEdits) {
-				const editData = edit.editStateConverter.toFirestore(edit);
-				data.suggestedEdits.push(editData);
+				data.suggestedEdits.push(edit.commonState.id);
 			}
+			//console.log("intent to", data);
 			return data;
 		},
 		fromFirestore: function(snapshot, options) {
 			const data = snapshot.data(options);
+			//console.log("intent from", data);
 			return data;
 		},
 	};

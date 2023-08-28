@@ -179,7 +179,7 @@ const Timeline = observer(function Timeline() {
 	const decisionClassName = " text-black py-2 px-4 rounded";
 
     return (
-        <div className="bg-slate-100 disable-select" onKeyDown={onDeleteKeyDown}>
+        <div className="w-fit bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
             <div className="flex justify-between">
                 <button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
                     {uiStore.timelineControls.isPlaying ? "pause" : "play"}

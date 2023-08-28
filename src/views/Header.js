@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 
 import useRootContext from "../hooks/useRootContext";
-import { action } from "mobx";
+import { action, set } from "mobx";
 import { authStateChanged, signInWithGoogle, signOutFromGoogle } from "../services/firebase";
 
 const Auth = observer(function Auth() {
 	const { userStore } = useRootContext();
 
 	const login = action(() => {
-		signInWithGoogle().then(action((result) => {
+		signInWithGoogle().then(action(async (result) => {
 			const user = result.user;
 			const token = result.credential.accessToken;
 			console.log(user.displayName);
@@ -29,7 +29,7 @@ const Auth = observer(function Auth() {
 	});
 
 	const taskDone = action(() => {
-		userStore.taskDone();
+		userStore.taskDone()
 	});
 
 	useEffect(() => {
@@ -70,12 +70,14 @@ const Auth = observer(function Auth() {
 					Logout
 				</button>
 				{
-					userStore.isTaskChosen ? (
+					(userStore.isTaskChosen && !userStore.loading) ? (
 					<button
 						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 						onClick={() => taskDone()}
 					>
-						Task {userStore.taskIdx + 1} Done
+						{
+							userStore.isTutorial ? "Tutorial Done" : `Task ${userStore.taskIdx + 1} Done`
+						}
 					</button>) : null
 				}
 			</div>
@@ -89,8 +91,6 @@ const Header = observer(function Header() {
 	return (
 		<div className="flex flex-row">
 			<Auth />
-			<div>
-			</div>
 		</div>
 	);
 });

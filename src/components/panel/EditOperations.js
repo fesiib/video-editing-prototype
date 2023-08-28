@@ -24,7 +24,7 @@ const EditOperations = observer(function EditOperations() {
 		domainStore.curIntent.setEditOperationKey(operationKey);
 	});
 
-	return (<div className="flex flex-col items-center p-1 m-1 border">
+	return (<div className="flex flex-col items-center p-1 m-1 border bg-gray-100">
 		<h2> Edit Operations</h2>
 		{Object.keys(domainStore.editOperations).map((operationKey) => {
 			const operation = domainStore.editOperations[operationKey];

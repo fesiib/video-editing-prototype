@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, toJS } from "mobx";
 import { adaptCoordinate, groundCoordinate, roundNumber } from "../../utilities/genericUtilities";
 
 class CommonState {
@@ -331,7 +331,6 @@ class CommonState {
             finish: nativeTimestamp,
         });
 
-		console.log(left.commonState.id, right.commonState.id);
 		return {
 			left,
 			right
@@ -410,7 +409,7 @@ class CommonState {
 				id: commonState.id,
 				trackId: commonState.trackId,
 				processsing: commonState.processing,
-				...commonState.metadata,
+				...toJS(commonState.metadata),
 			};
 			return data;
 		},

@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable, toJS } from "mobx";
 import DomainStore from "./domainStore";
 import UIStore from "./uiStore";
 import UserStore from "./userStore";
@@ -44,6 +44,10 @@ const LogDataConverter = {
 class RootStore {
 	collection = "pilots";
 	logCollection = "logs";
+	videoCollection = "videos";
+	intentCollection = "intents";
+	editCollection = "edits";
+
 	// doc = userId
 	// data = {userStore, uiStore, domainStore}
 
@@ -63,49 +67,61 @@ class RootStore {
 		this.domainStore.resetAll();
 	}
 
-	fetchLastSession() {
+	fetchTask(userId, taskIdx) {
+		return new Promise((resolve, reject) => {
+			if (taskIdx >= 0) {
+				this.domainStore.fetchFirebase(userId, taskIdx, this.userStore.videoId).then(action(() => {
+					console.log("fetched Domain");
+					if (this.domainStore.in_mainVideos.length === 0) {
+						this.domainStore.loadVideo(this.userStore.videoUrl, this.userStore.videoId);
+					}
+					resolve();
+				})).catch((error) => {
+					reject(error);
+				});
+				//this.uiStore.fetchFirebase(userId, taskIdx, this.videoId);
+			}
+			else {
+				resolve();
+			}
+		});
+	}
+
+	fetchFirebase() {
 		if (!this.userStore.isLoggedIn) {
 			return;
 		}
 		const userId = this.userStore.userId;
 		return new Promise((resolve, reject) => {
-			this.userStore.fetchLastSession().then((taskIdx) => {
+			this.userStore.fetchFirebase().then(action((taskIdx) => {
 				console.log("fetched User");
-				if (taskIdx >= 0) {
-					this.domainStore.fetchLastSession(userId, taskIdx).then(() => {
-						console.log("fetched Domain");
-						resolve();
-					}).catch((error) => {
-						reject(error);
-					});
-					//this.uiStore.fetchLastSession(userId, taskIdx);
-				}
-				else {
+				this.fetchTask(userId, taskIdx).then(() => {
 					resolve();
-				}
-			}).catch((error) => {
+				}).catch((error) => {
+					reject(error);
+				});				
+			})).catch((error) => {
 				reject(error);
 			});
 		});
 	}
 
-	saveSession() {
+	saveFirebase() {
 		if (!this.userStore.isLoggedIn) {
 			return;
 		}
 		const userId = this.userStore.userId;
 		return new Promise((resolve, reject) => {
-
-			this.userStore.saveSession().then((taskIdx) => {
+			this.userStore.saveFirebase().then((taskIdx) => {
 				console.log("saved User");
 				if (taskIdx >= 0) {
-					this.domainStore.saveSession(userId, taskIdx).then(() => {
+					this.domainStore.saveFirebase(userId, taskIdx).then(() => {
 						console.log("saved Domain");
 						resolve();
 					}).catch((error) => {
 						reject(error);
 					});
-					//this.uiStore.saveSession(userId, taskIdx);
+					//this.uiStore.saveFirebase(userId, taskIdx);
 				}
 				else {
 					resolve();

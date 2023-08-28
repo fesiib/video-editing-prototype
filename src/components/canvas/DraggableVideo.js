@@ -29,7 +29,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 
 	const videoElement = useMemo(() => {
         const element = document.createElement("video");
-		console.log(curVideo.source)
+		console.log("video-source: ", curVideo.source)
         element.src = curVideo.source;
         element.loop = false;
         element.id = "video_element_" + curVideo.commonState.id;

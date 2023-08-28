@@ -36,7 +36,7 @@ class UIStore {
         height: window.innerWidth / 3, // 1/3
     };
     timelineControls = {
-        numberOfRows: 3,
+        numberOfRows: 1,
         pxPerSec: 10,
         playPosition: 0, //secs
         isPlaying: false,
@@ -185,7 +185,7 @@ class UIStore {
 			sketching: false,
 		}
 		this.timelineControls = {
-			numberOfRows: 3,
+			numberOfRows: 1,
 			pxPerSec: 10,
 			playPosition: 0, //secs
 			isPlaying: false,

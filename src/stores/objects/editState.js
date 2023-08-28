@@ -1,8 +1,10 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable, toJS } from "mobx";
 
 import CommonState from "./commonState";
 
 import { randomUUID, roundNumber } from "../../utilities/genericUtilities";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { firestore } from "../../services/firebase";
 
 /*
 
@@ -239,7 +241,6 @@ class EditState {
 			delete parameters.circle;
 		}
 		if (parameters.star !== undefined) {
-			console.log(parameters.star.outerRadius);
 			if (parameters.star.outerRadius !== undefined) {
 				this.commonState.setMetadata({
 					width: parameters.star.outerRadius * 2,
@@ -654,23 +655,75 @@ class EditState {
 		this.isSuggested = edit.isSuggested;
 	}
 
+	saveFirebase(userId, taskIdx) {
+		const editCollection = collection(firestore,
+			this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.editCollection);
+		const editId = this.commonState.id;
+		const editDoc = doc(editCollection, editId).withConverter(this.editStateConverter);		
+		return new Promise((resolve, reject) => {
+			setDoc(editDoc, this, {merge: false}).then(() => {
+				//console.log(`edit ${editId} saved: `, editId, userId, this.domainStore.rootStore.editCollection);
+				resolve();
+			}).catch((error) => {
+				reject(`edit ${editId} save error: ` + error.message);
+			});
+		});
+	}
+
+	fetchFirebase(userId, taskIdx, editId) {
+		const editCollection = collection(firestore,
+			this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.editCollection);
+		const editDoc = doc(editCollection, editId).withConverter(this.editStateConverter);		
+		return new Promise((resolve, reject) => {
+			getDoc(editDoc).then(action((fetchedEditState) => {
+				//console.log("fetched edit", fetchedEditState);
+				const data = fetchedEditState.exists() ? fetchedEditState.data() : null;
+				if (data === null || data.commonState === undefined) {
+					//TODO: maybe reset edit state
+					resolve(false);
+				}
+
+				this.textParameters = { ...data.textParameters };
+				this.imageParameters = { ...data.imageParameters };
+				this.shapeParameters = { ...data.shapeParameters };
+				this.zoomParameters = { ...data.zoomParameters };
+				this.cropParameters = { ...data.cropParameters };
+				this.cutParameters = { ...data.cutParameters };
+				this.blurParameters = { ...data.blurParameters };
+				this.commonState = new CommonState(
+					this.domainStore,
+					this,
+					data.commonState.id,
+					data.commonState.trackId,
+				);
+				this.commonState.fetchedFromFirebase(data.commonState);
+				this.isSuggested = data.isSuggested;
+				resolve(true);
+			})).catch((error) => {
+				reject("edit fetch error: " + error.message);
+			});
+		});
+	}
+
 	editStateConverter = {
 		toFirestore: function(editState) {
 			const data = {
-				textParameters: { ...editState.textParameters },
-				imageParameters: { ...editState.imageParameters },
-				shapeParameters: { ...editState.shapeParameters },
-				zoomParameters: { ...editState.zoomParameters },
-				cropParameters: { ...editState.cropParameters },
-				cutParameters: { ...editState.cutParameters },
-				blurParameters: { ...editState.blurParameters },
+				textParameters: { ...toJS(editState.textParameters) },
+				imageParameters: { ...toJS(editState.imageParameters) },
+				shapeParameters: { ...toJS(editState.shapeParameters) },
+				zoomParameters: { ...toJS(editState.zoomParameters) },
+				cropParameters: { ...toJS(editState.cropParameters) },
+				cutParameters: { ...toJS(editState.cutParameters) },
+				blurParameters: { ...toJS(editState.blurParameters) },
 				commonState: editState.commonState.commonStateConverter.toFirestore(editState.commonState),
 				isSuggested: editState.isSuggested,
 			};
+			//console.log("to", data);
 			return data;
 		},
 		fromFirestore: function(snapshot, options) {
 			const data = snapshot.data(options);
+			//console.log("from", data);
 			return data;
 		}
 	}

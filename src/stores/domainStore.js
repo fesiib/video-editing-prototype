@@ -1,4 +1,4 @@
-import { makeAutoObservable, toJS } from "mobx";
+import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 
 import VideoState from "./objects/videoState";
 import IntentState from "./intentState";
@@ -20,7 +20,7 @@ class DomainStore {
         width: 854,
         height: 480, //720p
         duration: 10, // seconds
-        trackCnt: 2,
+        trackCnt: 1,
 		totalIntentCnt: 0,
     };
 
@@ -776,12 +776,30 @@ class DomainStore {
 	}
 
 
-	saveSession(userId, taskIdx) {
+	saveFirebase(userId, taskIdx) {
 		const projectId = this.projectMetadata.projectId;
 		const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
-		const projectDoc = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
-		return new Promise((resolve, reject) => {
-			setDoc(projectDoc, this, {merge: true}).then(() => {
+		const projectDomain = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
+		return new Promise(async (resolve, reject) => {
+			try {
+				let allVideoPromises = [];
+				for (let video of this.in_mainVideos) {
+					allVideoPromises.push(video.saveFirebase(userId, taskIdx));
+				}		
+				await Promise.all(allVideoPromises);
+			} catch (error) {
+				reject("videos save error: " + error);
+			}
+			try {
+				let allIntentPromises = [];
+				for (let intent of this.intents) {
+					allIntentPromises.push(intent.saveFirebase(userId, taskIdx));
+				}		
+				await Promise.all(allIntentPromises);
+			} catch (error) {
+				reject("intents save error: " + error);
+			}
+			setDoc(projectDomain, this, {merge: false}).then(() => {
 				resolve();
 			}).catch((error) => {
 				reject("domain save error: " + error.message);
@@ -789,49 +807,65 @@ class DomainStore {
 		});
 	}
 
-	fetchLastSession(userId, taskIdx) {
-		const projectId = this.projectMetadata.projectId;
+	fetchFirebase(userId, taskIdx, projectId) {
 		const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
-		const projectDoc = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
+		const projectDomain = doc(projectCollection, this.domainDoc).withConverter(this.domainStoreConverter);
 		return new Promise((resolve, reject) => {
-			getDoc(projectDoc).then((fetchedDomainStore) => {
-				if (fetchedDomainStore.exists()) {
-					const data = fetchedDomainStore.data();
-					this.in_mainVideos = [];
-					this.intents = [];
-					for (let video of data.in_mainVideos) {
-						const newVideo = new VideoState(
-							this,
-							this.in_mainVideos,
-							video.videoLink,
-							video.trackId,
-							true,
-						);
-						newVideo.fetchedFromFirebase(video);
-						this.in_mainVideos.push(newVideo);
-					}
-					for (let intent of data.intents) {
-						const newIntent = new IntentState(
-							this,
-							intent.idx,
-							intent.textCommand,
-							intent.sketchCommand,
-							intent.sketchPlayPosition,
-							intent.trackId, 
-						);
-						newIntent.fetchedFromFirebase(intent);
-						this.intents.push(newIntent);
-					}
-					this.in_mainVideos = data.in_mainVideos;
-					this.projectMetadata = data.projectMetadata;
-					this.intents = data.intents;
-					this.curIntentPos = data.curIntentPos;
-				}
-				else {
+			getDoc(projectDomain).then(action(async (fetchedDomainStore) => {
+				const data = fetchedDomainStore.exists() ? fetchedDomainStore.data() : null;
+				if (data === null || data.projectMetadata === undefined) {
 					this.resetAll();
+					resolve();
 				}
+				this.in_mainVideos = [];
+				this.intents = [];
+				this.projectMetadata = {
+					...data.projectMetadata,
+				};
+				this.curIntentPos = data.curIntentPos;
+				for (let videoId of data.in_mainVideos) {
+					const newVideo = new VideoState(
+						this,
+						this.in_mainVideos,
+						"",
+						0,
+						false,
+					);
+					try {
+						const success = await newVideo.fetchFirebase(userId, taskIdx, videoId);
+						if (success) {
+							runInAction(() => {
+								this.in_mainVideos.push(newVideo);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+
+				for (let intentId of data.intents) {
+					const newIntent = new IntentState(
+						this,
+						0,
+						"",
+						[],
+						-1,
+						0, 
+					);
+					try {
+						const success = await newIntent.fetchFirebase(userId, taskIdx, intentId);
+						if (success) {
+							runInAction(() => {
+								this.intents.push(newIntent);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+
 				resolve();
-			}).catch((error) => {
+			})).catch((error) => {
 				reject("domain fetch error: " + error.message);
 			});
 		});
@@ -842,24 +876,25 @@ class DomainStore {
 			const data = {
 				in_mainVideos: [],
 				projectMetadata: {
-					...domainStore.projectMetadata
+					...toJS(domainStore.projectMetadata)
 				},
 				intents: [],
 				curIntentPos: domainStore.curIntentPos,
 			};
 			for (let video of domainStore.in_mainVideos) {
-				const convertedVideo = video.videoStateConverter.toFirestore(video);
-				data.in_mainVideos.push(convertedVideo);
+				//const convertedVideo = video.videoStateConverter.toFirestore(video);
+				data.in_mainVideos.push(video.commonState.id);
 			}
 			for (let intent of domainStore.intents) {
-				const convertedIntent = intent.intentStateConverter.toFirestore(intent);
-				data.intents.push(convertedIntent);
+				//const convertedIntent = intent.intentStateConverter.toFirestore(intent);
+				data.intents.push(intent.id);
 			}
-			console.log(data);
+			//console.log("to", data);
 			return data;
 		},
 		fromFirestore: function(snapshot, options) {
 			const data = snapshot.data(options);
+			//console.log("from", data);
 			return data;
 		}	
 	};

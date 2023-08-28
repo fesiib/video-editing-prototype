@@ -44,7 +44,7 @@ const TimelineTracks = observer(function TimelineTracks() {
     const onGenericDragStart = action((event) => {
         const { active } = event;
         const { type, scene } = active.data.current;
-        console.log("start", type, event);
+        //console.log("start", type, event);
 
         if (type === "track") {
             setActiveTrackId(active.id);
@@ -144,7 +144,7 @@ const TimelineTracks = observer(function TimelineTracks() {
     const onGenericDrageMove = action((event) => {
         const { active, over } = event;
         const type = active.data.current.type;
-        console.log("move", type, event);
+        //console.log("move", type, event);
         if (type === "scene") {
             sceneTrackChange(active, over, null);
         }
@@ -153,7 +153,7 @@ const TimelineTracks = observer(function TimelineTracks() {
     const onGenericDragEnd = action((event) => {
         const { active, delta, over } = event;
         const type = active.data.current.type;
-        console.log("end", type, event);
+        //console.log("end", type, event);
         if (type === "track" && over) {
             if (active.id !== over.id) {
                 const activeTrackId = active.data.current.trackId;
@@ -228,7 +228,7 @@ const TimelineTracks = observer(function TimelineTracks() {
     return (
         <div
 			ref={tracksContainer}
-            className="bg-slate-300 m-5 flex-column overflow-scroll relative disable-select"
+            className="bg-slate-300 my-2 flex-column overflow-scroll relative disable-select"
 			style={{
                 width: width,
             }}

@@ -54,64 +54,89 @@ const App = observer(function App() {
     // );
 
     return (
-        <div className="App">
-			<div>
-				<Header />
-			</div>
-			{
-				userStore.isLoggedIn ? (userStore.isTaskChosen ? (
-					<div className="grid grid-cols-7 grid-rows-4">
-						<div className="col-span-1 row-span-4 flex flex-col">
-							<EditPanel />
+	<div className="h-screen"> 
+		{
+			userStore.loading ? (
+				<div> LOADING ... </div>
+			) : (<>
+				<div> <Header /> </div>
+				{
+					userStore.isTaskChosen ? (
+						// <div className="grid grid-cols-7 grid-rows-4 h-full overflow-hidden">
+						// 	<div className="col-span-full row-span-3 grid grid-cols-7 gap-4"> 
+						// 		<div className="col-span-1">
+						// 			<EditPanel />
+						// 		</div>
+						// 		<div className="col-span-3 flex flex-col items-center">
+						// 			<EditorCanvas />
+						// 			<Timeline />
+						// 		</div>
+						// 		<div className="col-span-3">
+						// 			<TextWall />
+						// 		</div>
+						// 	</div>
+						// 	<div className="col-span-6 col-start-2 place-content-around mx-5 justify-around object-top">
+						// 		<CommandSpace />
+						// 	</div>
+						// </div>
+						<div className="grid grid-cols-7 h-full">
+							<div className="col-span-1">
+								<EditPanel />
+							</div>
+							<div className="col-span-6 flex flex-col justify-start  mx-8">
+								<div className="grid grid-cols-2 items-center gap-2">
+									<div className="col-span-1 row-span-full flex flex-col items-center">
+										<EditorCanvas />
+										<Timeline />
+									</div>
+									<div className="col-span-1 row-span-full mx-4">
+										<TextWall />
+									</div>
+								</div>
+								<div className="col-span-6 col-start-2">
+									<CommandSpace />
+								</div>
+							</div>
 						</div>
-						<div className="col-span-3 row-span-2">
-							<EditorCanvas />
-							<Timeline />
+					) : (
+						<div className="flex flex-start gap-2 m-2">
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTutorial()}
+							>
+								Tutorial
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTask(0)}
+							>
+								Task 1
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTask(1)}
+							>
+								Task 2
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTask(2)}
+							>
+								Task 3
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTask(3)}
+							>
+								Task 4
+							</button>
 						</div>
-						<div className="col-span-3 row-span-2 ml-10">
-							<TextWall />
-						</div>
-						<div className="col-span-6 row-span-2">
-							<CommandSpace />
-						</div>
-					</div>
-				) : (
-					<div className="flex flex-start gap-2 m-2">
-						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => chooseTutorial()}
-						>
-							Tutorial
-						</button>
-						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => chooseTask(0)}
-						>
-							Task 1
-						</button>
-						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => chooseTask(1)}
-						>
-							Task 2
-						</button>
-						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => chooseTask(2)}
-						>
-							Task 3
-						</button>
-						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => chooseTask(3)}
-						>
-							Task 4
-						</button>
-					</div>
-				)) : null
-			}
-        </div>
-    );
+					)
+				}
+			</>
+			)
+		} 
+	</div>);
 });
 
 export default App;

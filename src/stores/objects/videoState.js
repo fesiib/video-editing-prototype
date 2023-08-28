@@ -1,10 +1,12 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 
 import CommonState from "./commonState";
 
 import { randomUUID } from "../../utilities/genericUtilities";
 
 import axios from 'axios'
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { firestore } from "../../services/firebase";
 
 const ADDR = "http://localhost:7777/"
 
@@ -33,6 +35,8 @@ function formatVTTtime(str_time) {
 }
 
 class VideoState {
+	videoDoc = "videos";
+
 	videoLink = null;
     source = null;
     transcript = [];
@@ -247,105 +251,75 @@ class VideoState {
 		};
 	}
 
-	fetchedFromFirebase(video) {
-		this.source = video.source;
-		this.transcript = [...video.transcript];
-		this.moments = [...video.moments];
-		this.videoMetadata = {
-			...video.videoMetadata,
-		}
-		this.commonState = new CommonState(
-			this.domainStore,
-			this,
-			video.commonState.id,
-			video.commonState.trackId,
-		);
-		this.highLabel = video.highLabel;
-		this.lowLabel = video.lowLabel;
-		this.videoLink = video.videoLink;
+	saveFirebase(userId, taskIdx) {
+		const videoCollection = collection(firestore,
+			this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.videoCollection);
+		const videoId = this.commonState.id;
+		const videoDoc = doc(videoCollection, videoId).withConverter(this.videoStateConverter);		
+		return new Promise((resolve, reject) => {
+			setDoc(videoDoc, this, {merge: false}).then(() => {
+				//console.log(`video ${videoId} saved: `, videoId, userId, this.domainStore.rootStore.videoCollection);
+				resolve();
+			}).catch((error) => {
+				reject(`video ${videoId} save error: ` + error.message);
+			});
+		});
 	}
 
-	// saveFirebase(userId, taskIdx) {
-	// 	const domainStore = this.domainStore;
-	// 	const projectId = domainStore.projectMetadata.projectId;
-	// 	const projectCollection = collection(firestore, domainStore.rootStore.collection, userId, projectId);
-	// 	const videoDoc = doc(
-	// 		projectCollection, domainStore.domainDoc, "in_mainVideos", 
-	// 	).withConverter(videoStateConverter);		
-	// 	return new Promise((resolve, reject) => {
-	// 		setDoc(videoDoc, this, {merge: true}).then(() => {
-	// 			resolve();
-	// 		}).catch((error) => {
-	// 			reject("domain save error: " + error.message);
-	// 		});
-	// 	});
-	// }
-
-	// fetchFirebase(userId, taskIdx) {
-	// 	const projectId = this.projectMetadata.projectId;
-	// 	const projectCollection = collection(firestore, this.rootStore.collection, userId, projectId);
-	// 	const projectDoc = doc(projectCollection, this.domainDoc).withConverter(domainStoreConverter);
-	// 	return new Promise((resolve, reject) => {
-	// 		getDoc(projectDoc).then((fetchedDomainStore) => {
-	// 			if (fetchedDomainStore.exists()) {
-	// 				const data = fetchedDomainStore.data();
-	// 				this.in_mainVideos = [];
-	// 				this.intents = [];
-	// 				for (let video of data.in_mainVideos) {
-	// 					const newVideo = new VideoState(
-	// 						this,
-	// 						this.in_mainVideos,
-	// 						video.videoLink,
-	// 						video.trackId,
-	// 						true,
-	// 					);
-	// 					newVideo.fetchedFromFirebase(video);
-	// 					this.in_mainVideos.push(newVideo);
-	// 				}
-	// 				for (let intent of data.intents) {
-	// 					const newIntent = new IntentState(
-	// 						this,
-	// 						intent.idx,
-	// 						intent.textCommand,
-	// 						intent.sketchCommand,
-	// 						intent.sketchPlayPosition,
-	// 						intent.trackId, 
-	// 					);
-	// 					newIntent.fetchedFromFirebase(intent);
-	// 					this.intents.push(newIntent);
-	// 				}
-	// 				this.in_mainVideos = data.in_mainVideos;
-	// 				this.projectMetadata = data.projectMetadata;
-	// 				this.intents = data.intents;
-	// 				this.curIntentPos = data.curIntentPos;
-	// 			}
-	// 			else {
-	// 				this.resetAll();
-	// 			}
-	// 			resolve();
-	// 		}).catch((error) => {
-	// 			reject("domain fetch error: " + error.message);
-	// 		});
-	// 	});
-	// }
+	fetchFirebase(userId, taskIdx, videoId) {
+		const videoCollection = collection(firestore,
+			this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.videoCollection);
+		const videoDoc = doc(videoCollection, videoId).withConverter(this.videoStateConverter);	
+		return new Promise((resolve, reject) => {
+			getDoc(videoDoc).then(action((fetchedVideoState) => {
+				//console.log("fetched video", fetchedVideoState);
+				const data = fetchedVideoState.exists() ? fetchedVideoState.data() : null;
+				if (data === null || data.commonState === undefined) {
+					//TODO: maybe reset video state
+					resolve(false);
+				}
+				
+				this.source = data.source;
+				this.transcript = [];
+				this.moments = [];
+				this.videoMetadata = {};
+				this.commonState = new CommonState(
+					this.domainStore,
+					this,
+					data.commonState.id,
+					data.commonState.trackId,
+				);
+				this.commonState.fetchedFromFirebase(data.commonState);
+				this.highLabel = data.highLabel;
+				this.lowLabel = data.lowLabel;
+				this.setVideoLink(data.videoLink);
+				resolve(true);
+			})).catch((error) => {
+				reject("edit fetch error: " + error.message);
+			});
+		});
+	}
 
 	videoStateConverter = {
 		toFirestore: function(videoState) {
 			const data = {
+				videoLink: videoState.videoLink,
 				source: videoState.source,
-				transcript: videoState.transcript,
-				moments: videoState.moments,
-				videoMetadata: {
-					...videoState.videoMetadata,
-				},
+				//transcript: videoState.transcript,
+				//moments: videoState.moments,
+				// videoMetadata: {
+				// 	...videoState.videoMetadata,
+				// },
 				commonState: videoState.commonState.commonStateConverter.toFirestore(videoState.commonState),
 				highLabel: videoState.highLabel,
 				lowLabel: videoState.lowLabel,
 			}
+			//console.log("to", data);
 			return data;
 		},
 		fromFirestore: function(snapshot, options) {
 			const data = snapshot.data(options);
+			//console.log("from", data);
 			return data;
 		},
 	};

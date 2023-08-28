@@ -42,7 +42,7 @@ const OperationPanel = observer(function OperationPanel() {
 		temporal: {},
 	});
 	return (<div className={"flex flex-col items-center p-2 border"
-		+ (haveSuggested ? " bg-green-200 opacity-50" : "")
+		+ (haveSuggested ? " bg-green-200 opacity-50" : " bg-gray-100")
 	}>
 		<h2> Operation Panel</h2>
 		{ selectedOperation === null ? 

@@ -47,7 +47,7 @@ const CommandSpace = observer(function CommandSpace() {
 		curIntent.considerEdits = !curIntent.considerEdits;
 	});
 
-	return (<div className="flex justify-between my-5">
+	return (<div className="flex justify-between my-5 max-h-96">
 		<div className="w-2/3 flex flex-col items-center mx-2">
 			<h2> Edit #{curIntent.idx} </h2>
 			{systemSetting ? (<>
@@ -59,7 +59,7 @@ const CommandSpace = observer(function CommandSpace() {
 					className="w-full border p-2"
 					onChange={onChangeTextCommand} 
 				/>
-				<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border">
+				<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border  bg-gray-100">
 					<SketchCanvas />
 					<div>
 						<label htmlFor={"considerEdits"}> iterate </label>
@@ -78,7 +78,7 @@ const CommandSpace = observer(function CommandSpace() {
 		</div>
 		<div className="w-1/3">
 			<h2> Edits: </h2>
-			<div className="border p-2">
+			<div className="border p-2 h-full overflow-y-scroll bg-gray-100">
 				<button 
 					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
 					onClick={() => onAddClick()} 
