@@ -331,7 +331,7 @@ class IntentState {
 
 				this.idx = data.idx;
 				this.textCommand = data.textCommand;
-				this.summary = data.dummary;
+				this.summary = data.summary;
 				this.sketchCommand = data.sketchCommand;
 				this.sketchPlayPosition = data.sketchPlayPosition;
 				this.trackId = data.trackId;

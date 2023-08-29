@@ -368,7 +368,6 @@ class DomainStore {
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
 		};
-		console.log("request projectid", this.projectMetadata.title);
 		requestData.projectId = toJS(this.projectMetadata.title);
 		requestData.projectMetadata = toJS({
 			...this.projectMetadata
