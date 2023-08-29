@@ -492,12 +492,12 @@ class EditState {
 				step: 1,
 			},
 			"star.innerRadius": {
-				min: 0,
-				min: this.shapeParameters.star.outerRadius,
+				min: minWidth / 2,
+				max: Math.min(canvasWidth, canvasHeight) / 2,
 				step: roundNumber(projectWidth / 100, 0),
 			},
 			"star.outerRadius": {
-				min: this.shapeParameters.star.innerRadius,
+				min: minWidth / 2,
 				max: Math.min(canvasWidth, canvasHeight) / 2,
 				step: roundNumber(projectWidth / 100, 0),
 			},
