@@ -191,9 +191,11 @@ class IntentState {
 		let y = Math.min(y1, y2);
 		let width = Math.abs(x1 - x2);
 		let height = Math.abs(y1 - y2);
+		let explanation = "random edit";
 
 
 		let newEdit = new EditState(this.domainStore, this, suggested, this.trackId);
+		newEdit.explanation = explanation;
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,

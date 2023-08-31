@@ -243,8 +243,17 @@ const Timeline = observer(function Timeline() {
                 </div>
             </div>
 			<div className="flex gap-1 justify-start px-2">
-					<span> Selected: </span> <span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
-				</div>
+				<span> Selected: </span> <span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
+			</div>
+			{
+				(selectedSuggestedEdits.length !== 1) ? null : (
+					<div className="flex gap-1 justify-start px-2">
+						<span> Explanation: </span> <span> {
+							uiStore.timelineControls.selectedTimelineItems[0].explanation
+						} </span>
+					</div>
+				)
+			}
             <TimelineTracks />
 			<div className="flex flex-col justify-center gap-1">
 				<div className="flex gap-1 justify-center">

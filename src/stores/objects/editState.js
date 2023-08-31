@@ -25,6 +25,8 @@ class EditState {
 
 	isSuggested = false;
 
+	explanation = [];
+
 	textParameters = {
 		content: "HELLO", // text input
 		style: {
@@ -272,6 +274,9 @@ class EditState {
 			this.commonState.setMetadata({
 				speed: parameters.speed,
 			});
+		}
+		if (parameters.info !== undefined) {
+			this.explanation = parameters.info;
 		}
 	}
 
@@ -665,6 +670,7 @@ class EditState {
 			edit.commonState.trackId,
 		);
 		this.isSuggested = edit.isSuggested;
+		this.explanation = edit.explanation;
 	}
 
 	saveFirebase(userId, taskIdx) {
@@ -710,6 +716,7 @@ class EditState {
 				);
 				this.commonState.fetchedFromFirebase(data.commonState);
 				this.isSuggested = data.isSuggested;
+				this.explanation = data.explanation;
 				resolve(true);
 			})).catch((error) => {
 				reject("edit fetch error: " + error.message);
@@ -729,6 +736,7 @@ class EditState {
 				blurParameters: { ...toJS(editState.blurParameters) },
 				commonState: editState.commonState.commonStateConverter.toFirestore(editState.commonState),
 				isSuggested: editState.isSuggested,
+				explanation: editState.explanation,
 			};
 			//console.log("to", data);
 			return data;
