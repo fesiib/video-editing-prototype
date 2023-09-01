@@ -2,7 +2,7 @@ import { action, makeAutoObservable, toJS } from "mobx";
 import DomainStore from "./domainStore";
 import UIStore from "./uiStore";
 import UserStore from "./userStore";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 
 class LogData {
@@ -128,6 +128,72 @@ class RootStore {
 				}
 			}).catch((error) => {
 				reject(error);
+			});
+		});
+	}
+
+	resetFirebase() {
+		if (!this.userStore.isLoggedIn) {
+			return;
+		}
+		const taskKeys = Object.keys(this.userStore.videoLinks);
+		const userId = this.userStore.userId;
+		const rootCollection = collection(firestore, this.collection);
+		const curUserStore = doc(rootCollection, userId);
+		const curVideoCollection = collection(curUserStore, this.videoCollection);
+		const curIntentCollection = collection(curUserStore, this.intentCollection);
+		const curEditCollection = collection(curUserStore, this.editCollection);
+		const taskCollections = taskKeys.map((taskKey) => {
+			return collection(curUserStore, taskKey);
+		});
+		return new Promise((resolve, reject) => {
+			let taskGets = [];
+			let taskDeletes = [];
+			for (let i = 0; i < taskCollections.length; i++) {
+				const curTaskCollection = taskCollections[i];
+				taskGets.push(getDocs(curTaskCollection));
+			}
+			Promise.all(taskGets).then((querySnapshots) => {
+				for (let i = 0; i < querySnapshots.length; i++) {
+					const querySnapshot = querySnapshots[i];
+					querySnapshot.forEach((singleDoc) => {
+						taskDeletes.push(deleteDoc(singleDoc.ref));
+					});
+				}
+				Promise.all(taskDeletes).then(() => {
+					console.log("deleted tasks");
+					getDocs(curVideoCollection).then((querySnapshot) => {
+						querySnapshot.forEach((singleDoc) => {
+							deleteDoc(singleDoc.ref);
+						});
+						getDocs(curIntentCollection).then((querySnapshot) => {
+							querySnapshot.forEach((singleDoc) => {
+								deleteDoc(singleDoc.ref);
+							});
+							getDocs(curEditCollection).then((querySnapshot) => {
+								querySnapshot.forEach((singleDoc) => {
+									deleteDoc(singleDoc.ref);
+								});
+								deleteDoc(curUserStore).then(() => {
+									console.log("deleted User");
+									resolve();
+								}).catch((error) => {
+									reject("user save error: " + error.message);
+								});
+							}).catch((error) => {
+								reject("user save error: " + error.message);
+							});
+						}).catch((error) => {
+							reject("user save error: " + error.message);
+						});
+					}).catch((error) => {
+						reject("user save error: " + error.message);
+					});
+				}).catch((error) => {
+					reject("user save error: " + error.message);
+				});
+			}).catch((error) => {
+				reject("user save error: " + error.message);
 			});
 		});
 	}

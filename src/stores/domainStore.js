@@ -265,6 +265,7 @@ class DomainStore {
 
 		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
+		const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
 		const randomConsiderEdits = Math.random() > 0.5;
 		const randomTextCommand = Math.random() > 0.5 ? "add" : "remove";
 		const randomSketchCommand = Math.random() > 0.5 ? [
@@ -273,7 +274,8 @@ class DomainStore {
 		const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
 		
 		newIntent.setEditOperationKey(randomEditOperationKey);
-		newIntent.suggestedEditOperationKey = randomSuggestedEditOperationKey;
+		newIntent.suggestedEditOperationKey = "";
+		newIntent.suggestedEditOperationKeys = randomSuggestedEditOperationKeys;
 		newIntent.considerEdits = randomConsiderEdits;
 		newIntent.textCommand = randomTextCommand;
 		newIntent.summary = randomTextCommand;
@@ -364,6 +366,7 @@ class DomainStore {
 			projectId: "",
 			projectMetadata: {},
 			edits: [],
+			skippedSegments: [],
 			requestParameters: {},
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
@@ -377,6 +380,16 @@ class DomainStore {
 		});
 		requestData.requestParameters = toJS({
 			...this.curIntent.requestParameters,
+		});
+
+		requestData.skippedSegments = [...this.skippedParts].map((edit) => {
+			return {
+				temporalParameters: {
+					start: edit.commonState.offset,
+					finish: edit.commonState.end,
+					duration: edit.commonState.sceneDuration,
+				}
+			};
 		});
 
 		// response
@@ -399,6 +412,8 @@ class DomainStore {
 					this.processingIntent = false;
 					return;
 				}
+				const suggestedEditOperationKeys = responseData.requestParameters.editOperations;
+				const suggestedParameters = responseData.requestParameters.parameters;
 				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
 				const suggestedEdits = responseData.edits;
 				this.curIntent.suggestedEdits = suggestedEdits.map((edit) => {
@@ -407,14 +422,23 @@ class DomainStore {
 						duration: this.projectMetadata.duration,
 						z: this.curIntent.intentPos + 1,
 					});
-					newEdit.setResponseBody(edit);
+					newEdit.setResponseBody({
+						...edit,
+						suggestedParameters: suggestedParameters,
+					});
 					return newEdit;
 				});
-				if (suggestedEditOperationKey !== this.curIntent.editOperationKey) {
-					this.curIntent.suggestedEditOperationKey = suggestedEditOperationKey;
+				// if (suggestedEditOperationKey !== this.curIntent.editOperationKey) {
+				// 	this.curIntent.suggestedEditOperationKey = suggestedEditOperationKey;
+				// }
+				// else {
+				// 	this.curIntent.suggestedEditOperationKey = "";
+				// }
+				if (suggestedEditOperationKeys.includes(this.curIntent.editOperationKey)) {
+					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys.filter((key) => key !== this.curIntent.editOperationKey);
 				}
 				else {
-					this.curIntent.suggestedEditOperationKey = "";
+					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
 				}
 				this.processingIntent = false;
 			})).catch(action((error) => {

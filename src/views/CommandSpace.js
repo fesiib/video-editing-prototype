@@ -66,7 +66,7 @@ const CommandSpace = observer(function CommandSpace() {
 							<SketchCanvas />
 							<div>
 								<label htmlFor={"considerEdits"}> iterate </label>
-								<input type="checkbox" id="consdierEdits" name="consdierEdits" value="consdierEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
+								<input type="checkbox" id="considerEdits" name="considerEdits" value="considerEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
 							
 								<button 
 									className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"

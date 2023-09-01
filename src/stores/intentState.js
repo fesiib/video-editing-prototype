@@ -20,6 +20,7 @@ class IntentState {
 	considerEdits = true;
 	suggestedEdits = [];
 	suggestedEditOperationKey = "";
+	suggestedEditOperationKeys = [];
 
     constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -31,6 +32,7 @@ class IntentState {
 		this.sketchPlayPosition = sketchPlayPosition;
 		this.editOperationKey = "";
 		this.suggestedEditOperationKey = "";
+		this.suggestedEditOperationKeys = [];
 		this.activeEdits = [];
 		this.suggestedEdits = [];
 		this.id = `intent-${randomUUID()}`;
@@ -50,6 +52,7 @@ class IntentState {
 		newIntent.summary = this.summary;
 		newIntent.editOperationKey = this.editOperationKey;
 		newIntent.suggestedEditOperationKey = this.suggestedEditOperationKey;
+		newIntent.suggestedEditOperationKeys = this.suggestedEditOperationKeys.slice(0);
 		newIntent.activeEdits = this.activeEdits.slice(0).map((edit) => {
 			const newEdit = edit.getDeepCopy();
 			newEdit.intent = newIntent;
@@ -78,6 +81,9 @@ class IntentState {
 
 	setEditOperationKey(newKey) {
 		this.domainStore.rootStore.resetTempState();
+		if (this.suggestedEditOperationKeys.includes(newKey)) {
+			this.suggestedEditOperationKeys = this.suggestedEditOperationKeys.filter((key) => key !== newKey);
+		}
 		if (newKey === this.suggestedEditOperationKey) {
 			this.suggestedEditOperationKey = "";
 		}
@@ -192,10 +198,14 @@ class IntentState {
 		let width = Math.abs(x1 - x2);
 		let height = Math.abs(y1 - y2);
 		let explanation = "random edit";
+		let suggestedParameters = {
+			"text": ["cheburek"]
+		};
 
 
 		let newEdit = new EditState(this.domainStore, this, suggested, this.trackId);
 		newEdit.explanation = explanation;
+		newEdit.suggestedParameters = suggestedParameters;
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -283,7 +293,7 @@ class IntentState {
 
 	get requestParameters() {
 		return {
-			consdierEdits: this.considerEdits,
+			considerEdits: this.considerEdits,
 			hasText: this.textCommand !== "",
 			hasSketch: this.sketchCommand.length > 0,
 			text: this.textCommand,
@@ -340,6 +350,7 @@ class IntentState {
 				this.id = data.id;
 				this.editOperationKey = data.editOperationKey;
 				this.suggestedEditOperationKey = data.suggestedEditOperationKey;
+				this.suggestedEditOperationKeys = data.suggestedEditOperationKeys;
 				
 				this.considerEdits = data.considerEdits;
 
@@ -396,6 +407,7 @@ class IntentState {
 				trackId: intent.trackId,
 				editOperationKey: intent.editOperationKey,
 				suggestedEditOperationKey: intent.suggestedEditOperationKey,
+				suggestedEditOperationKeys: intent.suggestedEditOperationKeys,
 				activeEdits: [],
 				suggestedEdits: [],
 				id: intent.id,

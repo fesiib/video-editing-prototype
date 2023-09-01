@@ -90,6 +90,8 @@ class EditState {
 		cropHeight: 0, // number input
 	};
 
+	suggestedParameters = {};
+
     constructor(domainStore, intent, isSuggested, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
@@ -97,6 +99,8 @@ class EditState {
 		this.intent = intent;
 		
 		this.isSuggested = isSuggested;
+		this.explanation = [];
+		this.suggestedParameters = {};
 
 		this.cropParameters = {
 			x: 0,
@@ -123,6 +127,10 @@ class EditState {
 
 		newEdit.cutParameters = {...this.cutParameters};
 		newEdit.blurParameters = {...this.blurParameters};
+
+		newEdit.isSuggested = this.isSuggested;
+		newEdit.explanation = [...this.explanation];
+		newEdit.suggestedParameters = {...this.suggestedParameters};
 		// add all parameters
 		return newEdit;
 	}
@@ -652,6 +660,7 @@ class EditState {
 		this.blurParameters = { ...responseBody.blurParameters };
 		this.setSpatialParameters(responseBody.spatialParameters);
 		this.setTemporalParameters(responseBody.temporalParameters);
+		this.suggestedParameters = { ...responseBody.suggestedParameters };
 	}
 
 	fetchedFromFirebase(edit) {
@@ -671,6 +680,7 @@ class EditState {
 		);
 		this.isSuggested = edit.isSuggested;
 		this.explanation = edit.explanation;
+		this.suggestedParameters = { ...edit.suggestedParameters };
 	}
 
 	saveFirebase(userId, taskIdx) {
@@ -717,6 +727,7 @@ class EditState {
 				this.commonState.fetchedFromFirebase(data.commonState);
 				this.isSuggested = data.isSuggested;
 				this.explanation = data.explanation;
+				this.suggestedParameters = { ...data.suggestedParameters };
 				resolve(true);
 			})).catch((error) => {
 				reject("edit fetch error: " + error.message);
@@ -737,6 +748,7 @@ class EditState {
 				commonState: editState.commonState.commonStateConverter.toFirestore(editState.commonState),
 				isSuggested: editState.isSuggested,
 				explanation: editState.explanation,
+				suggestedParameters: { ...toJS(editState.suggestedParameters) },
 			};
 			//console.log("to", data);
 			return data;

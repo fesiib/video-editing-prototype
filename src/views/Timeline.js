@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { action } from "mobx";
+import { action, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import TimelineTracks from "../components/timeline/TimelineTracks";
@@ -246,11 +246,19 @@ const Timeline = observer(function Timeline() {
 				<span> Selected: </span> <span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
 			</div>
 			{
-				(selectedSuggestedEdits.length !== 1) ? null : (
+				(selectedSuggestedEdits.length !== 1
+					|| domainStore.processingIntent
+				) ? null : (
 					<div className="flex gap-1 justify-start px-2">
 						<span> Explanation: </span> <span> {
 							uiStore.timelineControls.selectedTimelineItems[0].explanation
 						} </span>
+						{ domainStore.curIntent.editOperation === null ? null : (<>
+								<span> Parameter Help: </span> <span>
+									{JSON.stringify(toJS(uiStore.timelineControls.selectedTimelineItems[0].suggestedParameters[domainStore.curIntent.editOperationKey]))}
+								</span>
+							</>)
+						}
 					</div>
 				)
 			}
@@ -272,7 +280,7 @@ const Timeline = observer(function Timeline() {
 						{"->"}
 					</button>
 				</div>
-				{selectedSuggestedEdits.length === 0 ? null : (
+				{(selectedSuggestedEdits.length === 0 || !domainStore.processingIntent) ? null : (
 					<div className="flex gap-1 justify-center">
 						<button
 							className={"bg-green-300 hover:bg-green-500" + decisionClassName}

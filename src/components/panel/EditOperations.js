@@ -15,7 +15,7 @@ const EditOperations = observer(function EditOperations() {
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
-
+	const suggestedOperationKeys = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKeys : [];
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {
 			domainStore.curIntent.setEditOperationKey("");
@@ -31,6 +31,8 @@ const EditOperations = observer(function EditOperations() {
 			let currentClassName = inactiveButtonClassName;
 			if (selectedOperationKey === operationKey) {
 				currentClassName = activeButtonClassName;
+			} else if (suggestedOperationKeys.includes(operationKey)) {
+				currentClassName = suggestedButtonClassName;
 			} else if (suggestedOperationKey === operationKey) {
 				currentClassName = suggestedButtonClassName;
 			}

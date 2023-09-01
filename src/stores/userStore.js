@@ -1,6 +1,6 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { firestore } from "../services/firebase";
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 
 class UserStore {
 	userId = null;
@@ -257,6 +257,20 @@ class UserStore {
 				reject("user fetch error: " + error.message);
 			});
 		});
+	}
+
+	resetFirebase() {
+		if (this.userId === null || this.isTaskChosen === true) {
+			return;
+		}
+		if (this.loading === true) return;
+		this.loading = true;
+		this.rootStore.resetFirebase().then(action(() => {
+			this.loading = false;
+		})).catch(action((error) => {
+			this.loading = false;
+			console.log(error);
+		}));
 	}
 
 	get isLoggedIn() {
