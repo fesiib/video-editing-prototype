@@ -15,6 +15,9 @@ import TextWall from "./views/TextWall";
 import CommandSpace from "./views/CommandSpace";
 import EditPanel from "./views/EditPanel";
 import Header from "./views/Header";
+import History from "./views/History";
+import NewIntent from "./components/general/NewIntent";
+import NavigationToggle from "./components/general/NavigationToggle";
 
 const App = observer(function App() {
     const { userStore, uiStore, domainStore } = useRootContext();
@@ -79,23 +82,40 @@ const App = observer(function App() {
 						// 		<CommandSpace />
 						// 	</div>
 						// </div>
-						<div className="grid grid-cols-7 h-full">
-							<div className="col-span-1">
+						// <div className="grid grid-cols-7 h-full">
+						// 	<div className="col-span-1">
+						// 		<EditPanel />
+						// 	</div>
+						// 	<div className="col-span-6 flex flex-col justify-start  mx-8">
+						// 		<div className="grid grid-cols-2 items-center gap-2">
+						// 			<div className="col-span-1 row-span-full flex flex-col items-center">
+						// 				<EditorCanvas />
+						// 				<Timeline />
+						// 			</div>
+						// 			<div className="col-span-1 row-span-full mx-4">
+						// 				<TextWall />
+						// 			</div>
+						// 		</div>
+						// 		<div className="col-span-6 col-start-2">
+						// 			<CommandSpace />
+						// 		</div>
+						// 	</div>
+						// </div>
+						<div className="flex flex-row">
+							<div className="flex flex-col w-1/2 mx-1 gap-2">
+								<CommandSpace />
 								<EditPanel />
+								<History />
 							</div>
-							<div className="col-span-6 flex flex-col justify-start  mx-8">
-								<div className="grid grid-cols-2 items-center gap-2">
-									<div className="col-span-1 row-span-full flex flex-col items-center">
-										<EditorCanvas />
-										<Timeline />
-									</div>
-									<div className="col-span-1 row-span-full mx-4">
+							<div className="flex flex-col w-1/2 items-center">
+								<EditorCanvas />
+								<NavigationToggle />
+								<Timeline />
+								{
+									uiStore.navigation === "transcript" ? (
 										<TextWall />
-									</div>
-								</div>
-								<div className="col-span-6 col-start-2">
-									<CommandSpace />
-								</div>
+									) : null
+								}
 							</div>
 						</div>
 					) : (

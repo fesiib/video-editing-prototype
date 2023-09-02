@@ -7,6 +7,13 @@ import TimelineTracks from "../components/timeline/TimelineTracks";
 
 import useRootContext from "../hooks/useRootContext";
 import { roundNumber } from "../utilities/genericUtilities";
+import ScissorsIcon from "../icons/ScissorsIcon";
+import TrashcanIcon from "../icons/TrashcanIcon";
+import PauseIcon from "../icons/PauseIcon";
+import PlayIcon from "../icons/PlayIcon";
+import PlusIcon from "../icons/PlusIcon";
+import CheckIcon from "../icons/CheckIcon";
+import CrossIcon from "../icons/CrossIcon";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
@@ -175,56 +182,54 @@ const Timeline = observer(function Timeline() {
 	// 	uiStore.timelineControls.splitting
 	// ]);
 
-	const buttonClassName = " hover:bg-indigo-400 text-black py-2 px-4 rounded";
-	const decisionClassName = " text-black py-2 px-4 rounded";
+	const buttonClassName = " hover:bg-indigo-400 text-black p-1 rounded";
+	const decisionClassName = " text-black my-1 rounded";
 
     return (
-        <div className="w-fit bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
-            <div className="flex justify-between">
-                <button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
-                    {uiStore.timelineControls.isPlaying ? "pause" : "play"}
-                </button>
-                <button
-                    className={
-                        (uiStore.timelineControls.splitting
-                            ? "bg-indigo-500"
-                            : "bg-indigo-300") + buttonClassName
-                    }
-                    onClick={onPressSplit}
-                    id="split_button"
-                >
-                    {uiStore.timelineControls.splitting ? "Splitting" : "Split"}
-                </button>
-				<button
-                    className={
-                        (uiStore.timelineControls.rangeSelectingTimeline
-                            ? "bg-indigo-500"
-                            : "bg-indigo-300") + buttonClassName
-                    }
-                    onClick={onPressRangeSelect}
-                    id="intentselect_button"
-                >
-                    {uiStore.timelineControls.rangeSelectingTimeline ? "Range Selecting" : "Range Select"}
-                </button>
-                <button
-                    className={"bg-indigo-300" + buttonClassName}
-                    id="delete_button"
-                    onClick={onDeleteTimelineItems}
-                >
-                    Delete
-                </button>
-                {/* <div className="bg-indigo-300 p-1">
-                    <label htmlFor="speed_input"> Speed </label>
-                    <input
-                        id="speed_input"
-                        type="number"
-                        style={{
-                            width: 50,
-                        }}
-                        step={0.25}
-                    />
-                </div> */}
-                <div>
+        <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
+            <div className="flex flex-row justify-between my-2">
+				<div className="flex flex-row gap-2">
+					<button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
+						{
+							uiStore.timelineControls.isPlaying ? <PauseIcon /> : <PlayIcon />
+						}
+					</button>
+				</div>
+				<div className="flex flex-row flex-center gap-2">
+					<div className="flex p-1 bg-indigo-200 rounded">
+						<span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
+					</div>
+					<button
+						className={
+							(uiStore.timelineControls.rangeSelectingTimeline
+								? "bg-indigo-500"
+								: "bg-indigo-300") + buttonClassName
+						}
+						onClick={onPressRangeSelect}
+						id="intentselect_button"
+					>
+						<PlusIcon />
+					</button>
+					<button
+						className={
+							(uiStore.timelineControls.splitting
+								? "bg-indigo-500"
+								: "bg-indigo-300") + buttonClassName
+						}
+						onClick={onPressSplit}
+						id="split_button"
+					>
+						<ScissorsIcon />
+					</button>
+					<button
+						className={"bg-indigo-300" + buttonClassName}
+						id="delete_button"
+						onClick={onDeleteTimelineItems}
+					>
+						<TrashcanIcon />
+					</button>
+				</div>
+                <div className="self-end">
                     <label htmlFor="timelinen_zoom">
                         {" "}
                         Zoom {
@@ -242,12 +247,8 @@ const Timeline = observer(function Timeline() {
                     />
                 </div>
             </div>
-			<div className="flex gap-1 justify-start px-2">
-				<span> Selected: </span> <span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
-			</div>
 			{
-				(selectedSuggestedEdits.length !== 1
-					|| domainStore.processingIntent
+				(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
 				) ? null : (
 					<div className="flex gap-1 justify-start px-2">
 						<span> Explanation: </span> <span> {
@@ -262,7 +263,12 @@ const Timeline = observer(function Timeline() {
 					</div>
 				)
 			}
-            <TimelineTracks />
+			{
+				uiStore.navigation === "timeline" ? (
+					<TimelineTracks />
+				) : null
+			}
+
 			<div className="flex flex-col justify-center gap-1">
 				<div className="flex gap-1 justify-center">
 					<button
@@ -280,21 +286,21 @@ const Timeline = observer(function Timeline() {
 						{"->"}
 					</button>
 				</div>
-				{(selectedSuggestedEdits.length === 0 || !domainStore.processingIntent) ? null : (
+				{(selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? null : (
 					<div className="flex gap-1 justify-center">
 						<button
 							className={"bg-green-300 hover:bg-green-500" + decisionClassName}
 							id="accept_button"
 							onClick={() => onDecisionClick("accept")}
 						>
-							Accept {selectedSuggestedEdits.length > 1 ? "All" : ""}
+							<CheckIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
 						</button>
 						<button
 							className={"bg-red-300 hover:bg-red-500" + decisionClassName}
 							id="reject_button"
 							onClick={() => onDecisionClick("reject")}
 						>
-							Reject {selectedSuggestedEdits.length > 1 ? "All" : ""}
+							<CrossIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
 						</button>
 					</div>
 				)}

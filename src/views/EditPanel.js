@@ -7,7 +7,7 @@ import OperationPanel from "../components/panel/OperationPanel";
 
 const EditPanel = observer(function EditPanel() {
 
-	return (<div className="flex flex-col">
+	return (<div className="flex flex-row gap-2">
 		<EditOperations />
 		<OperationPanel />
 	</div>);

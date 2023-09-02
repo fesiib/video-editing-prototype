@@ -10,8 +10,8 @@ from processor import process_video, get_video_by_filename
 
 app = Flask(__name__)
 
-CORS(app, origins=["http://localhost:3000"])
-
+CORS(app, origins=["http://localhost:7777", "http://internal.kixlab.org:7777"])
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config["UPLOAD_EXTENSIONS"] = [".mp4", ".jpg", ".png", "webm"]
 
 FILE = Path(__file__).resolve()
@@ -76,7 +76,7 @@ def test_video(video_link):
 
 
 def launch_server():
-    app.run(host="0.0.0.0", port=7777)
+    app.run(host="0.0.0.0", port=5000)
 
 if __name__ == "__main__":
     #test_video("https://www.youtube.com/live/4LdIvyfzoGY?feature=share")

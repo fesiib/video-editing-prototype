@@ -12,6 +12,8 @@ class UIStore {
         height: window.innerHeight,
     };
 
+	navigation = "timeline";
+
     canvasSize = {
         width: (window.innerWidth / 3) * 2, // 2/3
         height: (window.innerHeight / 3) * 2, // 2/3
@@ -216,11 +218,11 @@ class UIStore {
     setWindowSize({ width, height }) {
         this.windowSize = { width, height };
         this.canvasSize = {
-            width: width / 7 * 3,
-            height: height / 2,
+            width: width / 2,
+            height: height / 3,
         };
         this.timelineSize = {
-            width: width / 7 * 3,
+            width: width / 2 - 10,
             height: 80 * this.rootStore.domainStore.projectMetadata.trackCnt,
         };
 		this.timelineControls.pxPerSec = this.adaptZoomValue(0);
@@ -319,6 +321,13 @@ class UIStore {
 			return;
 		}
 		this.canvasControls.transformerNodeIds = [];
+	}
+
+	setNavigation(navigation) {
+		if (navigation !== "timeline" && navigation !== "transcript") {
+			return;
+		}
+		this.navigation = navigation;
 	}
 
 	logData(msg, data) {

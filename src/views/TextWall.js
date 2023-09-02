@@ -468,7 +468,7 @@ const TextWall = observer(function TextWall() {
     return (
         <div 
 			ref={textWallRef}
-			className="overflow-y-scroll overflow-x-visible disable-select mx-2 px-2 bg-gray-100 border"
+			className="overflow-y-scroll overflow-x-visible disable-select w-full max-h-72 px-2 bg-gray-100 border"
 			style={{
                 height: uiStore.windowSize.height / 3 * 2
 			}}

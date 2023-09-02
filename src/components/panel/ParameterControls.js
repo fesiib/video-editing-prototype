@@ -63,7 +63,7 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	return (<div className="flex flex-col">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label> 
-		<div id={inputId} className="border grid">
+		<div id={inputId} className="border grid text-sm">
 			<input className="" 
 				id={inputId + "_url"} 
 				type="url"
@@ -110,10 +110,10 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 			}));
 		}
 	});
-	return (<div className="my-1 flex flex-col items-start">
+	return (<div className="flex flex-col items-start">
 		<label className="text-left text-xs w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
-			className="h-8 w-full border"
+			className="h-6 w-full border "
 			id={inputId}
 			type="text"
 			value={parameter === "mixed" ? "" : parameter}
@@ -219,7 +219,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 	return ((defaultMin === null || defaultMax === null || defaultMin >= defaultMax) ? null :
 	<div className="flex justify-between">
 		<label className="text-left text-sm" htmlFor={inputId}> {operationName} </label>
-		<div className="flex justify-end w-1/2">
+		<div className="flex justify-end w-1/2 text-sm">
 			<input 
 				className="w-1/2 border"
 				id={inputId}
@@ -271,10 +271,10 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 		}
 	});
 
-	return (<div className="my-1 flex justify-between">
+	return (<div className="flex justify-between">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<select 
-			className="w-1/2 border"
+			className="w-1/2 border text-sm"
 			id={inputId}
 			value={parameter === "mixed" ? null : parameter}
 			placeholder={parameter === "mixed" ? "mixed" : parameterKey}
@@ -320,7 +320,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 	return (<div className="my-1 flex justify-between">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
-			className="w-1/4 border"
+			className="w-1/4 border text-sm"
 			id={inputId}
 			type="color"
 			value={parameter === "mixed" ? "#000000" : parameter}
@@ -379,7 +379,7 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 	});
 
 	return (defaultMin === null || defaultMax === null || defaultMin > defaultMax) ? null : (
-	<div className="my-1 flex justify-between">
+	<div className="flex justify-between">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<input 
 			className="w-1/2 border"
@@ -422,7 +422,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 			}));
 		}
 	});
-	return (<div id={inputId} className="my-1 flex justify-start gap-1">
+	return (<div id={inputId} className="mt-1 flex justify-start gap-1">
 		{
 			options.map((option) => {
 				return (<button 

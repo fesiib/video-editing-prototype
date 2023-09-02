@@ -6,7 +6,9 @@ import { action } from "mobx";
 import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
 
-
+const fromScratch = "from-scratch";
+const addMore = "add-more";
+const adjustSelected = "adjust-selected";
 
 const CommandSpace = observer(function CommandSpace() {
 	const { userStore, domainStore } = useRootContext();
@@ -14,29 +16,11 @@ const CommandSpace = observer(function CommandSpace() {
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = [...domainStore.intents].reverse();
 
+	const [processMode, setProcessMode] = useState(fromScratch);
+
 	const onChangeTextCommand = (event) => {
 		curIntent.setTextCommand(event.target.value);
 	}
-
-	const onAddClick = action(() => {
-		domainStore.addIntent();
-	});
-
-	const onAddRandomClick = action(() => {
-		domainStore.addRandomIntent();
-	});
-
-	const onDeleteClick = action((intentPos) => {
-		domainStore.deleteIntent(intentPos);
-	});
-
-	const onCopyClick = action((intentPos) => {
-		domainStore.copyIntentToCurrent(intentPos);
-	});
-
-	const onIntentClick = action((intentPos) => {
-		domainStore.setCurIntent(intentPos);
-	});
 
 	const onProcessClick = action(() => {
 		domainStore.processIntent();
@@ -46,94 +30,49 @@ const CommandSpace = observer(function CommandSpace() {
 		curIntent.considerEdits = !curIntent.considerEdits;
 	});
 
-	return (<div className="flex justify-between my-5 max-h-96">
-		<div className="w-2/3 flex flex-col items-center mx-2">
-			<h2> Edit #{curIntent.idx} </h2>
-			{systemSetting ? (
-				domainStore.processingIntent ? (
-					<div> Processing... </div>
-				) : (
-					<>
+	const onProcessModeChange = action((event) => {
+		setProcessMode(event.target.value);
+	});
+
+	return (<div className="w-full flex flex-col items-center">
+		<h2 className="w-full"> Describe your edit </h2>
+		{systemSetting ? (
+			domainStore.processingIntent ? (
+				<div> Processing... </div>
+			) : (
+				<div className="flex flex-col gap-2 p-2 w-full bg-gray-100"> 
+					<div className="flex flex-row">
 						<input 
 							id="textCommand" 
 							type="text"
 							placeholder="description"
 							value={curIntent.textCommand}
-							className="w-full border p-2"
+							className="w-full border p-1"
 							onChange={onChangeTextCommand} 
 						/>
-						<div className="w-full flex flex-row gap-2 justify-between my-2 p-2 border  bg-gray-100">
-							<SketchCanvas />
-							<div>
-								<label htmlFor={"considerEdits"}> iterate </label>
-								<input type="checkbox" id="considerEdits" name="considerEdits" value="considerEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} />
-							
-								<button 
-									className="w-fit h-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
-									onClick={() => onProcessClick()}
-									//disabled={curIntent.textCommand === "" && curIntent.sketchCommand.length === 0}
-								>
-									Process
-								</button>
-							</div>
-						</div>
-					</>
-				)
-			) : null}
-		</div>
-		<div className="w-1/3">
-			<h2> Edits: </h2>
-			<div className="border p-2 h-full overflow-y-scroll bg-gray-100">
-				<button 
-					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-					onClick={() => onAddClick()} 
-					// disabled={curIntent.activeEdits.length === 0}
-				>
-					+ 
-				</button> 
-				<button
-					className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-					onClick={() => onAddRandomClick(curIntent.idx)}
-					// disabled={curIntent.activeEdits.length === 0}
-				>
-					+ Random
-				</button>
-				{reversedIntents.length === 0 ? (
-					<div> No edits </div>
-					) : (
-					reversedIntents.map((intent, revIdx) => {
-						const idx = reversedIntents.length - revIdx - 1;
-						const titleIdx = intent.idx;
-						const title = intent.editOperation === null ? "None" : intent.editOperation.title;
-						return <div  key={"intent" + idx} className="my-2 flex justify-between gap-2">
-							<button
-								className={(curIntent.idx === titleIdx ? "bg-indigo-500 " : "bg-indigo-300  hover:bg-indigo-400 ")
-									+ "text-left text-black font-bold py-2 px-4 rounded"
-								}
-								disabled={curIntent.idx === titleIdx}
-								onClick={() => onIntentClick(idx)}
+						<select value={processMode} onChange={onProcessModeChange}>
+							<option value={fromScratch}> From scratch </option>
+							<option value={addMore}> Add more </option>
+							<option value={adjustSelected}> Adjust selected </option>
+						</select>
+					</div>
+					<div className="w-full flex flex-row gap-2 justify-between">
+						<SketchCanvas />
+						<div className="flex flex-col gap-1">
+							<button 
+								className="w-fit h-fit bg-indigo-300 text-black py-2 px-2 rounded hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+								onClick={() => onProcessClick()}
+								disabled={curIntent.textCommand === ""}
 							>
-								{titleIdx} - {`[${title}]`}: {intent.summary}
+								Submit
 							</button>
-							<div className="w-fit flex gap-2 justify-center p-2">
-								{curIntent.idx === titleIdx ? null
-								: (<button
-									className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
-									onClick={() => onCopyClick(idx)}
-									// TODO: copy confirm
-								> Copy </button>)}
-								<button 
-									className="w-fit bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-									onClick={() => onDeleteClick(idx)}
-									// disabled={curIntent.activeEdits.length === 0}
-									// TODO: confirm delete
-								> Delete </button>
-							</div>
+							{/* <label htmlFor={"considerEdits"}> iterate </label>
+							<input type="checkbox" id="considerEdits" name="considerEdits" value="considerEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} /> */}
 						</div>
-					}))
-				}
-			</div>
-		</div>
+					</div>
+				</div>
+			)
+		) : null}
 	</div>);
 });
 

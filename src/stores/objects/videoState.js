@@ -8,7 +8,7 @@ import axios from 'axios'
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 
-const ADDR = "http://localhost:7777/"
+const ADDR = "http://192.168.50.153:5000/"
 
 const REQUEST_TYPES = {
     youtubeLink: {
@@ -100,9 +100,22 @@ class VideoState {
     processVideoLink() {
 		const requestCfg = REQUEST_TYPES.youtubeLink;
 		console.log("processing -> ", this.videoLink);
-        axios.post(requestCfg.serverAddr + requestCfg.route, {
-            videoLink: this.videoLink,
-        }).then(this.processVideoLinkSuccess, this.processVideoLinkFailure);
+
+		const url = requestCfg.serverAddr + requestCfg.route;
+		const data = {
+			videoLink: this.videoLink,
+		};
+		const config = {
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'DELETE, POST, GET, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+			},
+			responseType: 'json',
+		};
+
+		axios.post(url, data, config).then(this.processVideoLinkSuccess, this.processVideoLinkFailure);
     }
 
 	processVideoLinkSuccess(response) {

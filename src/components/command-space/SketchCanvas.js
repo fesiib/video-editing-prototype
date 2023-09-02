@@ -62,7 +62,11 @@ const SketchCanvas = observer(function SketchCanvas() {
 		uiStore.canvasControls.sketching = !uiStore.canvasControls.sketching;
 	});
 	const onCaptureFrameClick = action(() => {
-		if (videoElement === null || curVideo === null || canDraw == false) {
+		if (videoElement === null
+			|| curVideo === null
+			|| canDraw == false
+			|| sketchRef.current === null
+		) {
 			return;
 		}
 		const adaptedPlayPosition = uiStore.timelineControls.playPosition -
@@ -165,7 +169,7 @@ const SketchCanvas = observer(function SketchCanvas() {
 
 
 	useEffect(() => {
-		if (videoElement === null || curIntent === null) {
+		if (videoElement === null || curIntent === null || sketchRef.current === null) {
 			return;
 		}
 		if (curIntent.sketchPlayPosition >= 0) {
@@ -180,14 +184,15 @@ const SketchCanvas = observer(function SketchCanvas() {
 			});
 		}
 	}, [
+		sketchRef.current,
 		curIntent?.sketchPlayPosition,
 		videoElement,
 	]);
 
-	return (<div id={sketchCanvasId} className="w-full border p-2">
+	return (<div id={sketchCanvasId} className="w-full">
 		<div className="flex flex-row gap-2 justify-start">
 			<button
-				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
 				onClick={() => {
 					onSketchClick();
 				}}
@@ -197,102 +202,110 @@ const SketchCanvas = observer(function SketchCanvas() {
 			{
 				sketching ? (
 					<button
-						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black font-bold py-2 px-4 rounded"
+						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
 						onClick={() => onCaptureFrameClick()}
 					>
 						Capture Frame
 					</button>
 				) : null
 			}
-			<button
-				className="w-fit bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-				onClick={action(() => {
-					setCurRect(null);
-					curIntent.setSketchCommand([]);
-				})}
-				disabled={curIntent.sketchCommand.length === 0}
-			>
-				{(curIntent.sketchCommand.length === 0) ? "No Sketch" : "Clear"}
-			</button>
+			{
+				curIntent.sketchCommand.length === 0 ? null : (
+					<button
+						className="w-fit bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded"
+						onClick={action(() => {
+							setCurRect(null);
+							curIntent.setSketchCommand([]);
+						})}
+					>
+						Clear
+					</button>
+				)
+			}
 		</div>
-		<Stage
-			ref={stageRef}
-			className="my-2"
-			width={stageWidth}
-			height={stageHeight}
-			onMouseDown={onStageMouseDown}
-			onMouseMove={onStageMouseMove}
-			onMouseUp={onStageMouseUp}
-		>
-			<Layer
-				ref={sketchLayerRef}
-			>
-				<Rect
-					x={0}
-					y={0}
+		{
+			(!sketching && curIntent.sketchCommand.length === 0) ? null : (
+				<Stage
+					ref={stageRef}
+					className="my-2"
 					width={stageWidth}
 					height={stageHeight}
-					fill="black"
-					draggable={false}
-					visible={true}
-					perfectDrawEnabled={false}
-				/>
-				<Image
-					id={"sketch" + videoId}
-					name={"video"}
-					ref={sketchRef}
-					image={videoElement}
-					x={0}
-					y={0}
-					width={stageWidth}
-					height={stageHeight}
-					scaleX={1}
-					scaleY={1}
-					draggable={false}
-					visible={false}
-					perfectDrawEnabled={false}
-				/>
-			</Layer>
-			<Layer
-				ref={rectsLayerRef}
-			>
-				{curIntent.sketchCommand.map((rect, i) => {
-					const adaptedRect = {
-						x: rect.x / videoWidth * stageWidth,
-						y: rect.y / videoHeight * stageHeight,
-						width: rect.width / videoWidth * stageWidth,
-						height: rect.height / videoHeight * stageHeight,
-						stroke: rect.stroke,
-						strokeWidth: rect.strokeWidth,
-						lineCap: rect.lineCap,
-						lineJoin: rect.lineJoin,
-					};
-					return <Rect
-						key={`rect${i}`}
-						x={adaptedRect.x}
-						y={adaptedRect.y}
-						width={adaptedRect.width}
-						height={adaptedRect.height}
-						stroke={adaptedRect.stroke}
-						strokeWidth={adaptedRect.strokeWidth}
-						lineCap={adaptedRect.lineCap}
-						lineJoin={adaptedRect.lineJoin}
-					/>
-				})}
-				{curRect === null ? null : (
-					<Rect
-						x={curRect.x}
-						y={curRect.y}
-						width={curRect.width}
-						height={curRect.height}
-						stroke={curRect.stroke}
-						strokeWidth={curRect.strokeWidth}
-						lineCap={curRect.lineCap}
-						lineJoin={curRect.lineJoin}
-					/>
-				)}
-			</Layer>
-		</Stage>
+					onMouseDown={onStageMouseDown}
+					onMouseMove={onStageMouseMove}
+					onMouseUp={onStageMouseUp}
+				>
+					<Layer
+						ref={sketchLayerRef}
+					>
+						<Rect
+							x={0}
+							y={0}
+							width={stageWidth}
+							height={stageHeight}
+							fill="black"
+							draggable={false}
+							visible={true}
+							perfectDrawEnabled={false}
+						/>
+						<Image
+							id={"sketch" + videoId}
+							name={"video"}
+							ref={sketchRef}
+							image={videoElement}
+							x={0}
+							y={0}
+							width={stageWidth}
+							height={stageHeight}
+							scaleX={1}
+							scaleY={1}
+							draggable={false}
+							visible={false}
+							perfectDrawEnabled={false}
+						/>
+					</Layer>
+					<Layer
+						ref={rectsLayerRef}
+					>
+						{curIntent.sketchCommand.map((rect, i) => {
+							const adaptedRect = {
+								x: rect.x / videoWidth * stageWidth,
+								y: rect.y / videoHeight * stageHeight,
+								width: rect.width / videoWidth * stageWidth,
+								height: rect.height / videoHeight * stageHeight,
+								stroke: rect.stroke,
+								strokeWidth: rect.strokeWidth,
+								lineCap: rect.lineCap,
+								lineJoin: rect.lineJoin,
+							};
+							return <Rect
+								key={`rect${i}`}
+								x={adaptedRect.x}
+								y={adaptedRect.y}
+								width={adaptedRect.width}
+								height={adaptedRect.height}
+								stroke={adaptedRect.stroke}
+								strokeWidth={adaptedRect.strokeWidth}
+								lineCap={adaptedRect.lineCap}
+								lineJoin={adaptedRect.lineJoin}
+							/>
+						})}
+						{curRect === null ? null : (
+							<Rect
+								x={curRect.x}
+								y={curRect.y}
+								width={curRect.width}
+								height={curRect.height}
+								stroke={curRect.stroke}
+								strokeWidth={curRect.strokeWidth}
+								lineCap={curRect.lineCap}
+								lineJoin={curRect.lineJoin}
+							/>
+						)}
+					</Layer>
+				</Stage>
+			)
+
+		}
 	</div>);
 });
 

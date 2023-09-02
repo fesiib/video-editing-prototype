@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import useRootContext from "../hooks/useRootContext";
 import { action, set } from "mobx";
 import { authStateChanged, signInWithGoogle, signOutFromGoogle } from "../services/firebase";
+import NewIntent from "../components/general/NewIntent";
 
 const Auth = observer(function Auth() {
 	const { userStore } = useRootContext();
@@ -50,9 +51,9 @@ const Auth = observer(function Auth() {
 		}));
 	}, []);
 
-	return (<div className="flex flex-row m-2">
+	return (<div className="flex flex-row m-2 w-full">
 		{!userStore.isLoggedIn ? (
-			<div>
+			<div className="">
 				<button
 					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 					onClick={() => login()}
@@ -61,38 +62,46 @@ const Auth = observer(function Auth() {
 				</button>
 			</div>
 		) : (
-			<div className="flex flex-start gap-2">
-				<div
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-				>
-					{userStore.userName}
-				</div>
-				<button
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-					onClick={() => logout()}
-				>
-					Logout
-				</button>
+			<div className="w-full flex flex-row justify-between gap-2">
 				{
-					(!userStore.isTaskChosen && !userStore.loading) ? (
+					userStore.isTaskChosen && !userStore.loading ? (
+						<NewIntent />
+					) : null
+				}
+				<div className="flex flex-row">
+					{
+						(userStore.isTaskChosen && !userStore.loading) ? (
 						<button
 							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-							onClick={() => resetFirebase()}
+							onClick={() => taskDone()}
 						>
-							Reset All Tasks
+							{
+								userStore.isTutorial ? "Tutorial Done" : `Task ${userStore.taskIdx + 1} Done`
+							}
 						</button>) : null
-				}
-				{
-					(userStore.isTaskChosen && !userStore.loading) ? (
+					}
+					{
+						(!userStore.isTaskChosen && !userStore.loading) ? (
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => resetFirebase()}
+							>
+								Reset All Tasks
+							</button>) : null
+					}
+					
+					<div
+						className="text-black font-bold py-2 px-4 rounded"
+					>
+						{userStore.userName}
+					</div>
 					<button
 						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-						onClick={() => taskDone()}
+						onClick={() => logout()}
 					>
-						{
-							userStore.isTutorial ? "Tutorial Done" : `Task ${userStore.taskIdx + 1} Done`
-						}
-					</button>) : null
-				}
+						Logout
+					</button>
+				</div>
 			</div>
 		)}
 	</div>);
