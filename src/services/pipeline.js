@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "http://192.168.50.153:9888/";
+const URL = "http://internal.kixlab.org:7778/";
 
 export function requestSuggestions(requestData) {
 	return new Promise((resolve, reject) => {

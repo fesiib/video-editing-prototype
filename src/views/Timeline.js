@@ -306,7 +306,7 @@ const Timeline = observer(function Timeline() {
 				)}
 				{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
 					<div className="flex gap-1 justify-center">
-						<span> Suggested: </span> <span> {domainStore.curIntent.suggestedEdits.length} </span>
+						<span> {selectedSuggestedEdits.length} / {domainStore.curIntent.suggestedEdits.length} </span>
 					</div>
 				)}
 			</div>
