@@ -10,8 +10,8 @@ const EditOperations = observer(function EditOperations() {
 	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const inactiveButtonClassName = "w-full my-1 hover:brightness-50 border rounded";
-	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-green-600";
-	const activeButtonClassName = "w-full my-1 brightness-50 rounded border-4 border-red-600";
+	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-yellow-300";
+	const activeButtonClassName = "w-full my-1 rounded border-4 border-indigo-400";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";

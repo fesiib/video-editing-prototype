@@ -17,7 +17,7 @@ class IntentState {
 	id = "";
 	idx = 0;
 	
-	considerEdits = true;
+	processingMode = "from-scratch"; // from-scratch, add-more, adjust-selected
 	suggestedEdits = [];
 	suggestedEditOperationKey = "";
 	suggestedEditOperationKeys = [];
@@ -37,7 +37,7 @@ class IntentState {
 		this.suggestedEdits = [];
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
-		this.considerEdits = true;
+		this.processingMode = "from-scratch";
     }
 
 	getDeepCopy() {
@@ -63,7 +63,7 @@ class IntentState {
 			newEdit.intent = newIntent;
 			return newEdit;
 		});
-		newIntent.considerEdits = this.considerEdits;
+		newIntent.processingMode = this.processingMode;
 		return newIntent;
 	}
 
@@ -77,6 +77,10 @@ class IntentState {
 
 	setSketchPlayPosition(sketchPlayPosition) {
 		this.sketchPlayPosition = sketchPlayPosition;
+	}
+
+	setProcessingMode(processingMode) {
+		this.processingMode = processingMode;
 	}
 
 	setEditOperationKey(newKey) {
@@ -293,7 +297,7 @@ class IntentState {
 
 	get requestParameters() {
 		return {
-			considerEdits: this.considerEdits,
+			processingMode: this.processingMode,
 			hasText: this.textCommand !== "",
 			hasSketch: this.sketchCommand.length > 0,
 			text: this.textCommand,
@@ -352,7 +356,7 @@ class IntentState {
 				this.suggestedEditOperationKey = data.suggestedEditOperationKey;
 				this.suggestedEditOperationKeys = data.suggestedEditOperationKeys;
 				
-				this.considerEdits = data.considerEdits;
+				this.processingMode = data.processingMode;
 
 				for (let editId of data.activeEdits) {
 					const newEdit = new EditState(
@@ -412,7 +416,7 @@ class IntentState {
 				suggestedEdits: [],
 				id: intent.id,
 				idx: intent.idx,
-				considerEdits: intent.considerEdits,
+				processingMode: intent.processingMode,
 			};
 	
 			for (let edit of intent.activeEdits) {

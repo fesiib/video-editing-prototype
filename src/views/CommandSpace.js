@@ -16,8 +16,6 @@ const CommandSpace = observer(function CommandSpace() {
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = [...domainStore.intents].reverse();
 
-	const [processMode, setProcessMode] = useState(fromScratch);
-
 	const onChangeTextCommand = (event) => {
 		curIntent.setTextCommand(event.target.value);
 	}
@@ -26,16 +24,25 @@ const CommandSpace = observer(function CommandSpace() {
 		domainStore.processIntent();
 	});
 
-	const onConsiderEditsClick = action(() => {
-		curIntent.considerEdits = !curIntent.considerEdits;
-	});
 
-	const onProcessModeChange = action((event) => {
-		setProcessMode(event.target.value);
+	const onProcessingMode = action((event) => {
+		curIntent.setProcessingMode(event.target.value);
+
 	});
 
 	return (<div className="w-full flex flex-col items-center">
-		<h2 className="w-full"> Describe your edit </h2>
+		<h2 className="w-full"> {
+			curIntent.summary === "" ? (
+				<span> Edit {curIntent.idx}: 
+					<span 
+						className="italic text-gray-400"
+					> describe your edit </span> 
+				</span>
+			) : (
+				<span> Edit {curIntent.idx}: {curIntent.summary} </span>
+			)
+		}
+		</h2>
 		{systemSetting ? (
 			domainStore.processingIntent ? (
 				<div> Processing... </div>
@@ -62,10 +69,10 @@ const CommandSpace = observer(function CommandSpace() {
 					<div className="flex flex-col gap-1 justify-end items-end">
 						<div className="flex flex-col">
 
-							<label htmlFor="processMode"
+							<label htmlFor="processingMode"
 								className="w-full"
 							> Mode: </label>
-							<select id={"processMode"} value={processMode} onChange={onProcessModeChange}
+							<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
 								className="p-1"
 							>
 								<option value={fromScratch}> From scratch </option>

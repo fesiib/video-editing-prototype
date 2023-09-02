@@ -28,6 +28,10 @@ const Timeline = observer(function Timeline() {
 		return item.isSuggested;
 	});
 
+	selectedSuggestedEdits.sort((a, b) => {
+		return a.commonState.offset - b.commonState.offset;
+	});
+
     const onZoomChange = action((event) => {
 		// 0 -> minPxToSec
 		// 100 -> maxPxToSec
@@ -183,8 +187,7 @@ const Timeline = observer(function Timeline() {
 	// ]);
 
 	const buttonClassName = " hover:bg-indigo-400 text-black p-1 rounded";
-	const decisionClassName = " text-black my-1 rounded";
-
+	const decisionClassName = " text-black p-1 rounded";
     return (
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
             <div className="flex flex-row justify-between my-2">
@@ -195,10 +198,71 @@ const Timeline = observer(function Timeline() {
 						}
 					</button>
 				</div>
-				<div className="flex flex-row flex-center gap-2 h-fit">
-					<div className="flex p-1 bg-indigo-200 rounded">
-						<span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
+				<div className="flex flex-col justify-center gap-1">
+					<div className="flex gap-1 justify-center">
+						<button
+							className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+									? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+								) 
+								+ decisionClassName}
+							id="prev_button"
+							onClick={() => onNavigationClick("prev")}
+						>
+							{"<-"}
+						</button>
+						<div className={ ("flex flex-row gap-1 justify-center"
+								+ ((selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? " invisible" : " visible")
+								)}
+						>
+							<button
+								className={"bg-green-300 hover:bg-green-500" + decisionClassName}
+								id="accept_button"
+								onClick={() => onDecisionClick("accept")}
+							>
+								<CheckIcon />
+								{/* {selectedSuggestedEdits.length > 1 ? "All" : ""} */}
+							</button>
+							<button
+								className={"bg-red-300 hover:bg-red-500" + decisionClassName}
+								id="reject_button"
+								onClick={() => onDecisionClick("reject")}
+							>
+								<CrossIcon /> 
+								{/* {selectedSuggestedEdits.length > 1 ? "All" : ""} */}
+							</button>
+						</div>
+						<button
+							className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+							) 
+							+ decisionClassName}
+							id="next_button"
+							onClick={() => onNavigationClick("next")}
+						>
+							{"->"}
+						</button>
 					</div>
+					{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
+						<div className="flex gap-1 justify-center">
+							<span> [{
+								selectedSuggestedEdits.map((edit, idx) => {
+									const isLast = idx === selectedSuggestedEdits.length - 1;
+									let pos = 0;
+									for (let sugestedEdit of domainStore.curIntent.suggestedEdits) {
+										if (sugestedEdit.commonState.offset <= edit.commonState.offset) {
+											pos += 1;
+										}
+									}
+									return pos + (isLast ? "" : ", ");
+								})
+							}] / {domainStore.curIntent.suggestedEdits.length} </span>
+						</div>
+					)}
+				</div>
+				<div className="flex flex-row flex-center gap-2 h-fit">
+					{/* <div className="flex p-1 bg-indigo-200 rounded">
+						<span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
+					</div> */}
 					<button
 						className={
 							(uiStore.timelineControls.rangeSelectingTimeline
@@ -229,69 +293,28 @@ const Timeline = observer(function Timeline() {
 						<TrashcanIcon />
 					</button>
 				</div>
-				<div className="flex flex-col justify-center gap-1">
-					<div className="flex gap-1 justify-center">
-						<button
-							className={"bg-indigo-300" + buttonClassName}
-							id="prev_button"
-							onClick={() => onNavigationClick("prev")}
-						>
-							{"<-"}
-						</button>
-						<button
-							className={"bg-indigo-300" + buttonClassName}
-							id="next_button"
-							onClick={() => onNavigationClick("next")}
-						>
-							{"->"}
-						</button>
-					</div>
-					{(selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? null : (
-						<div className="flex gap-1 justify-center">
-							<button
-								className={"bg-green-300 hover:bg-green-500" + decisionClassName}
-								id="accept_button"
-								onClick={() => onDecisionClick("accept")}
-							>
-								<CheckIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
-							</button>
-							<button
-								className={"bg-red-300 hover:bg-red-500" + decisionClassName}
-								id="reject_button"
-								onClick={() => onDecisionClick("reject")}
-							>
-								<CrossIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
-							</button>
-						</div>
-					)}
-					{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
-						<div className="flex gap-1 justify-center">
-							<span> {selectedSuggestedEdits.length} / {domainStore.curIntent.suggestedEdits.length} </span>
-						</div>
-					)}
-				</div>
-                <div className="self-end">
-                    <label htmlFor="timelinen_zoom">
-                        {" "}
-                        Zoom {
-							`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`
-						}{" "}
-                    </label>
-                    <input
-                        id="timeline_zoom"
-                        type={"range"}
-                        min={0}
-                        max={100}
-                        value={uiStore.adaptPxPerSec(uiStore.timelineControls.pxPerSec)}
-                        onChange={onZoomChange}
-                        step={5}
-                    />
-                </div>
             </div>
 			{
-				uiStore.navigation === "timeline" ? (
+				uiStore.navigation === "timeline" ? (<div className="flex flex-col">
 					<TimelineTracks />
-				) : null
+					<div className="self-end">
+						<label htmlFor="timelinen_zoom">
+							{" "}
+							Zoom {
+								`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`
+							}{" "}
+						</label>
+						<input
+							id="timeline_zoom"
+							type={"range"}
+							min={0}
+							max={100}
+							value={uiStore.adaptPxPerSec(uiStore.timelineControls.pxPerSec)}
+							onChange={onZoomChange}
+							step={5}
+						/>
+					</div>
+				</div>) : null
 			}
         </div>
     );

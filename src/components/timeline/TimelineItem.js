@@ -59,7 +59,7 @@ export const TimelineItem = observer(
 			outerClassName = (isSelected
 				? "absolute bottom-0 z-20 border-2 border-red-600 brightness-50"
 				: "absolute bottom-0 z-20 border");
-			innerClassName = "h-5 bg-green-500";
+			innerClassName = "h-5 bg-yellow-300";
 		}
 		else {
 			outerClassName = (isSelected

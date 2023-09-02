@@ -398,7 +398,7 @@ const SentenceBox = observer(function SentenceBox({
 				type="suggested"
 				index = {index}
 				item = {item}
-				className = {"z-30 opacity-40 absolute inset-y-0 bg-green-500 flex"}
+				className = {"z-30 opacity-40 absolute inset-y-0 bg-yellow-300 flex"}
 				onDoubleClick={onPartDoubleClick}
 			/>
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }

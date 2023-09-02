@@ -266,7 +266,7 @@ class DomainStore {
 		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
-		const randomConsiderEdits = Math.random() > 0.5;
+		const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
 		const randomTextCommand = Math.random() > 0.5 ? "add" : "remove";
 		const randomSketchCommand = Math.random() > 0.5 ? [
 			{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
@@ -276,7 +276,7 @@ class DomainStore {
 		newIntent.setEditOperationKey(randomEditOperationKey);
 		newIntent.suggestedEditOperationKey = "";
 		newIntent.suggestedEditOperationKeys = randomSuggestedEditOperationKeys;
-		newIntent.considerEdits = randomConsiderEdits;
+		newIntent.processingMode = randomProcessingMode;
 		newIntent.textCommand = randomTextCommand;
 		newIntent.summary = randomTextCommand;
 		newIntent.sketchCommand = randomSketchCommand;
