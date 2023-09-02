@@ -9,6 +9,8 @@ import ParameterControls from "./ParameterControls";
 
 import CollapseIcon from "../../icons/CollapseIcon";
 import UncollapseIcon from "../../icons/UncollapseIcon";
+import { toJS } from "mobx";
+import EditState from "../../stores/objects/editState";
 
 const OperationPanel = observer(function OperationPanel() {
 
@@ -18,6 +20,10 @@ const OperationPanel = observer(function OperationPanel() {
 	const [collapsed, setCollapsed] = React.useState(false);
 	
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const selectedSuggestedEdits = selectedEdits.filter((item) => {
+		return item.isSuggested;
+	});
 
 	const haveSuggested = selectedEdits.some((edit) => edit.isSuggested);
 
@@ -66,110 +72,82 @@ const OperationPanel = observer(function OperationPanel() {
 		{
 			collapsed ? null : (
 				<div className={"flex flex-col justify-around p-2 border"
-					+ (haveSuggested ? " bg-green-200 opacity-50" : " bg-gray-100")
+					+ (haveSuggested ? " bg-gray-200 opacity-50" : " bg-gray-100")
 				}>
-					{ selectedOperation === null || uiStore.timelineControls.selectedTimelineItems.length === 0 ? 
-						null : (
-							<div className="flex flex-row justify-around">
-								<div
-									key={`metaParameter-${"custom"}`}
-									className="flex flex-col mx-1"
-								> 
-								{/* <span
-									className="font-bold text-left text-xs px-2"
-								> {selectedOperation.title} </span>  */}
-									{
-										Object.keys(metaParameters.custom).map((parameterKey) => {
-											const parameter = metaParameters.custom[parameterKey];
-											if (parameter !== null) {
-												return (<ParameterControls 
-													key={`parameter-${"custom"}-${parameterKey}`}
-													metaKey={"custom"}
-													parameterKey={parameterKey}
-													parameter={parameter}
-												/>);
-											}
-											return null;
-										})
-									}
-								</div>
-								<div className="flex flex-col">
-									<div
-										key={`metaParameter-${"spatial"}`}
-										className="flex flex-col mx-1"
-									> 
-									<span
-										className="font-bold text-left text-xs px-2"
-									> {"Coordinates"} </span> 
+					{ selectedOperation === null ? (
+							<div> No operation selected </div>
+						) : (<>
+							{
+								(selectedEdits.length === 0) ? (
+									<div> No segements selected </div>
+								) : (
+									<div className="flex flex-col divide-y divide-gray-300 gap-2">
 										{
-											Object.keys(metaParameters.spatial).map((parameterKey) => {
-												const parameter = metaParameters.spatial[parameterKey];
-												if (parameter !== null) {
-													return (<ParameterControls 
-														key={`parameter-${"spatial"}-${parameterKey}`}
-														metaKey={"spatial"}
-														parameterKey={parameterKey}
-														parameter={parameter}
-													/>);
-												}
-												return null;
-											})
+											(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
+											) ? null : (
+												<div className="flex flex-col justify-start px-1 divider-1">
+													<div className="">
+														<span className="text-sm"> Explanation: </span>
+														<span className="text-bold text-sm"> {
+															selectedEdits[0].explanation
+														} </span>
+													</div>
+													{ domainStore.curIntent.editOperation === null ? null : (
+														<div className="">
+															<span className="text-sm"> Parameter Help: </span>
+															<span className="text-bold text-sm">
+																{
+																	
+																	selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]?.length === 1 ?
+																		JSON.stringify(toJS(selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]))
+																		: "No help available"
+																}
+															</span>
+														</div>)
+													}
+												</div>
+											)
 										}
-									</div>
-									<div
-										key={`metaParameter-${"temporal"}`}
-										className="flex flex-col mx-1"
-									> 
-									<span
-										className="font-bold text-left text-xs px-2"
-									> {"Time"} </span> 
-										{
-											Object.keys(metaParameters.temporal).map((parameterKey) => {
-												const parameter = metaParameters.temporal[parameterKey];
-												if (parameter !== null) {
-													return (<ParameterControls 
-														key={`parameter-${"temporal"}-${parameterKey}`}
-														metaKey={"temporal"}
-														parameterKey={parameterKey}
-														parameter={parameter}
-													/>);
+										<div className="flex flex-row"> {
+											Object.keys(metaParameters).map((metaKey) => {
+												const metaParameter = metaParameters[metaKey];
+												if (metaParameter === null || Object.keys(metaParameter).length === 0) {
+													return null;
 												}
-												return null;
+												let metaParameterKeys = Object.keys(metaParameter);
+												if (metaKey === "custom") {
+													metaParameterKeys = Object.keys(flattenObject(EditState.getCustomParameters(selectedOperation)));
+													metaParameterKeys = metaParameterKeys.filter((key) => {
+														return metaParameter[key] !== null && metaParameter[key] !== undefined;
+													});
+												}
+												return (<div
+													key={`metaParameter-${metaKey}`}
+													className="flex flex-col mx-1"
+												> 
+												<span
+													className="font-bold text-left text-xs px-2"
+												> {metaKey} </span> 
+												{
+													metaParameterKeys.map((parameterKey) => {
+														const parameter = metaParameter[parameterKey];
+														if (parameter !== null) {
+															return (<ParameterControls 
+																key={`parameter-${metaKey}-${parameterKey}`}
+																metaKey={metaKey}
+																parameterKey={parameterKey}
+																parameter={parameter}
+															/>);
+														}
+														return null;
+													})
+												} </div>);
 											})
-										}
+										} </div> 
 									</div>
-								</div>
-							</div>
-						)
-						// <div className="flex flex-row"> {
-						// 	Object.keys(metaParameters).map((metaKey) => {
-						// 		const metaParameter = metaParameters[metaKey];
-						// 		if (metaParameter === null || Object.keys(metaParameter).length === 0) {
-						// 			return null;
-						// 		}
-						// 		return (<div
-						// 			key={`metaParameter-${metaKey}`}
-						// 			className="flex flex-col mx-1"
-						// 		> 
-						// 		<span
-						// 			className="font-bold text-left text-xs px-2"
-						// 		> {metaKey} </span> 
-						// 		{
-						// 			Object.keys(metaParameter).map((parameterKey) => {
-						// 				const parameter = metaParameter[parameterKey];
-						// 				if (parameter !== null) {
-						// 					return (<ParameterControls 
-						// 						key={`parameter-${metaKey}-${parameterKey}`}
-						// 						metaKey={metaKey}
-						// 						parameterKey={parameterKey}
-						// 						parameter={parameter}
-						// 					/>);
-						// 				}
-						// 				return null;
-						// 			})
-						// 		} </div>);
-						// 	})
-						// } </div> 
+								)
+							}
+						</>)
 					}
 				</div>
 			)

@@ -403,6 +403,83 @@ class EditState {
 		return this.intent.id === this.domainStore.curIntent.id;
 	}
 
+	static getCustomParameters(editOperation) {
+		if (editOperation === null) {
+			return null;
+		}
+		if (editOperation.title === "Text") {
+			return {
+				content: "HELLO", // text input
+				style: {
+					fill: "#000000", // color picker
+					fontSize: 50, // number input & +/- buttons
+					fontFamily: "Arial", // dropdown
+					align: "center", // 3 align icons
+					verticalAlign: "middle" // 3 verticalAlign icons
+				},
+				background: {
+					fill: "#ffffff", // color picker
+					alpha: 1, // range slider
+				},
+			};
+		}
+		if (editOperation.title === "Image") {
+			return {
+				source: "/placeholder.jpg", // file picker
+			};
+		}
+		if (editOperation.title === "Shape") {
+			return {
+				type: "rectangle", // dropdown
+				background: {
+					fill: "#ffffff", // color picker
+					alpha: 1, // range slider
+				},
+				stroke: {
+					width: 2,
+					fill: "#000000", // color picker
+					alpha: 1, // range slider
+				},
+				// circle: {
+				// 	// radiusX: 50, // number input & +/- buttons
+				// 	// radiusY: 50, // number input & +/- buttons
+				// },
+				star: {
+					numPoints: 6,
+					innerRadius: 100,
+					//outerRadius: 70,
+				},
+			};
+		}
+		if (editOperation.title === "Zoom") {
+			return {
+				zoomDurationStart: 0,
+				zoomDurationEnd: 0,
+			};
+		}
+		if (editOperation.title === "Crop") {
+			return {
+				x: 0, // number input
+				y: 0, // number input
+				width: 0,
+				height: 0,
+				cropX: 0,
+				cropY: 0,
+				cropWidth: 0, // number input
+				cropHeight: 0, // number input
+			};
+		}
+		if (editOperation.title === "Cut") {
+			return {};
+		}
+		if (editOperation.title === "Blur") {
+			return {
+				blur: 6, // range slider
+			};
+		}
+		return null;
+	}
+
 	isVisible(playPosition) {
 		if (this.commonState.offset > playPosition || this.commonState.end <= playPosition) {
 			return false;

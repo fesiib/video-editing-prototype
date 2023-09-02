@@ -63,11 +63,11 @@ const Auth = observer(function Auth() {
 			</div>
 		) : (
 			<div className="w-full flex flex-row justify-between gap-2">
-				{
+				{/* {
 					userStore.isTaskChosen && !userStore.loading ? (
 						<NewIntent />
 					) : null
-				}
+				} */}
 				<div className="flex flex-row">
 					{
 						(userStore.isTaskChosen && !userStore.loading) ? (

@@ -40,35 +40,46 @@ const CommandSpace = observer(function CommandSpace() {
 			domainStore.processingIntent ? (
 				<div> Processing... </div>
 			) : (
-				<div className="flex flex-col gap-2 p-2 w-full bg-gray-100"> 
-					<div className="flex flex-row">
-						<input 
+				<div className="flex flex-row w-full gap-2 p-1 bg-gray-100"> 
+					<div className="flex flex-col w-full gap-1 border p-1">
+						<textarea 
 							id="textCommand" 
+							maxLength={100}
 							type="text"
+							rows="4"
 							placeholder="description"
 							value={curIntent.textCommand}
-							className="w-full border p-1"
+							className="w-full border p-1 resize-none"
 							onChange={onChangeTextCommand} 
 						/>
-						<select value={processMode} onChange={onProcessModeChange}>
-							<option value={fromScratch}> From scratch </option>
-							<option value={addMore}> Add more </option>
-							<option value={adjustSelected}> Adjust selected </option>
-						</select>
-					</div>
-					<div className="w-full flex flex-row gap-2 justify-between">
-						<SketchCanvas />
-						<div className="flex flex-col gap-1">
-							<button 
-								className="w-fit h-fit bg-indigo-300 text-black py-2 px-2 rounded hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
-								onClick={() => onProcessClick()}
-								disabled={curIntent.textCommand === ""}
-							>
-								Submit
-							</button>
-							{/* <label htmlFor={"considerEdits"}> iterate </label>
-							<input type="checkbox" id="considerEdits" name="considerEdits" value="considerEdits" checked={curIntent.considerEdits} onChange={onConsiderEditsClick} /> */}
+						<div className="flex flex-row justify-between">
+							<SketchCanvas />
+							<span
+								className="text-xs"
+							> {curIntent.textCommand.length}/{100}</span>
 						</div>
+					</div>
+					<div className="flex flex-col gap-1 justify-end items-end">
+						<div className="flex flex-col">
+
+							<label htmlFor="processMode"
+								className="w-full"
+							> Mode: </label>
+							<select id={"processMode"} value={processMode} onChange={onProcessModeChange}
+								className="p-1"
+							>
+								<option value={fromScratch}> From scratch </option>
+								<option value={addMore}> Add more </option>
+								<option value={adjustSelected}> Adjust selected </option>
+							</select>
+						</div>
+						<button 
+							className="w-fit h-fit bg-indigo-300 text-black py-2 px-2 rounded hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+							onClick={() => onProcessClick()}
+							disabled={curIntent.textCommand === ""}
+						>
+							Submit
+						</button>
 					</div>
 				</div>
 			)

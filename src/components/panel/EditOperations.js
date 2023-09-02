@@ -10,8 +10,8 @@ const EditOperations = observer(function EditOperations() {
 	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const inactiveButtonClassName = "w-full my-1 hover:brightness-50 border rounded";
-	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-2 bg-green-600";
-	const activeButtonClassName = "w-full my-1 brightness-50";
+	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-green-600";
+	const activeButtonClassName = "w-full my-1 brightness-50 rounded border-4 border-red-600";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
@@ -24,9 +24,12 @@ const EditOperations = observer(function EditOperations() {
 		domainStore.curIntent.setEditOperationKey(operationKey);
 	});
 
-	return (<div className="flex flex-col w-1/4">
+	return (<div 
+		// className="flex flex-col w-1/4"
+		className="flex flex-col text-black"
+	>
 		<h2> Edit Operations </h2>
-		<div className="flex flex-row flex-wrap items-center p-1 border bg-gray-100">
+		<div className="flex flex-row items-center p-1 gap-2 border bg-gray-100 max-h-20">
 			{Object.keys(domainStore.editOperations).map((operationKey) => {
 				const operation = domainStore.editOperations[operationKey];
 				let currentClassName = inactiveButtonClassName;

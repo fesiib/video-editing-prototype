@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import Provider from "./Provider";
+import GPTLike from "./apps/GPTLike";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -13,10 +14,22 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 // 	</Provider>
 // );
 
+
+// default
+// root.render(
+//     <React.StrictMode>
+//         <Provider>
+//             <App />
+//         </Provider>
+//     </React.StrictMode> 
+// );
+
+
+// gptlike
 root.render(
     <React.StrictMode>
         <Provider>
-            <App />
+            <GPTLike />
         </Provider>
     </React.StrictMode> 
 );

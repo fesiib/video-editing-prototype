@@ -188,14 +188,14 @@ const Timeline = observer(function Timeline() {
     return (
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
             <div className="flex flex-row justify-between my-2">
-				<div className="flex flex-row gap-2">
+				<div className="flex flex-row gap-2 h-fit">
 					<button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
 						{
 							uiStore.timelineControls.isPlaying ? <PauseIcon /> : <PlayIcon />
 						}
 					</button>
 				</div>
-				<div className="flex flex-row flex-center gap-2">
+				<div className="flex flex-row flex-center gap-2 h-fit">
 					<div className="flex p-1 bg-indigo-200 rounded">
 						<span> {uiStore.timelineControls.selectedTimelineItems.length} </span>
 					</div>
@@ -229,6 +229,47 @@ const Timeline = observer(function Timeline() {
 						<TrashcanIcon />
 					</button>
 				</div>
+				<div className="flex flex-col justify-center gap-1">
+					<div className="flex gap-1 justify-center">
+						<button
+							className={"bg-indigo-300" + buttonClassName}
+							id="prev_button"
+							onClick={() => onNavigationClick("prev")}
+						>
+							{"<-"}
+						</button>
+						<button
+							className={"bg-indigo-300" + buttonClassName}
+							id="next_button"
+							onClick={() => onNavigationClick("next")}
+						>
+							{"->"}
+						</button>
+					</div>
+					{(selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? null : (
+						<div className="flex gap-1 justify-center">
+							<button
+								className={"bg-green-300 hover:bg-green-500" + decisionClassName}
+								id="accept_button"
+								onClick={() => onDecisionClick("accept")}
+							>
+								<CheckIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
+							</button>
+							<button
+								className={"bg-red-300 hover:bg-red-500" + decisionClassName}
+								id="reject_button"
+								onClick={() => onDecisionClick("reject")}
+							>
+								<CrossIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
+							</button>
+						</div>
+					)}
+					{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
+						<div className="flex gap-1 justify-center">
+							<span> {selectedSuggestedEdits.length} / {domainStore.curIntent.suggestedEdits.length} </span>
+						</div>
+					)}
+				</div>
                 <div className="self-end">
                     <label htmlFor="timelinen_zoom">
                         {" "}
@@ -252,63 +293,6 @@ const Timeline = observer(function Timeline() {
 					<TimelineTracks />
 				) : null
 			}
-			<div className="flex flex-col justify-center gap-1">
-				<div className="flex gap-1 justify-center">
-					<button
-						className={"bg-indigo-300" + buttonClassName}
-						id="prev_button"
-						onClick={() => onNavigationClick("prev")}
-					>
-						{"<-"}
-					</button>
-					<button
-						className={"bg-indigo-300" + buttonClassName}
-						id="next_button"
-						onClick={() => onNavigationClick("next")}
-					>
-						{"->"}
-					</button>
-				</div>
-				{(selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? null : (
-					<div className="flex gap-1 justify-center">
-						<button
-							className={"bg-green-300 hover:bg-green-500" + decisionClassName}
-							id="accept_button"
-							onClick={() => onDecisionClick("accept")}
-						>
-							<CheckIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
-						</button>
-						<button
-							className={"bg-red-300 hover:bg-red-500" + decisionClassName}
-							id="reject_button"
-							onClick={() => onDecisionClick("reject")}
-						>
-							<CrossIcon /> {selectedSuggestedEdits.length > 1 ? "All" : ""}
-						</button>
-					</div>
-				)}
-				{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
-					<div className="flex gap-1 justify-center">
-						<span> {selectedSuggestedEdits.length} / {domainStore.curIntent.suggestedEdits.length} </span>
-					</div>
-				)}
-				{
-					(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
-					) ? null : (
-						<div className="flex gap-1 justify-start px-2">
-							<span> Explanation: </span> <span> {
-								uiStore.timelineControls.selectedTimelineItems[0].explanation
-							} </span>
-							{ domainStore.curIntent.editOperation === null ? null : (<>
-									<span> Parameter Help: </span> <span>
-										{JSON.stringify(toJS(uiStore.timelineControls.selectedTimelineItems[0].suggestedParameters[domainStore.curIntent.editOperationKey]))}
-									</span>
-								</>)
-							}
-						</div>
-					)
-				}
-			</div>
         </div>
     );
 });
