@@ -28,13 +28,13 @@ const NewIntent = observer(function NewIntent() {
 		>
 			+ New Edit
 		</button> 
-		{/* <button
+		<button
 			className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
 			onClick={() => onAddRandomClick(curIntent.idx)}
 			// disabled={curIntent.activeEdits.length === 0}
 		>
 			+ Random
-		</button> */}
+		</button>
 	</div>);
 });
 

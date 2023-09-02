@@ -8,7 +8,8 @@ import axios from 'axios'
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 
-const ADDR = "http://internal.kixlab.org:7778/"
+// const ADDR = "http://internal.kixlab.org:7778/"
+const ADDR = "http://localhost:7778/"
 
 const REQUEST_TYPES = {
     youtubeLink: {

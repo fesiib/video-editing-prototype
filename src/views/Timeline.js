@@ -248,27 +248,10 @@ const Timeline = observer(function Timeline() {
                 </div>
             </div>
 			{
-				(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
-				) ? null : (
-					<div className="flex gap-1 justify-start px-2">
-						<span> Explanation: </span> <span> {
-							uiStore.timelineControls.selectedTimelineItems[0].explanation
-						} </span>
-						{ domainStore.curIntent.editOperation === null ? null : (<>
-								<span> Parameter Help: </span> <span>
-									{JSON.stringify(toJS(uiStore.timelineControls.selectedTimelineItems[0].suggestedParameters[domainStore.curIntent.editOperationKey]))}
-								</span>
-							</>)
-						}
-					</div>
-				)
-			}
-			{
 				uiStore.navigation === "timeline" ? (
 					<TimelineTracks />
 				) : null
 			}
-
 			<div className="flex flex-col justify-center gap-1">
 				<div className="flex gap-1 justify-center">
 					<button
@@ -309,6 +292,22 @@ const Timeline = observer(function Timeline() {
 						<span> {selectedSuggestedEdits.length} / {domainStore.curIntent.suggestedEdits.length} </span>
 					</div>
 				)}
+				{
+					(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
+					) ? null : (
+						<div className="flex gap-1 justify-start px-2">
+							<span> Explanation: </span> <span> {
+								uiStore.timelineControls.selectedTimelineItems[0].explanation
+							} </span>
+							{ domainStore.curIntent.editOperation === null ? null : (<>
+									<span> Parameter Help: </span> <span>
+										{JSON.stringify(toJS(uiStore.timelineControls.selectedTimelineItems[0].suggestedParameters[domainStore.curIntent.editOperationKey]))}
+									</span>
+								</>)
+							}
+						</div>
+					)
+				}
 			</div>
         </div>
     );

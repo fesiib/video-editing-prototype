@@ -76,7 +76,7 @@ def test_video(video_link):
 
 
 def launch_server():
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=7778)
 
 if __name__ == "__main__":
     #test_video("https://www.youtube.com/live/4LdIvyfzoGY?feature=share")
