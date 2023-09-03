@@ -348,6 +348,7 @@ class EditState {
 			if (this.shapeParameters.type === "circle") {
 				delete shapeParameters.star;
 			}
+			//console.log(this.shapeParameters.type, shapeParameters)
 			return shapeParameters;
 		}
 

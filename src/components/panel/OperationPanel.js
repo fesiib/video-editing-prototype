@@ -94,13 +94,13 @@ const OperationPanel = observer(function OperationPanel() {
 													</div>
 													{ domainStore.curIntent.editOperation === null ? null : (
 														<div className="">
-															<span className="text-sm"> Parameter Help: </span>
+															<span className="text-sm"> Specifications: </span>
 															<span className="text-bold text-sm">
 																{
 																	
 																	selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]?.length === 1 ?
 																		JSON.stringify(toJS(selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]))
-																		: "No help available"
+																		: "None"
 																}
 															</span>
 														</div>)
@@ -116,6 +116,7 @@ const OperationPanel = observer(function OperationPanel() {
 												}
 												let metaParameterKeys = Object.keys(metaParameter);
 												if (metaKey === "custom") {
+													///console.log(metaParameter, metaParameterKeys)
 													metaParameterKeys = Object.keys(flattenObject(EditState.getCustomParameters(selectedOperation)));
 													metaParameterKeys = metaParameterKeys.filter((key) => {
 														return metaParameter[key] !== null && metaParameter[key] !== undefined;

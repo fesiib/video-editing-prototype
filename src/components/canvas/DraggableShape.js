@@ -7,6 +7,7 @@ import { Rect, Circle, Ellipse, Star } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 import { adaptCoordinate } from "../../utilities/genericUtilities";
+import { isCompositeComponent } from "react-dom/test-utils";
 
 const StarShape = observer(function StarShape({
 	curShape,
@@ -20,6 +21,9 @@ const StarShape = observer(function StarShape({
 	id,
 	shapeName
 }) {
+	if (curShape.customParameters.star === undefined) {
+		return null;
+	}
 	return (<>
 		<Star
 			id={id + "_bg"}
@@ -229,11 +233,21 @@ const DraggableShape = observer(function DraggableShape({
 			uiStore.addSelectedCanvasObject(shapeRef.current.id());
 			if (curShape.customParameters.type === "star") {
 				transformerRef.keepRatio(true);
-			}
-			else {
-				transformerRef.keepRatio(false);
+				uiStore.transformerKeepRatioAuthor = curShape.commonState.id;
 			}
 		}
+		return action(() => {
+			if (!isVisible) {
+				return;
+			}
+			if (shapeRef.current !== null) {
+				//uiStore.removeSelectedCanvasObject(shapeRef.current.id());
+			}
+			if (uiStore.transformerKeepRatioAuthor === curShape.commonState.id) {
+				transformerRef.keepRatio(false);
+				uiStore.transformerKeepRatioAuthor = null;
+			}
+		});
     }), [
 		curShape.customParameters.type,
 		isVisible,
@@ -253,9 +267,9 @@ const DraggableShape = observer(function DraggableShape({
 		}
 	), []);
 
-	if (curShape.title !== shapeTitleConst) {
-		return null;
-	}
+	// if (curShape.title !== shapeTitleConst) {
+	// 	return null;
+	// }
 	if (curShape.customParameters.type === "rectangle") {
 		return (<RectangleShape
 			curShape={curShape}

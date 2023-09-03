@@ -60,7 +60,8 @@ const SideHistory = observer(function SideHistory() {
 						onClick={() => onIntentClick(idx)}
 					>
 						{/* {titleIdx} - {`[${title}]`}: {intent.summary} */}
-						{titleIdx}: {intent.summary}
+						{titleIdx}: {intent.summary === "" ? title : intent.summary}
+					
 					</button>
 					{
 						collapsed ? null : (

@@ -192,7 +192,11 @@ const Timeline = observer(function Timeline() {
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
-					<button className={"bg-indigo-300" + buttonClassName} id="play_button" onClick={onPressPlay}>
+					<button className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+							) 
+							+ decisionClassName}
+							id="play_button" onClick={onPressPlay}>
 						{
 							uiStore.timelineControls.isPlaying ? <PauseIcon /> : <PlayIcon />
 						}

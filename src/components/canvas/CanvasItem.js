@@ -11,6 +11,7 @@ import CropConfig from "./CropConfig";
 import BlurConfig from "./BlurConfig";
 import DraggableShape from "./DraggableShape";
 import ZoomConfig from "./ZoomConfig";
+import { toJS } from "mobx";
 
 const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef, videoGroupRef, objectsGroupRef }) {
     const { uiStore, domainStore } = useRootContext();
@@ -44,7 +45,7 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 		isVisible,
 	]);
 
-    return (<>
+	return (<>
 		{type === uiStore.objectNames.text ? <DraggableText curText={item} /> : null}
 		{type === uiStore.objectNames.image ? <DraggableImage curImage={item} /> : null}
 		{type === uiStore.objectNames.shape ? <DraggableShape
@@ -53,7 +54,10 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 		/> : null}
 		{type === uiStore.objectNames.cut ? <SkippedConfig skipped={item} /> : null}
 		{type === uiStore.objectNames.crop ? <CropConfig crop={item} /> : null}
-		{type === uiStore.objectNames.zoom ? <ZoomConfig zoom={item} videoGroupRef={videoGroupRef} objectsGroupRef={objectsGroupRef} /> : null}
+		{type === uiStore.objectNames.zoom ? <ZoomConfig zoom={item}
+			videoGroupRef={videoGroupRef}
+			objectsGroupRef={objectsGroupRef} 
+		/> : null}
 		{type === uiStore.objectNames.blur ? <BlurConfig blur={item} /> : null}
 	</>);
 });

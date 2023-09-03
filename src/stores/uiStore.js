@@ -24,6 +24,7 @@ class UIStore {
 		opacity: 1,
 		opacityAuthor: null,
 		zoomAuthor: null,
+		transformerKeepRatioAuthor: null,
 
 		sketching: false,
     };

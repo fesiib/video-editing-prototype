@@ -172,7 +172,7 @@ class CommonState {
 					};
 				}
 			}
-			if (this.object.tiel === "Shape") {
+			if (this.object.title === "Shape") {
 				// if (target.id().substring(0, 2) === "re") {
 
 				// }
