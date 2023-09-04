@@ -201,14 +201,76 @@ class IntentState {
 		let y = Math.min(y1, y2);
 		let width = Math.abs(x1 - x2);
 		let height = Math.abs(y1 - y2);
-		let explanation = "random edit";
+		let explanation = ["random edit", "random edit 2"];
 		let suggestedParameters = {
-			"text": ["cheburek"]
+			"text": ["cheburek"],
+			"image": ["goal"],
+			"shape": ["this!!"]
+		};
+		let suggestionSource = {
+			spatial: ["goal", " 2", "something happening "],
+			temporal: ["goal", " 2", "this!"],
+			edit: [" 2", "whenever"],
+			custom: ["lol", "kek", "whenever", " 2"],
 		};
 
 
 		let newEdit = new EditState(this.domainStore, this, suggested, this.trackId);
 		newEdit.explanation = explanation;
+		newEdit.suggestionSource = suggestionSource;
+		
+		newEdit.contribution = [{
+			text: this.textCommand,
+			type: [],
+		}];
+		for (let key in newEdit.suggestionSource) {
+			for (let source of newEdit.suggestionSource[key]) {
+				let newContribution = [];
+				for (let single of newEdit.contribution) {
+					const text = single.text;
+					const type = single.type;
+					if (type.includes(key) === true) {
+						newContribution.push(single);
+						continue;
+					}
+					if (text.includes(source)) {
+						const parts = text.split(source);
+						for (let part_idx = 0; part_idx < parts.length - 1; part_idx++) {
+							let part = parts[part_idx];
+							if (part_idx === 0) {
+								part = part.trimEnd();
+							}
+							else {
+								part = part.trim();
+							}
+							if (part !== "") {
+								newContribution.push({
+									text: part,
+									type: type.slice(0),
+								});
+							}
+							newContribution.push({
+								text: source,
+								type: [...type.slice(0), key],
+							});
+						}
+						let lastPart = parts[parts.length - 1];
+						if (lastPart !== "") {
+							newContribution.push({
+								text: lastPart.trimStart(),
+								type: type.slice(0),
+							});
+						}
+					}
+					else {
+						//console.log("could not find", source, "in", text);
+						newContribution.push(single);
+					}
+				}
+				newEdit.contribution = newContribution.slice(0);
+			}
+		}
+
 		newEdit.suggestedParameters = suggestedParameters;
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
@@ -325,7 +387,6 @@ class IntentState {
 				reject("edit save error: " + error.message);
 			}
 			setDoc(intentDoc, this, {merge: false}).then(() => {
-				//console.log("saved intent: ", intentId);
 				resolve();
 			}).catch((error) => {
 				reject("intent save error: " + error);

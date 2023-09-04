@@ -14,6 +14,7 @@ import PlayIcon from "../icons/PlayIcon";
 import PlusIcon from "../icons/PlusIcon";
 import CheckIcon from "../icons/CheckIcon";
 import CrossIcon from "../icons/CrossIcon";
+import CopyIcon from "../icons/CopyIcon";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
@@ -81,26 +82,63 @@ const Timeline = observer(function Timeline() {
 		uiStore.selectTimelineObjects([]);
     });
 
-    const onDeleteKeyDown = action((event) => {
+	const onCopyPasteTimelineItems = action(() => {
+		if (selectedSuggestedEdits.length > 0) {
+			return;
+		}
+		const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
+			(value) => value.commonState.id
+		);
+		if (selectedSceneIds.length !== 1) {
+			return;
+		}
+		uiStore.logData("copy", {
+			selectedSceneIds: selectedSceneIds,
+		});
+		const selectedScenes = domainStore.curIntent.activeEdits.filter((edit) => {
+			return selectedSceneIds.findIndex((id) => id === edit.commonState.id) >= 0;
+		});
+		const newScenes = selectedScenes.map((scene) => {
+			const newScene = scene.getDeepCopy();
+			newScene.commonState.setMetadata({
+				offset: uiStore.timelineControls.playPosition,
+				start: uiStore.timelineControls.playPosition,
+				finish: uiStore.timelineControls.playPosition + scene.commonState.sceneDuration,
+			});
+			domainStore.curIntent.activeEdits.push(newScene);
+			return newScene;
+		});
+		uiStore.selectTimelineObjects(newScenes);
+	});
+
+    const onKeyDown = action((event) => {
         if (event.which === 46) {
             ///delete key
             onDeleteTimelineItems();
         }
+		if (event.which === 67 && event.metaKey) {
+			///paste key
+			onCopyPasteTimelineItems();
+		}
     });
 
 	const onDecisionClick = action((decision) => {
 		if (decision === "accept") {
+			let addedEdits = [];
 			for (const edit of selectedSuggestedEdits) {
-				domainStore.curIntent.addEditFromSuggested(edit.commonState.id);
+				addedEdits.push(domainStore.curIntent.addEditFromSuggested(edit.commonState.id));
 			}
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
 			domainStore.curIntent.deleteEdits(deleteEditIds);
+			uiStore.selectTimelineObjects(addedEdits);
 			return;
 		}
 		else if (decision === "reject") {
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
 			domainStore.curIntent.deleteEdits(deleteEditIds);
-			onNavigationClick("next");
+			if (!onNavigationClick("next")) {
+				onNavigationClick("prev");
+			}
 			return;
 		}
 	});
@@ -125,7 +163,9 @@ const Timeline = observer(function Timeline() {
 			if (prevEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = prevEdit.offset;
 				uiStore.selectTimelineObjects([edits[prevEdit.editIdx]]);
+				return true;
 			}
+			return false;
 		} else if (direction === "next") {
 			const nextEdit = edits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset > uiStore.timelineControls.playPosition
@@ -143,7 +183,9 @@ const Timeline = observer(function Timeline() {
 			if (nextEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = nextEdit.offset;
 				uiStore.selectTimelineObjects([edits[nextEdit.editIdx]]);
+				return true;
 			}
+			return false;
 		}
 	});
 
@@ -186,10 +228,10 @@ const Timeline = observer(function Timeline() {
 	// 	uiStore.timelineControls.splitting
 	// ]);
 
-	const buttonClassName = " hover:bg-indigo-400 text-black p-1 rounded";
-	const decisionClassName = " text-black p-1 rounded";
+	const buttonClassName = " hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50";
+	const decisionClassName = " text-black p-1 rounded disabled:opacity-50";
     return (
-        <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onDeleteKeyDown}>
+        <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onKeyDown}>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
 					<button className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
@@ -211,6 +253,10 @@ const Timeline = observer(function Timeline() {
 								+ decisionClassName}
 							id="prev_button"
 							onClick={() => onNavigationClick("prev")}
+							disabled={
+								domainStore.curIntent.suggestedEdits.length === 0
+								&& domainStore.curIntent.activeEdits.length === 0
+							}
 						>
 							{"<-"}
 						</button>
@@ -242,6 +288,10 @@ const Timeline = observer(function Timeline() {
 							+ decisionClassName}
 							id="next_button"
 							onClick={() => onNavigationClick("next")}
+							disabled={
+								domainStore.curIntent.suggestedEdits.length === 0
+								&& domainStore.curIntent.activeEdits.length === 0
+							}
 						>
 							{"->"}
 						</button>
@@ -286,13 +336,26 @@ const Timeline = observer(function Timeline() {
 						}
 						onClick={onPressSplit}
 						id="split_button"
+						disabled={domainStore.curIntent.activeEdits.length === 0}
 					>
 						<ScissorsIcon />
 					</button>
 					<button
 						className={"bg-indigo-300" + buttonClassName}
 						id="delete_button"
+						onClick={onCopyPasteTimelineItems}
+						disabled={
+							uiStore.timelineControls.selectedTimelineItems.length !== 1
+							|| selectedSuggestedEdits.length > 0
+						}
+					>
+						<CopyIcon />
+					</button>
+					<button
+						className={"bg-indigo-300" + buttonClassName}
+						id="delete_button"
 						onClick={onDeleteTimelineItems}
+						disabled={uiStore.timelineControls.selectedTimelineItems.length === 0}
 					>
 						<TrashcanIcon />
 					</button>

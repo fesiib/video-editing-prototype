@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, reaction } from "mobx";
+import { action, reaction, toJS } from "mobx";
 
 import { Rect, Circle, Ellipse, Star } from "react-konva";
 
@@ -21,6 +21,9 @@ const StarShape = observer(function StarShape({
 	id,
 	shapeName
 }) {
+	if (curShape.customParameters.type !== "circle") {
+		return null;
+	}
 	if (curShape.customParameters.star === undefined) {
 		return null;
 	}
@@ -83,6 +86,9 @@ const CircleShape = observer(function CircleShape({
 	id,
 	shapeName
 }) {
+	if (curShape.customParameters.type !== "circle") {
+		return null;
+	}
 	return (<>
 		<Ellipse
 			id={id + "_bg"}
@@ -141,6 +147,9 @@ const RectangleShape = observer(function RectangleShape({
 	id,
 	shapeName,
 }) {
+	if (curShape.customParameters.type !== "rectangle") {
+		return null;
+	}
 	return (<>
 		<Rect
 			id={id + "_bg"}
@@ -267,9 +276,9 @@ const DraggableShape = observer(function DraggableShape({
 		}
 	), []);
 
-	// if (curShape.title !== shapeTitleConst) {
-	// 	return null;
-	// }
+	if (curShape.title !== shapeTitleConst || curShape.customParameters.type === undefined) {
+		return null;
+	}
 	if (curShape.customParameters.type === "rectangle") {
 		return (<RectangleShape
 			curShape={curShape}

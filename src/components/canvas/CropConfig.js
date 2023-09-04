@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action } from "mobx";
+import { action, toJS } from "mobx";
 
 import useRootContext from "../../hooks/useRootContext";
 import { Rect } from "react-konva";
@@ -153,7 +153,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 		mainVideos.length,
 	]);
 
-	return crop.title !== cropTitleConst ? null : (<>
+	return (crop.title !== cropTitleConst || crop.customParameters.cropX === undefined) ? null : (<>
 		<Rect 
 			id={"bg_" + crop.commonState.id}
 			name={uiStore.objectNames.crop}

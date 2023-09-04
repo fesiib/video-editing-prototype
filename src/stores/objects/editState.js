@@ -26,6 +26,13 @@ class EditState {
 	isSuggested = false;
 
 	explanation = [];
+	suggestionSource = {
+		spatial: [],
+		temporal: [],
+		edit: [],
+		custom: [],
+	};
+	contribution = [];
 
 	textParameters = {
 		content: "HELLO", // text input
@@ -100,6 +107,13 @@ class EditState {
 		
 		this.isSuggested = isSuggested;
 		this.explanation = [];
+		this.suggestionSource = {
+			spatial: [],
+			temporal: [],
+			edit: [],
+			custom: [],
+		};
+		this.contribution = []
 		this.suggestedParameters = {};
 
 		this.cropParameters = {
@@ -130,6 +144,13 @@ class EditState {
 
 		newEdit.isSuggested = this.isSuggested;
 		newEdit.explanation = [...this.explanation];
+		newEdit.suggestionSource = {
+			spatial: this.suggestionSource?.spatial ? this.suggestionSource.spatial.slice(0) : [],
+			temporal: this.suggestionSource?.temporal ? this.suggestionSource.temporal.slice(0) : [],
+			edit: this.suggestionSource?.edit ? this.suggestionSource.edit.slice(0) : [],
+			custom: this.suggestionSource?.custom ? this.suggestionSource.custom.slice(0) : [],
+		};
+		newEdit.contribution = [...this.contribution];
 		newEdit.suggestedParameters = {...this.suggestedParameters};
 		// add all parameters
 		return newEdit;
@@ -259,6 +280,13 @@ class EditState {
 			delete parameters.star;
 		}
 		this.commonState.setMetadata({ ...parameters });
+		if (parameters.source !== undefined) {
+			this.suggestionSource = {
+				...this.suggestionSource,
+				spatial: [...parameters.source],
+			};
+			this.contribution = [];
+		}
 	}
 
 	setTemporalParameters(parameters) {
@@ -285,6 +313,13 @@ class EditState {
 		}
 		if (parameters.info !== undefined) {
 			this.explanation = parameters.info;
+		}
+		if (parameters.source !== undefined) {
+			this.suggestionSource = {
+				...this.suggestionSource,
+				temporal: [...parameters.source],
+			};
+			this.contribution = [];
 		}
 	}
 
@@ -757,7 +792,14 @@ class EditState {
 			edit.commonState.trackId,
 		);
 		this.isSuggested = edit.isSuggested;
-		this.explanation = edit.explanation;
+		this.explanation = edit.explanation.slice(0);
+		this.suggestionSource = {
+			spatial: edit.suggestionSource.spatial.slice(0),
+			temporal: edit.suggestionSource.temporal.slice(0),
+			edit: edit.suggestionSource.edit.slice(0),
+			custom: edit.suggestionSource.custom.slice(0),
+		};
+		this.contribution = edit.contribution.slice(0);
 		this.suggestedParameters = { ...edit.suggestedParameters };
 	}
 
@@ -804,7 +846,14 @@ class EditState {
 				);
 				this.commonState.fetchedFromFirebase(data.commonState);
 				this.isSuggested = data.isSuggested;
-				this.explanation = data.explanation;
+				this.explanation = data.explanation.slice(0);
+				this.suggestionSource = {
+					spatial: data.suggestionSource.spatial.slice(0),
+					temporal: data.suggestionSource.temporal.slice(0),
+					edit: data.suggestionSource.edit.slice(0),
+					custom: data.suggestionSource.custom.slice(0),
+				};
+				this.contribution = data.contribution.slice(0);
 				this.suggestedParameters = { ...data.suggestedParameters };
 				resolve(true);
 			})).catch((error) => {
@@ -825,7 +874,14 @@ class EditState {
 				blurParameters: { ...toJS(editState.blurParameters) },
 				commonState: editState.commonState.commonStateConverter.toFirestore(editState.commonState),
 				isSuggested: editState.isSuggested,
-				explanation: editState.explanation,
+				explanation: editState.explanation.slice(0),
+				suggestionSource: {
+					spatial: editState.suggestionSource.spatial.slice(0),
+					temporal: editState.suggestionSource.temporal.slice(0),
+					edit: editState.suggestionSource.edit.slice(0),
+					custom: editState.suggestionSource.custom.slice(0),
+				},
+				contribution: editState.contribution.slice(0),
 				suggestedParameters: { ...toJS(editState.suggestedParameters) },
 			};
 			//console.log("to", data);

@@ -222,9 +222,9 @@ const EditorCanvas = observer(function EditorCanvas() {
 		if (uiStore.timelineControls.selectedTimelineItems.length > 0
 			&& uiStore.timelineControls.selectedTimelineItems[0].isSuggested
 		) {
-			transformerRef.current.anchorStroke("green");
+			transformerRef.current.anchorStroke("yellow");
 			transformerRef.current.anchorStrokeWidth(3);
-			transformerRef.current.borderStroke("green");
+			transformerRef.current.borderStroke("yellow");
 			transformerRef.current.borderStrokeWidth(3);
 		}
 		else {

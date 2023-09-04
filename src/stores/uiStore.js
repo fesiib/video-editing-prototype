@@ -95,7 +95,14 @@ class UIStore {
 		"crop": "#E19898",
 		"blur": "#b0e3ff",
 		"": "#3F1D38",
-	}
+	};
+
+	referenceTypeColorPalette = {
+		temporal: "rgba(255, 193, 7, 0.5)",
+		spatial: "rgba(0, 255, 42, 0.5)",
+		custom: "rgba(3, 169, 244, 0.5)",
+		edit: "rgba(244, 67, 54, 0.5)",
+	};
 
     labelColorPalette = {
         // high-level type

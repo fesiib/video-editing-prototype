@@ -21,10 +21,6 @@ const OperationPanel = observer(function OperationPanel() {
 	
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
-	const selectedSuggestedEdits = selectedEdits.filter((item) => {
-		return item.isSuggested;
-	});
-
 	const haveSuggested = selectedEdits.some((edit) => edit.isSuggested);
 
 	const metaParameters = selectedEdits.reduce((acc, edit) => {
@@ -82,14 +78,21 @@ const OperationPanel = observer(function OperationPanel() {
 									<div> No segements selected </div>
 								) : (
 									<div className="flex flex-col divide-y divide-gray-300 gap-2">
-										{
+										{/* {
 											(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
 											) ? null : (
 												<div className="flex flex-col justify-start px-1 divider-1">
 													<div className="">
 														<span className="text-sm"> Explanation: </span>
 														<span className="text-bold text-sm"> {
-															selectedEdits[0].explanation
+															
+															JSON.stringify(toJS(selectedEdits[0].explanation))
+														} </span>
+													</div>
+													<div className="">
+														<span className="text-sm"> Source: </span>
+														<span className="text-bold text-sm"> {
+															JSON.stringify(toJS(selectedEdits[0].suggestionSource))
 														} </span>
 													</div>
 													{ domainStore.curIntent.editOperation === null ? null : (
@@ -107,7 +110,7 @@ const OperationPanel = observer(function OperationPanel() {
 													}
 												</div>
 											)
-										}
+										} */}
 										<div className="flex flex-row"> {
 											Object.keys(metaParameters).map((metaKey) => {
 												const metaParameter = metaParameters[metaKey];
@@ -116,7 +119,6 @@ const OperationPanel = observer(function OperationPanel() {
 												}
 												let metaParameterKeys = Object.keys(metaParameter);
 												if (metaKey === "custom") {
-													///console.log(metaParameter, metaParameterKeys)
 													metaParameterKeys = Object.keys(flattenObject(EditState.getCustomParameters(selectedOperation)));
 													metaParameterKeys = metaParameterKeys.filter((key) => {
 														return metaParameter[key] !== null && metaParameter[key] !== undefined;

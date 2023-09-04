@@ -267,7 +267,8 @@ class DomainStore {
 		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
 		const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
-		const randomTextCommand = Math.random() > 0.5 ? "add" : "remove";
+		const randomTextCommand = (Math.random() > 0.5 ? "Whenever there is something happening do another thing with this!!!"
+			: "random goal goal random 2 goalie lol kek cheburek 22 kljaldf 10");
 		const randomSketchCommand = Math.random() > 0.5 ? [
 			{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
 		] : [];
@@ -406,7 +407,11 @@ class DomainStore {
 				return;
 			}
 			const summary = responseData.summary;
-			this.curIntent.summary = summary;
+			if (this.curIntent.summary === "") {
+				this.curIntent.summary = summary;
+			} else {
+				this.curIntent.summary = this.curIntent.summary + "\n" + summary;
+			}
 			requestSuggestions(requestData).then(action((responseData) => {
 				if (responseData === null || responseData.edits === undefined) {
 					this.processingIntent = false;
@@ -422,10 +427,71 @@ class DomainStore {
 						duration: this.projectMetadata.duration,
 						z: this.curIntent.intentPos + 1,
 					});
+					newEdit.suggestionSource = {
+						temporal: [],
+						spatial: [],
+						custom: [],
+						edit: [],
+					};
 					newEdit.setResponseBody({
 						...edit,
 						suggestedParameters: suggestedParameters,
 					});
+					
+					newEdit.contribution = [{
+						text: requestData.requestParameters.text,
+						type: [],
+					}];
+					for (let parameterKey in suggestedParameters) {
+						newEdit.suggestionSource[`custom.${parameterKey}`] = suggestedParameters[parameterKey].slice(0);
+					}
+					for (let key in newEdit.suggestionSource) {
+						for (let source of newEdit.suggestionSource[key]) {
+							let newContribution = [];
+							for (let single of newEdit.contribution) {
+								const text = single.text;
+								const type = single.type;
+								if (type.includes(key) === true) {
+									newContribution.push(single);
+									continue;
+								}
+								if (text.includes(source)) {
+									const parts = text.split(source);
+									for (let part_idx = 0; part_idx < parts.length - 1; part_idx++) {
+										let part = parts[part_idx];
+										if (part_idx === 0) {
+											part = part.trimEnd();
+										}
+										else {
+											part = part.trim();
+										}
+										if (part !== "") {
+											newContribution.push({
+												text: part,
+												type: type.slice(0),
+											});
+										}
+										newContribution.push({
+											text: source,
+											type: [...type.slice(0), key],
+										});
+									}
+									let lastPart = parts[parts.length - 1];
+									if (lastPart !== "") {
+										newContribution.push({
+											text: lastPart.trimStart(),
+											type: type.slice(0),
+										});
+									}
+								}
+								else {
+									//console.log("could not find", source, "in", text);
+									newContribution.push(single);
+								}
+							}
+							newEdit.contribution = newContribution.slice(0);
+						}
+					}
 					return newEdit;
 				});
 				// if (suggestedEditOperationKey !== this.curIntent.editOperationKey) {
@@ -441,6 +507,10 @@ class DomainStore {
 					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
 				}
 				this.processingIntent = false;
+				if (this.curIntent.suggestedEdits.length === 0) {
+					alert("Could not find relevant segment in the video!");
+				}
+
 			})).catch(action((error) => {
 				console.log("error", error);
 				this.processingIntent = false;
