@@ -7,6 +7,7 @@ import { Image, Layer, Line, Rect, Stage } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 import { Animation } from "konva/lib/Animation";
+import { roundNumber } from "../../utilities/genericUtilities";
 
 const SketchCanvas = observer(function SketchCanvas() {
 	const sketchCanvasId = "sketch-canvas";
@@ -306,6 +307,29 @@ const SketchCanvas = observer(function SketchCanvas() {
 			)
 
 		}
+		<div className={"text-sm flex flex-col"}>
+			<div>
+				Video: {domainStore.projectMetadata.width} x {domainStore.projectMetadata.height}
+			</div>
+			{
+				curIntent.sketchPlayPosition >= 0 ? (
+					<span > Time (seconds): {curIntent.sketchPlayPosition}</span>
+				) : null
+			}
+			{
+				curIntent.sketchCommand.map((rect, i) => {
+					const outputRect = {
+						x: roundNumber(rect.x, 2),
+						y: roundNumber(rect.y, 2),
+						width: roundNumber(rect.width, 2),
+						height: roundNumber(rect.height, 2),
+					}
+					return <span key={`rect${i}`}>
+						{`Rect ${i}: [${outputRect.x}, ${outputRect.y}, ${outputRect.width}, ${outputRect.height}]`}
+					</span>
+				})
+			}
+		</div>
 	</div>);
 });
 
