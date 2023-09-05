@@ -51,6 +51,7 @@ class EditState {
 
 	imageParameters = {
 		source: "/placeholder.jpg", // file picker
+		searchQuery: "", // search input
 	};
 
 	shapeParameters = {
@@ -462,6 +463,7 @@ class EditState {
 		if (editOperation.title === "Image") {
 			return {
 				source: "/placeholder.jpg", // file picker
+				searchQuery: "", // search input
 			};
 		}
 		if (editOperation.title === "Shape") {

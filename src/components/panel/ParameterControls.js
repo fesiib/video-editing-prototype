@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router-dom';
+
 import { observer } from "mobx-react-lite";
 
 import useRootContext from "../../hooks/useRootContext";
@@ -471,6 +473,68 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 	</div>);
 });
 
+const SearchInput = observer(function SearchInput({metaKey, parameterKey, parameter}) {
+	const {uiStore, domainStore} = useRootContext();
+	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const operationName = domainStore.operationNameMapping[parameterKey];
+
+	const inputId = `${metaKey}-${parameterKey}-input`;
+
+	const onInputChange = action((event) => {
+		const value = event.target.value;
+		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
+			edit.setCustomParameters(unFlattenObject({
+				[parameterKey]: value
+			}));
+		}
+	});
+	// <div className="flex flex-col">
+	// 	<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label> 
+	// 	<div id={inputId} className="border grid text-sm">
+	// 		<input className="" 
+	// 			id={inputId + "_url"} 
+	// 			type="url"
+	// 			value={parameter === "mixed" ? "" : parameter}
+	// 			placeholder={parameter === "mixed" ? "mixed" : ""}
+	// 			onChange={(event) => onUrlInputChange(event)} 
+	// 		/>
+	// 		<input className=""
+	// 			id={inputId}
+	// 			type="file"
+	// 			onChange={(event) => onFileInputChange(event)}
+	// 			accept={"image/*"}
+	// 		/>
+	// 	</div>
+	// </div>
+
+	return (<div className="flex flex-col">
+		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
+		<div className='flex flex-row w-full justify-between'>
+			<input 
+				className="w-2/3 border px-1 text-sm"
+				id={inputId}
+				type="search"
+				value={parameter}
+				onChange={(event) => onInputChange(event)}
+			/>
+			<button className='text-sm border w-fit px-1 bg-indigo-300 rounded hover:bg-indigo-500 disabled:opacity-50'
+				disabled={parameter === "mixed" || parameter === ""}
+			>
+				<Link
+					to={`https://www.google.com/search?tbm=isch&q=${parameter}`}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					Search
+				</Link>
+			</button>
+		</div>
+	</div>);
+});
+
 const ParameterControls = observer(function ParameterControls({
 	metaKey, parameterKey, parameter
 }) {
@@ -503,6 +567,9 @@ const ParameterControls = observer(function ParameterControls({
 	}
 	if (inputOperationMapping.toggle.includes(parameterKey)) {
 		return (<ToggleInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
+	}
+	if (inputOperationMapping.search.includes(parameterKey)) {
+		return (<SearchInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
 	}
 	return (<div> no format for {metaKey}.{parameterKey} </div>);
 });

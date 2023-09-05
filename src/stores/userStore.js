@@ -20,6 +20,11 @@ class UserStore {
 		"video-4": "https://youtu.be/ZSt9tm3RoUU",
 		"tutorial1": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"tutorial": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
+		"fs-video-2": "https://www.youtube.com/watch?v=kdN41iYTg3U",
+		"fs-video-3": "https://www.youtube.com/watch?v=3_nLdcHBJY4",
+		"fs-video-4": "https://www.youtube.com/watch?v=OKQpOzEY_A4",
+		"fs-video-5": "https://www.youtube.com/watch?v=sz8Lo3NY1m0",
+		"fs-video-6": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 	}
 
 	taskAssignments = {
@@ -35,7 +40,27 @@ class UserStore {
 			{
 				videoIds: ["tutorial"],
 				baseline: "",
-			}
+			},
+			{
+				videoIds: ["fs-video-2"],
+				baseline: "",
+			},
+			{
+				videoIds: ["fs-video-3"],
+				baseline: "",
+			},
+			{
+				videoIds: ["fs-video-4"],
+				baseline: "",
+			},
+			{
+				videoIds: ["fs-video-5"],
+				baseline: "",
+			},
+			{
+				videoIds: ["fs-video-6"],
+				baseline: "",
+			},
 		],
 	};
 
@@ -49,6 +74,27 @@ class UserStore {
 			videoIds: ["tutorial"],
 			baseline: "",
 		};
+		const fsTask2 = {
+			videoIds: ["fs-video-2"],
+			baseline: "",
+		};
+		const fsTask3 = {
+			videoIds: ["fs-video-3"],
+			baseline: "",
+		};
+		const fsTask4 = {
+			videoIds: ["fs-video-4"],
+			baseline: "",
+		};
+		const fsTask5 = {
+			videoIds: ["fs-video-5"],
+			baseline: "",
+		};
+		const fsTask6 = {
+			videoIds: ["fs-video-6"],
+			baseline: "",
+		};
+
 		const session1 = {
 			videoIds: [],
 			baseline: "",
@@ -75,6 +121,11 @@ class UserStore {
 			session1,
 			session2,
 			tutorial,
+			fsTask2,
+			fsTask3,
+			fsTask4,
+			fsTask5,
+			fsTask6,
 		];
 	}
 
@@ -116,6 +167,41 @@ class UserStore {
 	clearTask() {
 		this.curSessionIdx = -1;
 		this.curVideoIdx = -1;	
+	}
+
+	async chooseFsTask(taskIdx) {
+		if (this.userId === null) {
+			return;
+		}
+
+		if (this.loading === true) return;
+		this.loading = true;
+		if (this.taskIdx >= 0) {
+			await this.rootStore.saveFirebase().then(action(() => {
+				this.rootStore.resetAll();
+			})).catch((error) => {
+				console.log(error);
+			});
+		}
+		else {
+			this.rootStore.resetAll();
+		}
+		runInAction(async () => {
+			this.curSessionIdx = taskIdx + 1;
+			this.curVideoIdx = 0;
+			try {
+				await this.rootStore.fetchTask(this.userId, this.taskIdx);
+			} catch (error) {
+				runInAction(() => {
+					this.rootStore.domainStore.loadVideo(this.videoUrl, this.videoId);
+					console.log(error);
+				});
+			}
+			runInAction(async () => {
+				this.loading = false;
+				await this.saveFirebase();
+			});
+		});
 	}
 
 	async chooseTutorial() {

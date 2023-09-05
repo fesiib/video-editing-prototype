@@ -128,11 +128,15 @@ class DomainStore {
 			"style.align",
 			"style.verticalAlign",
 		],
+		search: [
+			"searchQuery",
+		],
 	};
 
 	operationNameMapping = {
 		"content": "Text",
 		"source": "Image",
+		"searchQuery" : "Search",
 		"type": "Shape",
 		"style.fontFamily": "Font Family",
 		"style.fill": "Color",
@@ -196,6 +200,7 @@ class DomainStore {
 
 	skipParameterIfMultiple = [
 		"source",
+		"searchQuery",
 		"start",
 		"finish",
 		"duration",

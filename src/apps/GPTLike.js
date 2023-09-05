@@ -29,6 +29,10 @@ const GPTLike = observer(function GPTLike() {
 		userStore.chooseTutorial();
 	});
 
+	const chooseFsTask = action((taskIdx) => {
+		userStore.chooseFsTask(taskIdx);
+	});
+
     useEffect(
         action(() => {
             uiStore.setWindowSize({
@@ -121,6 +125,36 @@ const GPTLike = observer(function GPTLike() {
 						</div>
 					) : (
 						<div className="flex flex-start gap-2 m-2">
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseFsTask(2)}
+							>
+								FS Task 2
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseFsTask(3)}
+							>
+								FS Task 3
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseFsTask(4)}
+							>
+								FS Task 4
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseFsTask(5)}
+							>
+								FS Task 5
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseFsTask(6)}
+							>
+								FS Task 6
+							</button>
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 								onClick={() => chooseTutorial()}

@@ -5,31 +5,26 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import Provider from "./Provider";
 import GPTLike from "./apps/GPTLike";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-// root.render(
-// 	<Provider>
-// 		<App />
-// 	</Provider>
-// );
-
-
-// default
-// root.render(
-//     <React.StrictMode>
-//         <Provider>
-//             <App />
-//         </Provider>
-//     </React.StrictMode> 
-// );
-
+const router = createBrowserRouter([
+	{
+		path: "/",
+		element: <GPTLike />,
+	},
+	{
+		path: "/app",
+		element: <App />,
+	},
+]);
 
 // gptlike
 root.render(
     <React.StrictMode>
         <Provider>
-            <GPTLike />
+            <RouterProvider router={router} />
         </Provider>
     </React.StrictMode> 
 );
