@@ -7,6 +7,7 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 
 class IntentState {
+	type = "main"; // side, main
 	summary = "";
     textCommand = "";
 	sketchCommand = [];
@@ -22,7 +23,7 @@ class IntentState {
 	suggestedEditOperationKey = "";
 	suggestedEditOperationKeys = [];
 
-    constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
+    constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, type, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
 		this.idx = idx;
@@ -30,6 +31,7 @@ class IntentState {
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.sketchPlayPosition = sketchPlayPosition;
+		this.type = type;
 		this.editOperationKey = "";
 		this.suggestedEditOperationKey = "";
 		this.suggestedEditOperationKeys = [];
@@ -47,6 +49,7 @@ class IntentState {
 			this.textCommand,
 			this.sketchCommand,
 			this.sketchPlayPosition,
+			this.type,
 			this.trackId
 		);
 		newIntent.summary = this.summary;
@@ -411,6 +414,7 @@ class IntentState {
 				this.summary = data.summary;
 				this.sketchCommand = data.sketchCommand;
 				this.sketchPlayPosition = data.sketchPlayPosition;
+				this.type = data.type;
 				this.trackId = data.trackId;
 				this.id = data.id;
 				this.editOperationKey = data.editOperationKey;
@@ -469,6 +473,7 @@ class IntentState {
 				summary: intent.summary,
 				sketchCommand: toJS(intent.sketchCommand),
 				sketchPlayPosition: intent.sketchPlayPosition,
+				type: intent.type,
 				trackId: intent.trackId,
 				editOperationKey: intent.editOperationKey,
 				suggestedEditOperationKey: intent.suggestedEditOperationKey,

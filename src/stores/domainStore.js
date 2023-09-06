@@ -215,7 +215,7 @@ class DomainStore {
 
 		this.projectMetadata.totalIntentCnt = 1;
         this.intents = [
-				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
 		];
 		this.curIntentPos = 0;
     }
@@ -248,7 +248,7 @@ class DomainStore {
 			totalIntentCnt: 1,
 		};
 		this.intents = [
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
 		];
 		this.curIntentPos = 0;
 	}
@@ -257,7 +257,7 @@ class DomainStore {
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		this.intents.push(
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
 		);
 		this.rootStore.resetTempState();
 	}
@@ -266,7 +266,7 @@ class DomainStore {
 		const systemSetting = this.rootStore.userStore.systemSetting;
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
-		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
+		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0);
 
 		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
@@ -287,6 +287,7 @@ class DomainStore {
 		newIntent.summary = randomTextCommand;
 		newIntent.sketchCommand = randomSketchCommand;
 		newIntent.sketchPlayPosition = randomSketchPlayPosition;
+		newIntent.type = "main";
 		
 		const randomEditsLength = Math.floor(Math.random() * 5);
 		const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
@@ -960,6 +961,7 @@ class DomainStore {
 						"",
 						[],
 						-1,
+						"main",
 						0, 
 					);
 					try {

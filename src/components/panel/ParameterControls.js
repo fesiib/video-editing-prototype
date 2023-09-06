@@ -72,12 +72,14 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 				value={parameter === "mixed" ? "" : parameter}
 				placeholder={parameter === "mixed" ? "mixed" : ""}
 				onChange={(event) => onUrlInputChange(event)} 
+				autoComplete='off'
 			/>
 			<input className=""
 				id={inputId}
 				type="file"
 				onChange={(event) => onFileInputChange(event)}
 				accept={"image/*"}
+				autoComplete='off'
 			/>
 		</div>
 	</div>);
@@ -121,6 +123,7 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 			value={parameter === "mixed" ? "" : parameter}
 			placeholder={parameter === "mixed" ? "mixed" : "text"}
 			onChange={(event) => onInputChange(event)} 
+			autoComplete='off'
 		/>
 	</div>);
 });
@@ -230,6 +233,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 				placeholder={parameter === "mixed" ? "mixed" : "number"}
 				onClick={(event) => {event.target.select()}}
 				onChange={(event) => onInputChange(event)}
+				autoComplete='off'
 			/>
 			<button 
 				className={"w-5 bg-gray-200 hover:bg-gray-300"}
@@ -327,6 +331,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 			type="color"
 			value={parameter === "mixed" ? "#000000" : parameter}
 			onChange={(event) => onInputChange(event)} 
+			autoComplete='off'
 		/>
 	</div>);
 });
@@ -469,7 +474,13 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 
 	return (<div className="my-1 flex justify-between">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
-		<input className="w-1/2 border" id={inputId} type="checkbox" value={parameter} onChange={(event) => onInputChange(event)} />
+		<input
+			className="w-1/2 border"
+			id={inputId}
+			type="checkbox"
+			value={parameter}
+			onChange={(event) => onInputChange(event)}
+		/>
 	</div>);
 });
 
@@ -477,6 +488,8 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 	const operationName = domainStore.operationNameMapping[parameterKey];
+
+	const isDisabled = parameter === "mixed" || parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -510,6 +523,8 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 	// 	</div>
 	// </div>
 
+	console.log(parameter === "mixed", parameter === "", selectedEdits.some((edit) => edit.isSuggested))
+
 	return (<div className="flex flex-col">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<div className='flex flex-row w-full justify-between'>
@@ -519,14 +534,16 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 				type="search"
 				value={parameter}
 				onChange={(event) => onInputChange(event)}
+				autoComplete='off'
 			/>
 			<button className='text-sm border w-fit px-1 bg-indigo-300 rounded hover:bg-indigo-500 disabled:opacity-50'
-				disabled={parameter === "mixed" || parameter === ""}
+				disabled={isDisabled}
 			>
 				<Link
 					to={`https://www.google.com/search?tbm=isch&q=${parameter}`}
 					target="_blank"
 					rel="noopener noreferrer"
+					
 				>
 					Search
 				</Link>
