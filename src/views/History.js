@@ -62,7 +62,7 @@ const History = observer(function History() {
 									disabled={curIntent.idx === titleIdx}
 									onClick={() => onIntentClick(idx)}
 								>
-									{intent.type} {titleIdx} - {`[${title}]`}: {intent.summary}
+									{titleIdx} - {`[${title}]`}: {intent.summary}
 								</button>
 								<div className="w-fit flex gap-2 justify-center p-2">
 									{curIntent.idx === titleIdx ? null

@@ -7,7 +7,6 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 
 class IntentState {
-	type = "main"; // side, main
 	summary = "";
     textCommand = "";
 	sketchCommand = [];
@@ -23,7 +22,9 @@ class IntentState {
 	suggestedEditOperationKey = "";
 	suggestedEditOperationKeys = [];
 
-    constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, type, trackId) {
+	history = [];
+
+    constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
 		this.idx = idx;
@@ -31,7 +32,6 @@ class IntentState {
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.sketchPlayPosition = sketchPlayPosition;
-		this.type = type;
 		this.editOperationKey = "";
 		this.suggestedEditOperationKey = "";
 		this.suggestedEditOperationKeys = [];
@@ -40,7 +40,74 @@ class IntentState {
 		this.id = `intent-${randomUUID()}`;
 		this.trackId = trackId;
 		this.processingMode = "from-scratch";
+		this.history = [];
+		this.enterHistory();
+		this.historyPos = 0;
     }
+
+	enterHistory() {
+		const historyEntry = {
+			summary: this.summary,
+			textCommand: this.textCommand,
+			sketchCommand: this.sketchCommand.slice(0),
+			sketchPlayPosition: this.sketchPlayPosition,
+			suggestedEdits: [],
+			suggestedEditOperationKey: this.suggestedEditOperationKey,
+			suggestedEditOperationKeys: this.suggestedEditOperationKeys.slice(0),
+			processingMode: this.processingMode,
+		};
+
+		for (let edit of this.suggestedEdits) {
+			historyEntry.suggestedEdits.push(edit.getDeepCopy());
+		}
+		this.history.push(historyEntry);
+	}
+
+	restoreHistory(historyEntryPos) {
+		if (this.history.length === 0 || historyEntryPos < 0 || historyEntryPos >= this.history.length) {
+			return;
+		}
+		if (this.historyPos === historyEntryPos) {
+			return;
+		}
+		if (this.historyPos === this.history.length - 1) {
+			console.log("saving last before", this.historyPos, this.history.map((entry) => entry.summary));
+			this.history.splice(this.historyPos, 1);
+			console.log("saving last after", this.historyPos, this.history.map((entry) => entry.summary));
+			this.enterHistory();
+		}
+		this.historyPos = historyEntryPos;
+		const historyEntry = {
+			...this.history[historyEntryPos]
+		};
+		this.summary = historyEntry.summary;
+		this.textCommand = historyEntry.textCommand;
+		this.sketchCommand = historyEntry.sketchCommand.slice(0);
+		this.sketchPlayPosition = historyEntry.sketchPlayPosition;
+		this.suggestedEditOperationKey = historyEntry.suggestedEditOperationKey;
+		this.suggestedEditOperationKeys = historyEntry.suggestedEditOperationKeys.slice(0);
+		this.processingMode = historyEntry.processingMode;
+		this.suggestedEdits = [];
+		for (let edit of historyEntry.suggestedEdits) {
+			this.suggestedEdits.push(edit.getDeepCopy());
+		}
+	}
+
+	deleteHistory(historyEntryPos) {
+		if (this.history.length === 0 || historyEntryPos < 0 || historyEntryPos >= this.history.length) {
+			return;
+		}
+		this.history.splice(historyEntryPos, 1);
+		if (this.historyPos === historyEntryPos) {
+			this.restoreHistory(this.history.length - 1);
+		}
+	}
+
+	clearHistory() {	
+		this.history = [];
+		this.enterHistory();
+		this.historyPos = 0;
+	}
 
 	getDeepCopy() {
 		let newIntent = new IntentState(
@@ -49,7 +116,6 @@ class IntentState {
 			this.textCommand,
 			this.sketchCommand,
 			this.sketchPlayPosition,
-			this.type,
 			this.trackId
 		);
 		newIntent.summary = this.summary;
@@ -67,6 +133,27 @@ class IntentState {
 			return newEdit;
 		});
 		newIntent.processingMode = this.processingMode;
+
+		//copy history
+		newIntent.history = this.history.map((entry) => {
+			const newEntry = {
+				summary: entry.summary,
+				textCommand: entry.textCommand,
+				sketchCommand: entry.sketchCommand.slice(0),
+				sketchPlayPosition: entry.sketchPlayPosition,
+				suggestedEdits: [],
+				suggestedEditOperationKey: entry.suggestedEditOperationKey,
+				suggestedEditOperationKeys: entry.suggestedEditOperationKeys.slice(0),
+				processingMode: entry.processingMode,
+			};
+			for (let edit of entry.suggestedEdits) {
+				const newEdit = edit.getDeepCopy();
+				newEdit.intent = newIntent;
+				newEntry.suggestedEdits.push(newEdit);
+			}
+			return newEntry;
+		});
+		newIntent.historyPos = this.historyPos;
 		return newIntent;
 	}
 
@@ -414,7 +501,6 @@ class IntentState {
 				this.summary = data.summary;
 				this.sketchCommand = data.sketchCommand;
 				this.sketchPlayPosition = data.sketchPlayPosition;
-				this.type = data.type;
 				this.trackId = data.trackId;
 				this.id = data.id;
 				this.editOperationKey = data.editOperationKey;
@@ -459,6 +545,42 @@ class IntentState {
 						console.log(error);
 					}
 				}
+
+				this.history = [];
+				for (let entry of data.history) {
+					const newEntry = {
+						summary: entry.summary,
+						textCommand: entry.textCommand,
+						sketchCommand: entry.sketchCommand.slice(0),
+						sketchPlayPosition: entry.sketchPlayPosition,
+						suggestedEdits: [],
+						suggestedEditOperationKey: entry.suggestedEditOperationKey,
+						suggestedEditOperationKeys: entry.suggestedEditOperationKeys.slice(0),
+						processingMode: entry.processingMode,
+					};
+					for (let editId of entry.suggestedEdits) {
+						const newEdit = new EditState(
+							this.domainStore,
+							this,
+							true,
+							this.trackId,
+						);
+						try {
+							const success = await newEdit.fetchFirebase(userId, taskIdx, editId);
+							if (success) {
+								runInAction(() => {
+									newEntry.suggestedEdits.push(newEdit);
+								});
+							}
+						} catch (error) {
+							console.log(error);
+						}
+					}
+					runInAction(() => {
+						this.history.push(newEntry);
+					});
+				}
+				this.historyPos = this.history.length - 1;
 				resolve(true);
 			})).catch((error) => {
 				reject("domain fetch error: " + error.message);
@@ -471,9 +593,8 @@ class IntentState {
 			const data = {
 				textCommand: intent.textCommand,
 				summary: intent.summary,
-				sketchCommand: toJS(intent.sketchCommand),
+				sketchCommand: toJS(intent.sketchCommand.slice(0)),
 				sketchPlayPosition: intent.sketchPlayPosition,
-				type: intent.type,
 				trackId: intent.trackId,
 				editOperationKey: intent.editOperationKey,
 				suggestedEditOperationKey: intent.suggestedEditOperationKey,
@@ -483,6 +604,8 @@ class IntentState {
 				id: intent.id,
 				idx: intent.idx,
 				processingMode: intent.processingMode,
+				history: [],
+				historyPos: intent.historyPos,
 			};
 	
 			for (let edit of intent.activeEdits) {
@@ -490,6 +613,22 @@ class IntentState {
 			}
 			for (let edit of intent.suggestedEdits) {
 				data.suggestedEdits.push(edit.commonState.id);
+			}
+			for (let entry of intent.history) {
+				const newEntry = {
+					summary: entry.summary,
+					textCommand: entry.textCommand,
+					sketchCommand: toJS(entry.sketchCommand.slice(0)),
+					sketchPlayPosition: entry.sketchPlayPosition,
+					suggestedEdits: [],
+					suggestedEditOperationKey: entry.suggestedEditOperationKey,
+					suggestedEditOperationKeys: entry.suggestedEditOperationKeys,
+					processingMode: entry.processingMode,
+				};
+				for (let edit of entry.suggestedEdits) {
+					newEntry.suggestedEdits.push(edit.commonState.id);
+				}
+				data.history.push(newEntry);
 			}
 			//console.log("intent to", data);
 			return data;

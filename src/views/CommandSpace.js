@@ -40,17 +40,27 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	return (<div className="w-full flex flex-col items-center">
-		<h2 className="w-full"> {
-			curIntent.summary === "" ? (
-				<span> {curIntent.type} Edit {curIntent.idx}: 
-					<span 
-						className="italic text-gray-400"
-					> describe your edit </span> 
-				</span>
-			) : (
-				<span> {curIntent.type} Edit {curIntent.idx}: {curIntent.summary} </span>
-			)
-		}
+		<h2 className="w-full"> 
+			{
+				curIntent.historyPos === curIntent.history.length - 1 ? (
+					<span> New 
+					</span>
+				) : (
+					<span> History
+					</span>
+				)
+			}
+			{
+				curIntent.summary === "" ? (
+					<span> Edit {curIntent.idx}: 
+						<span 
+							className="italic text-gray-400"
+						> describe your edit </span> 
+					</span>
+				) : (
+					<span> Edit {curIntent.idx}: {curIntent.summary} </span>
+				)
+			}
 		</h2>
 		{systemSetting ? (
 			domainStore.processingIntent ? (

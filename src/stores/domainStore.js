@@ -215,7 +215,7 @@ class DomainStore {
 
 		this.projectMetadata.totalIntentCnt = 1;
         this.intents = [
-				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
+				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		];
 		this.curIntentPos = 0;
     }
@@ -248,7 +248,7 @@ class DomainStore {
 			totalIntentCnt: 1,
 		};
 		this.intents = [
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		];
 		this.curIntentPos = 0;
 	}
@@ -257,7 +257,7 @@ class DomainStore {
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
 		this.intents.push(
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0)
+			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
 		);
 		this.rootStore.resetTempState();
 	}
@@ -266,37 +266,46 @@ class DomainStore {
 		const systemSetting = this.rootStore.userStore.systemSetting;
 		this.curIntentPos = this.intents.length;
 		this.projectMetadata.totalIntentCnt += 1;
-		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, "main", 0);
+		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
 
 		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
-		const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
-		const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
-		const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
-		const randomTextCommand = (Math.random() > 0.5 ? "Whenever there is something happening do another thing with this!!!"
-			: "random goal goal random 2 goalie lol kek cheburek 22 kljaldf 10");
-		const randomSketchCommand = Math.random() > 0.5 ? [
-			{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
-		] : [];
-		const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
 		
 		newIntent.setEditOperationKey(randomEditOperationKey);
-		newIntent.suggestedEditOperationKey = "";
-		newIntent.suggestedEditOperationKeys = randomSuggestedEditOperationKeys;
-		newIntent.processingMode = randomProcessingMode;
-		newIntent.textCommand = randomTextCommand;
-		newIntent.summary = randomTextCommand;
-		newIntent.sketchCommand = randomSketchCommand;
-		newIntent.sketchPlayPosition = randomSketchPlayPosition;
-		newIntent.type = "main";
-		
+
+		const historyLength = Math.floor(Math.random() * 5);
+				
 		const randomEditsLength = Math.floor(Math.random() * 5);
-		const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
 		for (let i = 0; i < randomEditsLength; i++) {
 			newIntent.addRandomEdit(false);
 		}
-		for (let i = 0; i < randomSuggestedEditsLength; i++) {
-			newIntent.addRandomEdit(true);
+
+		for (let h = 0; h < historyLength; h++) {
+			const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
+			const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
+			const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
+			const randomTextCommand = (Math.random() > 0.5 ? "Whenever there is something happening do another thing with this!!!"
+				: "random goal goal random 2 goalie lol kek cheburek 22 kljaldf 10");
+			const randomSketchCommand = Math.random() > 0.5 ? [
+				{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
+			] : [];
+			const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
+
+			newIntent.suggestedEditOperationKey = randomSuggestedEditOperationKey;
+			newIntent.suggestedEditOperationKeys = randomSuggestedEditOperationKeys;
+			newIntent.processingMode = randomProcessingMode;
+			newIntent.textCommand = randomTextCommand;
+			newIntent.summary = randomTextCommand;
+			newIntent.sketchCommand = randomSketchCommand;
+			newIntent.sketchPlayPosition = randomSketchPlayPosition;
+			newIntent.suggestedEdits = [];
+
+			const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
+			for (let i = 0; i < randomSuggestedEditsLength; i++) {
+				newIntent.addRandomEdit(true);
+			}
+			newIntent.enterHistory();
 		}
+		newIntent.historyPos = newIntent.history.length - 1;
 
 		this.intents.push(newIntent);
 
@@ -321,6 +330,13 @@ class DomainStore {
 				edit.commonState.setMetadata({
 					z: idx + 1,
 				});
+			}
+			for (let entry of intent.history) {
+				for (let edit of entry.suggestedEdits) {
+					edit.commonState.setMetadata({
+						z: idx + 1,
+					});
+				}
 			}
 			return intent;
 		});
@@ -352,6 +368,13 @@ class DomainStore {
 				z: this.curIntentPos + 1,
 			});
 		}
+		for (let entry of deepCopy.history) {
+			for (let edit of entry.suggestedEdits) {
+				edit.commonState.setMetadata({
+					z: this.curIntentPos + 1,
+				});
+			}
+		}
 		this.rootStore.resetTempState();
 	}
 
@@ -360,6 +383,13 @@ class DomainStore {
 			return;
 		}
 		this.curIntentPos = intentPos;
+		if (this.curIntentPos >= 0 && this.curIntentPos < this.intents.length
+			&& this.intents[this.curIntentPos].history.length > 0
+		) {
+			this.intents[this.curIntentPos].restoreHistory(
+				this.intents[this.curIntentPos].history.length - 1,
+			);
+		}
 		this.rootStore.resetTempState();
 	}
 
@@ -403,7 +433,12 @@ class DomainStore {
 		// make sure zIndex is fine
 		// make sure to edit suggesteEditOperationKey and remove it if they are equal
 
+		this.curIntent.enterHistory();
+		this.curIntent.restoreHistory(this.curIntent.history.length - 1);
+		// this.curIntent.historyPos = this.curIntent.history.length - 1;	
 		this.curIntent.suggestedEdits = [];
+		this.curIntent.suggestedEditOperationKeys = [];
+		this.curIntent.suggestedEditOperationKey = "";	
 
 		requestSummary({
 			input: requestData.requestParameters.text,
@@ -413,11 +448,14 @@ class DomainStore {
 				return;
 			}
 			const summary = responseData.summary;
-			if (this.curIntent.summary === "") {
-				this.curIntent.summary = summary;
-			} else {
-				this.curIntent.summary = this.curIntent.summary + "\n" + summary;
-			}
+			// if (this.curIntent.summary === "") {
+			// 	this.curIntent.summary = summary;
+			// } else {
+			// 	this.curIntent.summary = this.curIntent.summary + "\n" + summary;
+			// }
+			
+			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
+			this.curIntent.summary = summary;
 			requestSuggestions(requestData).then(action((responseData) => {
 				if (responseData === null || responseData.edits === undefined) {
 					this.processingIntent = false;
@@ -512,6 +550,7 @@ class DomainStore {
 				else {
 					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
 				}
+				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				this.processingIntent = false;
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");
@@ -519,51 +558,17 @@ class DomainStore {
 
 			})).catch(action((error) => {
 				console.log("error", error);
+				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				this.processingIntent = false;
+				alert("Sorry error occured");
 			}));
 		})).catch(action((error) => {
 			console.log("error", error);
+			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 			this.processingIntent = false;
+			alert("Sorry error occured");
 		}));
 	}
-
-	// linearizeEdits(editHierarchy) {
-	// 	let result = [];
-	// 	for (let edits of editHierarchy) {
-	// 		for (let edit of edits) {
-	// 			const editCopy = edit.getDeepCopy();
-	// 			for (let prevEdit of result) {
-	// 				const left = Math.max(prevEdit.commonState.offset, editCopy.commonState.offset);
-	// 				const right = Math.min(prevEdit.commonState.end, editCopy.commonState.end);
-	// 				if (left >= right) {
-	// 					continue;
-	// 				}
-	// 				let metadataUpdate = {};
-	// 				if (prevEdit.commonState.offset <= editCopy.commonState.offset) {
-	// 					metadataUpdate = {
-	// 						finish: editCopy.commonState.offset,
-	// 					};
-	// 				}
-	// 				else if (prevEdit.commonState.end >= editCopy.commonState.end) {
-	// 					metadataUpdate = {
-	// 						start: editCopy.commonState.end,
-	// 						offset: editCopy.commonState.end,
-	// 					};
-	// 				}
-	// 				else {
-	// 					metadataUpdate = {
-	// 						start: 0,
-	// 						offset: 0,
-	// 						finish: 0,
-	// 					}
-	// 				}
-	// 				prevEdit.commonState.setMetadata(metadataUpdate);
-	// 			}
-	// 			result.push(editCopy);
-	// 		}
-	// 	}
-	// 	return result.filter((edit) => edit.commonState.sceneDuration > 0);
-	// }
 
 	getVideoById(id) {
 		return this.in_mainVideos.find((video) => video.commonState.id === id);
@@ -961,7 +966,6 @@ class DomainStore {
 						"",
 						[],
 						-1,
-						"main",
 						0, 
 					);
 					try {
