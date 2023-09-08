@@ -314,7 +314,7 @@ const Timeline = observer(function Timeline() {
 									onClick={() => onMoreClick()}
 									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
 								>
-									more segments
+									search more
 								</button>
 							</div>
 						) : null

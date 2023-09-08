@@ -1,3 +1,26 @@
+mark {
+	color: transparent;
+	background-color: lightblue; /* or whatever */
+}
+
+textarea {
+	margin: 0;
+	border-radius: 0;
+	color: #444; /* or whatever */
+  	background-color: transparent;
+}
+
+.textarea-backdrop {
+	overflow: auto;
+	background-color: #fff;
+}
+
+.textarea-highlights {
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	color: transparent;
+}
+
 .disable-select {
 	-webkit-user-select: none;  
 	-moz-user-select: none;    

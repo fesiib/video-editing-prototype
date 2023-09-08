@@ -35,3 +35,16 @@ export function requestSummary(requestData) {
 		);
 	});
 }
+
+export function requestAmbiguousParts(requestData) {
+	return new Promise((resolve, reject) => {
+		const url = `${URL}ambiguous`;
+		axios.post(url, requestData).then((response) => {
+			resolve(response.data);
+		}
+		).catch((error) => {
+			reject(error);
+		}
+		);
+	});
+}

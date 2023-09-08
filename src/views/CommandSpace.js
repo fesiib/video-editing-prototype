@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, toJS } from "mobx";
+import { action, set, toJS } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
+import axios from "axios";
+import { requestAmbiguousParts } from "../services/pipeline";
 
 
 const CommandSpace = observer(function CommandSpace() {
@@ -18,13 +20,65 @@ const CommandSpace = observer(function CommandSpace() {
 	const selectedSuggestedEdits = selectedEdits.filter((item) => {
 		return item.isSuggested;
 	});
-
-	const reversedIntents = [...domainStore.intents].reverse();
 	const textCommandLimit = 200;
+	const textCommandRef = useRef(null);
 
-	const onChangeTextCommand = (event) => {
-		curIntent.setTextCommand(event.target.value);
-	}
+	const applyHighlights = (text, ambiguousParts) => {
+		let result = text.replace(/\n$/g, '\n\n');
+		ambiguousParts.sort((a, b) => {
+			return b.offset - a.offset;
+		});
+		for (const part of ambiguousParts) {
+			let leftResult = result.slice(0, part.offset);
+			let rightResult = result.slice(part.offset);
+			result = leftResult + rightResult.replace(part.text, `<mark>${part.text}</mark>`)
+		}
+		return result;
+	};
+
+	const onChangeTextCommand = action((event) => {
+		const text = event.target.value;
+		curIntent.setTextCommand(text);
+	});
+
+	const onTextAreaScroll = (event) => {
+		const scrollTop = event.target.scrollTop;
+		const divBackDrop = textCommandRef.current.querySelector("#textarea-backdrop");
+		divBackDrop.scrollTop = scrollTop;
+	};
+
+	const onMarkClick = action((mark) => {
+		const text = mark.innerText;
+		const idx = curIntent.textCommand.indexOf(text);
+		const len = text.length;
+		if (mark.style.backgroundColor === "lightgreen") {
+			mark.style.backgroundColor = "lightblue";
+		}
+		else {
+			mark.style.backgroundColor = "lightgreen";
+		}
+	});
+
+	const onTextAreaClick = action((event) => {
+		const divBackDrop = textCommandRef.current.querySelector("#textarea-backdrop");
+		const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
+		const marks = divHighlights.querySelectorAll("mark");
+		const intersectedMarks = [];
+		for (const mark of marks) {
+			const rect = mark.getBoundingClientRect();
+			if (rect.top < event.clientY && event.clientY < rect.bottom
+				&& rect.left < event.clientX && event.clientX < rect.right
+			) {
+				intersectedMarks.push(mark);
+			}
+		}
+		if (intersectedMarks.length === 0) {
+			return;
+		}
+		for (const mark of intersectedMarks) {
+			onMarkClick(mark);
+		}
+	});
 
 	const onProcessClick = action(() => {
 		domainStore.processIntent();
@@ -35,6 +89,34 @@ const CommandSpace = observer(function CommandSpace() {
 		curIntent.setProcessingMode(event.target.value);
 
 	});
+
+	useEffect(() => {
+		const text = curIntent.textCommand;
+		const words = text.trim().match(/\S+/g);
+		if (uiStore.commandSpaceControls.requestingAmbiguousParts
+			|| words === null
+			|| words.length < 2
+			|| textCommandRef.current === null
+		) {
+			const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
+			divHighlights.innerHTML = text;
+			return;
+		}
+		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
+		requestAmbiguousParts({
+			input: text,
+		}).then((response) => {
+			const ambiguousParts = response.ambiguousParts;
+			// https://codersblock.com/blog/highlight-text-inside-a-textarea/
+			const highlightedText = applyHighlights(text, ambiguousParts);
+			const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
+			divHighlights.innerHTML = highlightedText;
+			uiStore.commandSpaceControls.requestingAmbiguousParts = false;
+		}).catch((error) => {
+			console.log(error);
+			uiStore.commandSpaceControls.requestingAmbiguousParts = false;
+		});
+	}, [curIntent.textCommand]);
 
 	return (<div className="w-full flex flex-col items-center">
 		<h2 className="w-full"> 
@@ -66,16 +148,43 @@ const CommandSpace = observer(function CommandSpace() {
 				<div className="w-full p-1 bg-gray-100">
 					<div className="flex flex-row w-full gap-2"> 
 						<div className="flex flex-col w-full gap-1 border p-1">
-							<textarea 
-								id="textCommand" 
-								maxLength={textCommandLimit}
-								type="text"
-								rows="4"
-								placeholder="description"
-								value={curIntent.textCommand}
-								className="w-full border p-1 resize-none"
-								onChange={onChangeTextCommand} 
-							/>
+							<div
+								id="textarea-container"
+								className="textarea-container relative w-full h-full"
+								ref={textCommandRef}
+							>
+								<div  
+									id="textarea-backdrop"
+									className="textarea-backdrop absolute w-full h-full"
+								>
+									<div
+										id="textarea-highlights"
+										className="textarea-highlights z-0"
+										style = {{
+											pointerEvents: "auto",
+										}}
+									>
+									</div>
+								</div>
+								<textarea 
+									id="textCommand" 
+									maxLength={textCommandLimit}
+									type="text"
+									rows="4"
+									placeholder="description"
+									value={curIntent.textCommand}
+									className="w-full resize-none relative z-10"
+									style={{
+										margin: 0,
+										borderRadius: 0,
+										color: "#444444",
+										backgroundColor: "transparent",
+									}}
+									onChange={onChangeTextCommand}
+									onScroll={onTextAreaScroll}
+									onClick={onTextAreaClick}
+								/>
+							</div>
 							<div className="flex flex-row justify-between">
 								<SketchCanvas />
 								<span

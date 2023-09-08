@@ -14,6 +14,10 @@ class UIStore {
 
 	navigation = "timeline";
 
+	commandSpaceControls = {
+		requestingAmbiguousParts: false,
+	};
+
     canvasSize = {
         width: (window.innerWidth / 3) * 2, // 2/3
         height: (window.innerHeight / 3) * 2, // 2/3
