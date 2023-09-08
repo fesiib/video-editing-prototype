@@ -17,7 +17,9 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const onDeleteClick = action((event, historyPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		intent.deleteHistory(historyPos);
+		if (window.confirm("Delete this history entry?")) {
+			intent.deleteHistory(historyPos);
+		}
 	});
 
 	const onEntryClick = action((event, historyPos) => {
@@ -48,7 +50,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 			}
 			disabled={isSelected}
 		>
-			{title === "" ? "No summary" : title}
+			{title === "" ? "blank" : title}
 		
 		</button>
 		{
@@ -74,13 +76,17 @@ const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
 	const onDeleteClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		domainStore.deleteIntent(intentPos);
+		if (window.confirm("Delete this edit?")) {
+			domainStore.deleteIntent(intentPos);
+		}
 	});
 
 	const onCopyClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		domainStore.copyIntentToCurrent(intentPos);
+		if (window.confirm("Duplicate this edit to current?")) {
+			domainStore.copyIntentToCurrent(intentPos);
+		}
 	});
 
 	const onIntentClick = action((event, intentPos) => {

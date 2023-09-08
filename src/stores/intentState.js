@@ -71,9 +71,7 @@ class IntentState {
 			return;
 		}
 		if (this.historyPos === this.history.length - 1) {
-			console.log("saving last before", this.historyPos, this.history.map((entry) => entry.summary));
 			this.history.splice(this.historyPos, 1);
-			console.log("saving last after", this.historyPos, this.history.map((entry) => entry.summary));
 			this.enterHistory();
 		}
 		this.historyPos = historyEntryPos;

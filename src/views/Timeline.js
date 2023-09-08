@@ -75,6 +75,9 @@ const Timeline = observer(function Timeline() {
 
 
     const onDeleteTimelineItems = action(() => {
+		if (window.confirm("Delete selected edits?") === false) {
+			return;
+		}
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
             (value) => value.commonState.id
         );
