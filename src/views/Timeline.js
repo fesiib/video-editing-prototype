@@ -103,7 +103,7 @@ const Timeline = observer(function Timeline() {
 		const selectedScenes = curIntent.activeEdits.filter((edit) => {
 			return selectedSceneIds.findIndex((id) => id === edit.commonState.id) >= 0;
 		});
-		const newScenes = selectedScenes.map((scene) => {
+		const newScenes = selectedScenes.map(action((scene) => {
 			const newScene = scene.getDeepCopy();
 			let newOffset = scene.commonState.offset + scene.commonState.sceneDuration;
 			let newFinish = domainStore.projectMetadata.duration;
@@ -135,8 +135,9 @@ const Timeline = observer(function Timeline() {
 				finish: newFinish,
 			});
 			curIntent.activeEdits.push(newScene);
+			uiStore.timelineControls.playPosition = newOffset;
 			return newScene;
-		});
+		}));
 		uiStore.selectTimelineObjects(newScenes.filter((scene) => scene !== null));
 	});
 

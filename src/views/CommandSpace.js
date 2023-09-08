@@ -99,13 +99,17 @@ const CommandSpace = observer(function CommandSpace() {
 	useEffect(() => {
 		const text = curIntent.textCommand;
 		const words = text.trim().match(/\S+/g);
+		if (textCommandRef.current === null) {
+			return;
+		}
 		if (uiStore.commandSpaceControls.requestingAmbiguousParts
 			|| words === null
 			|| words.length < 2
-			|| textCommandRef.current === null
 		) {
 			const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
-			divHighlights.innerHTML = text;
+			if (divHighlights !== null && divHighlights !== undefined) {
+				divHighlights.innerHTML = text;
+			}
 			return;
 		}
 		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
