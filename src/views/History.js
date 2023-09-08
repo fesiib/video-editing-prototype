@@ -69,13 +69,11 @@ const History = observer(function History() {
 									: (<button
 										className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
 										onClick={() => onCopyClick(idx)}
-										// TODO: copy confirm
 									> Copy </button>)}
 									<button 
 										className="w-fit bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
 										onClick={() => onDeleteClick(idx)}
 										// disabled={curIntent.activeEdits.length === 0}
-										// TODO: confirm delete
 									> Delete </button>
 								</div>
 							</div>

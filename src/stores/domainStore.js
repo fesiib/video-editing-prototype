@@ -400,7 +400,7 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
-	processIntent(processingMode="from-scratch") {
+	processIntent(processingMode, segmentOfInterest) {
 		if (this.processingIntent) {
 			return;
 		}
@@ -410,6 +410,7 @@ class DomainStore {
 			projectId: "",
 			projectMetadata: {},
 			edits: [],
+			segmentOfInterest: segmentOfInterest,
 			skippedSegments: [],
 			requestParameters: {},
 			editParameterOptions: toJS({ ...this.dropdownOptions }),

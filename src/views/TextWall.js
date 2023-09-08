@@ -365,6 +365,7 @@ const SentenceBox = observer(function SentenceBox({
 			disposer();
 		}
 	}, []);
+
     return (
 		<div
 			ref={setNodeRef}
@@ -465,6 +466,80 @@ const TextWall = observer(function TextWall() {
 		return;
     });
 
+	const onTextWallScroll = action((event) => {
+		if (textWallRef.current === null
+			|| textWallRef.current === undefined
+			|| uiStore.navigation !== "transcript"	
+		) {
+			return;
+		}
+		const { top: parentTop, bottom: parentBottom } = textWallRef.current.getBoundingClientRect();
+		let l = 0;
+		let r = filteredScript.length;
+		while (l < r) {
+			const mid = Math.floor((l + r) / 2);
+			const scriptDiv = document.getElementById(`script-${mid}`);
+			if (scriptDiv === null || scriptDiv === undefined) {
+				console.log('could not find script');
+				r = mid;
+				continue;
+			}
+			const scriptRect = scriptDiv.getBoundingClientRect();
+			if (scriptRect.bottom < parentTop) {
+				l = mid + 1;
+			}
+			else if (scriptRect.top > parentBottom) {
+				r = mid;
+			}
+			else {
+				r = mid;
+			}
+		}
+		if (l === filteredScript.length) {
+			uiStore.commandSpaceControls.viewPortStart = domainStore.projectMetadata.duration;
+			uiStore.commandSpaceControls.viewPortFinish = domainStore.projectMetadata.duration;
+			return;
+		}
+		const startScriptPos = l;
+		uiStore.commandSpaceControls.viewPortStart = filteredScript[startScriptPos].start;
+		l = startScriptPos;
+		r = filteredScript.length;
+		while (l < r) {
+			const mid = Math.floor((l + r) / 2);
+			const scriptDiv = document.getElementById(`script-${mid}`);
+			if (scriptDiv === null || scriptDiv === undefined) {
+				console.log('could not find script');
+				r = mid;
+				continue;
+			}
+			const scriptRect = scriptDiv.getBoundingClientRect();
+			if (scriptRect.bottom < parentBottom) {
+				l = mid + 1;
+			}
+			else if (scriptRect.top > parentBottom) {
+				r = mid;
+			}
+			else {
+				l = mid + 1;
+			}
+		}
+		const finishScriptPos = l;
+		if (finishScriptPos === filteredScript.length) {
+			uiStore.commandSpaceControls.viewPortFinish = domainStore.projectMetadata.duration;
+			return;
+		}
+		//console.log(startScriptPos, finishScriptPos, filteredScript[startScriptPos].start, filteredScript[finishScriptPos].start);
+		uiStore.commandSpaceControls.viewPortFinish = filteredScript[finishScriptPos].start;
+	});
+
+	useEffect(action(() => {
+		onTextWallScroll(null);
+	}), [
+		filteredScript.length,
+		uiStore.navigation,
+		textWallRef.current,
+	]);
+
     return (
         <div 
 			ref={textWallRef}
@@ -472,6 +547,7 @@ const TextWall = observer(function TextWall() {
 			style={{
                 height: uiStore.windowSize.height / 3 * 2
 			}}
+			onScroll={(event) => onTextWallScroll(event)}
 		>
 			<DndContext
 				sensors={useSensors(

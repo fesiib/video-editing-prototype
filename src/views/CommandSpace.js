@@ -81,7 +81,13 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessClick = action(() => {
-		domainStore.processIntent();
+		domainStore.processIntent(
+			domainStore.processingModes.fromScratch,
+			{
+				start: 0,
+				finish: domainStore.projectMetadata.duration,
+			}
+		);
 	});
 
 

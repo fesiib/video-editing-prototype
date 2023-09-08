@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { action, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -15,6 +15,7 @@ import PlusIcon from "../icons/PlusIcon";
 import CheckIcon from "../icons/CheckIcon";
 import CrossIcon from "../icons/CrossIcon";
 import CopyIcon from "../icons/CopyIcon";
+import { playPositionToFormat } from "../utilities/timelineUtilities";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
@@ -76,7 +77,7 @@ const Timeline = observer(function Timeline() {
 
 
     const onDeleteTimelineItems = action(() => {
-		if (window.confirm("Delete selected edits?") === false) {
+		if (window.confirm("Delete selected segments? You cannot restore deleted segments ") === false) {
 			return;
 		}
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
@@ -149,7 +150,13 @@ const Timeline = observer(function Timeline() {
 
 	const onMoreClick = action(() => {
 		if (curIntent.processingAllowed) {
-			domainStore.processIntent(domainStore.processingModes.addMore);
+			domainStore.processIntent(
+				domainStore.processingModes.addMore,
+				{
+					start: uiStore.commandSpaceControls.viewPortStart,
+					finish: uiStore.commandSpaceControls.viewPortFinish,
+				}
+			);
 		}
 	});
 
@@ -307,14 +314,20 @@ const Timeline = observer(function Timeline() {
 						</button>
 					</div>
 					{curIntent.suggestedEdits.length === 0 ? (
-						(curIntent.processingAllowed === true) ? (
+						(curIntent.processingAllowed === true 
+							&& uiStore.commandSpaceControls.viewPortStart < uiStore.commandSpaceControls.viewPortFinish
+						) ? (
 							<div className="flex gap-1 justify-center">
 								<button
-									className={"bg-indigo-300 hover:bg-indigo-400" + decisionClassName}
+									className={"items-center bg-indigo-300 hover:bg-indigo-400" + decisionClassName}
 									onClick={() => onMoreClick()}
 									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
 								>
 									search more
+									<span> [
+										{playPositionToFormat(uiStore.commandSpaceControls.viewPortStart)
+										} - {playPositionToFormat(uiStore.commandSpaceControls.viewPortFinish)}
+									] </span>
 								</button>
 							</div>
 						) : null

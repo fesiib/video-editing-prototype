@@ -176,6 +176,17 @@ const TimelineTracks = observer(function TimelineTracks() {
         uiStore.selectTimelineObjects([]);
     });
 
+	const onTracksContainerScroll = action((event) => {
+		if (tracksContainer.current === null 
+			|| tracksContainer.current === undefined 
+			|| uiStore.navigation !== "timeline") {
+			return;
+		}
+		const width = uiStore.timelineSize.width;
+		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
+		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
+	});
+
     useEffect(() => {
         let newTracks = [];
         for (let i = 0; i < trackCnt; i++) {
@@ -223,7 +234,11 @@ const TimelineTracks = observer(function TimelineTracks() {
 				tracksContainer.current.scrollLeft = playPositionPx - width + 100;
 			}
 		}
-	}, [uiStore.timelineControls.playPosition])
+	}, [uiStore.timelineControls.playPosition]);
+
+	useEffect(action(() => {
+		onTracksContainerScroll(null);
+	}), [uiStore.timelineControls.pxPerSec]);
 
     return (
         <div
@@ -232,6 +247,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 			style={{
                 width: width,
             }}
+			onScroll={(event) => onTracksContainerScroll(event)}
         >
             <TimelineLabels />
 			<div

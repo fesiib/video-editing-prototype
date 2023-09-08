@@ -16,6 +16,8 @@ class UIStore {
 
 	commandSpaceControls = {
 		requestingAmbiguousParts: false,
+		viewPortStart: 0,
+		viewPortFinish: 0,
 	};
 
     canvasSize = {

@@ -17,7 +17,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const onDeleteClick = action((event, historyPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (window.confirm("Delete this history entry?")) {
+		if (window.confirm("Delete this history point? You cannot restore this history point.")) {
 			intent.deleteHistory(historyPos);
 		}
 	});
@@ -60,7 +60,6 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded"
 					onClick={(event) => onDeleteClick(event, historyIdx)}
 					disabled={intent.history.length === 1}
-					// TODO: confirm delete
 				> 	
 					<TrashcanIcon />
 				</button>
@@ -76,7 +75,7 @@ const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
 	const onDeleteClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (window.confirm("Delete this edit?")) {
+		if (window.confirm("Delete this edit? You cannot restore this edit.")) {
 			domainStore.deleteIntent(intentPos);
 		}
 	});
@@ -84,7 +83,7 @@ const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
 	const onCopyClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (window.confirm("Duplicate this edit to current?")) {
+		if (window.confirm("Duplicate this edit to current? Your current edit will be overwritten.")) {
 			domainStore.copyIntentToCurrent(intentPos);
 		}
 	});
