@@ -105,15 +105,39 @@ const Timeline = observer(function Timeline() {
 		});
 		const newScenes = selectedScenes.map((scene) => {
 			const newScene = scene.getDeepCopy();
+			let newOffset = scene.commonState.offset + scene.commonState.sceneDuration;
+			let newFinish = domainStore.projectMetadata.duration;
+
+			const sortedScenes = [...curIntent.activeEdits].sort((a, b) => {
+				return a.commonState.offset - b.commonState.offset;
+			});
+			
+			for (let otherScene of sortedScenes) {
+				if (otherScene.commonState.end < newOffset) {
+					continue;
+				}
+				if (otherScene.commonState.offset > newOffset) {
+					newFinish = otherScene.commonState.offset;
+					break;
+				}
+				newOffset = otherScene.commonState.end;
+			}
+
+			newFinish = Math.min(newFinish, newOffset + scene.commonState.sceneDuration)
+
+			if (newOffset >= newFinish) {
+				alert("Cannot duplicate this segment. No space left.");
+				return null;
+			}
 			newScene.commonState.setMetadata({
-				offset: uiStore.timelineControls.playPosition,
-				start: uiStore.timelineControls.playPosition,
-				finish: uiStore.timelineControls.playPosition + scene.commonState.sceneDuration,
+				offset: newOffset,
+				start: newOffset,
+				finish: newFinish,
 			});
 			curIntent.activeEdits.push(newScene);
 			return newScene;
 		});
-		uiStore.selectTimelineObjects(newScenes);
+		uiStore.selectTimelineObjects(newScenes.filter((scene) => scene !== null));
 	});
 
     const onKeyDown = action((event) => {
@@ -400,7 +424,7 @@ const Timeline = observer(function Timeline() {
 				uiStore.navigation === "timeline" ? (<div className="flex flex-col">
 					<TimelineTracks />
 					<div className="self-end">
-						<label htmlFor="timelinen_zoom">
+						<label htmlFor="timeline_zoom">
 							{" "}
 							Zoom {
 								`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`

@@ -9,26 +9,29 @@ import TrashcanIcon from "../icons/TrashcanIcon";
 import CopyIcon from "../icons/CopyIcon";
 
 const SuggHistoryItem = observer(function SuggHistoryItem(
-	{ entry, idx, historyIdx, intent, collapsed }
+	{ idx, historyIdx, collapsed }
 ) {
 	const { domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
-
-	const onDeleteClick = action((event, historyPos) => {
+	const intent = domainStore.intents[idx];
+	const entry = intent.history[historyIdx];
+	const onDeleteClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
 		if (window.confirm("Delete this history point? You cannot restore this history point.")) {
-			intent.deleteHistory(historyPos);
+			intent.deleteHistory(historyIdx);
 		}
 	});
 
-	const onEntryClick = action((event, historyPos) => {
+	const onEntryClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
 		if (intent.idx !== curIntent.idx) {
 			domainStore.setCurIntent(idx);
 		}
-		intent.restoreHistory(historyPos);
+		if (intent.historyPos !== historyIdx) {
+			intent.restoreHistory(historyIdx);
+		}
 	});
 
 	const isSelected = intent.historyPos === historyIdx && intent.idx === curIntent.idx;
@@ -37,13 +40,24 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 
 	const bgColor = "bg-yellow-200";
 	const hoverColor = "bg-yellow-400";
-	// TODO: update this whenever intent.historyPos or intent.summary are updated
 	const className = ("px-1 py-1 flex justify-between gap-2 ml-5 italic"
 		+ (isSelected ? ` ${hoverColor}` : ` ${bgColor} hover:${hoverColor}`)
 	);
 
+	useEffect(() => {
+		const dispose = reaction(() => intent.historyPos, (historyPos) => {
+			if (historyPos === historyIdx && intent.idx === curIntent.idx) {
+				console.log("history pos changed", historyIdx, historyPos);
+			}
+			else {
+				console.log("history pos changed but not selected", historyIdx, historyPos);
+			}
+		});
+		return () => dispose();
+	}, [curIntent.id, historyIdx]);
+
 	return (<div className={className}
-		onClick={(event) => onEntryClick(event, historyIdx)}
+		onClick={onEntryClick}
 	>
 		<button
 			className={"text-left truncate text-black font-bold py-2 px-2 rounded"
@@ -57,8 +71,8 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 			collapsed ? null : (
 			<div className="w-fit flex gap-2 justify-center">
 				<button 
-					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded"
-					onClick={(event) => onDeleteClick(event, historyIdx)}
+					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded disabled:opacity-50"
+					onClick={onDeleteClick}
 					disabled={intent.history.length === 1}
 				> 	
 					<TrashcanIcon />
@@ -68,9 +82,10 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	</div>);
 });
 
-const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
+const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	const { domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
+	const intent = domainStore.intents[idx];
 
 	const onDeleteClick = action((event, intentPos) => {
 		event.preventDefault();
@@ -131,15 +146,13 @@ const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
 				: (<button
 					className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-white py-2 px-2 rounded"
 					onClick={(event) => onCopyClick(event, idx)}
-					// TODO: copy confirm
 				> 
 					<CopyIcon />
 				</button>)}
 				<button 
 					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded"
 					onClick={(event) => onDeleteClick(event, idx)}
-					// disabled={curIntent.activeEdits.length === 0}
-					// TODO: confirm delete
+					//disabled={curIntent.activeEdits.length === 0}
 				> 	
 					<TrashcanIcon />
 				</button>
@@ -151,7 +164,7 @@ const HistoryItem = observer(function HistoryItem({ intent, idx, collapsed }) {
 const SideHistory = observer(function SideHistory() {
 	const { uiStore, domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
-	const reversedIntents = [...domainStore.intents].reverse();
+	const reversedIntents = Array.from(domainStore.intents).reverse();
 
 	const [collapsed, setCollapsed] = useState(true);
 
@@ -171,12 +184,12 @@ const SideHistory = observer(function SideHistory() {
 		{reversedIntents.length === 0 ? (
 			<div> No edits </div>
 			) : (
-			reversedIntents.map((intent, revIdx) => {
+			reversedIntents.map((_, revIdx) => {
 				const idx = reversedIntents.length - revIdx - 1;
-				const reversedHistory = [...intent.history].reverse();
+				const intent = domainStore.intents[idx];
+				const reversedHistory = Array.from(intent.history).reverse();
 				return (<div key={`history-item-${idx}`}>
 					<HistoryItem 
-						intent={intent}
 						idx={idx}
 						collapsed={collapsed}
 					/>
@@ -191,14 +204,12 @@ const SideHistory = observer(function SideHistory() {
 							collapsed={collapsed}
 						/>);
 					})} */}
-					{curIntent.idx === intent.idx ? (reversedHistory.map((entry, revHistoryIdx) => {
+					{curIntent.idx === intent.idx ? (reversedHistory.map((_, revHistoryIdx) => {
 						const historyIdx = reversedHistory.length - revHistoryIdx - 1;
 						return (<SuggHistoryItem
 							key={`history-item-${idx}-${historyIdx}`}
-							entry={entry}
 							idx={idx}
 							historyIdx={historyIdx}
-							intent={intent}
 							collapsed={collapsed}
 						/>);
 					})) : null}

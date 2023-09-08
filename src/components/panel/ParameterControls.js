@@ -65,7 +65,7 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	return (<div className="flex flex-col">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label> 
-		<div id={inputId} className="border grid text-sm">
+		<div id={inputId+"_container"} className="border grid text-sm">
 			<input className="" 
 				id={inputId + "_url"} 
 				type="url"
