@@ -23,8 +23,15 @@ const CommandSpace = observer(function CommandSpace() {
 	const textCommandLimit = 200;
 	const textCommandRef = useRef(null);
 
-	const applyHighlights = (text, ambiguousParts) => {
+	const applyHighlights = (text, allAmbiguousParts) => {
 		let result = text.replace(/\n$/g, '\n\n');
+		let ambiguousParts = [];
+		for (const context in allAmbiguousParts) {
+			if (context !== "spatial") {
+				continue;
+			}
+			ambiguousParts = [...ambiguousParts, ...allAmbiguousParts[context]];
+		}
 		ambiguousParts.sort((a, b) => {
 			return b.offset - a.offset;
 		});
@@ -115,7 +122,7 @@ const CommandSpace = observer(function CommandSpace() {
 		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
 		requestAmbiguousParts({
 			input: text,
-		}).then((response) => {
+		}, 1).then((response) => {
 			const ambiguousParts = response.ambiguousParts;
 			// https://codersblock.com/blog/highlight-text-inside-a-textarea/
 			const highlightedText = applyHighlights(text, ambiguousParts);

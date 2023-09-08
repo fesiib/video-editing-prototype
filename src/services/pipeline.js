@@ -36,9 +36,10 @@ export function requestSummary(requestData) {
 	});
 }
 
-export function requestAmbiguousParts(requestData) {
+export function requestAmbiguousParts(requestData, type=0) {
+	const address = type === 0 ? "ambiguous" : "ambiguous-gpt";
 	return new Promise((resolve, reject) => {
-		const url = `${URL}ambiguous`;
+		const url = `${URL}${address}`;
 		axios.post(url, requestData).then((response) => {
 			resolve(response.data);
 		}
