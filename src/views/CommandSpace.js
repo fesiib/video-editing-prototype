@@ -6,9 +6,6 @@ import { action, toJS } from "mobx";
 import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
 
-const fromScratch = "from-scratch";
-const addMore = "add-more";
-const adjustSelected = "adjust-selected";
 
 const CommandSpace = observer(function CommandSpace() {
 	const { userStore, uiStore, domainStore } = useRootContext();
@@ -87,7 +84,7 @@ const CommandSpace = observer(function CommandSpace() {
 							</div>
 						</div>
 						<div className="flex flex-col gap-1 justify-end items-end">
-							<div className="flex flex-col">
+							{/* <div className="flex flex-col">
 
 								<label htmlFor="processingMode"
 									className="w-full"
@@ -95,15 +92,15 @@ const CommandSpace = observer(function CommandSpace() {
 								<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
 									className="p-1"
 								>
-									<option value={fromScratch}> From scratch </option>
-									<option value={addMore}> Add more </option>
-									<option value={adjustSelected}> Adjust existing </option>
+									<option value={domainStore.processingModes.fromScratch}> From scratch </option>
+									<option value={domainStore.processingModes.addMore}> Add more </option>
+									<option value={domainStore.processingModes.adjustSelected}> Adjust existing </option>
 								</select>
-							</div>
+							</div> */}
 							<button 
 								className="w-fit h-fit bg-indigo-300 text-black py-2 px-2 rounded hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
 								onClick={() => onProcessClick()}
-								disabled={curIntent.textCommand === ""}
+								disabled={curIntent.processingAllowed === false}
 							>
 								Submit
 							</button>

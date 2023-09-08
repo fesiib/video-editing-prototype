@@ -18,8 +18,9 @@ import CopyIcon from "../icons/CopyIcon";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
+	const curIntent = domainStore.curIntent;
 
-	// const selectedSuggestedEdits = domainStore.curIntent.suggestedEdits.filter((edit) => {
+	// const selectedSuggestedEdits = curIntent.suggestedEdits.filter((edit) => {
 	// 	return uiStore.timelineControls.selectedTimelineItems.findIndex((item) => {
 	// 		return item.commonState.id === edit.commonState.id;
 	// 	}) >= 0;
@@ -81,7 +82,7 @@ const Timeline = observer(function Timeline() {
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
             (value) => value.commonState.id
         );
-        domainStore.curIntent.deleteEdits(selectedSceneIds);
+        curIntent.deleteEdits(selectedSceneIds);
 		uiStore.selectTimelineObjects([]);
     });
 
@@ -98,7 +99,7 @@ const Timeline = observer(function Timeline() {
 		uiStore.logData("copy", {
 			selectedSceneIds: selectedSceneIds,
 		});
-		const selectedScenes = domainStore.curIntent.activeEdits.filter((edit) => {
+		const selectedScenes = curIntent.activeEdits.filter((edit) => {
 			return selectedSceneIds.findIndex((id) => id === edit.commonState.id) >= 0;
 		});
 		const newScenes = selectedScenes.map((scene) => {
@@ -108,7 +109,7 @@ const Timeline = observer(function Timeline() {
 				start: uiStore.timelineControls.playPosition,
 				finish: uiStore.timelineControls.playPosition + scene.commonState.sceneDuration,
 			});
-			domainStore.curIntent.activeEdits.push(newScene);
+			curIntent.activeEdits.push(newScene);
 			return newScene;
 		});
 		uiStore.selectTimelineObjects(newScenes);
@@ -129,16 +130,16 @@ const Timeline = observer(function Timeline() {
 		if (decision === "accept") {
 			let addedEdits = [];
 			for (const edit of selectedSuggestedEdits) {
-				addedEdits.push(domainStore.curIntent.addEditFromSuggested(edit.commonState.id));
+				addedEdits.push(curIntent.addEditFromSuggested(edit.commonState.id));
 			}
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
-			domainStore.curIntent.deleteEdits(deleteEditIds);
+			curIntent.deleteEdits(deleteEditIds);
 			uiStore.selectTimelineObjects(addedEdits);
 			return;
 		}
 		else if (decision === "reject") {
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
-			domainStore.curIntent.deleteEdits(deleteEditIds);
+			curIntent.deleteEdits(deleteEditIds);
 			if (!onNavigationClick("next")) {
 				onNavigationClick("prev");
 			}
@@ -146,9 +147,15 @@ const Timeline = observer(function Timeline() {
 		}
 	});
 
+	const onMoreClick = action(() => {
+		if (curIntent.processingAllowed) {
+			domainStore.processIntent(domainStore.processingModes.addMore);
+		}
+	});
+
 	const onNavigationClick = action((direction) => {
-		const edits = (domainStore.curIntent.suggestedEdits.length > 0 ?
-			domainStore.curIntent.suggestedEdits : domainStore.curIntent.activeEdits);
+		const edits = (curIntent.suggestedEdits.length > 0 ?
+			curIntent.suggestedEdits : curIntent.activeEdits);
 		if (direction === "prev") {
 			const prevEdit = edits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset < uiStore.timelineControls.playPosition
@@ -237,7 +244,7 @@ const Timeline = observer(function Timeline() {
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onKeyDown}>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
-					<button className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+					<button className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
 								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
 							) 
 							+ decisionClassName}
@@ -250,15 +257,15 @@ const Timeline = observer(function Timeline() {
 				<div className="flex flex-col justify-center gap-1">
 					<div className="flex gap-1 justify-center">
 						<button
-							className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
 									? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
 								) 
 								+ decisionClassName}
 							id="prev_button"
 							onClick={() => onNavigationClick("prev")}
 							disabled={
-								domainStore.curIntent.suggestedEdits.length === 0
-								&& domainStore.curIntent.activeEdits.length === 0
+								curIntent.suggestedEdits.length === 0
+								&& curIntent.activeEdits.length === 0
 							}
 						>
 							{"<-"}
@@ -285,34 +292,46 @@ const Timeline = observer(function Timeline() {
 							</button>
 						</div>
 						<button
-							className={((domainStore.curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
 								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
 							) 
 							+ decisionClassName}
 							id="next_button"
 							onClick={() => onNavigationClick("next")}
 							disabled={
-								domainStore.curIntent.suggestedEdits.length === 0
-								&& domainStore.curIntent.activeEdits.length === 0
+								curIntent.suggestedEdits.length === 0
+								&& curIntent.activeEdits.length === 0
 							}
 						>
 							{"->"}
 						</button>
 					</div>
-					{domainStore.curIntent.suggestedEdits.length === 0 ? null : (
+					{curIntent.suggestedEdits.length === 0 ? (
+						(curIntent.processingAllowed === true) ? (
+							<div className="flex gap-1 justify-center">
+								<button
+									className={"bg-indigo-300 hover:bg-indigo-400" + decisionClassName}
+									onClick={() => onMoreClick()}
+									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
+								>
+									more segments
+								</button>
+							</div>
+						) : null
+					) : (
 						<div className="flex gap-1 justify-center">
 							<span> [{
 								selectedSuggestedEdits.map((edit, idx) => {
 									const isLast = idx === selectedSuggestedEdits.length - 1;
 									let pos = 0;
-									for (let sugestedEdit of domainStore.curIntent.suggestedEdits) {
+									for (let sugestedEdit of curIntent.suggestedEdits) {
 										if (sugestedEdit.commonState.offset <= edit.commonState.offset) {
 											pos += 1;
 										}
 									}
 									return pos + (isLast ? "" : ", ");
 								})
-							}] / {domainStore.curIntent.suggestedEdits.length} </span>
+							}] / {curIntent.suggestedEdits.length} </span>
 						</div>
 					)}
 				</div>
@@ -339,7 +358,7 @@ const Timeline = observer(function Timeline() {
 						}
 						onClick={onPressSplit}
 						id="split_button"
-						disabled={domainStore.curIntent.activeEdits.length === 0}
+						disabled={curIntent.activeEdits.length === 0}
 					>
 						<ScissorsIcon />
 					</button>

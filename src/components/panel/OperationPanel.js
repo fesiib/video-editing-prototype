@@ -53,7 +53,8 @@ const OperationPanel = observer(function OperationPanel() {
 	}
 
 	useEffect(() => {
-		if (selectedOperation === null || uiStore.canvasControls.sketching) {
+		// if (selectedOperation === null || uiStore.canvasControls.sketching) {
+		if (selectedOperation === null) {
 			setCollapsed(true);
 		} else {
 			setCollapsed(false);

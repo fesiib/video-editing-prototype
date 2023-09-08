@@ -26,7 +26,7 @@ class UIStore {
 		zoomAuthor: null,
 		transformerKeepRatioAuthor: null,
 
-		sketching: false,
+		sketching: true,
     };
     canvasConst = {
         margin: 2,
@@ -192,7 +192,7 @@ class UIStore {
 			opacityAuthor: null,
 			zoomAuthor: null,
 	
-			sketching: false,
+			sketching: true,
 		}
 		this.timelineControls = {
 			numberOfRows: 1,
@@ -215,7 +215,7 @@ class UIStore {
 
 	resetTempState() {
 		this.canvasControls.transformerNodeIds = [];
-		this.canvasControls.sketching = false;
+		this.canvasControls.sketching = true;
 		this.timelineControls.selectedTimelineItems = [];
 		this.timelineControls.splitting = false;
 		this.timelineControls.rangeSelectingTimeline = false;

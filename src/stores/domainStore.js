@@ -207,6 +207,12 @@ class DomainStore {
 		"speed",
 	];
 
+	processingModes = {
+		fromScratch: "from-scratch",
+		addMore: "add-more",
+		adjustSelected: "adjust-selected",
+	};
+
     constructor(rootStore) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.rootStore = rootStore;
@@ -282,7 +288,8 @@ class DomainStore {
 		for (let h = 0; h < historyLength; h++) {
 			const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
 			const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
-			const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
+			//const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
+			const randomProcessingMode = "from-scratch";
 			const randomTextCommand = (Math.random() > 0.5 ? "Whenever there is something happening do another thing with this!!!"
 				: "random goal goal random 2 goalie lol kek cheburek 22 kljaldf 10");
 			const randomSketchCommand = Math.random() > 0.5 ? [
@@ -393,7 +400,7 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
-	processIntent() {
+	processIntent(processingMode="from-scratch") {
 		if (this.processingIntent) {
 			return;
 		}
@@ -417,6 +424,7 @@ class DomainStore {
 		});
 		requestData.requestParameters = toJS({
 			...this.curIntent.requestParameters,
+			processingMode: processingMode,
 		});
 
 		requestData.skippedSegments = [...this.skippedParts].map((edit) => {

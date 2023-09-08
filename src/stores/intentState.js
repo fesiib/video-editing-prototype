@@ -457,6 +457,10 @@ class IntentState {
 		}
 	}
 
+	get processingAllowed() {
+		return this.textCommand !== "" || this.sketchCommand.length > 0;
+	}
+
 	saveFirebase(userId, taskIdx) {
 		const intentCollection = collection(firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.intentCollection);
 		const intentId = this.id;

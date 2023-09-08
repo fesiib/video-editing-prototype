@@ -8,6 +8,7 @@ import { Image, Layer, Line, Rect, Stage } from "react-konva";
 import useRootContext from "../../hooks/useRootContext";
 import { Animation } from "konva/lib/Animation";
 import { roundNumber } from "../../utilities/genericUtilities";
+import CaptureIcon from "../../icons/CaptureIcon";
 
 const SketchCanvas = observer(function SketchCanvas() {
 	const sketchCanvasId = "sketch-canvas";
@@ -73,6 +74,18 @@ const SketchCanvas = observer(function SketchCanvas() {
 		const adaptedPlayPosition = uiStore.timelineControls.playPosition -
 			curVideo.commonState.offset + curVideo.commonState.start;
 		curIntent.setSketchPlayPosition(adaptedPlayPosition);
+		return (() => {});
+	});
+
+	const onJumpClick = action(() => {
+		if (videoElement === null
+			|| curVideo === null
+			|| canDraw == false
+			|| sketchRef.current === null
+		) {
+			return;
+		}
+		uiStore.timelineControls.playPosition = curIntent.sketchPlayPosition;
 		return (() => {});
 	});
 
@@ -155,6 +168,14 @@ const SketchCanvas = observer(function SketchCanvas() {
 		}
 	});
 
+	const onStageMouseLeave = action((event) => {
+		event.evt.preventDefault();
+		if (!sketching) {
+			return;
+		}
+		setCurRect(null);
+	});
+
 	useEffect(() => {
 		const div = document.getElementById(sketchCanvasId);
 		if (curVideo === null || div === null) {
@@ -192,28 +213,30 @@ const SketchCanvas = observer(function SketchCanvas() {
 
 	return (<div id={sketchCanvasId} className="w-full">
 		<div className="flex flex-row gap-2 justify-start">
-			<button
+			{/* <button
 				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
 				onClick={() => {
 					onSketchClick();
 				}}
 			>
 				{!sketching ? "Sketch" : "Done"}
-			</button>
+			</button> */}
 			{
 				sketching ? (
 					<button
-						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
+						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
 						onClick={() => onCaptureFrameClick()}
+						disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					>
-						Capture Frame
+						{/* Capture Fram */}
+						<CaptureIcon />
 					</button>
 				) : null
 			}
 			{
 				curIntent.sketchCommand.length === 0 ? null : (
 					<button
-						className="w-fit bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded"
+						className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
 						onClick={action(() => {
 							setCurRect(null);
 							curIntent.setSketchCommand([]);
@@ -222,6 +245,17 @@ const SketchCanvas = observer(function SketchCanvas() {
 						Clear
 					</button>
 				)
+			}
+			{
+				sketching && curIntent.sketchPlayPosition >= 0 ? (
+					<button
+						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
+						onClick={() => onJumpClick()}
+						disabled={curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
+					>
+						Jump To {"->"}
+					</button>
+				) : null
 			}
 		</div>
 		{
@@ -234,6 +268,7 @@ const SketchCanvas = observer(function SketchCanvas() {
 					onMouseDown={onStageMouseDown}
 					onMouseMove={onStageMouseMove}
 					onMouseUp={onStageMouseUp}
+					onMouseLeave={onStageMouseLeave}
 				>
 					<Layer
 						ref={sketchLayerRef}
