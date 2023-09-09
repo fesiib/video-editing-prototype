@@ -15,6 +15,10 @@ import PlusIcon from "../icons/PlusIcon";
 import CheckIcon from "../icons/CheckIcon";
 import CrossIcon from "../icons/CrossIcon";
 import CopyIcon from "../icons/CopyIcon";
+
+import { TfiSplitH } from "react-icons/tfi";
+import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+
 import { playPositionToFormat } from "../utilities/timelineUtilities";
 
 const Timeline = observer(function Timeline() {
@@ -300,7 +304,7 @@ const Timeline = observer(function Timeline() {
 								&& curIntent.activeEdits.length === 0
 							}
 						>
-							{"<-"}
+							<MdSkipPrevious />
 						</button>
 						<div className={ ("flex flex-row gap-1 justify-center"
 								+ ((selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? " invisible" : " visible")
@@ -335,7 +339,7 @@ const Timeline = observer(function Timeline() {
 								&& curIntent.activeEdits.length === 0
 							}
 						>
-							{"->"}
+							<MdSkipNext />
 						</button>
 					</div>
 					{curIntent.suggestedEdits.length === 0 ? (
@@ -348,7 +352,7 @@ const Timeline = observer(function Timeline() {
 									onClick={() => onMoreClick()}
 									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
 								>
-									search more
+									search more between
 									<span> [
 										{playPositionToFormat(uiStore.commandSpaceControls.viewPortStart)
 										} - {playPositionToFormat(uiStore.commandSpaceControls.viewPortFinish)}
@@ -398,7 +402,7 @@ const Timeline = observer(function Timeline() {
 						id="split_button"
 						disabled={curIntent.activeEdits.length === 0}
 					>
-						<ScissorsIcon />
+						<TfiSplitH />
 					</button>
 					<button
 						className={"bg-indigo-300" + buttonClassName}

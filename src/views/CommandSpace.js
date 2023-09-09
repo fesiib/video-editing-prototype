@@ -122,7 +122,7 @@ const CommandSpace = observer(function CommandSpace() {
 		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
 		requestAmbiguousParts({
 			input: text,
-		}, 1).then((response) => {
+		}, 0).then((response) => {
 			const ambiguousParts = response.ambiguousParts;
 			// https://codersblock.com/blog/highlight-text-inside-a-textarea/
 			const highlightedText = applyHighlights(text, ambiguousParts);

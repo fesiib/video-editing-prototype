@@ -9,6 +9,8 @@ import useRootContext from "../../hooks/useRootContext";
 import { Animation } from "konva/lib/Animation";
 import { roundNumber } from "../../utilities/genericUtilities";
 import CaptureIcon from "../../icons/CaptureIcon";
+import SketchIcon from "../../icons/SketchIcon";
+import HideIcon from "../../icons/HideIcon";
 
 const SketchCanvas = observer(function SketchCanvas() {
 	const sketchCanvasId = "sketch-canvas";
@@ -213,14 +215,14 @@ const SketchCanvas = observer(function SketchCanvas() {
 
 	return (<div id={sketchCanvasId} className="w-full">
 		<div className="flex flex-row gap-2 justify-start">
-			{/* <button
-				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black py-2 px-4 rounded"
+			<button
+				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded"
 				onClick={() => {
 					onSketchClick();
 				}}
 			>
-				{!sketching ? "Sketch" : "Done"}
-			</button> */}
+				{!sketching ? <SketchIcon /> : <HideIcon />}
+			</button>
 			{
 				sketching ? (
 					<button
