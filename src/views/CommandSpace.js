@@ -23,6 +23,8 @@ const CommandSpace = observer(function CommandSpace() {
 	const textCommandLimit = 200;
 	const textCommandRef = useRef(null);
 
+	const [shouldSketch, setShouldSketch] = useState(false);
+
 	const applyHighlights = (text, allAmbiguousParts) => {
 		let result = text.replace(/\n$/g, '\n\n');
 		let ambiguousParts = [];
@@ -103,16 +105,22 @@ const CommandSpace = observer(function CommandSpace() {
 
 	});
 
-	useEffect(() => {
+	const onSketchTextClick = action(() => {
+		uiStore.canvasControls.sketching = true;
+	});
+
+	useEffect(action(() => {
 		const text = curIntent.textCommand;
 		const words = text.trim().match(/\S+/g);
 		if (textCommandRef.current === null) {
+			setShouldSketch(() => false);
 			return;
 		}
 		if (uiStore.commandSpaceControls.requestingAmbiguousParts
 			|| words === null
 			|| words.length < 2
 		) {
+			setShouldSketch(() => false);
 			const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
 			if (divHighlights !== null && divHighlights !== undefined) {
 				divHighlights.innerHTML = text;
@@ -122,18 +130,23 @@ const CommandSpace = observer(function CommandSpace() {
 		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
 		requestAmbiguousParts({
 			input: text,
-		}, 0).then((response) => {
+		}, 0).then(action((response) => {
 			const ambiguousParts = response.ambiguousParts;
 			// https://codersblock.com/blog/highlight-text-inside-a-textarea/
-			const highlightedText = applyHighlights(text, ambiguousParts);
-			const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
-			divHighlights.innerHTML = highlightedText;
+			// const highlightedText = applyHighlights(text, ambiguousParts);
+			// const divHighlights = textCommandRef.current.querySelector("#textarea-highlights");
+			// divHighlights.innerHTML = highlightedText;
+			if (ambiguousParts !== undefined && ambiguousParts !== null 
+				&& "spatial" in ambiguousParts) {
+				setShouldSketch(() => ambiguousParts["spatial"].length > 0);
+			}
 			uiStore.commandSpaceControls.requestingAmbiguousParts = false;
-		}).catch((error) => {
+		})).catch(action((error) => {
 			console.log(error);
 			uiStore.commandSpaceControls.requestingAmbiguousParts = false;
-		});
-	}, [curIntent.textCommand]);
+			setShouldSketch(() => false);
+		}));
+	}), [curIntent.textCommand]);
 
 	return (<div className="w-full flex flex-col items-center">
 		<h2 className="w-full"> 
@@ -203,7 +216,9 @@ const CommandSpace = observer(function CommandSpace() {
 								/>
 							</div>
 							<div className="flex flex-row justify-between">
-								<SketchCanvas />
+								<SketchCanvas 
+									shouldSketch={shouldSketch}
+								/>
 								<span
 									className="text-xs"
 								> {curIntent.textCommand.length}/{textCommandLimit}</span>

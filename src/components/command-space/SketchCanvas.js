@@ -12,7 +12,11 @@ import CaptureIcon from "../../icons/CaptureIcon";
 import SketchIcon from "../../icons/SketchIcon";
 import HideIcon from "../../icons/HideIcon";
 
-const SketchCanvas = observer(function SketchCanvas() {
+import { BiTime } from "react-icons/bi";
+
+const SketchCanvas = observer(function SketchCanvas(
+	{ shouldSketch }
+) {
 	const sketchCanvasId = "sketch-canvas";
 	
 	const { uiStore, domainStore } = useRootContext();
@@ -178,6 +182,10 @@ const SketchCanvas = observer(function SketchCanvas() {
 		setCurRect(null);
 	});
 
+	const onSketchTextClick = action(() => {
+		uiStore.canvasControls.sketching = true;
+	});
+
 	useEffect(() => {
 		const div = document.getElementById(sketchCanvasId);
 		if (curVideo === null || div === null) {
@@ -214,40 +222,54 @@ const SketchCanvas = observer(function SketchCanvas() {
 	]);
 
 	return (<div id={sketchCanvasId} className="w-full">
-		<div className="flex flex-row gap-2 justify-start">
-			<button
-				className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded"
-				onClick={() => {
-					onSketchClick();
-				}}
-			>
-				{!sketching ? <SketchIcon /> : <HideIcon />}
-			</button>
-			{
-				sketching ? (
-					<button
-						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
-						onClick={() => onCaptureFrameClick()}
-						disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
-					>
-						{/* Capture Fram */}
-						<CaptureIcon />
-					</button>
+		{
+			(!uiStore.commandSpaceControls.requestingAmbiguousParts 
+				&& !uiStore.canvasControls.sketching && shouldSketch) ? (
+					<div
+						className="text-sm cursor-pointer hover:underline text-blue-500 p-1"
+						onClick={onSketchTextClick}
+					>  Specify a region in the video for improved results
+					</div>
 				) : null
-			}
-			{
-				curIntent.sketchCommand.length === 0 ? null : (
-					<button
-						className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
-						onClick={action(() => {
-							setCurRect(null);
-							curIntent.setSketchCommand([]);
-						})}
-					>
-						Clear
-					</button>
-				)
-			}
+		}
+		<div className="flex flex-row justify-between w-full pr-5">
+			<div className="flex flex-row gap-2 justify-start">
+				<button
+					className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded"
+					onClick={() => {
+						onSketchClick();
+					}}
+				>
+					{!sketching ? (
+						<SketchIcon />	 	
+					) : <HideIcon />}
+				</button>
+				{
+					sketching ? (
+						<button
+							className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
+							onClick={() => onCaptureFrameClick()}
+							disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
+						>
+							{/* Capture Fram */}
+							<CaptureIcon />
+						</button>
+					) : null
+				}
+				{
+					curIntent.sketchCommand.length === 0 ? null : (
+						<button
+							className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
+							onClick={action(() => {
+								setCurRect(null);
+								curIntent.setSketchCommand([]);
+							})}
+						>
+							Clear
+						</button>
+					)
+				}
+			</div>
 			{
 				sketching && curIntent.sketchPlayPosition >= 0 ? (
 					<button
@@ -255,7 +277,7 @@ const SketchCanvas = observer(function SketchCanvas() {
 						onClick={() => onJumpClick()}
 						disabled={curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					>
-						Jump To {"->"}
+						<BiTime />
 					</button>
 				) : null
 			}
