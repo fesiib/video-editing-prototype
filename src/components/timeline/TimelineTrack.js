@@ -9,6 +9,8 @@ import EmptySpace from "./EmptySpace";
 import MainTimelineItem from "./MainTimelineItem";
 import StaticTimelineItem from "./StaticTimelineItem";
 
+import { BiSolidMoviePlay } from "react-icons/bi";
+
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(
         { id, style, title, mainScenes, skippedScenes, scenes, staticScenes, isOverlay, isOver, setActivatorNodeRef, listeners, attributes },
@@ -57,16 +59,18 @@ const TimelineTrack = observer(
                 </div>
                 <div
                     className={
-                        isOverlay
-                            ? "bg-slate-600 my-1 relative h-14"
+                        (isOverlay
+                            ? "bg-slate-600"
                             : isOver
-                            ? "bg-slate-500 my-1 relative h-14"
-                            : "bg-slate-400 my-1 relative h-14"
+                            ? "bg-slate-500"
+                            : "bg-slate-400")
+						+ " my-1 relative h-14"
                     }
                     style={{
                         width: width,
                     }}
                 >
+
 					{mainScenes.map((mainScene) => (
                         <MainTimelineItem
                             key={mainScene.commonState.id}
@@ -106,6 +110,15 @@ const TimelineTrack = observer(
 							space={space}
 							scenes={scenes} />
 					))} */}
+					<div className="absolute bottom-1 z-20 w-fit"
+						id={`video_indicator_${id}`}
+						style={{
+							marginLeft: "0.5em",
+							pointerEvents: "none",
+						}}
+					>
+						<BiSolidMoviePlay />
+					</div>
                 </div>
             </div>
         );

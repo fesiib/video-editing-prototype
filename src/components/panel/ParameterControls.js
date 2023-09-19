@@ -74,13 +74,13 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 				onChange={(event) => onUrlInputChange(event)} 
 				autoComplete='off'
 			/>
-			<input className=""
+			{/* <input className=""
 				id={inputId}
 				type="file"
 				onChange={(event) => onFileInputChange(event)}
 				accept={"image/*"}
 				autoComplete='off'
-			/>
+			/> */}
 		</div>
 	</div>);
 });

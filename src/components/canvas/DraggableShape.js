@@ -7,7 +7,6 @@ import { Rect, Circle, Ellipse, Star } from "react-konva";
 
 import useRootContext from "../../hooks/useRootContext";
 import { adaptCoordinate } from "../../utilities/genericUtilities";
-import { isCompositeComponent } from "react-dom/test-utils";
 
 const StarShape = observer(function StarShape({
 	curShape,
@@ -21,7 +20,7 @@ const StarShape = observer(function StarShape({
 	id,
 	shapeName
 }) {
-	if (curShape.customParameters.type !== "circle") {
+	if (curShape.customParameters.type !== "star") {
 		return null;
 	}
 	if (curShape.customParameters.star === undefined) {

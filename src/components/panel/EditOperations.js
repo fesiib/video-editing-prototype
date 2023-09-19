@@ -2,6 +2,8 @@ import React from "react";
 
 import { observer } from "mobx-react-lite";
 
+import { AiOutlineBulb } from "react-icons/ai";
+
 import useRootContext from "../../hooks/useRootContext";
 import { action } from "mobx";
 
@@ -10,7 +12,7 @@ const EditOperations = observer(function EditOperations() {
 	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const inactiveButtonClassName = "w-full my-1 hover:brightness-50 border rounded";
-	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-yellow-300";
+	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-yellow-300 flex flex-row items-center justify-center rounded";
 	const activeButtonClassName = "w-full my-1 rounded border-4 border-indigo-400";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
@@ -48,7 +50,11 @@ const EditOperations = observer(function EditOperations() {
 						backgroundColor: uiStore.editColorPalette[operationKey],
 					}}
 				>
-					{operation.title}
+					{
+						suggestedOperationKeys.includes(operationKey) ? (
+							<AiOutlineBulb />
+						) : null
+					} {operation.title}
 				</button>)
 			})}
 		</div>

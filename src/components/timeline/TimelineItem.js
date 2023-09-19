@@ -6,6 +6,8 @@ import useRootContext from "../../hooks/useRootContext";
 
 import TrimWrapper from "./TrimWrapper";
 
+import { AiOutlineBulb } from "react-icons/ai";
+
 export const TimelineItem = observer(
     forwardRef(function TimelineItem(
         { itemType, scene, scenes, transform, attributes, listeners, ...props },
@@ -49,7 +51,7 @@ export const TimelineItem = observer(
 
 		if (isMain) {
 			outerClassName = "absolute bottom-0 z-10";
-			innerClassName = "h-6 bg-white";
+			innerClassName = "h-6 bg-slate-100 drop-shadow-2xl border-y border-black";
 		}
 		else if (isSkipped) {
 			outerClassName = "absolute bottom-0 z-10";
@@ -59,7 +61,7 @@ export const TimelineItem = observer(
 			outerClassName = (isSelected
 				? "absolute bottom-0 z-20 border-2 border-red-600 brightness-50"
 				: "absolute bottom-0 z-20 border");
-			innerClassName = "h-5 bg-yellow-300";
+			innerClassName = "h-5 bg-yellow-300 flex flex-row justify-center items-center";
 		}
 		else {
 			outerClassName = (isSelected
@@ -94,6 +96,9 @@ export const TimelineItem = observer(
 								</TrimWrapper>
 							)
 						}
+						{isSuggested ? (
+							<AiOutlineBulb/>
+						) : null}
 					</div>
                 )}
             </div>

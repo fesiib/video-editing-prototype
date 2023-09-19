@@ -13,6 +13,10 @@ import SketchIcon from "../../icons/SketchIcon";
 import HideIcon from "../../icons/HideIcon";
 
 import { BiTime } from "react-icons/bi";
+import { MdOutlineDraw } from "react-icons/md";
+import { MdOutlineDoneOutline } from "react-icons/md";
+import { TbCaptureFilled } from "react-icons/tb";
+import { AiOutlineClear } from "react-icons/ai";
 
 const SketchCanvas = observer(function SketchCanvas(
 	{ shouldSketch }
@@ -241,8 +245,8 @@ const SketchCanvas = observer(function SketchCanvas(
 					}}
 				>
 					{!sketching ? (
-						<SketchIcon />	 	
-					) : <HideIcon />}
+						<MdOutlineDraw />	 	
+					) : <MdOutlineDoneOutline />}
 				</button>
 				{
 					sketching ? (
@@ -252,7 +256,7 @@ const SketchCanvas = observer(function SketchCanvas(
 							disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
 						>
 							{/* Capture Fram */}
-							<CaptureIcon />
+							<TbCaptureFilled />
 						</button>
 					) : null
 				}
@@ -265,7 +269,7 @@ const SketchCanvas = observer(function SketchCanvas(
 								curIntent.setSketchCommand([]);
 							})}
 						>
-							Clear
+							<AiOutlineClear />
 						</button>
 					)
 				}
@@ -366,7 +370,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			)
 
 		}
-		<div className={"text-sm flex flex-col"}>
+		{/* <div className={"text-sm flex flex-col"}>
 			<div>
 				Video: {domainStore.projectMetadata.width} x {domainStore.projectMetadata.height}
 			</div>
@@ -388,7 +392,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					</span>
 				})
 			}
-		</div>
+		</div> */}
 	</div>);
 });
 

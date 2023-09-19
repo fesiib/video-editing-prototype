@@ -18,6 +18,10 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const onDeleteClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
+		if (domainStore.processingIntent) {
+			alert("Cannot delete history point while processing.");
+			return;
+		}
 		if (window.confirm("Delete this history point? You cannot restore this history point.")) {
 			intent.deleteHistory(historyIdx);
 		}
@@ -60,11 +64,12 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		onClick={onEntryClick}
 	>
 		<button
-			className={"text-left truncate text-black font-bold py-2 px-2 rounded"
+			className={"text-left text-black text-sm py-2 px-2 rounded"
+				+ (collapsed ? " truncate" : "")
 			}
 			disabled={isSelected}
 		>
-			{title === "" ? "blank" : title}
+			{title === "" ? `Description ${historyIdx + 1}` : title}
 		
 		</button>
 		{
@@ -90,6 +95,10 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	const onDeleteClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
+		if (domainStore.processingIntent) {
+			alert("Cannot delete edit while processing.");
+			return;
+		}
 		if (window.confirm("Delete this edit? You cannot restore this edit.")) {
 			domainStore.deleteIntent(intentPos);
 		}

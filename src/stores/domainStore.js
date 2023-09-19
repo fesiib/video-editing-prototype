@@ -410,6 +410,7 @@ class DomainStore {
 			projectId: "",
 			projectMetadata: {},
 			edits: [],
+			curPlayPosition: this.rootStore.uiStore.timelineControls.playPosition,
 			segmentOfInterest: segmentOfInterest,
 			skippedSegments: [],
 			requestParameters: {},
@@ -466,6 +467,7 @@ class DomainStore {
 			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 			this.curIntent.summary = summary;
 			requestSuggestions(requestData).then(action((responseData) => {
+				console.log(responseData);
 				if (responseData === null || responseData.edits === undefined) {
 					this.processingIntent = false;
 					return;
@@ -564,7 +566,6 @@ class DomainStore {
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");
 				}
-
 			})).catch(action((error) => {
 				console.log("error", error);
 				this.curIntent.restoreHistory(this.curIntent.history.length - 1);

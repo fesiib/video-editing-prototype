@@ -51,11 +51,11 @@ const Auth = observer(function Auth() {
 		}));
 	}, []);
 
-	return (<div className="flex flex-row m-2 w-full">
+	return (<div className="flex flex-row m-1 w-full h-8">
 		{!userStore.isLoggedIn ? (
 			<div className="">
 				<button
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+					className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
 					onClick={() => login()}
 				>
 					Login
@@ -72,7 +72,7 @@ const Auth = observer(function Auth() {
 					{
 						(userStore.isTaskChosen && !userStore.loading) ? (
 						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+							className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
 							onClick={() => taskDone()}
 						>
 							{
@@ -83,7 +83,7 @@ const Auth = observer(function Auth() {
 					{
 						(!userStore.isTaskChosen && !userStore.loading) ? (
 							<button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
 								onClick={() => resetFirebase()}
 							>
 								Reset All Tasks
@@ -91,12 +91,12 @@ const Auth = observer(function Auth() {
 					}
 					
 					<div
-						className="text-black font-bold py-2 px-4 rounded"
+						className="text-black font-bold p-1 rounded"
 					>
 						{userStore.userName}
 					</div>
 					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+						className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
 						onClick={() => logout()}
 					>
 						Logout

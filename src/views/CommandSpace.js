@@ -3,9 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { action, set, toJS } from "mobx";
 
+import { AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineSend } from "react-icons/ai";
+import { BiLoader } from "react-icons/bi";
+
 import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
-import axios from "axios";
+
 import { requestAmbiguousParts } from "../services/pipeline";
 
 
@@ -149,14 +153,10 @@ const CommandSpace = observer(function CommandSpace() {
 	}), [curIntent.textCommand]);
 
 	return (<div className="w-full flex flex-col items-center">
-		<h2 className="w-full"> 
+		<div className="w-full flex flex-row gap-2 items-center"> 
 			{
-				curIntent.historyPos === curIntent.history.length - 1 ? (
-					<span> New 
-					</span>
-				) : (
-					<span> History
-					</span>
+				curIntent.historyPos === curIntent.history.length - 1 ? (null) : (
+					<span> <AiOutlineHistory /> </span>
 				)
 			}
 			{
@@ -164,16 +164,19 @@ const CommandSpace = observer(function CommandSpace() {
 					<span> Edit {curIntent.idx}: 
 						<span 
 							className="italic text-gray-400"
-						> describe your edit </span> 
+						> describe edit </span> 
 					</span>
 				) : (
 					<span> Edit {curIntent.idx}: {curIntent.summary} </span>
 				)
 			}
-		</h2>
+		</div>
 		{systemSetting ? (
 			domainStore.processingIntent ? (
-				<div> Processing... </div>
+				<div className="flex flex-row gap-2 items-center"> 
+					<span> Processing... </span> 
+					<BiLoader />
+				</div>
 			) : (
 				<div className="w-full p-1 bg-gray-100">
 					<div className="flex flex-row w-full gap-2"> 
@@ -201,7 +204,7 @@ const CommandSpace = observer(function CommandSpace() {
 									maxLength={textCommandLimit}
 									type="text"
 									rows="4"
-									placeholder="description"
+									placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
 									value={curIntent.textCommand}
 									className="w-full resize-none relative z-10"
 									style={{
@@ -239,55 +242,17 @@ const CommandSpace = observer(function CommandSpace() {
 								</select>
 							</div> */}
 							<button 
-								className="w-fit h-fit bg-indigo-300 text-black py-2 px-2 rounded hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+								className={"w-fit h-fit bg-indigo-300 text-black p-1 rounded hover:bg-indigo-400"
+									+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-300"
+								}
+
 								onClick={() => onProcessClick()}
 								disabled={curIntent.processingAllowed === false}
 							>
-								Submit
+								<AiOutlineSend />
 							</button>
 						</div>
 					</div>
-					{
-						(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
-						) ? null : (
-							<div className="flex flex-col justify-start px-1 divider-1">
-								<div className="flex flex-col flex-wrap w-full">
-									<h2 className="text-sm"> Last description: </h2>
-									<div className="flex flex-row flex-wrap gap-1 text-s">
-									{
-										selectedEdits[0].contribution.map((single, idx) => {
-											const text = single.text;
-											const type = single.type.filter((ref) => {
-												return !ref.startsWith("custom.") || ref === `custom.${curIntent.editOperationKey}`;
-											});
-											return (<div 
-												className={"relative h-fit"}
-												key={`contribution-${idx}-${text}`}
-											> 
-												{type.map((refType, t_idx) => {
-													const t = refType.startsWith("custom.") ? "custom" : refType;
-													const typeClassName = "absolute w-full ";
-													return (<div 
-														className={typeClassName}
-														style={{
-															height: `${(1 / type.length) * 100}%`,
-															bottom: `${(t_idx / type.length) * 100}%`,
-															backgroundColor: uiStore.referenceTypeColorPalette[t],
-														}}
-														key={`contribution-${idx}-${text}-${t}`}
-													>
-													</div>);
-												})}
-												{text}
-											</div>);
-										})
-									}
-									{/* {JSON.stringify(toJS(selectedEdits[0].contribution))} */}
-									</div>
-								</div>
-							</div>
-						)
-					}
 				</div>
 			)
 		) : null}

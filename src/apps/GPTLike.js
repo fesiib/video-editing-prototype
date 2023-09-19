@@ -17,6 +17,7 @@ import EditPanel from "../views/EditPanel";
 import Header from "../views/Header";
 import SideHistory from "../views/SideHistory";
 import NavigationToggle from "../components/general/NavigationToggle";
+import Explanation from "../components/general/Explanation";
 
 const GPTLike = observer(function GPTLike() {
     const { userStore, uiStore, domainStore } = useRootContext();
@@ -107,12 +108,13 @@ const GPTLike = observer(function GPTLike() {
 						<div className="flex flex-row h-full">
 							<div className="relative w-1/12 h-full">
 								<SideHistory />
-							</div>
-							<div className="flex flex-col w-1/2 mx-1 gap-2">
+							</div>	
+							<div className="flex flex-col w-5/12 mx-1 gap-2">
 								<CommandSpace />
+								<Explanation />
 								<EditPanel />
 							</div>
-							<div className="flex flex-col w-1/2 items-center">
+							{/* <div className="flex flex-col w-6/12 items-center">
 								<EditorCanvas />
 								<NavigationToggle />
 								<Timeline />
@@ -121,6 +123,11 @@ const GPTLike = observer(function GPTLike() {
 										<TextWall />
 									) : null
 								}
+							</div> */}
+							<div className="flex flex-col w-6/12 items-center">
+								<EditorCanvas />
+								<Timeline />
+								<TextWall />
 							</div>
 						</div>
 					) : (

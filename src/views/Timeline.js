@@ -18,6 +18,7 @@ import CopyIcon from "../icons/CopyIcon";
 
 import { TfiSplitH } from "react-icons/tfi";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+import { FiSearch } from "react-icons/fi";
 
 import { playPositionToFormat } from "../utilities/timelineUtilities";
 
@@ -274,7 +275,7 @@ const Timeline = observer(function Timeline() {
 	// 	uiStore.timelineControls.splitting
 	// ]);
 
-	const buttonClassName = " hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50";
+	const buttonClassName = " disabled:hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50";
 	const decisionClassName = " text-black p-1 rounded disabled:opacity-50";
     return (
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onKeyDown}>
@@ -294,7 +295,7 @@ const Timeline = observer(function Timeline() {
 					<div className="flex gap-1 justify-center">
 						<button
 							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
-									? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+									? "bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 								) 
 								+ decisionClassName}
 							id="prev_button"
@@ -329,7 +330,7 @@ const Timeline = observer(function Timeline() {
 						</div>
 						<button
 							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
-								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+								? "bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 							) 
 							+ decisionClassName}
 							id="next_button"
@@ -348,15 +349,16 @@ const Timeline = observer(function Timeline() {
 						) ? (
 							<div className="flex gap-1 justify-center">
 								<button
-									className={"items-center bg-indigo-300 hover:bg-indigo-400" + decisionClassName}
+									className={"items-center bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300 flex flex-row gap-1"
+										+ decisionClassName}
 									onClick={() => onMoreClick()}
 									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
 								>
-									search more between
-									<span> [
+									<FiSearch />
+									<span>
 										{playPositionToFormat(uiStore.commandSpaceControls.viewPortStart)
 										} - {playPositionToFormat(uiStore.commandSpaceControls.viewPortFinish)}
-									] </span>
+									</span>
 								</button>
 							</div>
 						) : null
@@ -384,8 +386,8 @@ const Timeline = observer(function Timeline() {
 					<button
 						className={
 							(uiStore.timelineControls.rangeSelectingTimeline
-								? "bg-indigo-500"
-								: "bg-indigo-300") + buttonClassName
+								? "bg-indigo-600"
+								: "bg-indigo-300 hover:bg-indigo-400 ") + buttonClassName
 						}
 						onClick={onPressRangeSelect}
 						id="intentselect_button"
@@ -395,8 +397,8 @@ const Timeline = observer(function Timeline() {
 					<button
 						className={
 							(uiStore.timelineControls.splitting
-								? "bg-indigo-500"
-								: "bg-indigo-300") + buttonClassName
+								? "bg-indigo-600"
+								: "bg-indigo-300 hover:bg-indigo-400 ") + buttonClassName
 						}
 						onClick={onPressSplit}
 						id="split_button"
@@ -405,7 +407,7 @@ const Timeline = observer(function Timeline() {
 						<TfiSplitH />
 					</button>
 					<button
-						className={"bg-indigo-300" + buttonClassName}
+						className={"bg-indigo-300 hover:bg-indigo-400 " + buttonClassName}
 						id="delete_button"
 						onClick={onCopyPasteTimelineItems}
 						disabled={
@@ -416,7 +418,7 @@ const Timeline = observer(function Timeline() {
 						<CopyIcon />
 					</button>
 					<button
-						className={"bg-indigo-300" + buttonClassName}
+						className={"bg-indigo-300 hover:bg-indigo-400 " + buttonClassName}
 						id="delete_button"
 						onClick={onDeleteTimelineItems}
 						disabled={uiStore.timelineControls.selectedTimelineItems.length === 0}

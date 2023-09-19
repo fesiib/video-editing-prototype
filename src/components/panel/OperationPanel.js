@@ -12,6 +12,33 @@ import UncollapseIcon from "../../icons/UncollapseIcon";
 import { toJS } from "mobx";
 import EditState from "../../stores/objects/editState";
 
+import { AiOutlineBulb } from "react-icons/ai";
+import { AiOutlineEdit } from "react-icons/ai";
+import { BiTime } from "react-icons/bi";
+import { PiFrameCorners } from "react-icons/pi";
+
+const MetaKeyLabel = observer(function MetaKeyLabel({ metaKey }) {
+	if (metaKey === "custom") {
+		return (<div className="flex flex-row justify-start items-center gap-1">
+			<AiOutlineEdit />
+			<span className="text-sm font-bold"> Edit </span>
+		</div>);
+	}
+	if (metaKey === "spatial") {
+		return (<div className="flex flex-row justify-start items-center gap-1">
+			<PiFrameCorners />
+			<span className="text-sm font-bold"> Spatial </span>
+		</div>);
+	}
+	if (metaKey === "temporal") {
+		return (<div className="flex flex-row justify-start items-center gap-1">
+			<BiTime />
+			<span className="text-sm font-bold"> Temporal </span>
+		</div>);
+	}
+	return null;
+});
+
 const OperationPanel = observer(function OperationPanel() {
 
 	const { uiStore, domainStore } = useRootContext();
@@ -62,14 +89,22 @@ const OperationPanel = observer(function OperationPanel() {
 	}, [selectedOperation, uiStore.canvasControls.sketching]);
 
 	return (<div className="w-full">
-		<button className="flex flex-row justify-start w-full bg-gray-200 hover:bg-gray-300" onClick={onTitleClick}>
-			{collapsed ? <CollapseIcon /> : <UncollapseIcon />}
-			<span> Operation Panel </span>
+		<button 
+			className="w-full bg-gray-200 hover:bg-gray-300 flex flex-row gap-2 items-center"
+			onClick={onTitleClick}
+		>
+			<div className="flex flex-row justify-start">
+				{collapsed ? <CollapseIcon /> : <UncollapseIcon />}
+				<span> Operation Panel </span>
+			</div>
+			{
+				haveSuggested ? ( <AiOutlineBulb /> ) : null
+			}
 		</button>
 		{
 			collapsed ? null : (
 				<div className={"flex flex-col justify-around p-2 border"
-					+ (haveSuggested ? " bg-gray-200 opacity-50" : " bg-gray-100")
+					+ (haveSuggested ? " bg-yellow-200 opacity-50" : " bg-gray-100")
 				}>
 					{ selectedOperation === null ? (
 							<div> No operation selected </div>
@@ -129,9 +164,7 @@ const OperationPanel = observer(function OperationPanel() {
 													key={`metaParameter-${metaKey}`}
 													className="flex flex-col mx-1"
 												> 
-												<span
-													className="font-bold text-left text-xs px-2"
-												> {metaKey} </span> 
+												<MetaKeyLabel metaKey={metaKey} />
 												{
 													metaParameterKeys.map((parameterKey) => {
 														const parameter = metaParameter[parameterKey];

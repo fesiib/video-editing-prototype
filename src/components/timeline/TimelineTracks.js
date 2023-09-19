@@ -185,6 +185,14 @@ const TimelineTracks = observer(function TimelineTracks() {
 		const width = uiStore.timelineSize.width;
 		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
 		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
+
+		for (let i = 0; i < trackCnt; i++) {
+			const videoIndicatorId = `video_indicator_${"track_" + i}`;
+			const videoIndicator = document.getElementById(videoIndicatorId);
+			if (videoIndicator?.style !== undefined) {
+				videoIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
+			}
+		}
 	});
 
     useEffect(() => {
