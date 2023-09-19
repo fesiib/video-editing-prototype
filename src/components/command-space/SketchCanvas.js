@@ -71,7 +71,13 @@ const SketchCanvas = observer(function SketchCanvas(
 	]);
 
 	const onSketchClick = action(() => {
-		uiStore.canvasControls.sketching = !uiStore.canvasControls.sketching;
+		if (uiStore.canvasControls.sketching) {
+			uiStore.canvasControls.sketching = false;
+			return;
+		}
+		onClearClick();
+		onCaptureFrameClick();
+		uiStore.canvasControls.sketching = true;
 	});
 	const onCaptureFrameClick = action(() => {
 		if (videoElement === null
@@ -85,6 +91,11 @@ const SketchCanvas = observer(function SketchCanvas(
 			curVideo.commonState.offset + curVideo.commonState.start;
 		curIntent.setSketchPlayPosition(adaptedPlayPosition);
 		return (() => {});
+	});
+
+	const onClearClick = action(() => {
+		setCurRect(null);
+		curIntent.setSketchCommand([]);
 	});
 
 	const onJumpClick = action(() => {
@@ -249,25 +260,22 @@ const SketchCanvas = observer(function SketchCanvas(
 					) : <MdOutlineDoneOutline />}
 				</button>
 				{
-					sketching ? (
-						<button
-							className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
-							onClick={() => onCaptureFrameClick()}
-							disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
-						>
-							{/* Capture Fram */}
-							<TbCaptureFilled />
-						</button>
-					) : null
+					// sketching ? (
+					// 	<button
+					// 		className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
+					// 		onClick={() => onCaptureFrameClick()}
+					// 		disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
+					// 	>
+					// 		{/* Capture Fram */}
+					// 		<TbCaptureFilled />
+					// 	</button>
+					// ) : null
 				}
 				{
 					curIntent.sketchCommand.length === 0 ? null : (
 						<button
 							className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
-							onClick={action(() => {
-								setCurRect(null);
-								curIntent.setSketchCommand([]);
-							})}
+							onClick={() => onClearClick()}
 						>
 							<AiOutlineClear />
 						</button>
