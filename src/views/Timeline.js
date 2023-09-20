@@ -433,8 +433,8 @@ const Timeline = observer(function Timeline() {
 					<div className="self-end">
 						<label htmlFor="timeline_zoom">
 							{" "}
-							Zoom {
-								`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`
+							Timeline Zoom {
+								//`${roundNumber(uiStore.timelineSize.width / uiStore.timelineControls.pxPerSec, 0)}s`
 							}{" "}
 						</label>
 						<input

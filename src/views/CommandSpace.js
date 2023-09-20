@@ -11,6 +11,7 @@ import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
 
 import { requestAmbiguousParts } from "../services/pipeline";
+import { IconContext } from "react-icons";
 
 
 const CommandSpace = observer(function CommandSpace() {
@@ -152,111 +153,117 @@ const CommandSpace = observer(function CommandSpace() {
 		}));
 	}), [curIntent.textCommand]);
 
-	return (<div className="w-full flex flex-col items-center">
-		<div className="w-full flex flex-row gap-2 items-center"> 
-			{
-				curIntent.historyPos === curIntent.history.length - 1 ? (null) : (
-					<span> <AiOutlineHistory /> </span>
-				)
-			}
-			{
-				curIntent.summary === "" ? (
-					<span> Edit {curIntent.idx}: 
-						<span 
-							className="italic text-gray-400"
-						> describe edit </span> 
-					</span>
+	return (<IconContext.Provider value={{ 
+		color: "black", 
+		className: "",
+		size: "1.5em",
+	}}>
+		<div className="w-full flex flex-col items-center">
+			<div className="w-full flex flex-row gap-2 items-center"> 
+				{
+					curIntent.historyPos === curIntent.history.length - 1 ? (null) : (
+						<span> <AiOutlineHistory /> </span>
+					)
+				}
+				{
+					curIntent.summary === "" ? (
+						<span> Edit {curIntent.idx}: 
+							<span 
+								className="italic text-gray-400"
+							> describe edit </span> 
+						</span>
+					) : (
+						<span> Edit {curIntent.idx}: {curIntent.summary} </span>
+					)
+				}
+			</div>
+			{systemSetting ? (
+				domainStore.processingIntent ? (
+					<div className="flex flex-row gap-2 items-center"> 
+						<span> Processing... </span> 
+						<BiLoader />
+					</div>
 				) : (
-					<span> Edit {curIntent.idx}: {curIntent.summary} </span>
-				)
-			}
-		</div>
-		{systemSetting ? (
-			domainStore.processingIntent ? (
-				<div className="flex flex-row gap-2 items-center"> 
-					<span> Processing... </span> 
-					<BiLoader />
-				</div>
-			) : (
-				<div className="w-full p-1 bg-gray-100">
-					<div className="flex flex-row w-full gap-2"> 
-						<div className="flex flex-col w-full gap-1 border p-1">
-							<div
-								id="textarea-container"
-								className="textarea-container relative w-full h-full"
-								ref={textCommandRef}
-							>
-								<div  
-									id="textarea-backdrop"
-									className="textarea-backdrop absolute w-full h-full"
+					<div className="w-full p-1 bg-gray-100">
+						<div className="flex flex-row w-full gap-2"> 
+							<div className="flex flex-col w-full gap-1 border p-1">
+								<div
+									id="textarea-container"
+									className="textarea-container relative w-full h-full"
+									ref={textCommandRef}
 								>
-									<div
-										id="textarea-highlights"
-										className="textarea-highlights z-0"
-										style = {{
-											pointerEvents: "auto",
-										}}
+									<div  
+										id="textarea-backdrop"
+										className="textarea-backdrop absolute w-full h-full"
 									>
+										<div
+											id="textarea-highlights"
+											className="textarea-highlights z-0"
+											style = {{
+												pointerEvents: "auto",
+											}}
+										>
+										</div>
 									</div>
+									<textarea 
+										id="textCommand" 
+										maxLength={textCommandLimit}
+										type="text"
+										rows="4"
+										placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
+										value={curIntent.textCommand}
+										className="w-full resize-none relative z-10"
+										style={{
+											margin: 0,
+											borderRadius: 0,
+											color: "#444444",
+											backgroundColor: "transparent",
+										}}
+										onChange={onChangeTextCommand}
+										onScroll={onTextAreaScroll}
+										onClick={onTextAreaClick}
+									/>
 								</div>
-								<textarea 
-									id="textCommand" 
-									maxLength={textCommandLimit}
-									type="text"
-									rows="4"
-									placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
-									value={curIntent.textCommand}
-									className="w-full resize-none relative z-10"
-									style={{
-										margin: 0,
-										borderRadius: 0,
-										color: "#444444",
-										backgroundColor: "transparent",
-									}}
-									onChange={onChangeTextCommand}
-									onScroll={onTextAreaScroll}
-									onClick={onTextAreaClick}
-								/>
+								<div className="flex flex-row justify-between">
+									<SketchCanvas 
+										shouldSketch={shouldSketch}
+									/>
+									<span
+										className="text-xs"
+									> {curIntent.textCommand.length}/{textCommandLimit}</span>
+								</div>
 							</div>
-							<div className="flex flex-row justify-between">
-								<SketchCanvas 
-									shouldSketch={shouldSketch}
-								/>
-								<span
-									className="text-xs"
-								> {curIntent.textCommand.length}/{textCommandLimit}</span>
-							</div>
-						</div>
-						<div className="flex flex-col gap-1 justify-end items-end">
-							{/* <div className="flex flex-col">
+							<div className="flex flex-col gap-1 justify-end items-end">
+								{/* <div className="flex flex-col">
 
-								<label htmlFor="processingMode"
-									className="w-full"
-								> Mode: </label>
-								<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
-									className="p-1"
+									<label htmlFor="processingMode"
+										className="w-full"
+									> Mode: </label>
+									<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
+										className="p-1"
+									>
+										<option value={domainStore.processingModes.fromScratch}> From scratch </option>
+										<option value={domainStore.processingModes.addMore}> Add more </option>
+										<option value={domainStore.processingModes.adjustSelected}> Adjust existing </option>
+									</select>
+								</div> */}
+								<button 
+									className={"w-fit h-fit bg-indigo-300 text-black p-1 rounded hover:bg-indigo-400"
+										+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-300"
+									}
+
+									onClick={() => onProcessClick()}
+									disabled={curIntent.processingAllowed === false}
 								>
-									<option value={domainStore.processingModes.fromScratch}> From scratch </option>
-									<option value={domainStore.processingModes.addMore}> Add more </option>
-									<option value={domainStore.processingModes.adjustSelected}> Adjust existing </option>
-								</select>
-							</div> */}
-							<button 
-								className={"w-fit h-fit bg-indigo-300 text-black p-1 rounded hover:bg-indigo-400"
-									+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-300"
-								}
-
-								onClick={() => onProcessClick()}
-								disabled={curIntent.processingAllowed === false}
-							>
-								<AiOutlineSend />
-							</button>
+									<AiOutlineSend />
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			)
-		) : null}
-	</div>);
+				)
+			) : null}
+		</div>
+	</IconContext.Provider>);
 });
 
 export default CommandSpace;

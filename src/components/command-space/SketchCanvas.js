@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, autorun, set } from "mobx";
+import { action, autorun, reaction, set } from "mobx";
 
 import { Image, Layer, Line, Rect, Stage } from "react-konva";
 
@@ -83,7 +83,7 @@ const SketchCanvas = observer(function SketchCanvas(
 		if (videoElement === null
 			|| curVideo === null
 			|| canDraw == false
-			|| sketchRef.current === null
+			//|| sketchRef.current === null
 		) {
 			return;
 		}
@@ -213,6 +213,20 @@ const SketchCanvas = observer(function SketchCanvas(
 		setStageWidth(newStageWidth);
 		setStageHeight(newStageWidth / videoWidth * videoHeight);
 	}, [sketching, videoWidth, videoHeight]);
+
+	useEffect(() => {
+		const disposer = reaction(() => uiStore.timelineControls.playPosition, (playPosition) => {
+			if (videoElement === null || curIntent === null || sketchRef.current === null) {
+				return;
+			}
+			if (curIntent.sketchCommand.length === 0) {
+				onCaptureFrameClick();
+			}
+		});
+		return () => {
+			disposer();
+		}
+	})
 
 
 	useEffect(() => {

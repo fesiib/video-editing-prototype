@@ -523,8 +523,6 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 	// 	</div>
 	// </div>
 
-	console.log(parameter === "mixed", parameter === "", selectedEdits.some((edit) => edit.isSuggested))
-
 	return (<div className="flex flex-col">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label>
 		<div className='flex flex-row w-full justify-between'>
