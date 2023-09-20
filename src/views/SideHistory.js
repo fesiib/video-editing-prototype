@@ -76,7 +76,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 			collapsed ? null : (
 			<div className="w-fit flex gap-2 justify-center">
 				<button 
-					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded disabled:opacity-50"
+					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded disabled:opacity-50 disabled:hover:bg-red-500"
 					onClick={onDeleteClick}
 					disabled={intent.history.length === 1}
 				> 	

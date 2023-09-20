@@ -123,23 +123,23 @@ const Explanation = observer(function Explanation() {
 		return item.isSuggested;
 	});
 
-	let textToExplain = "";
-	if (selectedSuggestedEdits.length === 1 && !domainStore.processingIntent && systemSetting) {
-		const edit = selectedSuggestedEdits[0];
-		const text = edit.contribution.map((single) => {
-			return single.text;
-		}).join("");
-		textToExplain = text.trim();
-	}
+	// let textToExplain = "";
+	// if (selectedSuggestedEdits.length === 1 && !domainStore.processingIntent && systemSetting) {
+	// 	const edit = selectedSuggestedEdits[0];
+	// 	const text = edit.contribution.map((single) => {
+	// 		return single.text;
+	// 	}).join("");
+	// 	textToExplain = text.trim();
+	// }
 
 	return (
-		textToExplain === ""
+		curIntent.suggestedEdits.length === 0
 	) ? (null) : (
 		<div className="flex flex-col">
 			<div className="flex gap-1 flex-row justify-start items-center">
 				<AiOutlineBulb/>
 				<span> Explanation </span>
-				<span> {
+				{/* <span> {
 					selectedSuggestedEdits.map((edit, idx) => {
 						const isLast = idx === selectedSuggestedEdits.length - 1;
 						let pos = 0;
@@ -150,11 +150,11 @@ const Explanation = observer(function Explanation() {
 						}
 						return pos + (isLast ? "" : ", ");
 					})
-				} / {curIntent.suggestedEdits.length} </span>
+				} / {curIntent.suggestedEdits.length} </span> */}
 			</div>
 			{/* Lines below */}
 			<RowsVisualization 
-				edit={selectedEdits[0]}
+				edit={curIntent.suggestedEdits[0]}
 			/>
 			{/* 
 			Colors on top of the text
