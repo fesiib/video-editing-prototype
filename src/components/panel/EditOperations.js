@@ -20,7 +20,7 @@ const EditOperations = observer(function EditOperations() {
 
 	const inactiveButtonClassName = "w-full text-white my-1 hover:bg-green-700 rounded bg-green-600 flex flex-row items-center justify-center gap-1 rounded";
 	const suggestedButtonClassName = "w-full my-1 hover:bg-yellow-400 bg-yellow-300 flex flex-row items-center justify-center gap-1 relative rounded";
-	const activeButtonClassName = "w-full text-white my-1 rounded bg-green-800 flex flex-row items-center justify-center gap-1 rounded";
+	const activeButtonClassName = "w-full text-white font-bold my-1 rounded bg-green-900 flex flex-row items-center justify-center gap-1 rounded";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
@@ -65,7 +65,7 @@ const EditOperations = observer(function EditOperations() {
 					onClick={(event) => handleButtonClick(operationKey)}
 					style={{
 						borderColor: uiStore.editColorPalette[operationKey],
-						borderWidth: "3px",
+						borderWidth: "2px",
 					}}
 				>
 					{/* {
