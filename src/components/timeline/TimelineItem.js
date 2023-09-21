@@ -44,7 +44,8 @@ export const TimelineItem = observer(
                     : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
             width: uiStore.secToPx(scene.commonState.sceneDuration),
             //transition: `transform ${0.5}s`,
-            backgroundColor: uiStore.editColorPalette[lowLabel],
+            borderColor: uiStore.editColorPalette[lowLabel],
+			borderWidth: "3px",
             opacity: isOverlay ? 0.8 : 1,
         };
 
@@ -61,15 +62,19 @@ export const TimelineItem = observer(
 		}
 		else if (isSuggested) {
 			outerClassName = (isSelected
-				? "absolute bottom-0 z-20 border-2 border-red-600 brightness-50"
-				: "absolute bottom-0 z-20 border");
+				? "absolute bottom-0 z-20 brightness-50"
+				: "absolute bottom-0 z-20 ");
 			innerClassName = "h-5 bg-yellow-300 flex flex-row justify-center items-center";
+		}
+		else if (isOverlay) {
+			outerClassName = ("absolute z-10 brightness-75");
+			innerClassName = "flex bg-green-300 justify-center items-center";
 		}
 		else {
 			outerClassName = (isSelected
-				? "absolute bottom-6 z-10 border-2 border-red-600 brightness-50"
-				: "absolute bottom-6 z-10 border");
-			innerClassName = "flex justify-between";
+				? "absolute bottom-7 z-10 brightness-75"
+				: "absolute bottom-7 z-10 ");
+			innerClassName = "flex bg-green-300 justify-between";
 		}
 
         return (
@@ -84,7 +89,9 @@ export const TimelineItem = observer(
 				onMouseLeave={() => setHovering(() => false)}
             >
                 {isOverlay ? (
-					<div className="flex flex-row justify-center">
+					<div className={
+						innerClassName + " flex flex-row justify-center items-center"
+					}>
 						<span className="">
 							{uiStore.timelineControls.selectedTimelineItems.length > 1
 								? uiStore.timelineControls.selectedTimelineItems.length + " scenes"
@@ -100,7 +107,7 @@ export const TimelineItem = observer(
 									scene={scene} scenes={scenes}
 								>
 									<span 
-										className="h-7"
+										className="h-6 font-bold"
 										id={"label_" + scene.commonState.id}
 									>
 										{!willOverflow ? lowLabel : ""}

@@ -110,7 +110,7 @@ const GPTLike = observer(function GPTLike() {
 								<SideHistory />
 							</div>	
 							<div className="flex flex-col w-5/12 mx-1 gap-2">
-								<div className="flex flex-col m-1 p-1 drop-shadow-lg">
+								<div className="flex flex-col m-1 p-1 drop-shadow-lg gap-2">
 									<CommandSpace />
 									<Explanation />
 								</div>

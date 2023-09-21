@@ -389,6 +389,9 @@ class DomainStore {
 		if (intentPos >= this.intents.length || intentPos < 0) {
 			return;
 		}
+		if (intentPos === this.curIntentPos) {
+			return;
+		}
 		this.curIntentPos = intentPos;
 		if (this.curIntentPos >= 0 && this.curIntentPos < this.intents.length
 			&& this.intents[this.curIntentPos].history.length > 0
@@ -448,7 +451,8 @@ class DomainStore {
 		// this.curIntent.historyPos = this.curIntent.history.length - 1;	
 		this.curIntent.suggestedEdits = [];
 		this.curIntent.suggestedEditOperationKeys = [];
-		this.curIntent.suggestedEditOperationKey = "";	
+		this.curIntent.suggestedEditOperationKey = "";
+		const requestedIntentPos = this.curIntentPos;	
 
 		requestSummary({
 			input: requestData.requestParameters.text,
@@ -463,15 +467,16 @@ class DomainStore {
 			// } else {
 			// 	this.curIntent.summary = this.curIntent.summary + "\n" + summary;
 			// }
-			
+			this.setCurIntent(requestedIntentPos);
 			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-			this.curIntent.summary = summary;
+			this.curIntent.setSummary(summary);
 			requestSuggestions(requestData).then(action((responseData) => {
 				console.log(responseData);
 				if (responseData === null || responseData.edits === undefined) {
 					this.processingIntent = false;
 					return;
 				}
+				this.setCurIntent(requestedIntentPos);
 				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				const suggestedEditOperationKeys = responseData.requestParameters.editOperations;
 				const suggestedParameters = responseData.requestParameters.parameters;
@@ -557,25 +562,32 @@ class DomainStore {
 				// else {
 				// 	this.curIntent.suggestedEditOperationKey = "";
 				// }
+				this.setCurIntent(requestedIntentPos);
+				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				if (suggestedEditOperationKeys.includes(this.curIntent.editOperationKey)) {
 					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys.filter((key) => key !== this.curIntent.editOperationKey);
 				}
 				else {
 					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
 				}
-				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				this.processingIntent = false;
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");
 				}
+				else {
+					this.rootStore.uiStore.selectTimelineObjects([this.curIntent.suggestedEdits[0]]);
+					this.rootStore.uiStore.playPosition = this.curIntent.suggestedEdits[0].commonState.offset;
+				}
 			})).catch(action((error) => {
 				console.log("error", error);
+				this.setCurIntent(requestedIntentPos);
 				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				this.processingIntent = false;
 				alert("Sorry error occured");
 			}));
 		})).catch(action((error) => {
 			console.log("error", error);
+			this.setCurIntent(requestedIntentPos);
 			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 			this.processingIntent = false;
 			alert("Sorry error occured");

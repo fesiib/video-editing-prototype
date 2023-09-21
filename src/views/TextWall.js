@@ -13,7 +13,7 @@ import TrimHandlerRightIcon from "../icons/TrimHandlerRightIcon";
 const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler, isOverlay }) {
 	const { uiStore } = useRootContext();
 	const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
-	const { attributes, listeners, setNodeRef } = useDraggable({
+	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: isOverlay ? `overlay-script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`
 			: `script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`,
 		data: {
@@ -30,16 +30,15 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
 		ref={setNodeRef}
 		className={handlerClassName}
 		style={{
-			height: "100%",
 			// width: `${handlerWidth}px`,
 			//transform: CSS.Transform.toString(adjustedTransform),
 			opacity: isOverlay ? 0.5 : 1,
-			backgroundColor: "grey",
+			//backgroundColor: "grey",
 		}}
 		{...listeners} {...attributes}
 	> 
-		<button className="my-auto">
-			{" "} {isLeftHandler ? <TrimHandlerLeftIcon /> : <TrimHandlerRightIcon />}{" "}
+		<button className={"w-2 h-7 bg-black rounded"}>
+			{/* {" "}{isLeftHandler ? <TrimHandlerLeftIcon /> : <TrimHandlerRightIcon />}{" "} */}
 		</button>
 	</div>
 });
@@ -50,10 +49,11 @@ const DraggableParts = observer(function DraggableParts({
 	item,
 	className,
 	onDoubleClick,
+	isHovering,
 }) {
     const { uiStore, domainStore } = useRootContext();
 
-	let parts = []
+	let parts = [];
 	
 	if (type === "active") {
 		parts = domainStore.curIntent.activeEdits.filter((edit) => {
@@ -72,20 +72,21 @@ const DraggableParts = observer(function DraggableParts({
 			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
 			const isLeftEnd = (item.start <= edit.commonState.offset && item.finish > edit.commonState.offset);
 			const isRightEnd = (item.start < edit.commonState.end && item.finish >= edit.commonState.end);
-			let innerClassName = className;
+			let innerClassName = className + " bg-green-400";
 			if (isLeftEnd && isRightEnd) {
-				innerClassName += " justify-between";
+				innerClassName += " justify-between items-center";
 			}
 			else if (isRightEnd) {
-				innerClassName += " justify-end";
+				innerClassName += " justify-end items-center";
 			}
 			else if (isLeftEnd) {
-				innerClassName += " justify-start";
+				innerClassName += " justify-start items-center";
 			};
 
-			if (uiStore.timelineControls.selectedTimelineItems.findIndex(
-				(selectedItem) => selectedItem.commonState.id === edit.commonState.id) !== -1
-			) {
+			const isSelected = uiStore.timelineControls.selectedTimelineItems.findIndex(
+				(selectedItem) => selectedItem.commonState.id === edit.commonState.id) !== -1;
+
+			if (isSelected) {
 				innerClassName += " border-y-2 border-red-600 brightness-50";
 			}
 
@@ -97,7 +98,7 @@ const DraggableParts = observer(function DraggableParts({
 				<div
 					className={innerClassName}
 					style={{
-						backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
+						//backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
 						marginLeft: `${left}%`,
 						width: `${width}%`,
 					}}
@@ -392,14 +393,14 @@ const SentenceBox = observer(function SentenceBox({
 				type="active"
 				index = {index}
 				item = {item}
-				className = {"z-20 opacity-40 inset-y-0 absolute flex"}
+				className = {"z-20 opacity-40 inset-y-0 absolute flex items-end bottom-0"}
 				onDoubleClick={onPartDoubleClick}
 			/>
 			<StaticParts
 				type="suggested"
 				index = {index}
 				item = {item}
-				className = {"z-30 opacity-70 absolute inset-y-0 bg-yellow-300 flex top-3"}
+				className = {"z-30 opacity-70 absolute hover:inset-y-0 hover:-bottom-1 inset-y-5 bg-yellow-300 flex -bottom-1"}
 				onDoubleClick={onPartDoubleClick}
 			/>
 			{showTime ? (<div className={timeClassName}> {formattedStart} </div>) : null }

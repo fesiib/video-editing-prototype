@@ -71,6 +71,7 @@ class IntentState {
 		if (this.historyPos === historyEntryPos) {
 			return;
 		}
+		this.domainStore.rootStore.resetTempState();
 		if (this.historyPos === this.history.length - 1) {
 			this.history.splice(this.historyPos, 1);
 			this.enterHistory();
@@ -170,6 +171,10 @@ class IntentState {
 
 	setProcessingMode(processingMode) {
 		this.processingMode = processingMode;
+	}
+
+	setSummary(summary) {
+		this.summary = summary;
 	}
 
 	setEditOperationKey(newKey) {

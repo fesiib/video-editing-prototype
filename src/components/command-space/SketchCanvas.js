@@ -264,19 +264,28 @@ const SketchCanvas = observer(function SketchCanvas(
 		<div className="flex flex-row justify-between w-full pr-5">
 			<div className="flex flex-row gap-2 justify-start">
 				<button
-					className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded"
+					className="w-fit bg-indigo-200 hover:bg-indigo-300 text-black p-1 rounded"
 					onClick={() => {
 						onSketchClick();
 					}}
 				>
 					{!sketching ? (
-						<MdOutlineDraw />	 	
-					) : <MdOutlineDoneOutline />}
+						<div className="flex flex-row item-center gap-1">
+							<MdOutlineDraw />
+							<span className="font-bold">
+								Sketch
+							</span>
+						</div>
+					) : (
+						<div className="flex flex-row item-center gap-1">
+							<MdOutlineDoneOutline />
+						</div>
+					)}
 				</button>
 				{
 					// sketching ? (
 					// 	<button
-					// 		className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50"
+					// 		className="w-fit bg-indigo-200 hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50"
 					// 		onClick={() => onCaptureFrameClick()}
 					// 		disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					// 	>
@@ -287,11 +296,17 @@ const SketchCanvas = observer(function SketchCanvas(
 				}
 				{
 					curIntent.sketchCommand.length === 0 ? null : (
+						
 						<button
 							className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
 							onClick={() => onClearClick()}
 						>
-							<AiOutlineClear />
+							<div className="flex flex-row item-center gap-1">
+								<AiOutlineClear />
+								<span className="font-bold">
+									Clear
+								</span>
+							</div>
 						</button>
 					)
 				}
@@ -299,7 +314,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			{
 				sketching && curIntent.sketchPlayPosition >= 0 ? (
 					<button
-						className="w-fit bg-indigo-300 hover:bg-indigo-400 text-black p-1 rounded disabled:opacity-50 disabled:hover:bg-indigo-300"
+						className="w-fit bg-indigo-200 hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50 disabled:hover:bg-indigo-200"
 						onClick={() => onJumpClick()}
 						disabled={curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					>

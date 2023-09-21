@@ -166,13 +166,13 @@ const CommandSpace = observer(function CommandSpace() {
 					)
 				}
 				{
-					curIntent.summary === "" ? (
-						<span> Edit {curIntent.idx}: 
-							<span 
-								className="italic text-gray-400"
-							> describe edit </span> 
-						</span>
-					) : (
+					curIntent.summary === "" ? (<span>
+						{
+							curIntent.editOperation === null ? (`Edit ${curIntent.idx}`) : (
+								`Edit ${curIntent.idx}: ${curIntent.editOperation.title}`
+							)
+						}
+					</span>) : (
 						<span> Edit {curIntent.idx}: {curIntent.summary} </span>
 					)
 				}
@@ -181,7 +181,13 @@ const CommandSpace = observer(function CommandSpace() {
 				domainStore.processingIntent ? (
 					<div className="flex flex-row gap-2 items-center"> 
 						<span> Processing... </span> 
-						<BiLoader />
+						<iframe
+							src="https://giphy.com/embed/L05HgB2h6qICDs5Sms"
+							width="25"
+							height="25"
+							frameBorder="0" 
+							className="giphy-embed"
+						/>
 					</div>
 				) : (
 					<div className="w-full p-1 bg-gray-100">
@@ -248,8 +254,8 @@ const CommandSpace = observer(function CommandSpace() {
 									</select>
 								</div> */}
 								<button 
-									className={"w-fit h-fit bg-indigo-300 text-black p-1 rounded hover:bg-indigo-400"
-										+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-300"
+									className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"
+										+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-200"
 									}
 
 									onClick={() => onProcessClick()}

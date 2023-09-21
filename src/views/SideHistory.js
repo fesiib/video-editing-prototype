@@ -131,10 +131,11 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	// if (isSelected)
 	// 	console.log("History: ", intent.summary, intent.history.map((entry) => entry.summary));
 
-	const bgColor = "bg-gray-100";
-	const hoverColor = "bg-gray-400";
+	const bgColor = "bg-gray-200";
+	const hoverColor = "bg-gray-300";
+	const selectColor = "bg-gray-400";
 	const className = ("px-1 py-1 flex justify-between gap-2"
-		+ (isSelected ? ` ${hoverColor}` : ` ${bgColor} hover:${hoverColor}`)
+		+ (isSelected ? ` ${selectColor}` : ` ${bgColor} hover:${hoverColor}`)
 	);
 
 	return (<div className={className}
@@ -172,7 +173,8 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 });
 
 const SideHistory = observer(function SideHistory() {
-	const { uiStore, domainStore } = useRootContext();
+	const { userStore, uiStore, domainStore } = useRootContext();
+	const systemSettings = userStore.systemSettings;
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = Array.from(domainStore.intents).reverse();
 
@@ -212,7 +214,7 @@ const SideHistory = observer(function SideHistory() {
 							collapsed={collapsed}
 						/>);
 					})} */}
-					{curIntent.idx === intent.idx ? (intent.history.map((_, historyIdx) => {
+					{(curIntent.idx === intent.idx && systemSettings) ? (intent.history.map((_, historyIdx) => {
 						return (<SuggHistoryItem
 							key={`history-item-${idx}-${historyIdx}`}
 							idx={idx}

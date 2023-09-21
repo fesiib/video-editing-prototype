@@ -25,11 +25,14 @@ const NewIntent = observer(function NewIntent({
 
 	return (<div className="flex flex-row gap-2">
 		<button 
-			className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold h-fit py-2 px-2 rounded mr-2"
+			className="w-fit bg-green-600 hover:bg-green-700 text-white font-bold h-fit py-2 px-2 rounded mr-2"
 			onClick={() => onAddClick()} 
 			// disabled={curIntent.activeEdits.length === 0}
 		>
-			<BigPlusIcon />
+			<div className="flex flex-row justify-center items-center gap-1">
+				<BigPlusIcon />
+				<span> Add </span>
+			</div>
 		</button>
 		{collapsed ? null : (
 			<button

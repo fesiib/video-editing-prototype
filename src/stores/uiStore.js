@@ -93,14 +93,14 @@ class UIStore {
     backgroundName = "bg";
 
 	editColorPalette = {
-		"text": "#F6BD60",
-		"image": "#F5A7A6",
-		"shape": "#b19bbd",
-		"cut": "#abc7ff",
-		"zoom": "#A8D0C6",
-		"crop": "#E19898",
-		"blur": "#b0e3ff",
-		"": "#3F1D38",
+		"text": "#c45161",
+		"image": "#e094a0",
+		"shape": "#f2b6c0",
+		"cut": "#c7522a",
+		"zoom": "#74a892",
+		"crop": "#8db7d2",
+		"blur": "#5e62a9",
+		"": "#434279",
 	};
 
 	referenceTypeColorPalette = {

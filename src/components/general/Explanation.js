@@ -67,7 +67,7 @@ const RowsVisualization = observer(function RowsVisualization({
 					<div
 						className={"relative flex flex-row gap-1"}
 					>
-						{/* <div 
+						<div 
 							className={"absolute w-full"
 								+ (rowKey === COMMAND ? "" : " bg-gray-300 rounded")
 							}
@@ -75,7 +75,7 @@ const RowsVisualization = observer(function RowsVisualization({
 								height: `${50}%`,
 								bottom: `${25}%`,
 							}}
-						> </div> */}
+						> </div>
 						{edit.contribution.map((single, idx) => {
 							const text = single.text;
 							const type = single.type;
@@ -100,10 +100,10 @@ const RowsVisualization = observer(function RowsVisualization({
 							> 
 								{highlight ? (
 									<div 
-										className={"absolute w-full rounded bg-yellow-200 opacity-50"}
+										className={"absolute w-full rounded bg-yellow-300 opacity-25"}
 										style={{
-											height: `${100}%`,
-											bottom: `${0}%`,
+											height: `${50}%`,
+											bottom: `${25}%`,
 											//backgroundColor: uiStore.referenceTypeColorPalette[rowKey],
 											//backgroundColor: "yellow"
 										}}
@@ -142,7 +142,7 @@ const Explanation = observer(function Explanation() {
 	// }
 
 	return (
-		curIntent.suggestedEdits.length === 0
+		curIntent.suggestedEdits.length === 0 || !systemSetting
 	) ? (null) : (
 		<div className="flex flex-col">
 			<div className="flex gap-1 flex-row justify-start items-center">
@@ -163,7 +163,10 @@ const Explanation = observer(function Explanation() {
 			</div>
 			{/* Lines below */}
 			<RowsVisualization 
-				edit={curIntent.suggestedEdits[0]}
+				edit={selectedSuggestedEdits.length > 0 ?
+					selectedEdits[0] :
+					curIntent.suggestedEdits[0]
+				}
 			/>
 			{/* 
 			Colors on top of the text

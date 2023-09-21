@@ -534,7 +534,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 				onChange={(event) => onInputChange(event)}
 				autoComplete='off'
 			/>
-			<button className='text-sm border w-fit px-1 bg-indigo-300 rounded hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-300'
+			<button className='text-sm border w-fit px-1 bg-indigo-200 rounded hover:bg-indigo-300 disabled:opacity-50 disabled:hover:bg-indigo-200'
 				disabled={isDisabled}
 			>
 				<Link

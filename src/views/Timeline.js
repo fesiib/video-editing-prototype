@@ -17,8 +17,9 @@ import CrossIcon from "../icons/CrossIcon";
 import CopyIcon from "../icons/CopyIcon";
 
 import { TfiSplitH } from "react-icons/tfi";
-import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
-import { FiSearch } from "react-icons/fi";
+import { FaSearch } from "react-icons/fa";
+import { BsFillSkipBackwardFill } from "react-icons/bs";
+import { BsFillSkipForwardFill } from "react-icons/bs";
 
 import { playPositionToFormat } from "../utilities/timelineUtilities";
 
@@ -304,7 +305,7 @@ const Timeline = observer(function Timeline() {
 					<div className="flex gap-1 justify-center">
 						<button
 							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
-									? "bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
+									? "bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 								) 
 								+ decisionClassName}
 							id="prev_button"
@@ -314,7 +315,7 @@ const Timeline = observer(function Timeline() {
 								&& curIntent.activeEdits.length === 0
 							}
 						>
-							<MdSkipPrevious />
+							<BsFillSkipBackwardFill />
 						</button>
 						<div className={ ("flex flex-row gap-1 justify-center"
 								+ ((selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? " invisible" : " visible")
@@ -339,7 +340,7 @@ const Timeline = observer(function Timeline() {
 						</div>
 						<button
 							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
-								? "bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
+								? "bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 							) 
 							+ decisionClassName}
 							id="next_button"
@@ -349,7 +350,7 @@ const Timeline = observer(function Timeline() {
 								&& curIntent.activeEdits.length === 0
 							}
 						>
-							<MdSkipNext />
+							<BsFillSkipForwardFill />
 						</button>
 					</div>
 					{curIntent.suggestedEdits.length === 0 ? (
@@ -358,13 +359,13 @@ const Timeline = observer(function Timeline() {
 						) ? (
 							<div className="flex gap-1 justify-center">
 								<button
-									className={"items-center bg-indigo-300 hover:bg-indigo-400 disabled:hover:bg-indigo-300 flex flex-row gap-1"
+									className={"items-center bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200 flex flex-row gap-1"
 										+ decisionClassName}
 									onClick={() => onMoreClick()}
 									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
 								>
-									<FiSearch />
-									<span>
+									<FaSearch />
+									<span className="font-bold">
 										{playPositionToFormat(uiStore.commandSpaceControls.viewPortStart)
 										} - {playPositionToFormat(uiStore.commandSpaceControls.viewPortFinish)}
 									</span>

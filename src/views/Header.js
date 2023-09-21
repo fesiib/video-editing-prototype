@@ -55,7 +55,7 @@ const Auth = observer(function Auth() {
 		{!userStore.isLoggedIn ? (
 			<div className="">
 				<button
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
+					className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 					onClick={() => login()}
 				>
 					Login
@@ -72,7 +72,7 @@ const Auth = observer(function Auth() {
 					{
 						(userStore.isTaskChosen && !userStore.loading) ? (
 						<button
-							className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
+							className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 							onClick={() => taskDone()}
 						>
 							{
@@ -85,13 +85,13 @@ const Auth = observer(function Auth() {
 						(!userStore.isTaskChosen && !userStore.loading) ? (
 							<div>
 								<button
-									className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
+									className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 									onClick={() => resetFirebase()}
 								>
 									Reset All Tasks
 								</button>
 								<select
-									className="border mx-2 font-bold p-1 rounded"
+									className="border mx-2 p-1 rounded"
 									onChange={(e) => {
 										userStore.setParticipantId(e.target.value);
 									}}
@@ -110,12 +110,12 @@ const Auth = observer(function Auth() {
 					}
 					
 					<div
-						className="text-black font-bold p-1 rounded"
+						className="text-black p-1 rounded"
 					>
 						{userStore.userName}
 					</div>
 					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
+						className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 						onClick={() => logout()}
 					>
 						Logout
