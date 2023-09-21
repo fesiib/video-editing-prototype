@@ -13,6 +13,8 @@ import SketchCanvas from "../components/command-space/SketchCanvas";
 import { requestAmbiguousParts } from "../services/pipeline";
 import { IconContext } from "react-icons";
 
+import ReactLoading from "react-loading";
+
 
 const CommandSpace = observer(function CommandSpace() {
 	const { userStore, uiStore, domainStore } = useRootContext();
@@ -181,13 +183,7 @@ const CommandSpace = observer(function CommandSpace() {
 				domainStore.processingIntent ? (
 					<div className="flex flex-row gap-2 items-center"> 
 						<span> Processing... </span> 
-						<iframe
-							src="https://giphy.com/embed/L05HgB2h6qICDs5Sms"
-							width="25"
-							height="25"
-							frameBorder="0" 
-							className="giphy-embed"
-						/>
+						<ReactLoading type={"bars"} color={"black"} height={20} width={20} />
 					</div>
 				) : (
 					<div className="w-full p-1 bg-gray-100">
