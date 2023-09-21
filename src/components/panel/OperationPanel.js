@@ -107,11 +107,11 @@ const OperationPanel = observer(function OperationPanel() {
 					+ (haveSuggested ? " bg-yellow-200 opacity-50" : " bg-gray-100")
 				}>
 					{ selectedOperation === null ? (
-							<div> No operation selected </div>
+							<div className="italic text-gray-400"> Please select an operation </div>
 						) : (<>
 							{
 								(selectedEdits.length === 0) ? (
-									<div> No segements selected </div>
+									<div className="italic text-gray-400"> Please select an edit </div>
 								) : (
 									<div className="flex flex-col divide-y divide-gray-300 gap-2">
 										{/* {

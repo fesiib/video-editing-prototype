@@ -30,7 +30,7 @@ const EditOperations = observer(function EditOperations() {
 		// className="flex flex-col w-1/4"
 		className="flex flex-col text-black"
 	>
-		<h2> Edit Operations </h2>
+		{/* <h2> Edit Operations </h2> */}
 		<div className="flex flex-row items-center p-1 gap-2 border bg-gray-100 max-h-20">
 			{Object.keys(domainStore.editOperations).map((operationKey) => {
 				const operation = domainStore.editOperations[operationKey];
