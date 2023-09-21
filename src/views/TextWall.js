@@ -470,7 +470,7 @@ const TextWall = observer(function TextWall() {
 	const onTextWallScroll = action((event) => {
 		if (textWallRef.current === null
 			|| textWallRef.current === undefined
-			|| uiStore.navigation !== "transcript"	
+			//|| uiStore.navigation !== "transcript"	
 		) {
 			return;
 		}
@@ -496,6 +496,7 @@ const TextWall = observer(function TextWall() {
 				r = mid;
 			}
 		}
+		uiStore.commandSpaceControls.viewPortAuthor = "transcript";
 		if (l === filteredScript.length) {
 			uiStore.commandSpaceControls.viewPortStart = domainStore.projectMetadata.duration;
 			uiStore.commandSpaceControls.viewPortFinish = domainStore.projectMetadata.duration;
@@ -539,6 +540,48 @@ const TextWall = observer(function TextWall() {
 		filteredScript.length,
 		uiStore.navigation,
 		textWallRef.current,
+	]);
+
+	useEffect(() => {
+		if (textWallRef.current === null || textWallRef.current === undefined
+			|| filteredScript.length == 0) {
+			return;
+		}
+		const disposal = reaction(() => uiStore.commandSpaceControls.viewPortStart, (targetStart) => {
+			if (uiStore.commandSpaceControls.viewPortAuthor !== "timeline") {
+				return;
+			}
+			let l = 0;
+			let r = filteredScript.length;
+			while (l < r) {
+				const mid = Math.floor((l + r) / 2);
+				if (filteredScript[mid].start < targetStart) {
+					l = mid + 1;
+				}
+				else {
+					r = mid;
+				}
+			}
+			if (l === filteredScript.length) {
+				l = filteredScript.length - 1;
+			}
+			const scriptDiv = document.getElementById(`script-${l}`);
+			if (scriptDiv === null || scriptDiv === undefined) {
+				console.log('could not find script');
+				return;
+			}
+			scriptDiv.scrollIntoView({
+				behavior: "instant",
+				block: "start",
+				inline: "nearest",
+			});
+		});	
+		return () => {
+			disposal();
+		};
+	}, [
+		textWallRef.current,
+		filteredScript.length,
 	]);
 
     return (

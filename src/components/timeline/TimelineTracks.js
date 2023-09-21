@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, toJS } from "mobx";
+import { action, reaction, toJS } from "mobx";
 
 import {
     closestCorners,
@@ -185,6 +185,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 		const width = uiStore.timelineSize.width;
 		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
 		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
+		uiStore.commandSpaceControls.viewPortAuthor = "timeline";
 
 		for (let i = 0; i < trackCnt; i++) {
 			const videoIndicatorId = `video_indicator_${"track_" + i}`;
@@ -243,6 +244,21 @@ const TimelineTracks = observer(function TimelineTracks() {
 			}
 		}
 	}, [uiStore.timelineControls.playPosition]);
+
+	useEffect(() => {
+		if (tracksContainer.current === null || tracksContainer.current === undefined) {
+			return;
+		}
+		const disposal = reaction(() => uiStore.commandSpaceControls.viewPortStart, (viewPortStart) => {
+			if (uiStore.commandSpaceControls.viewPortAuthor !== "transcript") {
+				return;
+			}
+			tracksContainer.current.scrollLeft = uiStore.secToPx(viewPortStart);
+		});
+		return () => {
+			disposal();
+		}
+	}, [tracksContainer.current]);
 
 	useEffect(action(() => {
 		onTracksContainerScroll(null);

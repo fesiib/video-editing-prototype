@@ -18,6 +18,7 @@ class UIStore {
 		requestingAmbiguousParts: false,
 		viewPortStart: 0,
 		viewPortFinish: 0,
+		viewPortAuthor: null,
 	};
 
     canvasSize = {
