@@ -47,12 +47,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const title = isSelected ? intent.summary : entry.summary;
 	// const title = entry.summary;
 
-	const bgColor = "bg-yellow-100";
-	const hoverColor = "bg-yellow-400";
-	const selectColor = "bg-yellow-500";
-	const className = ("px-1 py-1 flex justify-between gap-2 ml-5 italic"
-		+ (isSelected ? ` ${selectColor}` : ` ${bgColor} hover:${hoverColor}`)
-	);
+	const className = `mb-1 flex flex-row justify-between gap-2 ml-5 ${isSelected ? "bg-amber-400" : "bg-amber-200 hover:bg-amber-300"} rounded`
 
 	return (<div className={className}
 		onClick={onEntryClick}
@@ -75,9 +70,9 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		</button>
 		{
 			collapsed ? null : (
-			<div className="w-fit flex gap-2 justify-center">
+			<div className="w-fit h-fit my-auto">
 				<button 
-					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded disabled:opacity-50 disabled:hover:bg-red-500"
+					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs p-1 rounded disabled:opacity-50 disabled:hover:bg-red-500"
 					onClick={onDeleteClick}
 					disabled={intent.history.length === 1}
 				> 	
@@ -174,7 +169,7 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 
 const SideHistory = observer(function SideHistory() {
 	const { userStore, uiStore, domainStore } = useRootContext();
-	const systemSettings = userStore.systemSettings;
+	const systemSetting = userStore.systemSetting;
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const reversedIntents = Array.from(domainStore.intents).reverse();
 
@@ -214,7 +209,7 @@ const SideHistory = observer(function SideHistory() {
 							collapsed={collapsed}
 						/>);
 					})} */}
-					{(curIntent.idx === intent.idx && systemSettings) ? (intent.history.map((_, historyIdx) => {
+					{(curIntent.idx === intent.idx && systemSetting) ? (intent.history.map((_, historyIdx) => {
 						return (<SuggHistoryItem
 							key={`history-item-${idx}-${historyIdx}`}
 							idx={idx}
