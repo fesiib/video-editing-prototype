@@ -472,6 +472,7 @@ class DomainStore {
 					this.processingIntent = false;
 					return;
 				}
+				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				const suggestedEditOperationKeys = responseData.requestParameters.editOperations;
 				const suggestedParameters = responseData.requestParameters.parameters;
 				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
@@ -494,7 +495,7 @@ class DomainStore {
 					});
 					
 					newEdit.contribution = [{
-						text: requestData.requestParameters.text,
+						text: requestData.requestParameters.text.toLowerCase(),
 						type: [],
 					}];
 					for (let parameterKey in suggestedParameters) {
@@ -502,6 +503,7 @@ class DomainStore {
 					}
 					for (let key in newEdit.suggestionSource) {
 						for (let source of newEdit.suggestionSource[key]) {
+							source = source.toLowerCase();
 							let newContribution = [];
 							for (let single of newEdit.contribution) {
 								const text = single.text;

@@ -82,6 +82,7 @@ const StaticTimelineItem = observer(function StaticTimelineItem({
 				if (index >= 0) {
 					uiStore.selectTimelineObjects([]);
 				} else {
+					uiStore.timelineControls.playPosition = staticScene.commonState.offset;
 					uiStore.selectTimelineObjects([staticScene]);
 				}
 			}

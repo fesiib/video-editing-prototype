@@ -17,6 +17,7 @@ const RowsVisualization = observer(function RowsVisualization({
 
 	let rows = {
 		[COMMAND]: [],
+		"edit": [],
 		"custom": [],
 		"spatial": [],
 		"temporal": [],
@@ -26,7 +27,8 @@ const RowsVisualization = observer(function RowsVisualization({
 		[COMMAND]: null,
 		"temporal": "Temporal",
 		"spatial": "Spatial",
-		"custom": "Edit",
+		"edit" : "Edit",
+		"custom": "Parameters",
 	};
 
 	let fullText = "";
@@ -98,11 +100,12 @@ const RowsVisualization = observer(function RowsVisualization({
 							> 
 								{highlight ? (
 									<div 
-										className={"absolute w-full rounded"}
+										className={"absolute w-full rounded bg-yellow-200 opacity-50"}
 										style={{
 											height: `${100}%`,
 											bottom: `${0}%`,
-											backgroundColor: uiStore.referenceTypeColorPalette[rowKey],
+											//backgroundColor: uiStore.referenceTypeColorPalette[rowKey],
+											//backgroundColor: "yellow"
 										}}
 									>
 									</div> ) : (null)

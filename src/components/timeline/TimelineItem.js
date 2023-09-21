@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 
@@ -14,6 +14,8 @@ export const TimelineItem = observer(
         ref
     ) {
         const { uiStore, domainStore } = useRootContext();
+
+		const [hovering, setHovering] = useState(false);
 
         const lowLabel = scene.intent === undefined ?
         	(scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "")
@@ -78,19 +80,29 @@ export const TimelineItem = observer(
                 {...attributes}
                 {...listeners}
                 {...props}
+				onMouseEnter={() => setHovering(() => true)}
+				onMouseLeave={() => setHovering(() => false)}
             >
                 {isOverlay ? (
-                    <span>
-                        {uiStore.timelineControls.selectedTimelineItems.length > 1
-                            ? uiStore.timelineControls.selectedTimelineItems.length + " scenes"
-                            : "1 scene"}
-                    </span>
+					<div className="flex flex-row justify-center">
+						<span className="">
+							{uiStore.timelineControls.selectedTimelineItems.length > 1
+								? uiStore.timelineControls.selectedTimelineItems.length + " scenes"
+								: "1 scene"}
+						</span>
+					</div>
                 ) : (
 					<div className={innerClassName}>
 						{ (isMain || isSkipped || isSuggested) ? null
 							: (
-								<TrimWrapper scene={scene} scenes={scenes}>
-									<span id={"label_" + scene.commonState.id}>
+								<TrimWrapper 
+									showHandlers={hovering || isSelected}
+									scene={scene} scenes={scenes}
+								>
+									<span 
+										className="h-7"
+										id={"label_" + scene.commonState.id}
+									>
 										{!willOverflow ? lowLabel : ""}
 									</span>
 								</TrimWrapper>

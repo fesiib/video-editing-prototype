@@ -10,7 +10,9 @@ import CopyIcon from "../icons/CopyIcon";
 import { AiOutlineHistory } from "react-icons/ai";
 
 const SuggHistoryItem = observer(function SuggHistoryItem(
-	{ idx, historyIdx, collapsed }
+	{ 
+		idx, historyIdx, 
+		collapsed }
 ) {
 	const { domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
@@ -43,15 +45,14 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const isSelected = historyPos === historyIdx && intent.idx === curIntent.idx;
 
 	const title = isSelected ? intent.summary : entry.summary;
+	// const title = entry.summary;
 
 	const bgColor = "bg-yellow-100";
-	const hoverColor = "bg-yellow-200";
+	const hoverColor = "bg-yellow-400";
 	const selectColor = "bg-yellow-500";
 	const className = ("px-1 py-1 flex justify-between gap-2 ml-5 italic"
-		+ (isSelected ? ` ${selectColor} hover:${hoverColor}` : ` ${bgColor} hover:${hoverColor}`)
+		+ (isSelected ? ` ${selectColor}` : ` ${bgColor} hover:${hoverColor}`)
 	);
-
-	console.log("rerender", historyPos)
 
 	return (<div className={className}
 		onClick={onEntryClick}
@@ -193,10 +194,8 @@ const SideHistory = observer(function SideHistory() {
 		{reversedIntents.length === 0 ? (
 			<div> No edits </div>
 			) : (
-			reversedIntents.map((_, revIdx) => {
-				const idx = reversedIntents.length - revIdx - 1;
+			domainStore.intents.map((_, idx) => {
 				const intent = domainStore.intents[idx];
-				const reversedHistory = Array.from(intent.history).reverse();
 				return (<div key={`history-item-${idx}`}>
 					<HistoryItem 
 						idx={idx}
@@ -213,17 +212,16 @@ const SideHistory = observer(function SideHistory() {
 							collapsed={collapsed}
 						/>);
 					})} */}
-					{curIntent.idx === intent.idx ? (reversedHistory.map((_, revHistoryIdx) => {
-						const historyIdx = reversedHistory.length - revHistoryIdx - 1;
+					{curIntent.idx === intent.idx ? (intent.history.map((_, historyIdx) => {
 						return (<SuggHistoryItem
 							key={`history-item-${idx}-${historyIdx}`}
 							idx={idx}
 							historyIdx={historyIdx}
 							collapsed={collapsed}
 						/>);
-					})) : null}
+					}).reverse()) : null}
 				</div>);
-			}))
+			}).reverse())
 		}
 	</div>);
 });

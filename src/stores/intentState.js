@@ -23,6 +23,7 @@ class IntentState {
 	suggestedEditOperationKeys = [];
 
 	history = [];
+	historyPos = 0;
 
     constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -172,7 +173,7 @@ class IntentState {
 	}
 
 	setEditOperationKey(newKey) {
-		this.domainStore.rootStore.resetTempState();
+		//this.domainStore.rootStore.resetTempState();
 		if (this.suggestedEditOperationKeys.includes(newKey)) {
 			this.suggestedEditOperationKeys = this.suggestedEditOperationKeys.filter((key) => key !== newKey);
 		}

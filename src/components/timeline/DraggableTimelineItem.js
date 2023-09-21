@@ -96,6 +96,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
             if (index >= 0) {
                 uiStore.selectTimelineObjects([]);
             } else {
+				uiStore.timelineControls.playPosition = scene.commonState.offset;
                 uiStore.selectTimelineObjects([scene]);
             }
         }

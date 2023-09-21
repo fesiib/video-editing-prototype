@@ -58,7 +58,7 @@ export function getTaskAssignments(N = 16) {
 		let session2 = `${taskAssignments[participantId][0].videoIds[1]} - ${taskAssignments[participantId][0].videoIds[1] === taskAssignments[participantId][0].baseline ? "baseline" : "ours"}`;
 		let session3 = `${taskAssignments[participantId][1].videoIds[0]} - ${taskAssignments[participantId][1].videoIds[0] === taskAssignments[participantId][1].baseline ? "baseline" : "ours"}`;
 		let session4 = `${taskAssignments[participantId][1].videoIds[1]} - ${taskAssignments[participantId][1].videoIds[1] === taskAssignments[participantId][1].baseline ? "baseline" : "ours"}`;
-		console.log(`${prefixText} ${session1}, ${session2}, ${session3}, ${session4}`);
+		//console.log(`${prefixText} ${session1}, ${session2}, ${session3}, ${session4}`);
 		taskAssignments[participantId].push(
 			{
 				videoIds: ["tutorial"],

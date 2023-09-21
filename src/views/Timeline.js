@@ -193,6 +193,15 @@ const Timeline = observer(function Timeline() {
 	const onNavigationClick = action((direction) => {
 		const edits = (curIntent.suggestedEdits.length > 0 ?
 			curIntent.suggestedEdits : curIntent.activeEdits);
+
+		if (edits.length > 0 && uiStore.timelineControls.selectedTimelineItems.length === 0) {
+			for (let edit of edits) {
+				if (edit.commonState.offset === uiStore.timelineControls.playPosition) {
+					uiStore.selectTimelineObjects([edit]);
+					return true;
+				}
+			}
+		}
 		if (direction === "prev") {
 			const prevEdit = edits.reduce((acc, edit, idx) => {
 				if (edit.commonState.offset < uiStore.timelineControls.playPosition

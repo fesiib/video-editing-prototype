@@ -31,7 +31,7 @@ const NewIntent = observer(function NewIntent({
 		>
 			<BigPlusIcon />
 		</button>
-		{/* {collapsed ? null : (
+		{collapsed ? null : (
 			<button
 				className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold h-fit py-2 px-2 rounded"
 				onClick={() => onAddRandomClick(curIntent.idx)}
@@ -39,7 +39,7 @@ const NewIntent = observer(function NewIntent({
 			>
 				Random
 			</button>
-		)} */}
+		)}
 	</div>);
 });
 

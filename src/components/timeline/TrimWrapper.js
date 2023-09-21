@@ -15,6 +15,7 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
     scene,
     scenes,
     isLeftHandler,
+	showHandlers,
 }) {
     const { uiStore } = useRootContext();
 
@@ -147,16 +148,20 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
     };
 
     return (
-        <div className="static" ref={setNodeRef} style={style} {...listeners} {...attributes}>
-            <button className="my-auto">
-                {" "}
-                {isLeftHandler ? <TrimHandlerLeftIcon /> : <TrimHandlerRightIcon />}{" "}
+        <div className="static" ref={setNodeRef} {...listeners} {...attributes}>
+            <button className={(showHandlers || isDragging) ? 
+				"w-2 h-full bg-gray-200 rounded" : ""
+			}>
+                {/* {" "}{isLeftHandler ? <TrimHandlerLeftIcon /> : <TrimHandlerRightIcon />}{" "} */}
             </button>
         </div>
     );
 });
 
-const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
+const TrimWrapper = observer(function TrimWrapper({ 
+	scene, scenes, children,
+	showHandlers,
+}) {
     const { uiStore } = useRootContext();
 
     const onHandlerDragStart = action((event) => {
@@ -225,9 +230,15 @@ const TrimWrapper = observer(function TrimWrapper({ scene, scenes, children }) {
                 onDragStart={onHandlerDragStart}
                 onDragEnd={onHandlerDragEnd}
             >
-                <DraggableRangeHandle scene={scene} scenes={scenes} isLeftHandler={true} />
+                <DraggableRangeHandle
+					scene={scene} scenes={scenes} isLeftHandler={true}
+					showHandlers={showHandlers} 
+				/>
                 {children}
-                <DraggableRangeHandle scene={scene} scenes={scenes} isLeftHandler={false} />
+                <DraggableRangeHandle 
+					scene={scene} scenes={scenes} isLeftHandler={false} 
+					showHandlers={showHandlers}
+				/>
             </DndContext>
         </>
     );

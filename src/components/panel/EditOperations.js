@@ -13,7 +13,7 @@ const EditOperations = observer(function EditOperations() {
 
 	const inactiveButtonClassName = "w-full my-1 hover:brightness-50 border rounded";
 	const suggestedButtonClassName = "w-full my-1 hover:brightness-50 border-4 border-yellow-300 flex flex-row items-center justify-center rounded";
-	const activeButtonClassName = "w-full my-1 rounded border-4 border-indigo-400";
+	const activeButtonClassName = "w-full my-1 rounded border-4 border-indigo-400 flex flex-row items-center justify-center rounded";
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
