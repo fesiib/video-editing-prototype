@@ -68,7 +68,7 @@ const Auth = observer(function Auth() {
 						<NewIntent />
 					) : null
 				} */}
-				<div className="flex flex-row">
+				<div className="flex flex-row gap-2">
 					{
 						(userStore.isTaskChosen && !userStore.loading) ? (
 						<button
@@ -76,18 +76,37 @@ const Auth = observer(function Auth() {
 							onClick={() => taskDone()}
 						>
 							{
-								userStore.isTutorial ? "Tutorial Done" : `Task ${userStore.taskIdx + 1} Done`
+								userStore.isTutorial ? "Tutorial Done" 
+									: `Task ${userStore.taskIdx + 1} (${userStore.videoId}) Done`
 							}
 						</button>) : null
 					}
 					{
 						(!userStore.isTaskChosen && !userStore.loading) ? (
-							<button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
-								onClick={() => resetFirebase()}
-							>
-								Reset All Tasks
-							</button>) : null
+							<div>
+								<button
+									className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded"
+									onClick={() => resetFirebase()}
+								>
+									Reset All Tasks
+								</button>
+								<select
+									className="border mx-2 font-bold p-1 rounded"
+									onChange={(e) => {
+										userStore.setParticipantId(e.target.value);
+									}}
+									value={userStore.participantId}
+								>
+									{
+										Object.keys(userStore.taskAssignments).map((participantId) => {
+											return <option 
+												key={`participant-${participantId}`}
+												value={participantId}>P-{participantId}</option>
+										})
+									}
+								</select>
+							</div>
+						) : null
 					}
 					
 					<div

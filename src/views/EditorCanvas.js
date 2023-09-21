@@ -238,17 +238,20 @@ const EditorCanvas = observer(function EditorCanvas() {
 
     return (
         <>
-            <div>
-                <label htmlFor="canvas_zoom"> Canvas Zoom {uiStore.canvasZoom}% </label>
-                <input
-                    id="canvas_zoom"
-                    type={"range"}
-                    min={0}
-                    max={10}
-                    value={uiStore.canvasControls.scalePos}
-                    onChange={onZoomChange}
-                />
-            </div>
+			<div className="flex flex-row justify-end w-full">
+				<div className="flex flex-row mx-2">
+					<label htmlFor="canvas_zoom"> Canvas Zoom: {uiStore.canvasZoom}%  </label>
+					<input
+						className="mx-2"
+						id="canvas_zoom"
+						type={"range"}
+						min={0}
+						max={10}
+						value={uiStore.canvasControls.scalePos}
+						onChange={onZoomChange}
+					/>
+				</div>
+			</div>
             <Stage
                 ref={stageRef}
                 width={canvasWidth}

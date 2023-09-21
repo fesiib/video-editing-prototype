@@ -275,14 +275,14 @@ const Timeline = observer(function Timeline() {
 	// 	uiStore.timelineControls.splitting
 	// ]);
 
-	const buttonClassName = " disabled:hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50";
+	const buttonClassName = " disabled:hover:bg-gray-300 text-black p-1 rounded disabled:opacity-50";
 	const decisionClassName = " text-black p-1 rounded disabled:opacity-50";
     return (
         <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onKeyDown}>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
 					<button className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
-								? "bg-indigo-300 hover:bg-indigo-400" : "bg-yellow-300 hover:bg-yellow-400"
+								? "bg-gray-300 hover:bg-gray-400" : "bg-yellow-300 hover:bg-yellow-400"
 							) 
 							+ decisionClassName}
 							id="play_button" onClick={onPressPlay}>
@@ -386,8 +386,8 @@ const Timeline = observer(function Timeline() {
 					<button
 						className={
 							(uiStore.timelineControls.rangeSelectingTimeline
-								? "bg-indigo-600"
-								: "bg-indigo-300 hover:bg-indigo-400 ") + buttonClassName
+								? "bg-gray-500"
+								: "bg-gray-300 hover:bg-gray-400 ") + buttonClassName
 						}
 						onClick={onPressRangeSelect}
 						id="intentselect_button"
@@ -397,8 +397,8 @@ const Timeline = observer(function Timeline() {
 					<button
 						className={
 							(uiStore.timelineControls.splitting
-								? "bg-indigo-600"
-								: "bg-indigo-300 hover:bg-indigo-400 ") + buttonClassName
+								? "bg-gray-500"
+								: "bg-gray-300 hover:bg-gray-400 ") + buttonClassName
 						}
 						onClick={onPressSplit}
 						id="split_button"
@@ -407,7 +407,7 @@ const Timeline = observer(function Timeline() {
 						<TfiSplitH />
 					</button>
 					<button
-						className={"bg-indigo-300 hover:bg-indigo-400 " + buttonClassName}
+						className={"bg-gray-300 hover:bg-gray-400 " + buttonClassName}
 						id="delete_button"
 						onClick={onCopyPasteTimelineItems}
 						disabled={
@@ -418,7 +418,7 @@ const Timeline = observer(function Timeline() {
 						<CopyIcon />
 					</button>
 					<button
-						className={"bg-indigo-300 hover:bg-indigo-400 " + buttonClassName}
+						className={"bg-gray-300 hover:bg-gray-400 " + buttonClassName}
 						id="delete_button"
 						onClick={onDeleteTimelineItems}
 						disabled={uiStore.timelineControls.selectedTimelineItems.length === 0}
@@ -429,7 +429,6 @@ const Timeline = observer(function Timeline() {
             </div>
 			{
 				uiStore.navigation === "timeline" ? (<div className="flex flex-col">
-					<TimelineTracks />
 					<div className="self-end">
 						<label htmlFor="timeline_zoom">
 							{" "}
@@ -447,6 +446,7 @@ const Timeline = observer(function Timeline() {
 							step={5}
 						/>
 					</div>
+					<TimelineTracks />
 				</div>) : null
 			}
         </div>

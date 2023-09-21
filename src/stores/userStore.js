@@ -1,12 +1,14 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { firestore } from "../services/firebase";
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { getTaskAssignments } from "../data/taskAssignments";
 
 class UserStore {
 	userId = null;
 	userName = null;
 	email = null;
 	token = null;
+	participantId = null;
 
 	loading = false;
 
@@ -14,10 +16,13 @@ class UserStore {
 	curVideoIdx = -1;
 
 	videoLinks = {
-		"video-1": "https://youtu.be/ZSt9tm3RoUU",
-		"video-2": "https://youtu.be/ZSt9tm3RoUU",
-		"video-3": "https://youtu.be/ZSt9tm3RoUU",
-		"video-4": "https://youtu.be/ZSt9tm3RoUU",
+		// controlled
+		"video-1": "https://www.youtube.com/watch?v=kdN41iYTg3U",
+		"video-2": "https://www.youtube.com/watch?v=3_nLdcHBJY4",
+		// open-ended
+		"video-3": "https://www.youtube.com/watch?v=OKQpOzEY_A4",
+		"video-4": "https://www.youtube.com/watch?v=sz8Lo3NY1m0",
+		// tutorial
 		"tutorial1": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"tutorial": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"fs-video-2": "https://www.youtube.com/watch?v=kdN41iYTg3U",
@@ -27,44 +32,9 @@ class UserStore {
 		"fs-video-6": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 	}
 
-	taskAssignments = {
-		"default": [
-			{
-				videoIds: ["video-1", "video-2"],
-				baseline: "video-1",
-			},
-			{
-				videoIds: ["video-3", "video-4"],
-				baseline: "video-3",
-			},
-			{
-				videoIds: ["tutorial"],
-				baseline: "",
-			},
-			{
-				videoIds: ["fs-video-2"],
-				baseline: "",
-			},
-			{
-				videoIds: ["fs-video-3"],
-				baseline: "",
-			},
-			{
-				videoIds: ["fs-video-4"],
-				baseline: "",
-			},
-			{
-				videoIds: ["fs-video-5"],
-				baseline: "",
-			},
-			{
-				videoIds: ["fs-video-6"],
-				baseline: "",
-			},
-		],
-	};
-
-    constructor(rootStore) {
+	taskAssignments = getTaskAssignments(16);
+    
+	constructor(rootStore) {
         makeAutoObservable(this);
 		this.rootStore = rootStore;
     }
@@ -135,22 +105,24 @@ class UserStore {
 		}
 		if (this.loading === true) return;
 		this.loading = true;
-		console.log(this.userId, userId);
 		this.userId = userId;
 		this.userName = userName;
 		this.email = email;
 		this.token = token;
+		this.participantId = 0;
 		this.clearTask();
 		this.rootStore.resetAll();
 		this.rootStore.fetchFirebase().then(action(() => {
 			console.log("fetched last session");
-			if (this.taskAssignments[userId] === undefined) {
-				this.taskAssignments[userId] = this.randomizeTasks();
-			}
+			// if (this.taskAssignments[this.participantId] === undefined) {
+			// 	this.taskAssignments[this.participantId] = this.randomizeTasks();
+			// }
 			this.loading = false;
 		})).catch(action((error) => {
 			console.log(error);
-			this.taskAssignments[userId] = this.randomizeTasks();
+			// if (this.taskAssignments[this.participantId] === undefined) {
+			// 	this.taskAssignments[this.participantId] = this.randomizeTasks();
+			// }
 			this.loading = false;
 		}));
 	}
@@ -160,8 +132,27 @@ class UserStore {
 		this.userName = null;
 		this.email = null;
 		this.token = null;
+		this.participantId = null;
 		this.clearTask();
 		this.rootStore.resetAll();
+	}
+
+	setParticipantId(participantId) {
+		if (this.userId === null || this.participantId === participantId
+			|| this.isTaskChosen === true	
+		) {
+			return;
+		}
+		if (this.loading === true) return;
+		this.loading = true;
+		this.rootStore.resetFirebase().then(action(() => {
+			this.participantId = participantId;
+			console.log("participantId: " + participantId, toJS(this.taskAssignments[participantId]));
+			this.loading = false;
+		})).catch(action((error) => {
+			this.loading = false;
+			console.log(error);
+		}));
 	}
 
 	clearTask() {
@@ -323,9 +314,9 @@ class UserStore {
 				const data = fetchedUserStore.exists() ? fetchedUserStore.data() : null;
 				if (data.userId === null || data.userId === undefined) {
 					this.clearTask();
-					if (this.taskAssignments[this.userid] === undefined) {
-						this.taskAssignments[this.userId] = this.randomizeTasks();
-					}
+					// if (this.taskAssignments[this.participantId] === undefined) {
+					// 	this.taskAssignments[this.participantId] = this.randomizeTasks();
+					// }
 					resolve(null);
 					return;
 				}
@@ -336,7 +327,8 @@ class UserStore {
 					this.token = data.token;
 					this.curSessionIdx = data.curSessionIdx;
 					this.curVideoIdx = data.curVideoIdx;
-					this.taskAssignments[this.userId] = data.taskAssignment;
+					this.participantId = data.participantId;
+					//this.taskAssignments[this.participantId] = data.taskAssignment;
 					resolve(this.taskIdx);
 				}
 			})).catch((error) => {
@@ -372,18 +364,20 @@ class UserStore {
 	}
 
 	get videoId() {
-		if (this.userId === null || this.curSessionIdx === -1 || this.curVideoIdx === -1) {
+		if (this.userId === null || this.participantId === null
+			|| this.curSessionIdx === -1 || this.curVideoIdx === -1) {
 			return null;
 		}
-		const videoId = this.taskAssignments[this.userId][this.curSessionIdx].videoIds[this.curVideoIdx];
+		const videoId = this.taskAssignments[this.participantId][this.curSessionIdx].videoIds[this.curVideoIdx];
 		return videoId;
 	}
 	
 	get videoUrl() {
-		if (this.userId === null || this.curSessionIdx === -1 || this.curVideoIdx === -1) {
+		if (this.userId === null || this.participantId === null
+			|| this.curSessionIdx === -1 || this.curVideoIdx === -1) {
 			return null;
 		}
-		const videoId = this.taskAssignments[this.userId][this.curSessionIdx].videoIds[this.curVideoIdx];
+		const videoId = this.taskAssignments[this.participantId][this.curSessionIdx].videoIds[this.curVideoIdx];
 		return this.videoLinks[videoId];
 	}
 
@@ -395,10 +389,11 @@ class UserStore {
 	}
 
 	get systemSetting() {
-		if (this.userId === null || this.curSessionIdx === -1 || this.curVideoIdx === -1) {
+		if (this.userId === null || this.participantId === null
+			|| this.curSessionIdx === -1 || this.curVideoIdx === -1) {
 			return false;
 		}
-		const baselineId = this.taskAssignments[this.userId][this.curSessionIdx].baseline;
+		const baselineId = this.taskAssignments[this.participantId][this.curSessionIdx].baseline;
 		return baselineId !== this.videoId;
 	}
 }
@@ -412,7 +407,8 @@ const userStoreConverter = {
 			token: userStore.token,
 			curSessionIdx: userStore.curSessionIdx,
 			curVideoIdx: userStore.curVideoIdx,
-			taskAssignment: toJS(userStore.taskAssignments[userStore.userId]),
+			participantId: userStore.participantId,
+			//taskAssignment: toJS(userStore.taskAssignments[userStore.userId]),
 		};
 	},
 	fromFirestore: action((snapshot, options) => {
@@ -424,7 +420,8 @@ const userStoreConverter = {
 			token: data.token,
 			curSessionIdx: data.curSessionIdx,
 			curVideoIdx: data.curVideoIdx,
-			taskAssignment: data.taskAssignment,
+			participantId: data.participantId,
+			//taskAssignment: data.taskAssignment,
 		};
 		return newData;
 	})

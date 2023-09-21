@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, reaction } from "mobx";
+import { action, observe, reaction } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
 import NewIntent from "../components/general/NewIntent";
 import TrashcanIcon from "../icons/TrashcanIcon";
 import CopyIcon from "../icons/CopyIcon";
+import { AiOutlineHistory } from "react-icons/ai";
 
 const SuggHistoryItem = observer(function SuggHistoryItem(
 	{ idx, historyIdx, collapsed }
@@ -15,6 +16,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const intent = domainStore.intents[idx];
 	const entry = intent.history[historyIdx];
+	const historyPos = intent.historyPos;
 	const onDeleteClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
@@ -33,42 +35,40 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		if (intent.idx !== curIntent.idx) {
 			domainStore.setCurIntent(idx);
 		}
-		if (intent.historyPos !== historyIdx) {
+		if (historyPos !== historyIdx) {
 			intent.restoreHistory(historyIdx);
 		}
 	});
 
-	const isSelected = intent.historyPos === historyIdx && intent.idx === curIntent.idx;
+	const isSelected = historyPos === historyIdx && intent.idx === curIntent.idx;
 
 	const title = isSelected ? intent.summary : entry.summary;
 
-	const bgColor = "bg-yellow-200";
-	const hoverColor = "bg-yellow-400";
+	const bgColor = "bg-yellow-100";
+	const hoverColor = "bg-yellow-200";
+	const selectColor = "bg-yellow-500";
 	const className = ("px-1 py-1 flex justify-between gap-2 ml-5 italic"
-		+ (isSelected ? ` ${hoverColor}` : ` ${bgColor} hover:${hoverColor}`)
+		+ (isSelected ? ` ${selectColor} hover:${hoverColor}` : ` ${bgColor} hover:${hoverColor}`)
 	);
 
-	useEffect(() => {
-		const dispose = reaction(() => intent.historyPos, (historyPos) => {
-			if (historyPos === historyIdx && intent.idx === curIntent.idx) {
-				console.log("history pos changed", historyIdx, historyPos);
-			}
-			else {
-				console.log("history pos changed but not selected", historyIdx, historyPos);
-			}
-		});
-		return () => dispose();
-	}, [curIntent.id, historyIdx]);
+	console.log("rerender", historyPos)
 
 	return (<div className={className}
 		onClick={onEntryClick}
 	>
 		<button
-			className={"text-left text-black text-sm py-2 px-2 rounded"
+			className={"text-left text-black text-sm py-2 px-2 rounded flex flex-row gap-1 items-center"
 				+ (collapsed ? " truncate" : "")
 			}
 			disabled={isSelected}
 		>
+			{
+				historyIdx === curIntent.history.length - 1 ? (
+					<span> <AiOutlineHistory /> </span>
+				) : (
+					<span> <AiOutlineHistory /> </span>
+				)
+			}
 			{title === "" ? `Description ${historyIdx + 1}` : title}
 		
 		</button>

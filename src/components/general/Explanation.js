@@ -17,9 +17,9 @@ const RowsVisualization = observer(function RowsVisualization({
 
 	let rows = {
 		[COMMAND]: [],
-		"temporal": [],
-		"spatial": [],
 		"custom": [],
+		"spatial": [],
+		"temporal": [],
 	};
 
 	const DISPLAY_NAMES = {
@@ -50,6 +50,10 @@ const RowsVisualization = observer(function RowsVisualization({
 	return (<div className="flex flex-col text-s p-2 bg-gray-100 overflow-x-auto">
 		{
 			Object.keys(rows).map((rowKey, idx) => {
+				const content = rows[rowKey];
+				if (content.length === 0 && rowKey !== COMMAND) {
+					return null;
+				}
 				return (<div className="flex flex-row flex-nowrap w-fit gap-2 items-center"
 					key={`contribution-${rowKey}`}
 				>
@@ -61,7 +65,7 @@ const RowsVisualization = observer(function RowsVisualization({
 					<div
 						className={"relative flex flex-row gap-1"}
 					>
-						<div 
+						{/* <div 
 							className={"absolute w-full"
 								+ (rowKey === COMMAND ? "" : " bg-gray-300 rounded")
 							}
@@ -69,7 +73,7 @@ const RowsVisualization = observer(function RowsVisualization({
 								height: `${50}%`,
 								bottom: `${25}%`,
 							}}
-						> </div>
+						> </div> */}
 						{edit.contribution.map((single, idx) => {
 							const text = single.text;
 							const type = single.type;
@@ -87,15 +91,17 @@ const RowsVisualization = observer(function RowsVisualization({
 								</div>);
 							}
 							return (<div 
-								className={"relative disable-select text-transparent whitespace-nowrap"}
+								className={"relative disable-select whitespace-nowrap "
+									+ (highlight ? "" : "text-transparent")
+								}
 								key={`contribution-${rowKey}-${idx}`}
 							> 
 								{highlight ? (
 									<div 
 										className={"absolute w-full rounded"}
 										style={{
-											height: `${50}%`,
-											bottom: `${25}%`,
+											height: `${100}%`,
+											bottom: `${0}%`,
 											backgroundColor: uiStore.referenceTypeColorPalette[rowKey],
 										}}
 									>
@@ -138,7 +144,7 @@ const Explanation = observer(function Explanation() {
 		<div className="flex flex-col">
 			<div className="flex gap-1 flex-row justify-start items-center">
 				<AiOutlineBulb/>
-				<span> Explanation </span>
+				<span> Edit Description Breakdown </span>
 				{/* <span> {
 					selectedSuggestedEdits.map((edit, idx) => {
 						const isLast = idx === selectedSuggestedEdits.length - 1;
