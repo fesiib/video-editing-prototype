@@ -131,12 +131,16 @@ const TimelineTracks = observer(function TimelineTracks() {
                 const otherMiddle = (otherEnd + otherOffset) / 2;
 
                 if (otherMiddle > middle) {
-                    otherScene.commonState.offset = otherScene.commonState.offset + moveOffset;
+                    otherScene.commonState.setMetadata({
+						offset: otherScene.commonState.offset + moveOffset
+					});
                 }
             }
             const deltaSeconds = newOffset - leftMostScene.commonState.offset;
             for (let selectedScene of selectedScenes) {
-                selectedScene.commonState.offset = selectedScene.commonState.offset + deltaSeconds;
+				selectedScene.commonState.setMetadata({
+					offset: selectedScene.commonState.offset + deltaSeconds
+				});
             }
         }
     });
@@ -175,31 +179,6 @@ const TimelineTracks = observer(function TimelineTracks() {
 	const onBackgroundClick = action((event) => {
         uiStore.selectTimelineObjects([]);
     });
-
-	const onTracksContainerScroll = action((event) => {
-		if (tracksContainer.current === null 
-			|| tracksContainer.current === undefined 
-			|| uiStore.navigation !== "timeline") {
-			return;
-		}
-		const width = uiStore.timelineSize.width;
-		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
-		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
-		uiStore.commandSpaceControls.viewPortAuthor = "timeline";
-
-		// for (let i = 0; i < trackCnt; i++) {
-		// 	const videoIndicatorId = `video_indicator_${"track_" + i}`;
-		// 	const videoIndicator = document.getElementById(videoIndicatorId);
-		// 	if (videoIndicator?.style !== undefined) {
-		// 		videoIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
-		// 	}
-		// 	const suggIndicatorId = `sugg_indicator_${"track_" + i}`;
-		// 	const suggIndicator = document.getElementById(suggIndicatorId);
-		// 	if (suggIndicator?.style !== undefined) {
-		// 		suggIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
-		// 	}
-		// }
-	});
 
     useEffect(() => {
         let newTracks = [];
@@ -250,11 +229,41 @@ const TimelineTracks = observer(function TimelineTracks() {
 		}
 	}, [uiStore.timelineControls.playPosition]);
 
+	const onTracksContainerScroll = action((event) => {
+		if (tracksContainer.current === null 
+			|| tracksContainer.current === undefined 
+			|| uiStore.navigation !== "timeline") {
+			return;
+		}
+		const width = uiStore.timelineSize.width;
+		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
+		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
+		uiStore.commandSpaceControls.viewPortAuthor = "other";
+
+		// for (let i = 0; i < trackCnt; i++) {
+		// 	const videoIndicatorId = `video_indicator_${"track_" + i}`;
+		// 	const videoIndicator = document.getElementById(videoIndicatorId);
+		// 	if (videoIndicator?.style !== undefined) {
+		// 		videoIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
+		// 	}
+		// 	const suggIndicatorId = `sugg_indicator_${"track_" + i}`;
+		// 	const suggIndicator = document.getElementById(suggIndicatorId);
+		// 	if (suggIndicator?.style !== undefined) {
+		// 		suggIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
+		// 	}
+		// }
+	});
+
 	useEffect(() => {
 		if (tracksContainer.current === null || tracksContainer.current === undefined) {
 			return;
 		}
-		const disposal = reaction(() => uiStore.commandSpaceControls.viewPortStart, (viewPortStart) => {
+		const disposal = reaction(() => {
+			return {
+				viewPortStart: uiStore.commandSpaceControls.viewPortStart,
+				viewPortFinish: uiStore.commandSpaceControls.viewPortFinish,
+			};
+		}, ({ viewPortStart, viewPortFinish }) => {
 			if (uiStore.commandSpaceControls.viewPortAuthor !== "transcript") {
 				return;
 			}

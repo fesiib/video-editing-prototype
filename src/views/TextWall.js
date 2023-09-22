@@ -12,7 +12,6 @@ import TrimHandlerRightIcon from "../icons/TrimHandlerRightIcon";
 
 const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler, isOverlay }) {
 	const { uiStore } = useRootContext();
-	const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: isOverlay ? `overlay-script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`
 			: `script-${isLeftHandler ? "left" : "right"}-${edit.commonState.id}`,
@@ -20,7 +19,6 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
             type: "script",
             edit,
 			isLeftHandler,
-			limit,
         },
         disabled: false,
     });
@@ -94,35 +92,31 @@ const DraggableParts = observer(function DraggableParts({
 				key={`draggable-${index}-${edit.commonState.id}`}
 				id={`draggable-${index}-${edit.commonState.id}`}
 				onDoubleClick={(event) => onDoubleClick(event, edit)}
+				className={innerClassName}
+				style={{
+					borderTopWidth: "2px",
+					borderBottomWidth: "2px",
+					borderColor: uiStore.editColorPalette[edit.intent.editOperationKey],
+					marginLeft: `${left}%`,
+					width: `${width}%`,
+				}}
 			>
-				<div
-					className={innerClassName}
-					style={{
-						borderTopWidth: "2px",
-						borderBottomWidth: "2px",
-						borderColor: uiStore.editColorPalette[edit.intent.editOperationKey],
-						marginLeft: `${left}%`,
-						width: `${width}%`,
-					}}
-					//onClick={(event) => handleEditClick(event, edit)}
-				> 
-					{isLeftEnd ?
-						<DraggableHandle 
-							edit={edit} 
-							isLeftHandler={true}
-							isOverlay={false}
-						/>
-						: null
-					}
-					{isRightEnd ?
-						<DraggableHandle
-							edit={edit} 
-							isLeftHandler={false}
-							isOverlay={false}
-						/>
-						: null
-					}
-				</div>
+				{isLeftEnd ?
+					<DraggableHandle 
+						edit={edit} 
+						isLeftHandler={true}
+						isOverlay={false}
+					/>
+					: null
+				}
+				{isRightEnd ?
+					<DraggableHandle
+						edit={edit} 
+						isLeftHandler={false}
+						isOverlay={false}
+					/>
+					: null
+				}
 			</div>);
 		})}
 	</>);
@@ -248,10 +242,8 @@ const SentenceBox = observer(function SentenceBox({
 	const onPartDoubleClick = action((event, part) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (uiStore.timelineControls.rangeSelectingTimeline) {
-			uiStore.timelineControls.rangeSelectingTimeline = false;
-			uiStore.timelineControls.rangeSelectingFirstPx = -1;
-			uiStore.timelineControls.positionIndicatorVisibility -= 1;
+		if (uiStore.timelineControls.rangeSelectingTimeline || uiStore.timelineControls.splitting) {
+			return;
 		}
 
 		const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
@@ -305,7 +297,16 @@ const SentenceBox = observer(function SentenceBox({
 	const onClick = action((event) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
+		if (uiStore.timelineControls.splitting) {
+			console.log(event.target);
+			// uiStore.timelineControls.splitting = false;
+			// uiStore.timelineControls.positionIndicatorVisibility -= 1;
+			// uiStore.resetTempState();
+            // const {left, right} = scene.split(uiStore.pxToSec(offsetPx));
+			// scene.replaceSelf([left, right]);
+			return;
+		}
+		if (uiStore.timelineControls.rangeSelectingTimeline) {
 			let offset = item.start;
 			let finish = item.finish;
 			for (let edit of domainStore.curIntent.activeEdits) {
@@ -441,15 +442,19 @@ const TextWall = observer(function TextWall() {
 		const item = over.data.current.item;
 		const edit = active.data.current.edit;
 		const isLeftHandler = active.data.current.isLeftHandler;
-		const limit = active.data.current.limit;
+		const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
 		if (isLeftHandler) {
-			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.finish));
-			edit.commonState.offset = updatedStart;
-			edit.commonState.start = updatedStart;
+			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.end));
+			edit.commonState.setMetadata({
+				offset: updatedStart,
+				start: updatedStart,
+			})
 		}
 		else {
 			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
-			edit.commonState.finish = updatedFinish;	
+			edit.commonState.setMetadata({
+				finish: edit.commonState.start + (updatedFinish - edit.commonState.offset),
+			});
 		}
 		setActiveHandler(null);
 		return;
@@ -464,15 +469,19 @@ const TextWall = observer(function TextWall() {
 		const item = over.data.current.item;
 		const edit = active.data.current.edit;
 		const isLeftHandler = active.data.current.isLeftHandler;
-		const limit = active.data.current.limit;
+		const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
 		if (isLeftHandler) {
-			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.finish));
-			edit.commonState.offset = updatedStart;
-			edit.commonState.start = updatedStart;
+			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.end));
+			edit.commonState.setMetadata({
+				offset: updatedStart,
+				start: updatedStart,
+			})
 		}
 		else {
 			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
-			edit.commonState.finish = updatedFinish;	
+			edit.commonState.setMetadata({
+				finish: edit.commonState.start + (updatedFinish - edit.commonState.offset),
+			});
 		}
 		return;
     });
@@ -506,13 +515,13 @@ const TextWall = observer(function TextWall() {
 				r = mid;
 			}
 		}
-		uiStore.commandSpaceControls.viewPortAuthor = "transcript";
-		if (l === filteredScript.length) {
+		uiStore.commandSpaceControls.viewPortAuthor = "other";
+		const startScriptPos = l;
+		if (startScriptPos === filteredScript.length) {
 			uiStore.commandSpaceControls.viewPortStart = domainStore.projectMetadata.duration;
 			uiStore.commandSpaceControls.viewPortFinish = domainStore.projectMetadata.duration;
 			return;
 		}
-		const startScriptPos = l;
 		uiStore.commandSpaceControls.viewPortStart = filteredScript[startScriptPos].start;
 		l = startScriptPos;
 		r = filteredScript.length;
@@ -540,12 +549,11 @@ const TextWall = observer(function TextWall() {
 			uiStore.commandSpaceControls.viewPortFinish = domainStore.projectMetadata.duration;
 			return;
 		}
-		//console.log(startScriptPos, finishScriptPos, filteredScript[startScriptPos].start, filteredScript[finishScriptPos].start);
 		uiStore.commandSpaceControls.viewPortFinish = filteredScript[finishScriptPos].start;
 	});
 
 	useEffect(action(() => {
-		onTextWallScroll(null);
+		//onTextWallScroll(null);
 	}), [
 		filteredScript.length,
 		uiStore.navigation,
@@ -601,7 +609,7 @@ const TextWall = observer(function TextWall() {
 			style={{
                 height: uiStore.windowSize.height / 3 * 2
 			}}
-			onScroll={(event) => onTextWallScroll(event)}
+			//onScroll={(event) => onTextWallScroll(event)}
 		>
 			<DndContext
 				sensors={useSensors(

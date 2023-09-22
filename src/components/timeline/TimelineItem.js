@@ -103,8 +103,24 @@ export const TimelineItem = observer(
                 {...attributes}
                 {...listeners}
                 {...props}
-				onMouseEnter={() => setHovering(() => true)}
-				onMouseLeave={() => setHovering(() => false)}
+				onMouseEnter={(event) => {
+					setHovering(() => true);
+					if (props.onMouseEnter !== undefined 
+						&& props.onMouseEnter !== null
+						&& typeof props.onMouseEnter === "function"
+					) {
+						props.onMouseEnter(event);
+					}
+				}}
+				onMouseLeave={(event) => {
+					setHovering(() => false);
+					if (props.onMouseLeave !== undefined 
+						&& props.onMouseLeave !== null
+						&& typeof props.onMouseLeave === "function"
+					) {
+						props.onMouseLeave(event);
+					}
+				}}
             >
                 {isOverlay ? (
 					<div className={

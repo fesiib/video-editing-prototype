@@ -46,17 +46,29 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 	]);
 
 	return (<>
-		{type === uiStore.objectNames.text ? <DraggableText curText={item} /> : null}
-		{type === uiStore.objectNames.image ? <DraggableImage curImage={item} /> : null}
+		{type === uiStore.objectNames.text ? <DraggableText 
+			curText={item} 
+			stageRef={stageRef}
+		/> : null}
+		{type === uiStore.objectNames.image ? <DraggableImage
+			curImage={item}
+			stageRef={stageRef}
+		/> : null}
 		{type === uiStore.objectNames.shape ? <DraggableShape
 			curShape={item} 
 			transformerRef={transformerRef}
+			stageRef={stageRef}
 		/> : null}
 		{type === uiStore.objectNames.cut ? <SkippedConfig skipped={item} /> : null}
-		{type === uiStore.objectNames.crop ? <CropConfig crop={item} /> : null}
-		{type === uiStore.objectNames.zoom ? <ZoomConfig zoom={item}
+		{type === uiStore.objectNames.crop ? <CropConfig 
+			crop={item} 
+			stageRef={stageRef}
+		/> : null}
+		{type === uiStore.objectNames.zoom ? <ZoomConfig
+			zoom={item}
 			videoGroupRef={videoGroupRef}
-			objectsGroupRef={objectsGroupRef} 
+			objectsGroupRef={objectsGroupRef}
+			stageRef={stageRef} 
 		/> : null}
 		{type === uiStore.objectNames.blur ? <BlurConfig blur={item} /> : null}
 	</>);

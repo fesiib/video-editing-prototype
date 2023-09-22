@@ -407,7 +407,10 @@ class IntentState {
 		if (fromActive !== undefined) {
 			return fromActive;
 		}
-		return fromSuggested;
+		if (fromSuggested !== undefined) {
+			return fromSuggested;
+		}
+		return null;
 	}
 
 	getCanvasObjectById(id) {

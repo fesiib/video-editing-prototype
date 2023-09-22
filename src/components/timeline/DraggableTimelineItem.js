@@ -34,6 +34,10 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
         event.stopPropagation();
         event.preventDefault();
 
+		if (uiStore.timelineControls.rangeSelectingTimeline) {
+			return;
+		}
+
         if (uiStore.timelineControls.splitting) {
             const labelsDiv = document.getElementById(uiStore.timelineConst.timelineLabelsId);
             const timelineRect = labelsDiv.getBoundingClientRect();
@@ -42,19 +46,13 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
                 timelineRect.left +
                 labelsDiv.scrollLeft -
                 uiStore.timelineConst.trackHandlerWidth;
+			uiStore.timelineControls.splitting = false;
+			uiStore.timelineControls.positionIndicatorVisibility -= 1;
 			uiStore.resetTempState();
             const {left, right} = scene.split(uiStore.pxToSec(offsetPx));
 			scene.replaceSelf([left, right]);
-            uiStore.timelineControls.splitting = false;
-            uiStore.timelineControls.positionIndicatorVisibility -= 1;
             return;
         }
-
-		if (uiStore.timelineControls.rangeSelectingTimeline) {
-			uiStore.timelineControls.rangeSelectingTimeline = false;
-			uiStore.timelineControls.rangeSelectingFirstPx = -1;
-			uiStore.timelineControls.positionIndicatorVisibility -= 1;
-		}
 
         const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
             (value) => value.commonState.id === scene.commonState.id

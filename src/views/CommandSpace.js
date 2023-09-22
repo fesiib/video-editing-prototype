@@ -167,17 +167,21 @@ const CommandSpace = observer(function CommandSpace() {
 						<span> <AiOutlineHistory /> </span>
 					)
 				}
-				{
-					curIntent.summary === "" ? (<span>
+				<span>
+					<span className="text-s">
+						{`Edit ${curIntent.idx}`}
+					</span>
+					<span className="font-bold">
 						{
-							curIntent.editOperation === null ? (`Edit ${curIntent.idx}`) : (
-								`Edit ${curIntent.idx}: ${curIntent.editOperation.title}`
+							curIntent.summary === "" ? (
+								curIntent.editOperation === null ? (null) : (
+									`: ${curIntent.editOperation.title}`
+							)) : (
+								`: ${curIntent.summary}`
 							)
 						}
-					</span>) : (
-						<span> Edit {curIntent.idx}: {curIntent.summary} </span>
-					)
-				}
+					</span>
+				</span>
 			</div>
 			{systemSetting ? (
 				domainStore.processingIntent ? (

@@ -59,11 +59,27 @@ class CommonState {
     }
 
     setMetadata(metadata) {
+		// make sure new update won't make the scene duration 0 or negative
+		const minDuration = this.domainStore.rootStore.uiStore.timelineConst.minTimelineItemDuration;
+		const potentialStart = metadata.start !== undefined ? metadata.start : this.start;
+		const potentialFinish = metadata.finish !== undefined ? metadata.finish : this.finish;
+		if (potentialFinish - potentialStart <= minDuration) {
+			if (metadata.start !== undefined) {
+				metadata.start = potentialFinish - minDuration;
+				if (metadata.offset !== undefined) {
+					metadata.offset = potentialFinish - minDuration;
+				}
+			}
+			else if (metadata.finish !== undefined) {
+				metadata.finish = potentialStart + minDuration;
+			}
+		}
+
 		this.updateAuthorCut = metadata.updateAuthorCut !== undefined ? metadata.updateAuthorCut : this.updateAuthorCut;
 		this.updateAuthorCrop = metadata.updateAuthorCrop !== undefined ? metadata.updateAuthorCrop : this.updateAuthorCrop;
 		this.updateAuthorBlur = metadata.updateAuthorBlur !== undefined ? metadata.updateAuthorBlur : this.updateAuthorBlur;
 		this.updateAuthorZoom = metadata.updateAuthorZoom !== undefined ? metadata.updateAuthorZoom : this.updateAuthorZoom;
-        
+		
 		this.thumbnails = metadata.thumbnails !== undefined ? metadata.thumbnails : this.thumbnails;
         this.start = metadata.start !== undefined ? metadata.start : this.start;
         this.duration = metadata.duration !== undefined ? metadata.duration : this.duration;
@@ -105,6 +121,7 @@ class CommonState {
             this.domainStore.projectMetadata.duration = this.end;
 			this.domainStore.rootStore.uiStore.timelineConst.trackMaxDuration = this.end;
         }
+		return true;
     }
 
     onDragMove(target) {

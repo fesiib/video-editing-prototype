@@ -32,6 +32,13 @@ const EditorCanvas = observer(function EditorCanvas() {
 
 	const orderedObjects = domainStore.orderedAllObjects;
 
+	const onCursorStyleChange = (cursorStyle) => {
+		console.log(cursorStyle);
+		if (stageRef.current !== null) {
+			stageRef.current.container().style.cursor = cursorStyle;
+		}
+	};
+
 	const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
     });
@@ -39,9 +46,13 @@ const EditorCanvas = observer(function EditorCanvas() {
     const isBackground = (target) => {
         return target.name() === uiStore.backgroundName;
     };
-    const isObject = (target) => {
+    const isVisibleObject = (target) => {
 		const object = domainStore.curIntent.getCanvasObjectById(target.id());
-		if (object === undefined) {
+		if (object === undefined || object === null 
+		) {
+			return false;
+		}
+		if (!object.isVisible(uiStore.timelineControls.playPosition)) {
 			return false;
 		}
         for (let i in uiStore.objectNames) {
@@ -105,11 +116,12 @@ const EditorCanvas = observer(function EditorCanvas() {
             selectionRectRef.current.visible(false);
         });
 
-        const objects = stageRef.current.find((value) => isObject(value));
+        const objects = stageRef.current.find((value) => isVisibleObject(value));
         const box = selectionRectRef.current.getClientRect();
         const selected = objects.filter((object) => {
             return Util.haveIntersection(box, object.getClientRect());
         });
+		console.log(objects, selected);
 		uiStore.selectCanvasObjects(selected);
     });
 
@@ -127,7 +139,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 		// 	uiStore.selectCanvasObjects([event.target]);
         //     return;
 		// }
-		if (!isObject(event.target)) {
+		if (!isVisibleObject(event.target)) {
 			uiStore.selectCanvasObjects([]);
             return;
 		}
@@ -226,13 +238,24 @@ const EditorCanvas = observer(function EditorCanvas() {
 			transformerRef.current.anchorStrokeWidth(3);
 			transformerRef.current.borderStroke("yellow");
 			transformerRef.current.borderStrokeWidth(3);
+			// transformerRef.current.findOne(".rotater").on("mouseenter", () => onCursorStyleChange("default"));
+			// transformerRef.current.findOne(".rotater").on("mouseleave", () => onCursorStyleChange("default"));
 		}
 		else {
 			transformerRef.current.anchorStroke("blue");
 			transformerRef.current.anchorStrokeWidth(1);
 			transformerRef.current.borderStroke("blue");
 			transformerRef.current.borderStrokeWidth(1);
+			// transformerRef.current.findOne(".rotater").on("mouseenter", () => onCursorStyleChange("pointer"));
+			// transformerRef.current.findOne(".rotater").on("mouseleave", () => onCursorStyleChange("default"));
 		}
+		return () => {
+			if (transformerRef.current === null) {
+				return;
+			}
+			// transformerRef.current.findOne(".rotater").off("mouseenter");
+			// transformerRef.current.findOne(".rotater").off("mouseleave");
+		};
 	}), []);
 
 
@@ -267,7 +290,7 @@ const EditorCanvas = observer(function EditorCanvas() {
                         y={0}
                         width={canvasWidth}
                         height={canvasHeight}
-                        fill={"gray"}
+                        fill={"transparent"}
                         name={uiStore.backgroundName}
                     />
                 </Layer>
@@ -280,10 +303,10 @@ const EditorCanvas = observer(function EditorCanvas() {
                     y={canvasHeight / 2}
                 >
 					<Group
-						clipX={canvasWidth / 2 - projectWidth / 2}
-						clipY={canvasHeight / 2 - projectHeight / 2}
-						clipWidth={projectWidth}
-						clipHeight={projectHeight}
+						clipX={canvasWidth / 2 - projectWidth / 2 - 5}
+						clipY={canvasHeight / 2 - projectHeight / 2 - 5}
+						clipWidth={projectWidth + 10}
+						clipHeight={projectHeight + 10}
 					>
 						<Rect
 							x={canvasWidth / 2}
@@ -296,6 +319,12 @@ const EditorCanvas = observer(function EditorCanvas() {
 							scaleX={1}
 							scaleY={1}
 							name={uiStore.backgroundName}
+							// shadowColor={"black"}
+							// shadowOffset={{x: 10, y: 10}}
+							// shadowOpacity={0.5}
+							// shadowBlur={10}
+							stroke="black"
+							strokeWidth={1}
 						/>
 					</Group>
 				</Layer>
@@ -313,6 +342,11 @@ const EditorCanvas = observer(function EditorCanvas() {
 						clipY={canvasHeight / 2 - projectHeight / 2}
 						clipWidth={projectWidth}
 						clipHeight={projectHeight}
+						shadowColor={"black"}
+						shadowBlur={10}
+						shadowOpacity={0.5}
+						shadowOffsetX={5}
+						shadowOffsetY={5}
 					>
 						<Group
 							ref={videoGroupRef}

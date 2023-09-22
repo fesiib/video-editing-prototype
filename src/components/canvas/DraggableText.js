@@ -9,7 +9,7 @@ import useRootContext from "../../hooks/useRootContext";
 import { adaptCoordinate } from "../../utilities/genericUtilities";
 
 
-const DraggableText = observer(function DraggableText({ curText }) {
+const DraggableText = observer(function DraggableText({ curText, stageRef }) {
     const { uiStore, domainStore } = useRootContext();
 
 	const textTitleConst = domainStore.editOperations[uiStore.objectNames.text].title;

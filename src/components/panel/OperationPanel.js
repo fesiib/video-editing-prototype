@@ -95,7 +95,7 @@ const OperationPanel = observer(function OperationPanel() {
 		>
 			<div className="flex flex-row justify-start">
 				{collapsed ? <CollapseIcon /> : <UncollapseIcon />}
-				<span> Operation Panel </span>
+				<span> Edit Operation Parameters </span>
 			</div>
 			{
 				haveSuggested ? ( <AiOutlineBulb /> ) : null

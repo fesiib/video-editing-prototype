@@ -13,7 +13,6 @@ import { playPositionToFormat } from "../../utilities/timelineUtilities";
 
 const DraggableRangeHandle = observer(function DraggableRangeHandle({
     scene,
-    scenes,
     isLeftHandler,
 	showHandlers,
 }) {
@@ -36,23 +35,6 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
     };
 
     if (isDragging && typeof adjustedTransform?.x === "number") {
-        let leftUpperBound = 0;
-        let rightLowerBound = null;
-        for (let otherScene of scenes) {
-            if (otherScene.commonState.id === scene.commonState.id) {
-                continue;
-            }
-            if (otherScene.commonState.offset <= scene.commonState.offset) {
-                leftUpperBound = Math.max(leftUpperBound, otherScene.commonState.end);
-            }
-            if (otherScene.commonState.end >= scene.commonState.end) {
-                if (rightLowerBound === null) {
-                    rightLowerBound = otherScene.commonState.offset;
-                } else {
-                    rightLowerBound = Math.min(rightLowerBound, otherScene.commonState.offset);
-                }
-            }
-        }
         let transformSeconds = uiStore.pxToSec(adjustedTransform.x);
         const sceneDiv = document.getElementById(scene.commonState.id);
         const labelDiv = document.getElementById("label_" + scene.commonState.id);
@@ -67,10 +49,10 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
 			: scene.intent.editOperationKey;
 
         if (isLeftHandler) {
-            transformSeconds = Math.min(transformSeconds, scene.commonState.sceneDuration);
+            transformSeconds = Math.min(transformSeconds, scene.commonState.sceneDuration - uiStore.timelineConst.minTimelineItemDuration);
             transformSeconds = Math.max(
                 transformSeconds,
-                leftUpperBound - scene.commonState.offset,
+                scene.leftTimelineLimit - scene.commonState.offset,
                 -scene.commonState.start
             );
             sceneDiv.style.transform = `translate3d(${uiStore.secToPx(
@@ -104,13 +86,11 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
                 transformSeconds,
                 scene.commonState.duration - scene.commonState.finish
             );
-            if (rightLowerBound !== null) {
-                transformSeconds = Math.min(
-                    transformSeconds,
-                    rightLowerBound - scene.commonState.end
-                );
-            }
-            transformSeconds = Math.max(transformSeconds, -scene.commonState.sceneDuration);
+            transformSeconds = Math.min(
+				transformSeconds,
+				scene.rightTimelineLimit - scene.commonState.end
+			);
+            transformSeconds = Math.max(transformSeconds, -scene.commonState.sceneDuration + uiStore.timelineConst.minTimelineItemDuration);
 
             sceneDiv.style.width = `${uiStore.secToPx(
                 scene.commonState.sceneDuration + transformSeconds
@@ -165,7 +145,7 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
 });
 
 const TrimWrapper = observer(function TrimWrapper({ 
-	scene, scenes, children,
+	scene, children,
 	showHandlers,
 }) {
     const { uiStore } = useRootContext();
@@ -187,44 +167,28 @@ const TrimWrapper = observer(function TrimWrapper({
         const isLeftHandler = active.data.current.isLeftHandler;
         let deltaSeconds = uiStore.pxToSec(delta.x);
 
-        let leftUpperBound = 0;
-        let rightLowerBound = null;
-        for (let otherScene of scenes) {
-            if (otherScene.commonState.id === scene.commonState.id) {
-                continue;
-            }
-            if (otherScene.commonState.offset <= scene.commonState.offset) {
-                leftUpperBound = Math.max(leftUpperBound, otherScene.commonState.end);
-            }
-            if (otherScene.commonState.end >= scene.commonState.end) {
-                if (rightLowerBound === null) {
-                    rightLowerBound = otherScene.commonState.offset;
-                } else {
-                    rightLowerBound = Math.min(rightLowerBound, otherScene.commonState.offset);
-                }
-            }
-        }
         if (isLeftHandler) {
             deltaSeconds = Math.min(deltaSeconds, scene.commonState.sceneDuration);
             deltaSeconds = Math.max(
                 deltaSeconds,
-                leftUpperBound - scene.commonState.offset,
+                scene.leftTimelineLimit - scene.commonState.offset,
                 -scene.commonState.start
             );
-            scene.commonState.start += deltaSeconds;
-            scene.commonState.offset += deltaSeconds;
+			scene.commonState.setMetadata({
+				offset: scene.commonState.offset + deltaSeconds,
+				start: scene.commonState.start + deltaSeconds,
+			});
         } else {
 			deltaSeconds = Math.min(
                 deltaSeconds,
                 scene.commonState.duration - scene.commonState.finish
             );
-            if (rightLowerBound !== null) {
-                deltaSeconds = Math.min(deltaSeconds, rightLowerBound - scene.commonState.end);
-            }
+			deltaSeconds = Math.min(deltaSeconds, scene.rightTimelineLimit - scene.commonState.end);
             deltaSeconds = Math.max(deltaSeconds, -scene.commonState.sceneDuration);
-            scene.commonState.finish += deltaSeconds;
+			scene.commonState.setMetadata({
+				finish: scene.commonState.finish + deltaSeconds,
+			});
         }
-
         uiStore.timelineControls.positionIndicatorVisibility -= 1;
     });
 
@@ -237,12 +201,12 @@ const TrimWrapper = observer(function TrimWrapper({
                 onDragEnd={onHandlerDragEnd}
             >
                 <DraggableRangeHandle
-					scene={scene} scenes={scenes} isLeftHandler={true}
+					scene={scene} isLeftHandler={true}
 					showHandlers={showHandlers} 
 				/>
                 {children}
                 <DraggableRangeHandle 
-					scene={scene} scenes={scenes} isLeftHandler={false} 
+					scene={scene} isLeftHandler={false} 
 					showHandlers={showHandlers}
 				/>
             </DndContext>

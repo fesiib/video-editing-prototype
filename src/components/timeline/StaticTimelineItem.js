@@ -29,19 +29,13 @@ const StaticTimelineItem = observer(function StaticTimelineItem({
 	const onTimelineItemClick = action((event) => {
         event.stopPropagation();
         event.preventDefault();
-        if (uiStore.timelineControls.splitting) {
+        if (uiStore.timelineControls.splitting || uiStore.timelineControls.rangeSelectingTimeline) {
             return;
         }
 		if (itemType === "skipped") {
 			return;	
 		}
 		if (itemType === "suggested") {
-			if (uiStore.timelineControls.rangeSelectingTimeline) {
-				uiStore.timelineControls.rangeSelectingTimeline = false;
-				uiStore.timelineControls.rangeSelectingFirstPx = -1;
-				uiStore.timelineControls.positionIndicatorVisibility -= 1;
-			}
-	
 			const index = uiStore.timelineControls.selectedTimelineItems.findIndex(
 				(value) => value.commonState.id === staticScene.commonState.id
 			);

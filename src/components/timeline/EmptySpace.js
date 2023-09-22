@@ -24,7 +24,9 @@ const EmptySpace = observer(function EmptySpace({space, scenes}) {
 	const onDblClickEmptySpace = action((event) => {
 		for (let scene of scenes) {
 			if (scene.commonState.offset > space.offset) {
-				scene.commonState.offset -= space.duration;
+				scene.commonState.setMetadata({
+					offset: scene.commonState.offset - space.duration,
+				})
 			}
 		}
 	});

@@ -25,10 +25,10 @@ const RowsVisualization = observer(function RowsVisualization({
 
 	const DISPLAY_NAMES = {
 		[COMMAND]: null,
-		"temporal": "Temporal",
-		"spatial": "Spatial",
-		"edit" : "Edit",
-		"custom": "Parameters",
+		"temporal": "when (timeline)",
+		"spatial": "where (frame)",
+		"edit" : "what (edit)",
+		"custom": "how (parameters)",
 	};
 
 	let fullText = "";
@@ -60,7 +60,7 @@ const RowsVisualization = observer(function RowsVisualization({
 					key={`contribution-${rowKey}`}
 				>
 					<div
-						className="w-16 text-right text-xs"
+						className="w-28 text-left text-xs"
 					>
 						{DISPLAY_NAMES[rowKey]}
 					</div>
@@ -147,7 +147,7 @@ const Explanation = observer(function Explanation() {
 		<div className="flex flex-col">
 			<div className="flex gap-1 flex-row justify-start items-center">
 				<AiOutlineBulb/>
-				<span> Edit Description Breakdown </span>
+				<span> Examine processing results: </span>
 				{/* <span> {
 					selectedSuggestedEdits.map((edit, idx) => {
 						const isLast = idx === selectedSuggestedEdits.length - 1;
