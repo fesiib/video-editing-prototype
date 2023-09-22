@@ -179,9 +179,9 @@ class IntentState {
 
 	setEditOperationKey(newKey) {
 		//this.domainStore.rootStore.resetTempState();
-		if (this.suggestedEditOperationKeys.includes(newKey)) {
-			this.suggestedEditOperationKeys = this.suggestedEditOperationKeys.filter((key) => key !== newKey);
-		}
+		// if (this.suggestedEditOperationKeys.includes(newKey)) {
+		// 	this.suggestedEditOperationKeys = this.suggestedEditOperationKeys.filter((key) => key !== newKey);
+		// }
 		if (newKey === this.suggestedEditOperationKey) {
 			this.suggestedEditOperationKey = "";
 		}

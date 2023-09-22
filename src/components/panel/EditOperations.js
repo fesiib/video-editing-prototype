@@ -18,9 +18,14 @@ const EditOperations = observer(function EditOperations() {
 
 	const { userStore, uiStore, domainStore } = useRootContext();
 
-	const inactiveButtonClassName = "w-full text-white my-1 hover:bg-green-700 rounded bg-green-600 flex flex-row items-center justify-center gap-1 rounded";
-	const suggestedButtonClassName = "w-full my-1 hover:bg-yellow-400 bg-yellow-300 flex flex-row items-center justify-center gap-1 relative rounded";
-	const activeButtonClassName = "w-full text-white font-bold my-1 rounded bg-green-900 flex flex-row items-center justify-center gap-1 rounded";
+	const inactiveButtonClassName = "w-full text-white my-1 hover:bg-green-700 rounded bg-green-600 flex flex-row items-center justify-center gap-1 rounded opacity-50";
+	const suggestedButtonClassName = "w-full my-1 hover:bg-yellow-400 bg-yellow-300 flex flex-row items-center justify-center gap-1 relative rounded opacity-50";
+	const activeButtonClassName = "w-full text-white font-bold my-1 rounded bg-green-700 flex flex-row items-center justify-center gap-1 rounded";
+
+	const inactiveRadioClassName = "w-4 h-4 ";
+	const suggestedRadioClassName = "w-4 h-4 ";
+	const activeRadioClassName = "w-4 h-4 ";
+	
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;
 	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
@@ -48,40 +53,65 @@ const EditOperations = observer(function EditOperations() {
 		className="flex flex-col text-black"
 	>
 		{/* <h2> Edit Operations </h2> */}
-		<div className="flex flex-row items-center p-1 gap-2 border bg-gray-100 max-h-20">
-			{Object.keys(domainStore.editOperations).map((operationKey) => {
-				const operation = domainStore.editOperations[operationKey];
-				let currentClassName = inactiveButtonClassName;
-				if (selectedOperationKey === operationKey) {
-					currentClassName = activeButtonClassName;
-				} else if (suggestedOperationKeys.includes(operationKey)) {
-					currentClassName = suggestedButtonClassName;
-				} else if (suggestedOperationKey === operationKey) {
-					currentClassName = suggestedButtonClassName;
-				}
-				return (<button 
-					key={"title_" + operation.title}
-					className={currentClassName}
-					onClick={(event) => handleButtonClick(operationKey)}
-					style={{
-						borderColor: uiStore.editColorPalette[operationKey],
-						borderWidth: "2px",
-					}}
-				>
-					{/* {
-						//notification
-						suggestedOperationKeys.includes(operationKey) ? (
-							<>
-  								<span class="absolute -right-3 -top-3 rounded-full h-4 w-4 bg-yellow-300">
-								  <span class="animate-ping absolute left-0 top-0 h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-								</span>
-							</>) : null
-					} */}
-					{operationIcons[operationKey]}
-					{operation.title}
-				</button>)
-			})}
-		</div>
+		<fieldset >
+			<legend className=""> Select an edit operation: </legend>
+			<div className="flex flex-row items-center p-1 gap-2 border bg-gray-100 max-h-20">
+				{Object.keys(domainStore.editOperations).map((operationKey) => {
+					const operation = domainStore.editOperations[operationKey];
+					let currentClassName = inactiveButtonClassName;
+					if (selectedOperationKey === operationKey) {
+						currentClassName = activeButtonClassName;
+					} else if (suggestedOperationKeys.includes(operationKey)) {
+						currentClassName = suggestedButtonClassName;
+					} else if (suggestedOperationKey === operationKey) {
+						currentClassName = suggestedButtonClassName;
+					}
+
+					let currentRadioClassName = inactiveRadioClassName;
+					if (selectedOperationKey === operationKey) {
+						currentRadioClassName = activeRadioClassName;
+					} else if (suggestedOperationKeys.includes(operationKey)) {
+						currentRadioClassName = suggestedRadioClassName;
+					} else if (suggestedOperationKey === operationKey) {
+						currentRadioClassName = suggestedRadioClassName;
+					}
+					return (<div
+						key={"title_" + operation.title}
+						className="flex flex-col w-full justify-center items-center"
+					>
+						<input 
+							type="radio"
+							name="edit_operation"
+							id={`edit-op-${operationKey}`}
+							value={operationKey}
+							checked={selectedOperationKey === operationKey}
+							onChange={(event) => handleButtonClick(operationKey)}
+							className={currentRadioClassName}
+						/>
+						<button 
+							className={currentClassName}
+							onClick={(event) => handleButtonClick(operationKey)}
+							style={{
+								borderColor: uiStore.editColorPalette[operationKey],
+								borderWidth: "2px",
+							}}
+						>
+							{/* {
+								//notification
+								suggestedOperationKeys.includes(operationKey) ? (
+									<>
+										<span class="absolute -right-3 -top-3 rounded-full h-4 w-4 bg-yellow-300">
+										<span class="animate-ping absolute left-0 top-0 h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+										</span>
+									</>) : null
+							} */}
+							{operationIcons[operationKey]}
+							{operation.title}
+						</button>
+					</div>)
+				})}
+			</div>
+		</fieldset>
 	</div>);
 });
 
