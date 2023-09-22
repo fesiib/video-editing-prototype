@@ -103,9 +103,10 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	const onCopyClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (window.confirm("Duplicate this edit to current? Your current edit will be overwritten.")) {
-			domainStore.copyIntentToCurrent(intentPos);
-		}
+		// if (window.confirm("Duplicate this edit to current? Your current edit will be overwritten.")) {
+		// 	domainStore.copyIntentToCurrent(intentPos);
+		// }
+		domainStore.duplicateIntent(intentPos);
 	});
 
 	const onIntentClick = action((event, intentPos) => {
@@ -148,13 +149,19 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 		{
 			collapsed ? null : (
 			<div className="w-fit flex gap-2 justify-center">
-				{curIntent.idx === titleIdx ? null
+				{/* {curIntent.idx === titleIdx ? null
 				: (<button
 					className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-white py-2 px-2 rounded"
 					onClick={(event) => onCopyClick(event, idx)}
 				> 
 					<CopyIcon />
-				</button>)}
+				</button>)} */}
+				<button
+					className="w-fit text-left bg-indigo-300 hover:bg-indigo-400 text-white py-2 px-2 rounded"
+					onClick={(event) => onCopyClick(event, idx)}
+				> 
+					<CopyIcon />
+				</button>
 				<button 
 					className="w-fit bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-2 px-2 rounded"
 					onClick={(event) => onDeleteClick(event, idx)}

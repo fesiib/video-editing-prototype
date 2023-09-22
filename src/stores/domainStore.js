@@ -385,6 +385,35 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
+	duplicateIntent(intentPos) {
+		if (intentPos >= this.intents.length || intentPos < 0) {
+			return;
+		}
+		const deepCopy = this.intents[intentPos].getDeepCopy();
+		this.curIntentPos = this.intents.length;
+		this.projectMetadata.totalIntentCnt += 1;
+		deepCopy.idx = this.projectMetadata.totalIntentCnt;
+		this.intents.push(deepCopy);
+		for (let edit of deepCopy.activeEdits) {
+			edit.commonState.setMetadata({
+				z: this.curIntentPos + 1,
+			});
+		}
+		for (let edit of deepCopy.suggestedEdits) {
+			edit.commonState.setMetadata({
+				z: this.curIntentPos + 1,
+			});
+		}
+		for (let entry of deepCopy.history) {
+			for (let edit of entry.suggestedEdits) {
+				edit.commonState.setMetadata({
+					z: this.curIntentPos + 1,
+				});
+			}
+		}
+		this.rootStore.resetTempState();
+	}
+
 	setCurIntent(intentPos) {
 		if (intentPos >= this.intents.length || intentPos < 0) {
 			return;
