@@ -143,12 +143,18 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
     }
     const style = {
         //transform: CSS.Transform.toString(adjustedTransform),
-        backgroundColor: "grey",
-        opacity: 0.5,
+        //backgroundColor: "grey",
+        //opacity: 0.5,
     };
 
     return (
-        <div className="static" ref={setNodeRef} {...listeners} {...attributes}>
+        <div 
+			className=""
+			//style={style}
+			ref={setNodeRef}
+			{...listeners}
+			{...attributes}
+		>
             <button className={(showHandlers || isDragging) ? 
 				"w-2 h-full bg-gray-200 rounded" : ""
 			}>

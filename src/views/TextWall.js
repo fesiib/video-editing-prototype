@@ -98,7 +98,9 @@ const DraggableParts = observer(function DraggableParts({
 				<div
 					className={innerClassName}
 					style={{
-						//backgroundColor: uiStore.editColorPalette[edit.intent.editOperationKey],
+						borderTopWidth: "2px",
+						borderBottomWidth: "2px",
+						borderColor: uiStore.editColorPalette[edit.intent.editOperationKey],
 						marginLeft: `${left}%`,
 						width: `${width}%`,
 					}}
@@ -183,6 +185,9 @@ const StaticParts = observer(function StaticParts({
 			const width = Math.floor((finish - start) / (item.finish - item.start) * 100);
 			const isLeftEnd = (item.start <= part.commonState.offset && item.finish > part.commonState.offset);
 			const isRightEnd = (item.start < part.commonState.end && item.finish >= part.commonState.end);
+			const isSelected = uiStore.timelineControls.selectedTimelineItems.findIndex(
+				(selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1;
+			
 			let innerClassName = className;
 			if (isLeftEnd && isRightEnd) {
 				innerClassName += " justify-between";
@@ -193,10 +198,8 @@ const StaticParts = observer(function StaticParts({
 			else if (isLeftEnd) {
 				innerClassName += " justify-start";
 			}
-			if (uiStore.timelineControls.selectedTimelineItems.findIndex(
-				(selectedItem) => selectedItem.commonState.id === part.commonState.id) !== -1
-			) {
-				innerClassName += " border-y-2 border-red-600 brightness-50";
+			if (isSelected) {
+				innerClassName += " brightness-50";
 			}
 			return(<div
 				key={`static-${index}-${part.commonState.id}`}
@@ -206,6 +209,13 @@ const StaticParts = observer(function StaticParts({
 				<div
 					className={innerClassName}
 					style={{
+						borderTopWidth: (type === "skipped" ? "0px" : (
+							isSelected ? "3px" : "1px"
+						)),
+						borderBottomWidth: (type === "skipped" ? "0px" : (
+							isSelected ? "3px" : "1px"
+						)),
+						borderColor: uiStore.editColorPalette[part.intent.editOperationKey],
 						marginLeft: `${left}%`,
 						width: `${width}%`,
 					}}

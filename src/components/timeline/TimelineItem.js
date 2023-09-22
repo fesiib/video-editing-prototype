@@ -7,6 +7,13 @@ import useRootContext from "../../hooks/useRootContext";
 import TrimWrapper from "./TrimWrapper";
 
 import { AiOutlineBulb } from "react-icons/ai";
+import { MdFormatColorText } from "react-icons/md";
+import { BiImageAlt } from "react-icons/bi";
+import { CgShapeSquare } from "react-icons/cg";
+import { RiScissors2Fill } from "react-icons/ri";
+import { BiSolidCrop } from "react-icons/bi";
+import { TbZoomPan } from "react-icons/tb";
+import { MdLensBlur } from "react-icons/md";
 
 export const TimelineItem = observer(
     forwardRef(function TimelineItem(
@@ -14,6 +21,16 @@ export const TimelineItem = observer(
         ref
     ) {
         const { uiStore, domainStore } = useRootContext();
+
+		const operationIcons = {
+			"text": <MdFormatColorText />,
+			"image": <BiImageAlt />,
+			"shape": <CgShapeSquare />,
+			"cut": <RiScissors2Fill />,
+			"crop": <BiSolidCrop />,
+			"zoom": <TbZoomPan />,
+			"blur": <MdLensBlur />,
+		};
 
 		const [hovering, setHovering] = useState(false);
 
@@ -44,37 +61,38 @@ export const TimelineItem = observer(
                     : `translate3d(${uiStore.secToPx(scene.commonState.offset)}px, ${0}px, ${0}px)`,
             width: uiStore.secToPx(scene.commonState.sceneDuration),
             //transition: `transform ${0.5}s`,
-            borderColor: uiStore.editColorPalette[lowLabel],
-			borderWidth: "3px",
-            opacity: isOverlay ? 0.8 : 1,
+			borderWidth: (isMain || isSkipped) ? "1px" : (
+				isSelected ? "3px" : "2px"),
+            borderColor: (isMain || isSkipped) ? "black" : uiStore.editColorPalette[lowLabel],
+			opacity: isOverlay ? 0.8 : 1,
         };
 
 		let outerClassName = "";
 		let innerClassName = "";
 
 		if (isMain) {
-			outerClassName = "absolute bottom-0 z-10";
-			innerClassName = "h-6 bg-slate-100 drop-shadow-2xl border-y border-black";
+			outerClassName = "absolute bottom-1/2 z-10 drop-shadow-xl";
+			innerClassName = "h-5 bg-slate-100";
 		}
 		else if (isSkipped) {
-			outerClassName = "absolute bottom-0 z-10";
-			innerClassName = "h-6 bg-gray-500";
+			outerClassName = "absolute bottom-1/2 z-10";
+			innerClassName = "h-5 bg-gray-500";
 		}
 		else if (isSuggested) {
 			outerClassName = (isSelected
-				? "absolute bottom-0 z-20 brightness-50"
-				: "absolute bottom-0 z-20 ");
+				? "absolute top-1/2 z-20 brightness-50"
+				: "absolute top-1/2 z-20 ");
 			innerClassName = "h-5 bg-yellow-300 flex flex-row justify-center items-center";
 		}
 		else if (isOverlay) {
 			outerClassName = ("absolute z-10 brightness-75");
-			innerClassName = "flex bg-green-300 justify-center items-center";
+			innerClassName = "h-5 bg-green-300 flex flex-row justify-center items-center";
 		}
 		else {
 			outerClassName = (isSelected
-				? "absolute bottom-7 z-10 brightness-75"
-				: "absolute bottom-7 z-10 ");
-			innerClassName = "flex bg-green-300 justify-between";
+				? "absolute bottom-1/2 z-10 brightness-75"
+				: "absolute bottom-1/2 z-10 ");
+			innerClassName = "h-5 bg-green-300 flex flex-row justify-between";
 		}
 
         return (
@@ -90,7 +108,7 @@ export const TimelineItem = observer(
             >
                 {isOverlay ? (
 					<div className={
-						innerClassName + " flex flex-row justify-center items-center"
+						innerClassName
 					}>
 						<span className="">
 							{uiStore.timelineControls.selectedTimelineItems.length > 1
@@ -107,16 +125,21 @@ export const TimelineItem = observer(
 									scene={scene} scenes={scenes}
 								>
 									<span 
-										className="h-6 font-bold"
+										className={"h-5 align-top flex items-center font-bold"}
 										id={"label_" + scene.commonState.id}
 									>
-										{!willOverflow ? lowLabel : ""}
+										{!willOverflow ? lowLabel : ("")}
 									</span>
 								</TrimWrapper>
 							)
 						}
 						{isSuggested ? (
-							<AiOutlineBulb/>
+							<span 
+								className={"h-5 align-top flex items-center"}
+								id={"label_" + scene.commonState.id}
+							>
+								{!willOverflow ? lowLabel : ("")}
+							</span>
 						) : null}
 					</div>
                 )}

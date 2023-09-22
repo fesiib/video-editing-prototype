@@ -30,7 +30,7 @@ const PlayPositionIndicator = observer(function PlayPositionIndicator() {
         <>
             <div
                 className={
-                    isDragging ? "absolute z-20 bg-violet-500" : "absolute z-20 hover:bg-violet-500"
+                    isDragging ? "absolute z-50 bg-violet-500" : "absolute z-50 hover:bg-violet-500"
                 }
                 style={{
                     height: height,

@@ -187,13 +187,18 @@ const TimelineTracks = observer(function TimelineTracks() {
 		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
 		uiStore.commandSpaceControls.viewPortAuthor = "timeline";
 
-		for (let i = 0; i < trackCnt; i++) {
-			const videoIndicatorId = `video_indicator_${"track_" + i}`;
-			const videoIndicator = document.getElementById(videoIndicatorId);
-			if (videoIndicator?.style !== undefined) {
-				videoIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
-			}
-		}
+		// for (let i = 0; i < trackCnt; i++) {
+		// 	const videoIndicatorId = `video_indicator_${"track_" + i}`;
+		// 	const videoIndicator = document.getElementById(videoIndicatorId);
+		// 	if (videoIndicator?.style !== undefined) {
+		// 		videoIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
+		// 	}
+		// 	const suggIndicatorId = `sugg_indicator_${"track_" + i}`;
+		// 	const suggIndicator = document.getElementById(suggIndicatorId);
+		// 	if (suggIndicator?.style !== undefined) {
+		// 		suggIndicator.style.left = `${tracksContainer.current.scrollLeft}px`;
+		// 	}
+		// }
 	});
 
     useEffect(() => {

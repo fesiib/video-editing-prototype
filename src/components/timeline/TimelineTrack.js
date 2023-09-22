@@ -9,7 +9,8 @@ import EmptySpace from "./EmptySpace";
 import MainTimelineItem from "./MainTimelineItem";
 import StaticTimelineItem from "./StaticTimelineItem";
 
-import { BiSolidMoviePlay } from "react-icons/bi";
+import { BiMoviePlay, BiSolidMoviePlay } from "react-icons/bi";
+import { AiFillBulb, AiOutlineBulb } from "react-icons/ai";
 
 const TimelineTrack = observer(
     forwardRef(function TimelineTrack(
@@ -110,14 +111,23 @@ const TimelineTrack = observer(
 							space={space}
 							scenes={scenes} />
 					))} */}
-					<div className="absolute bottom-1 z-20 w-fit"
+					<div className="absolute top-2.5 z-20 w-fit"
 						id={`video_indicator_${id}`}
 						style={{
 							marginLeft: "0.5em",
 							pointerEvents: "none",
 						}}
 					>
-						<BiSolidMoviePlay />
+						<BiMoviePlay />
+					</div>
+					<div className="absolute bottom-2 z-20 w-fit"
+						id={`sugg_indicator_${id}`}
+						style={{
+							marginLeft: "0.5em",
+							pointerEvents: "none",
+						}}
+					>
+						<AiOutlineBulb />
 					</div>
                 </div>
             </div>
