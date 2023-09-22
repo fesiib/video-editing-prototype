@@ -52,10 +52,10 @@ const RowsVisualization = observer(function RowsVisualization({
 	return (<div className="flex flex-col text-s p-2 bg-gray-100 overflow-x-auto">
 		{
 			Object.keys(rows).map((rowKey, idx) => {
-				const content = rows[rowKey];
-				if (content.length === 0 && rowKey !== COMMAND) {
-					return null;
-				}
+				// const content = rows[rowKey];
+				// if (content.length === 0 && rowKey !== COMMAND) {
+				// 	return null;
+				// }
 				return (<div className="flex flex-row flex-nowrap w-fit gap-2 items-center"
 					key={`contribution-${rowKey}`}
 				>

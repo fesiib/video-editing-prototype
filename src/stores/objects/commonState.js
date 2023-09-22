@@ -66,12 +66,23 @@ class CommonState {
 		if (potentialFinish - potentialStart <= minDuration) {
 			if (metadata.start !== undefined) {
 				metadata.start = potentialFinish - minDuration;
+				if (metadata.start < 0) {
+					metadata.start = 0;
+					metadata.finish = minDuration;
+				}
 				if (metadata.offset !== undefined) {
-					metadata.offset = potentialFinish - minDuration;
+					metadata.offset = metadata.start;
 				}
 			}
 			else if (metadata.finish !== undefined) {
 				metadata.finish = potentialStart + minDuration;
+				if (metadata.finish > this.domainStore.projectMetadata.duration) {
+					metadata.finish = this.domainStore.projectMetadata.duration;
+					metadata.start = this.domainStore.projectMetadata.duration - minDuration;
+					if (metadata.offset !== undefined) {
+						metadata.offset = metadata.start;
+					}
+				}
 			}
 		}
 
