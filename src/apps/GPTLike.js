@@ -20,6 +20,7 @@ import NavigationToggle from "../components/general/NavigationToggle";
 import Explanation from "../components/general/Explanation";
 
 const GPTLike = observer(function GPTLike() {
+	const DISPLAY_STR = "Whenever there is laptop seen, highlight it with a transparent star around it";
     const { userStore, uiStore, domainStore } = useRootContext();
 
 	const chooseTask = action((taskIdx) => {
@@ -197,9 +198,25 @@ const GPTLike = observer(function GPTLike() {
 						</div>
 					)
 				}
+				{/* <div className="flex flex-row gap-1 divide-x divide-solid flex-wrap">
+					{
+						Array(...DISPLAY_STR).map((char, idx) => {
+							return (
+								<div key={idx} className="m-1 flex flex-col">
+									<span>
+										{idx}
+									</span>
+									<span>
+										{char}
+									</span>	
+								</div>
+							);
+						})
+					}
+				</div>  */}
 			</div>
 			)
-		} 
+		}
 	</div>);
 });
 
