@@ -291,17 +291,12 @@ class EditState {
 	}
 
 	setTemporalParameters(parameters) {
-		if (parameters.start !== undefined) {
-			this.commonState.setMetadata({
-				offset: parameters.start,
-				start: parameters.start,
-			});
-		}
-		if (parameters.finish !== undefined) {
-			this.commonState.setMetadata({
-				finish: parameters.finish - this.commonState.offset + this.commonState.start,
-			});
-		}
+		console.log(parameters);
+		this.commonState.setMetadata({
+			offset: parameters.start,
+			start: parameters.start,
+			finish: parameters.finish,
+		});
 		if (parameters.duration !== undefined) {
 			this.commonState.setMetadata({
 				finish: this.commonState.start + parameters.duration,

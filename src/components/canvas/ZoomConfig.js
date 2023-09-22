@@ -30,6 +30,11 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 	const y = adaptCoordinate(zoom.commonState.y, zoom.commonState.height, projectHeight, canvasHeight);
 
 	const setZoomParameters = action(() => {
+		if (videoGroupRef === null || videoGroupRef === undefined
+			|| objectsGroupRef === null || objectsGroupRef === undefined
+		) {
+			return;
+		}
 		const playPosition = uiStore.timelineControls.playPosition;
 		let durationStart = zoom.customParameters.zoomDurationStart;
 		let durationEnd = zoom.customParameters.zoomDurationEnd;
@@ -106,7 +111,10 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 	]);
 
 	useEffect(action(() => {
-		if (zoomRef.current === null) {
+		if (zoomRef.current === null
+			|| videoGroupRef === null || videoGroupRef === undefined
+			|| objectsGroupRef === null || objectsGroupRef === undefined	
+		) {
 			return;
 		}
 		if (!isVisible) {

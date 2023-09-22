@@ -121,7 +121,6 @@ const EditorCanvas = observer(function EditorCanvas() {
         const selected = objects.filter((object) => {
             return Util.haveIntersection(box, object.getClientRect());
         });
-		console.log(objects, selected);
 		uiStore.selectCanvasObjects(selected);
     });
 
