@@ -69,7 +69,7 @@ textarea {
 }
 
 /* Color Palette
-	primary color		pc	#A1D0FF
+	primary color		pc	#c7d2fe
 	secondary color		sc	#2497E3
 	background color	bc	#64748b
 	background-focus	bf	#4b5563
@@ -97,7 +97,6 @@ input[type=range]::-moz-range-track {
 	height: 5px;
 	width: 100%;
 	cursor: pointer;
-	animate: 0.2s;
 	background: /*bc*/#64748b;
 	border-radius: 1px;
 }
@@ -106,7 +105,7 @@ input[type=range]::-moz-range-track {
 input[type=range]::-webkit-slider-thumb {
 	height: 20px;
 	width: 5px;
-	background: /*pc*/#A1D0FF;
+	background: /*pc*/#c7d2fe;
 	cursor: pointer;
 	-webkit-appearance: none;
 	margin-top: -7px;
@@ -119,7 +118,7 @@ input[type=range]:focus::-webkit-slider-runnable-track {
 input[type=range]::-moz-range-thumb {
 	height: 20px;
 	width: 5px;
-	background: /*pc*/#A1D0FF;
+	background: /*pc*/#c7d2fe;
 	cursor: pointer;
 	border-radius: 15px;
 }
@@ -136,11 +135,11 @@ input[type=range]::-ms-thumb {
 	height: 20px;
 	width: 5px;
 	border-radius: 15px;
-	background: /*pc*/#A1D0FF;
+	background: /*pc*/#c7d2fe;
 	cursor: pointer;
 }
 input[type=range]::-ms-fill-lower {
-	background: /*pc*/#A1D0FF;
+	background: /*pc*/#c7d2fe;
 	border-radius: 2px;
 }
 input[type=range]::-ms-fill-upper {
@@ -148,7 +147,7 @@ input[type=range]::-ms-fill-upper {
 	border-radius: 2px;
 }
 input[type=range]:focus::-ms-fill-lower {
-	background: /*pc*/#A1D0FF;
+	background: /*pc*/#c7d2fe;
 }
 input[type=range]:focus::-ms-fill-upper {
 	background: /*bf*/#4b5563;
