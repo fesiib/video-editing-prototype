@@ -439,7 +439,7 @@ class DomainStore {
 		this.processingIntent = true;
 		// request
 		const requestData = {
-			projectId: "",
+			videoId: "",
 			projectMetadata: {},
 			edits: [],
 			curPlayPosition: this.rootStore.uiStore.timelineControls.playPosition,
@@ -449,9 +449,9 @@ class DomainStore {
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
 		};
-		requestData.projectId = toJS(this.projectMetadata.title);
+		requestData.videoId = toJS(this.projectMetadata.title);
 		requestData.projectMetadata = toJS({
-			...this.projectMetadata
+			...this.projectMetadata,
 		});
 		requestData.edits = [...this.curIntent.activeEdits].map((edit) => {
 			return toJS(edit.requestBody);

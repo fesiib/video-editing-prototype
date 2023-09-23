@@ -517,7 +517,7 @@ class EditState {
 		if (this.commonState.offset > playPosition || this.commonState.end <= playPosition) {
 			return false;
 		}
-		if (this.intent.editOperation === null || this.intent.editOperation.linearize === false) {
+		if (this.intent.editOperation === null) {
 			return true;
 		}
 		if (this.isSuggested && this.intent.idx === this.domainStore.curIntent.idx) {
@@ -544,6 +544,10 @@ class EditState {
 					return false;
 				}
 			}
+		}
+
+		if (this.intent.editOperation.linearize === false) {
+			return true;
 		}
 
 		const intents = this.domainStore.intents;
