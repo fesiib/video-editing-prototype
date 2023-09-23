@@ -22,9 +22,9 @@ const EditOperations = observer(function EditOperations() {
 	const suggestedButtonClassName = "w-full my-1 hover:bg-yellow-400 bg-yellow-300 flex flex-row items-center justify-center gap-1 relative rounded opacity-50";
 	const activeButtonClassName = "w-full text-white font-bold my-1 rounded bg-green-700 flex flex-row items-center justify-center gap-1 rounded";
 
-	const inactiveRadioClassName = "w-4 h-4 ";
-	const suggestedRadioClassName = "w-4 h-4 ";
-	const activeRadioClassName = "w-4 h-4 ";
+	const inactiveRadioClassName = "w-4 h-4 hover:cursor-pointer";
+	const suggestedRadioClassName = "w-4 h-4 hover:cursor-pointer";
+	const activeRadioClassName = "w-4 h-4 hover:cursor-pointer";
 	
 
 	const selectedOperationKey = domainStore.curIntent.editOperationKey;

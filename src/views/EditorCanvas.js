@@ -261,8 +261,10 @@ const EditorCanvas = observer(function EditorCanvas() {
     return (
         <>
 			<div className="flex flex-row justify-end w-full">
-				<div className="flex flex-row mx-2">
-					<label htmlFor="canvas_zoom"> Canvas Zoom: {uiStore.canvasZoom}%  </label>
+				<div className="flex flex-row mx-2 items-center">
+					<label htmlFor="canvas_zoom"
+						className="whitespace-nowrap"
+					> Canvas Zoom: {uiStore.canvasZoom}%  </label>
 					<input
 						className="mx-2"
 						id="canvas_zoom"

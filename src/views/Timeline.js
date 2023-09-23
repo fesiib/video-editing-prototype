@@ -439,7 +439,7 @@ const Timeline = observer(function Timeline() {
             </div>
 			{
 				uiStore.navigation === "timeline" ? (<div className="flex flex-col">
-					<div className="self-end">
+					<div className="self-end flex flex-row items-center">
 						<label htmlFor="timeline_zoom">
 							{" "}
 							Timeline Zoom {
@@ -447,6 +447,7 @@ const Timeline = observer(function Timeline() {
 							}{" "}
 						</label>
 						<input
+							className="mx-2"
 							id="timeline_zoom"
 							type={"range"}
 							min={0}
