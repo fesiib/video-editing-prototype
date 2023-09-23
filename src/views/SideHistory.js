@@ -217,6 +217,9 @@ const SideHistory = observer(function SideHistory() {
 						/>);
 					})} */}
 					{(curIntent.idx === intent.idx && systemSetting) ? (intent.history.map((_, historyIdx) => {
+						if (historyIdx === 0) {
+							return null;
+						}
 						return (<SuggHistoryItem
 							key={`history-item-${idx}-${historyIdx}`}
 							idx={idx}

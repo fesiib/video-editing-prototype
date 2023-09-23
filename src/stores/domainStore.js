@@ -605,7 +605,7 @@ class DomainStore {
 				}
 				else {
 					this.rootStore.uiStore.selectTimelineObjects([this.curIntent.suggestedEdits[0]]);
-					this.rootStore.uiStore.playPosition = this.curIntent.suggestedEdits[0].commonState.offset;
+					this.rootStore.uiStore.timelineControls.playPosition = this.curIntent.suggestedEdits[0].commonState.offset;
 				}
 			})).catch(action((error) => {
 				console.log("error", error);

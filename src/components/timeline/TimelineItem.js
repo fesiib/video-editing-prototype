@@ -62,7 +62,7 @@ export const TimelineItem = observer(
             width: uiStore.secToPx(scene.commonState.sceneDuration),
             //transition: `transform ${0.5}s`,
 			borderWidth: (isMain || isSkipped) ? "1px" : (
-				isSelected ? "3px" : "2px"),
+				isSelected ? "2px" : "1px"),
             borderColor: (isMain || isSkipped) ? "black" : uiStore.editColorPalette[lowLabel],
 			opacity: isOverlay ? 0.8 : 1,
         };

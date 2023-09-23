@@ -93,15 +93,26 @@ class UIStore {
     };
     backgroundName = "bg";
 
+	// editColorPalette = {
+	// 	"text": "#c45161",
+	// 	"image": "#e094a0",
+	// 	"shape": "#f2b6c0",
+	// 	"cut": "#c7522a",
+	// 	"zoom": "#74a892",
+	// 	"crop": "#8db7d2",
+	// 	"blur": "#5e62a9",
+	// 	"": "#434279",
+	// };
+
 	editColorPalette = {
-		"text": "#c45161",
-		"image": "#e094a0",
-		"shape": "#f2b6c0",
-		"cut": "#c7522a",
-		"zoom": "#74a892",
-		"crop": "#8db7d2",
-		"blur": "#5e62a9",
-		"": "#434279",
+		"text": "#000000",
+		"image": "#000000",
+		"shape": "#000000",
+		"cut": "#000000",
+		"zoom": "#000000",
+		"crop": "#000000",
+		"blur": "#000000",
+		"": "#000000",
 	};
 
 	referenceTypeColorPalette = {
