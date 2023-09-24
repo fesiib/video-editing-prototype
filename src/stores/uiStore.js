@@ -263,18 +263,20 @@ class UIStore {
 	}
 
 	adaptZoomValue(value) {
+		const scale = value / 100 * value / 100;
 		const trackMaxDuration = this.timelineConst.trackMaxDuration;
 		const width = this.timelineSize.width;
 		const minPxToSec = width / trackMaxDuration;
 		const maxPxToSec = width / 60;
-		return value * (maxPxToSec - minPxToSec) / 100 + minPxToSec
+		return scale * (maxPxToSec - minPxToSec) + minPxToSec
 	}
 	adaptPxPerSec(pxPerSec) {
 		const trackMaxDuration = this.timelineConst.trackMaxDuration;
 		const width = this.timelineSize.width;
 		const minPxToSec = width / trackMaxDuration;
 		const maxPxToSec = width / 60;
-		return (pxPerSec - minPxToSec) * 100 / (maxPxToSec - minPxToSec)
+		const scale = (pxPerSec - minPxToSec) / (maxPxToSec - minPxToSec)
+		return Math.round(Math.sqrt(scale) * 100);
 	};
 
 	removeSelectedCanvasObject(objectId) {

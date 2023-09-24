@@ -37,9 +37,9 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, [curVideo.source, curVideo.commonState.id]);
 
     const onLoadedMetadata = action((event) => {
-		if (curVideo.commonState.duration === event.target.duration) {
-			return;
-		}
+		// if (curVideo.commonState.duration === event.target.duration) {
+		// 	return;
+		// }
 		let passedCurVideo = false;
 		for (let video of domainStore.in_mainVideos) {
 			if (video.commonState.id === curVideo.commonState.id) {
@@ -52,6 +52,7 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
 				});
 			}
 		}
+		console.log("video-duration", event.target.duration);
 		const metadata = {
             duration: event.target.duration,
 			start: 0,

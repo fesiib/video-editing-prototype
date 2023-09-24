@@ -291,7 +291,6 @@ class EditState {
 	}
 
 	setTemporalParameters(parameters) {
-		console.log(parameters);
 		this.commonState.setMetadata({
 			offset: parameters.start,
 			start: parameters.start,

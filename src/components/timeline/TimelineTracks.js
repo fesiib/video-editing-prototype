@@ -148,7 +148,6 @@ const TimelineTracks = observer(function TimelineTracks() {
     const onGenericDrageMove = action((event) => {
         const { active, over } = event;
         const type = active.data.current.type;
-        //console.log("move", type, event);
         if (type === "scene") {
             sceneTrackChange(active, over, null);
         }
@@ -157,7 +156,6 @@ const TimelineTracks = observer(function TimelineTracks() {
     const onGenericDragEnd = action((event) => {
         const { active, delta, over } = event;
         const type = active.data.current.type;
-        //console.log("end", type, event);
         if (type === "track" && over) {
             if (active.id !== over.id) {
                 const activeTrackId = active.data.current.trackId;
@@ -235,6 +233,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 			|| uiStore.navigation !== "timeline") {
 			return;
 		}
+
 		const width = uiStore.timelineSize.width;
 		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
 		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
@@ -264,7 +263,9 @@ const TimelineTracks = observer(function TimelineTracks() {
 				viewPortFinish: uiStore.commandSpaceControls.viewPortFinish,
 			};
 		}, ({ viewPortStart, viewPortFinish }) => {
-			if (uiStore.commandSpaceControls.viewPortAuthor !== "transcript") {
+			if (uiStore.commandSpaceControls.viewPortAuthor !== "transcript"
+				&& uiStore.commandSpaceControls.viewPortAuthor !== "zoom"
+			) {
 				return;
 			}
 			tracksContainer.current.scrollLeft = uiStore.secToPx(viewPortStart);
@@ -276,16 +277,21 @@ const TimelineTracks = observer(function TimelineTracks() {
 
 	useEffect(action(() => {
 		onTracksContainerScroll(null);
-	}), [uiStore.timelineControls.pxPerSec]);
+	}), [
+		//uiStore.timelineControls.pxPerSec
+	]);
 
     return (
         <div
+			id={"tracks_container"}
 			ref={tracksContainer}
             className="bg-slate-300 my-2 flex-column overflow-scroll relative disable-select"
 			style={{
                 width: width,
             }}
-			onScroll={(event) => onTracksContainerScroll(event)}
+			onScroll={(event) => {
+				onTracksContainerScroll(event);
+			}}
         >
             <TimelineLabels />
 			<div

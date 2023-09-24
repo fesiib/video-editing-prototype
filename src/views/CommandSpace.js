@@ -134,6 +134,9 @@ const CommandSpace = observer(function CommandSpace() {
 			}
 			return;
 		}
+		setShouldSketch(() => true);
+		return;
+		// skip processing 
 		uiStore.commandSpaceControls.requestingAmbiguousParts = true;
 		requestAmbiguousParts({
 			input: text,

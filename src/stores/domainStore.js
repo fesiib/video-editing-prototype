@@ -474,15 +474,13 @@ class DomainStore {
 		// response
 		// make sure zIndex is fine
 		// make sure to edit suggesteEditOperationKey and remove it if they are equal
-
+		const requestedIntentPos = this.curIntentPos;	
 		this.curIntent.enterHistory();
 		this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-		// this.curIntent.historyPos = this.curIntent.history.length - 1;	
+		this.curIntent.summary = "";
 		this.curIntent.suggestedEdits = [];
 		this.curIntent.suggestedEditOperationKeys = [];
 		this.curIntent.suggestedEditOperationKey = "";
-		const requestedIntentPos = this.curIntentPos;	
-
 		requestSummary({
 			input: requestData.requestParameters.text,
 		}).then(action((responseData) => {
@@ -511,7 +509,7 @@ class DomainStore {
 				const suggestedParameters = responseData.requestParameters.parameters;
 				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
 				const suggestedEdits = responseData.edits;
-				this.curIntent.suggestedEdits = suggestedEdits.map((edit) => {
+				this.curIntent.suggestedEdits = suggestedEdits.map(action((edit) => {
 					const newEdit = new EditState(this, this.curIntent, true, this.curIntent.trackId);
 					newEdit.commonState.setMetadata({
 						duration: this.projectMetadata.duration,
@@ -584,21 +582,8 @@ class DomainStore {
 						}
 					}
 					return newEdit;
-				});
-				// if (suggestedEditOperationKey !== this.curIntent.editOperationKey) {
-				// 	this.curIntent.suggestedEditOperationKey = suggestedEditOperationKey;
-				// }
-				// else {
-				// 	this.curIntent.suggestedEditOperationKey = "";
-				// }
-				this.setCurIntent(requestedIntentPos);
-				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-				if (suggestedEditOperationKeys.includes(this.curIntent.editOperationKey)) {
-					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys.filter((key) => key !== this.curIntent.editOperationKey);
-				}
-				else {
-					this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
-				}
+				}));
+				this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
 				this.processingIntent = false;
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");

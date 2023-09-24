@@ -53,7 +53,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		onClick={onEntryClick}
 	>
 		<button
-			className={"text-left text-black text-sm py-2 px-2 rounded flex flex-row gap-1 items-center"
+			className={"text-left text-black text-xs py-2 px-2 rounded flex flex-row gap-1 items-center"
 				+ (collapsed ? " truncate" : "")
 			}
 			disabled={isSelected}
@@ -118,7 +118,7 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	const titleIdx = intent.idx;
 	const isSelected = curIntent.idx === titleIdx;
 
-	const editOperationTitle = intent.editOperation === null ? "None" : intent.editOperation.title;
+	const editOperationTitle = intent.editOperation === null ? "No Description" : intent.editOperation.title;
 
 	// TODO: summarize all descriptions in the history
 	const title = intent.history.length === 0 ? ("") : (
@@ -138,7 +138,8 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 		onClick={(event) => onIntentClick(event, idx)}
 	>
 		<button
-			className={"text-left truncate text-black font-bold py-2 px-2 rounded"
+			className={"text-sm text-left text-black py-2 px-2 rounded"
+				+ (collapsed ? " truncate" : "")
 			}
 			disabled={isSelected}
 		>

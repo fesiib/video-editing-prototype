@@ -257,7 +257,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					<div
 						className="text-sm cursor-pointer hover:underline text-blue-500 p-1"
 						onClick={onSketchTextClick}
-					>  Specify a region in the video for improved results
+					>  Specify a region for improved results
 					</div>
 				) : null
 		}

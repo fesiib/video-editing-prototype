@@ -45,7 +45,17 @@ const Timeline = observer(function Timeline() {
 		// 0 -> minPxToSec
 		// 100 -> maxPxToSec
 		// value * (maxPxToSec - minPxToSec) / 100 + minPxToSec
-        uiStore.timelineControls.pxPerSec = uiStore.adaptZoomValue(event.target.value);
+		const beforeLeftMarginPx = uiStore.secToPx(
+			uiStore.timelineControls.playPosition - uiStore.commandSpaceControls.viewPortStart
+		);
+        
+		uiStore.timelineControls.pxPerSec = uiStore.adaptZoomValue(event.target.value);
+		const afterPlayPositionPx = uiStore.secToPx(uiStore.timelineControls.playPosition);
+		uiStore.commandSpaceControls.viewPortStart = Math.max(0,
+			uiStore.pxToSec(afterPlayPositionPx - beforeLeftMarginPx));
+		uiStore.commandSpaceControls.viewPortFinish = Math.min(domainStore.projectMetadata.duration,
+			uiStore.commandSpaceControls.viewPortStart + uiStore.pxToSec(uiStore.timelineSize.width));
+		uiStore.commandSpaceControls.viewPortAuthor = "zoom";
     });
 
     const onPressPlay = action((event) => {
@@ -172,7 +182,7 @@ const Timeline = observer(function Timeline() {
 		else if (decision === "reject") {
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
 			curIntent.deleteEdits(deleteEditIds);
-			if (!onNavigationClick("next")) {
+			if (!onNavigationClick("next") && curIntent.suggestedEdits.length > 0) {
 				onNavigationClick("prev");
 			}
 			return;

@@ -46,6 +46,19 @@ class IntentState {
 		this.historyPos = 0;
     }
 
+	recordHistory() {
+		if (this.history.length === 0) {
+			return;
+		}
+		this.history[this.historyPos].summary = this.summary;
+		this.history[this.historyPos].suggestedEditOperationKey = this.suggestedEditOperationKey;
+		this.history[this.historyPos].suggestedEditOperationKeys = this.suggestedEditOperationKeys.slice(0);
+		this.history[this.historyPos].suggestedEdits = [];
+		for (let edit of this.suggestedEdits) {
+			this.history[this.historyPos].suggestedEdits.push(edit.getDeepCopy());
+		}
+	}
+
 	enterHistory() {
 		const historyEntry = {
 			summary: this.summary,
@@ -72,10 +85,11 @@ class IntentState {
 			return;
 		}
 		this.domainStore.rootStore.resetTempState();
-		if (this.historyPos === this.history.length - 1) {
-			this.history.splice(this.historyPos, 1);
-			this.enterHistory();
-		}
+		// if (this.historyPos === this.history.length - 1) {
+		// 	this.history.splice(this.historyPos, 1);
+		// 	this.enterHistory();
+		// }
+		this.recordHistory();
 		this.historyPos = historyEntryPos;
 		const historyEntry = {
 			...this.history[historyEntryPos]
@@ -97,10 +111,16 @@ class IntentState {
 		if (this.history.length === 0 || historyEntryPos < 0 || historyEntryPos >= this.history.length) {
 			return;
 		}
-		this.history.splice(historyEntryPos, 1);
 		if (this.historyPos === historyEntryPos) {
-			this.restoreHistory(this.history.length - 1);
+			if (this.historyPos < this.history.length - 1) {
+				this.restoreHistory(this.history.length - 1);
+			}
+			else {
+				this.restoreHistory(this.history.length - 2);
+			}
+			this.historyPos = this.history.length - 2;
 		}
+		this.history.splice(historyEntryPos, 1);
 	}
 
 	clearHistory() {	
