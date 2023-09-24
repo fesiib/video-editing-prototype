@@ -481,7 +481,7 @@ class IntentState {
 			hasSketch: this.sketchCommand.length > 0,
 			text: this.textCommand,
 			sketchRectangles: [...this.sketchCommand],
-			sketchFrameTimestamp: this.sketchPlayPosition,
+			sketchFrameTimestamp: this.sketchCommand.length > 0 ? this.sketchPlayPosition : -1,
 			editOperation: this.editOperationKey,
 		}
 	}

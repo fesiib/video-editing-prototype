@@ -65,7 +65,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 					<span> <AiOutlineHistory /> </span>
 				)
 			}
-			{title === "" ? `Description ${historyIdx + 1}` : title}
+			{title === "" ? `Request ${historyIdx + 1}` : title}
 		
 		</button>
 		{
@@ -118,7 +118,7 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 	const titleIdx = intent.idx;
 	const isSelected = curIntent.idx === titleIdx;
 
-	const editOperationTitle = intent.editOperation === null ? "No Description" : intent.editOperation.title;
+	const editOperationTitle = intent.editOperation === null ? "No Edit Selected" : intent.editOperation.title;
 
 	// TODO: summarize all descriptions in the history
 	const title = intent.history.length === 0 ? ("") : (

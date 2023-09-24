@@ -115,6 +115,7 @@ const SketchCanvas = observer(function SketchCanvas(
 		if (!sketching) {
 			return;
 		}
+		onClearClick();
 		const pos = event.target.getStage().getPointerPosition();
 		const x = pos.x;
 		const y = pos.y;
@@ -257,7 +258,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					<div
 						className="text-sm cursor-pointer hover:underline text-blue-500 p-1"
 						onClick={onSketchTextClick}
-					>  Specify a region for improved results
+					>  Specify a region of interest for improved results
 					</div>
 				) : null
 		}
