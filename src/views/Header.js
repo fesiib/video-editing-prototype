@@ -37,6 +37,10 @@ const Auth = observer(function Auth() {
 		userStore.resetFirebase();
 	});
 
+	const saveOnServer = action(() => {
+		userStore.saveOnServer();
+	})
+
 	useEffect(() => {
 		authStateChanged(action((user) => {
 			if (user) {
@@ -105,6 +109,12 @@ const Auth = observer(function Auth() {
 										})
 									}
 								</select>
+								<button
+									className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
+									onClick={() => saveOnServer()}
+								>
+									Finish
+								</button>
 							</div>
 						) : null
 					}

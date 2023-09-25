@@ -3,7 +3,18 @@ import DomainStore from "./domainStore";
 import UIStore from "./uiStore";
 import UserStore from "./userStore";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { randomUUID } from "../utilities/genericUtilities";
 import { firestore } from "../services/firebase";
+import axios from "axios";
+
+const ADDR = "http://internal.kixlab.org:7778/"
+
+const REQUEST_TYPES = {
+    saveOnServer: {
+        serverAddr: ADDR,
+        route: "save-user"
+    },
+};
 
 class LogData {
 	userId = null;
@@ -194,6 +205,92 @@ class RootStore {
 				});
 			}).catch((error) => {
 				reject("user save error: " + error.message);
+			});
+		});
+	}
+
+	saveOnServer() {
+		if (!this.userStore.isLoggedIn) {
+			return;
+		}
+		const taskKeys = Object.keys(this.userStore.videoLinks);
+		const userId = this.userStore.userId;
+		const rootCollection = collection(firestore, this.collection);
+		const curUserStore = doc(rootCollection, userId);
+		const curVideoCollection = collection(curUserStore, this.videoCollection);
+		const curIntentCollection = collection(curUserStore, this.intentCollection);
+		const curEditCollection = collection(curUserStore, this.editCollection);
+		const taskCollections = taskKeys.map((taskKey) => {
+			return collection(curUserStore, taskKey);
+		});
+
+		let allData = {
+			dataId: randomUUID(),
+			userId: this.userStore.email,
+			userStore: {},
+			tasks: [],
+			videos: [],
+			intents: [],
+			edits: [],
+		};
+
+		return new Promise((resolve, reject) => {
+			let taskGets = [];
+			for (let i = 0; i < taskCollections.length; i++) {
+				const curTaskCollection = taskCollections[i];
+				taskGets.push(getDocs(curTaskCollection));
+			}
+			Promise.all(taskGets).then((querySnapshots) => {
+				for (let i = 0; i < querySnapshots.length; i++) {
+					const querySnapshot = querySnapshots[i];
+					querySnapshot.forEach((singleDoc) => {
+						allData.tasks.push(singleDoc.data());
+					});
+				}
+				const videos = getDocs(curVideoCollection);
+				const intents = getDocs(curIntentCollection);
+				const edits = getDocs(curEditCollection);
+				const userStore = getDoc(curUserStore);
+				Promise.all([videos, intents, edits, userStore]).then((querySnapshots) => {
+					const viodeoQuerySnapshot = querySnapshots[0];
+					viodeoQuerySnapshot.forEach((singleDoc) => {
+						allData.videos.push(singleDoc.data());
+					});
+					const intentQuerySnapshot = querySnapshots[1];
+					intentQuerySnapshot.forEach((singleDoc) => {
+						allData.intents.push(singleDoc.data());
+					});
+					const editQuerySnapshot = querySnapshots[2];
+					editQuerySnapshot.forEach((singleDoc) => {
+						allData.edits.push(singleDoc.data());
+					});
+					const userStoreSnapshot = querySnapshots[3];
+					allData.userStore = userStoreSnapshot.data();
+
+					console.log("saving -->", allData);
+					const requestCfg = REQUEST_TYPES.saveOnServer;
+					const url = requestCfg.serverAddr + requestCfg.route;
+					const config = {
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'DELETE, POST, GET, OPTIONS',
+							'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+						},
+						responseType: 'json',
+					};
+
+					axios.post(url, {data: allData}, config).then((response) => {
+						resolve("success");
+					}).catch((error) => {
+						reject("server save error (request): " + error.message);
+					});
+				}).catch((error) => {
+					console.log(error);
+					reject("server save error (parts): " + error.message);
+				});
+			}).catch((error) => {
+				reject("server save error (tasks): " + error.message);
 			});
 		});
 	}

@@ -17,8 +17,8 @@ class UserStore {
 
 	videoLinks = {
 		// controlled
-		"video-1": "https://www.youtube.com/watch?v=kdN41iYTg3U",
-		"video-2": "https://www.youtube.com/watch?v=3_nLdcHBJY4",
+		"video-1": "https://www.youtube.com/watch?v=b3TVLNNqgdc",
+		"video-2": "https://www.youtube.com/live/Tih8I3Klw54?si=QXkQ-ID33_FyAmWO",
 		// open-ended
 		"video-3": "https://www.youtube.com/watch?v=OKQpOzEY_A4",
 		"video-4": "https://www.youtube.com/watch?v=sz8Lo3NY1m0",
@@ -347,6 +347,22 @@ class UserStore {
 			this.loading = false;
 		})).catch(action((error) => {
 			this.loading = false;
+			console.log(error);
+		}));
+	}
+
+	saveOnServer() {
+		if (this.userId === null || this.isTaskChosen === true) {
+			return;
+		}
+		if (this.loading === true) return;
+		this.loading = true;
+		this.rootStore.saveOnServer().then(action(() => {
+			this.loading = false;
+			alert("Data has been saved!");
+		})).catch(action((error) => {
+			this.loading = false;
+			alert("ERROR: " + error);
 			console.log(error);
 		}));
 	}
