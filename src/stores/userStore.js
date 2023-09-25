@@ -359,10 +359,10 @@ class UserStore {
 		this.loading = true;
 		this.rootStore.saveOnServer().then(action(() => {
 			this.loading = false;
-			alert("Data has been saved!");
+			alert("Congratulations, you finished the study!");
 		})).catch(action((error) => {
 			this.loading = false;
-			alert("ERROR: " + error);
+			alert("ERROR: " + error + "\nPlease try again!");
 			console.log(error);
 		}));
 	}

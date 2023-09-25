@@ -220,6 +220,7 @@ class RootStore {
 		const curVideoCollection = collection(curUserStore, this.videoCollection);
 		const curIntentCollection = collection(curUserStore, this.intentCollection);
 		const curEditCollection = collection(curUserStore, this.editCollection);
+		const logsCollection = collection(curUserStore, this.logCollection);
 		const taskCollections = taskKeys.map((taskKey) => {
 			return collection(curUserStore, taskKey);
 		});
@@ -232,6 +233,7 @@ class RootStore {
 			videos: [],
 			intents: [],
 			edits: [],
+			logs: [],
 		};
 
 		return new Promise((resolve, reject) => {
@@ -251,7 +253,10 @@ class RootStore {
 				const intents = getDocs(curIntentCollection);
 				const edits = getDocs(curEditCollection);
 				const userStore = getDoc(curUserStore);
-				Promise.all([videos, intents, edits, userStore]).then((querySnapshots) => {
+				const logs = getDocs(logsCollection);
+				Promise.all([
+					videos, intents, edits, userStore, logs
+				]).then((querySnapshots) => {
 					const viodeoQuerySnapshot = querySnapshots[0];
 					viodeoQuerySnapshot.forEach((singleDoc) => {
 						allData.videos.push(singleDoc.data());
@@ -266,6 +271,11 @@ class RootStore {
 					});
 					const userStoreSnapshot = querySnapshots[3];
 					allData.userStore = userStoreSnapshot.data();
+					
+					const logQuerySnapshot = querySnapshots[4];
+					logQuerySnapshot.forEach((singleDoc) => {
+						allData.logs.push(singleDoc.data());
+					});
 
 					console.log("saving -->", allData);
 					const requestCfg = REQUEST_TYPES.saveOnServer;
