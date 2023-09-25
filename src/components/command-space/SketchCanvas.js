@@ -408,7 +408,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			)
 
 		}
-		{/* <div className={"text-sm flex flex-col"}>
+		<div className={"text-sm flex flex-col"}>
 			<div>
 				Video: {domainStore.projectMetadata.width} x {domainStore.projectMetadata.height}
 			</div>
@@ -430,7 +430,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					</span>
 				})
 			}
-		</div> */}
+		</div>
 	</div>);
 });
 
