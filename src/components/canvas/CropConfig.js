@@ -92,7 +92,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 		}
 		for (const video of mainVideos) {
 			let cropMetadata = {};
-			if (!isSelectedFg && !isSelectedBg) {
+			if ((!isSelectedFg && !isSelectedBg) || uiStore.timelineControls.isPlaying) {
 				const scaleX = crop.customParameters.width / domainStore.projectMetadata.width;
 				const scaleY = crop.customParameters.height / domainStore.projectMetadata.height;
 				const originalX = video.commonState.originalWidth / domainStore.projectMetadata.width;
@@ -151,6 +151,7 @@ const CropConfig = observer(function CropConfig({ crop }) {
 		crop.customParameters?.cropHeight,
 		isVisible,
 		mainVideos.length,
+		uiStore.timelineControls.isPlaying,
 	]);
 
 	return (crop.title !== cropTitleConst || crop.customParameters.cropX === undefined) ? null : (<>

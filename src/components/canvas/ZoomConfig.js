@@ -123,12 +123,16 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 		let durationStart = zoom.customParameters.zoomDurationStart;
 		let durationEnd = zoom.customParameters.zoomDurationEnd;
 		if (durationStart + durationEnd > zoom.commonState.sceneDuration) {
-			return;
+			zoom.customParameters.zoomDurationStart = Math.min(durationStart, zoom.commonState.sceneDuration);
+			zoom.customParameters.zoomDurationEnd = Math.min(durationEnd, 
+				zoom.commonState.sceneDuration - zoom.customParameters.zoomDurationStart);
+			durationStart = zoom.customParameters.zoomDurationStart;
+			durationEnd = zoom.customParameters.zoomDurationEnd;
 		}
 
 		let interval = -1;
 	
-		if (!isSelected) {
+		if (!isSelected || uiStore.timelineControls.isPlaying) {
 			// if (uiStore.timelineControls.isPlaying) {
 			// 	interval = setInterval(setZoomParameters, 20);
 			// }
@@ -172,7 +176,7 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 		isSelected,
 		zoom.customParameters?.zoomDurationStart,
 		zoom.customParameters?.zoomDurationEnd,
-		//uiStore.timelineControls.isPlaying,
+		uiStore.timelineControls.isPlaying,
 		isVisible,
 		uiStore.timelineControls.playPosition,
 	]);

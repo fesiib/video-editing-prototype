@@ -266,6 +266,14 @@ class IntentState {
 			z: this.intentPos + 1,
 		});
 		this.activeEdits.push(newEdit);
+		newEdit.zoomParameters = {
+			...newEdit.zoomParameters,
+			zoomDurationStart: Math.min(3, newEdit.commonState.sceneDuration),
+		}
+		newEdit.zoomParameters = {
+			...newEdit.zoomParameters,
+			zoomDurationEnd: Math.min(3, newEdit.commonState.sceneDuration - newEdit.zoomParameters.zoomDurationStart),
+		}
 		//this.activeEdits.sort((a, b) => a.commonState.offset - b.commonState.offset);
 		return this.activeEdits[this.activeEdits.length - 1];
 	}

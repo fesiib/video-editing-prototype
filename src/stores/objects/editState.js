@@ -77,8 +77,8 @@ class EditState {
 	};
 
 	zoomParameters = {
-		zoomDurationStart: 0,
-		zoomDurationEnd: 0,
+		zoomDurationStart: 3,
+		zoomDurationEnd: 3,
 	};
 
 	blurParameters = {
@@ -503,8 +503,8 @@ class EditState {
 		}
 		if (editOperation.title === "Zoom") {
 			return {
-				zoomDurationStart: 0,
-				zoomDurationEnd: 0,
+				zoomDurationStart: 3,
+				zoomDurationEnd: 3,
 			};
 		}
 		if (editOperation.title === "Crop") {
