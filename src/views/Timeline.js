@@ -83,12 +83,37 @@ const Timeline = observer(function Timeline() {
         event.preventDefault();
         event.stopPropagation();
         uiStore.timelineControls.splitting = false;
-		if (uiStore.timelineControls.rangeSelectingTimeline === true) {
-            uiStore.timelineControls.rangeSelectingTimeline = false;
-			uiStore.timelineControls.rangeSelectingFirstPx = -1;
-            return;
-        }
-        uiStore.timelineControls.rangeSelectingTimeline = true;
+		let offset = uiStore.timelineControls.playPosition;
+
+		let newOffset = uiStore.timelineControls.playPosition;
+		let newFinish = domainStore.projectMetadata.duration;
+
+		const sortedScenes = [...curIntent.activeEdits].sort((a, b) => {
+			return a.commonState.offset - b.commonState.offset;
+		});
+		
+		for (let otherScene of sortedScenes) {
+			if (otherScene.commonState.end < newOffset) {
+				continue;
+			}
+			if (otherScene.commonState.offset > newOffset) {
+				newFinish = otherScene.commonState.offset;
+				break;
+			}
+			newOffset = otherScene.commonState.end;
+		}
+
+		newFinish = Math.min(newFinish, newOffset + 10)
+
+		if (newOffset >= newFinish) {
+			alert("Cannot add any segment. No space left.");
+			return;
+		}
+		const newScene = curIntent.addActiveEdit(
+			newOffset, newFinish,
+		);	
+		uiStore.timelineControls.playPosition = newOffset;
+		uiStore.selectTimelineObjects([newScene]);
     });
 
 

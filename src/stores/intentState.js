@@ -35,7 +35,7 @@ class IntentState {
         this.textCommand = textCommand;
 		this.sketchCommand = sketchCommand;
 		this.sketchPlayPosition = sketchPlayPosition;
-		this.editOperationKey = "";
+		this.editOperationKey = Object.keys(domainStore.editOperations)[0];
 		this.suggestedEditOperationKey = "";
 		this.suggestedEditOperationKeys = [];
 		this.activeEdits = [];
