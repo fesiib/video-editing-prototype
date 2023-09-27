@@ -251,7 +251,7 @@ const Timeline = observer(function Timeline() {
 	});
 
 	const onMoreClick = action(() => {
-		if (curIntent.processingAllowed) {
+		if (curIntent.processingAllowed && curIntent.searchMoreAllowed) {
 			domainStore.processIntent(
 				domainStore.processingModes.addMore,
 				{
@@ -428,7 +428,7 @@ const Timeline = observer(function Timeline() {
 						</button>
 					</div>
 					{curIntent.suggestedEdits.length === 0 ? (
-						(curIntent.processingAllowed === true 
+						(curIntent.processingAllowed === true && curIntent.searchMoreAllowed
 							&& uiStore.commandSpaceControls.viewPortStart < uiStore.commandSpaceControls.viewPortFinish
 						) ? (
 							<div className="flex gap-1 justify-center">

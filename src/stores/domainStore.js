@@ -443,6 +443,7 @@ class DomainStore {
 		if (this.processingIntent) {
 			return;
 		}
+		const isAddMore = processingMode === this.processingModes.addMore;
 		this.processingIntent = true;
 		// request
 		const requestData = {
@@ -481,10 +482,12 @@ class DomainStore {
 		// response
 		// make sure zIndex is fine
 		// make sure to edit suggesteEditOperationKey and remove it if they are equal
-		const requestedIntentPos = this.curIntentPos;	
-		this.curIntent.enterHistory();
-		this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-		this.curIntent.summary = "";
+		const requestedIntentPos = this.curIntentPos;
+		if (isAddMore == false) {
+			this.curIntent.enterHistory();
+			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
+			this.curIntent.summary = "";
+		}	
 		this.curIntent.suggestedEdits = [];
 		this.curIntent.suggestedEditOperationKeys = [];
 		this.curIntent.suggestedEditOperationKey = "";
@@ -504,7 +507,9 @@ class DomainStore {
 			// }
 			this.setCurIntent(requestedIntentPos);
 			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-			this.curIntent.setSummary(summary);
+			if (isAddMore === false) {
+				this.curIntent.setSummary(summary);
+			}
 			requestSuggestions(requestData).then(action((responseData) => {
 				console.log(responseData);
 				if (responseData === null || responseData.edits === undefined) {

@@ -498,7 +498,28 @@ class IntentState {
 	}
 
 	get processingAllowed() {
-		return this.textCommand !== "" || this.sketchCommand.length > 0;
+		return this.textCommand !== "" || (this.sketchCommand.length > 0 && this.sketchPlayPosition >= 0);
+	}
+
+	get searchMoreAllowed() {
+		const isTextSame = this.textCommand === this.history[this.historyPos].textCommand;
+		let isSketchSame = this.sketchCommand.length === this.history[this.historyPos].sketchCommand.length;
+		const isSketchPlayPositionSame = this.sketchPlayPosition === this.history[this.historyPos].sketchPlayPosition;
+		if (isSketchSame) {
+			for (let i = 0; i < this.sketchCommand.length; i++) {
+				if (this.sketchCommand[i].x !== this.history[this.historyPos].sketchCommand[i].x
+					|| this.sketchCommand[i].y !== this.history[this.historyPos].sketchCommand[i].y
+					|| this.sketchCommand[i].width !== this.history[this.historyPos].sketchCommand[i].width
+					|| this.sketchCommand[i].height !== this.history[this.historyPos].sketchCommand[i].height
+				) {
+					isSketchSame = false;
+					break;
+				}
+			}
+		}
+		return (
+			isTextSame && isSketchSame && (isSketchPlayPositionSame || this.sketchCommand.length === 0)
+		);
 	}
 
 	saveFirebase(userId, taskIdx) {
