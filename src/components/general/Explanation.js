@@ -149,18 +149,25 @@ const Explanation = observer(function Explanation() {
 			<div className="flex gap-1 flex-row justify-start items-center">
 				<AiOutlineBulb/>
 				<span> Examine processing results: </span>
-				{/* <span> {
-					selectedSuggestedEdits.map((edit, idx) => {
-						const isLast = idx === selectedSuggestedEdits.length - 1;
-						let pos = 0;
-						for (let sugestedEdit of curIntent.suggestedEdits) {
-							if (sugestedEdit.commonState.offset <= edit.commonState.offset) {
-								pos += 1;
-							}
-						}
-						return pos + (isLast ? "" : ", ");
-					})
-				} / {curIntent.suggestedEdits.length} </span> */}
+				{
+					selectedSuggestedEdits.length > 0 ? (
+						<span> {
+							`${curIntent.suggestedEdits.findIndex((suggestedEdit) => {
+								return suggestedEdit.commonState.id === selectedEdits[0].commonState.id;
+							}) + 1}`
+							// selectedEdits.map((edit, idx) => {
+							// 	const isLast = idx === selectedEdits.length - 1;
+							// 	let pos = 0;
+							// 	for (let sugestedEdit of curIntent.suggestedEdits) {
+							// 		if (sugestedEdit.commonState.offset <= edit.commonState.offset) {
+							// 			pos += 1;
+							// 		}
+							// 	}
+							// 	return pos + (isLast ? "" : ", ");
+							// })
+						} / {curIntent.suggestedEdits.length} </span>
+					) : (null)
+				}
 			</div>
 			{/* Lines below */}
 			<RowsVisualization 
