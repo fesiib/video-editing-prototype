@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 
@@ -8,7 +8,7 @@ import useRootContext from "../../hooks/useRootContext";
 import { toJS } from "mobx";
 
 const RowsVisualization = observer(function RowsVisualization({
-	edit,
+	contribution,
 }) {
 	const COMMAND = "command";
 	const { userStore, uiStore, domainStore } = useRootContext();
@@ -31,23 +31,23 @@ const RowsVisualization = observer(function RowsVisualization({
 		"custom": "how (parameters)",
 	};
 
-	let fullText = "";
-	for (let i = 0; i < edit.contribution.length; i++) {
-		const single = edit.contribution[i];
-		fullText += single.text;
-		const text = single.text;
-		const type = single.type;
-		for (let refType of type) {
-			const t = refType.startsWith("custom.") ? "custom" : refType;
-			if (!(t in rows)) {
-				rows[t] = [];
-			}
-			rows[t].push({
-				offset: fullText.length - text.length,
-				text: text,
-			});
-		}
-	}
+	// let fullText = "";
+	// for (let i = 0; i < contribution.length; i++) {
+	// 	const single = contribution[i];
+	// 	fullText += single.text;
+	// 	const text = single.text;
+	// 	const type = single.type;
+	// 	for (let refType of type) {
+	// 		const t = refType.startsWith("custom.") ? "custom" : refType;
+	// 		if (!(t in rows)) {
+	// 			rows[t] = [];
+	// 		}
+	// 		rows[t].push({
+	// 			offset: fullText.length - text.length,
+	// 			text: text,
+	// 		});
+	// 	}
+	// }
 
 	return (<div className="flex flex-col text-s p-2 bg-gray-100 overflow-x-auto">
 		{
@@ -76,12 +76,13 @@ const RowsVisualization = observer(function RowsVisualization({
 								bottom: `${25}%`,
 							}}
 						> </div>
-						{edit.contribution.map((single, idx) => {
+						{contribution.map((single, idx) => {
 							const text = single.text;
 							const type = single.type;
 							const highlight = (type.includes(rowKey) || (
-								rowKey === "custom" && type.some((t) => t.startsWith("custom."))
+								rowKey === "custom" && type.some((t) => t.startsWith(`custom.${curIntent.editOperationKey}`))
 							));
+							console.log()
 							// const isCustom = type.startsWith("custom.");
 							// const t = rowKey.startsWith("custom.") ? "custom" : rowKey;
 							if (rowKey === COMMAND) {
@@ -163,9 +164,9 @@ const Explanation = observer(function Explanation() {
 			</div>
 			{/* Lines below */}
 			<RowsVisualization 
-				edit={selectedSuggestedEdits.length > 0 ?
-					selectedEdits[0] :
-					curIntent.suggestedEdits[0]
+				contribution={selectedSuggestedEdits.length > 0 ?
+					selectedEdits[0].contribution :
+					curIntent.combinedContribution
 				}
 			/>
 			{/* 

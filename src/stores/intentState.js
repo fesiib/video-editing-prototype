@@ -2,7 +2,7 @@ import { action, makeAutoObservable, runInAction, set, toJS } from "mobx";
 
 import EditState from "./objects/editState";
 
-import { randomUUID } from "../utilities/genericUtilities";
+import { randomUUID, sliceTextArray } from "../utilities/genericUtilities";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
 
@@ -25,6 +25,8 @@ class IntentState {
 	history = [];
 	historyPos = 0;
 
+	combinedContribution = [];
+
     constructor(domainStore, idx, textCommand, sketchCommand, sketchPlayPosition, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
@@ -44,6 +46,8 @@ class IntentState {
 		this.history = [];
 		this.enterHistory();
 		this.historyPos = 0;
+
+		this.combinedContribution = [];
     }
 
 	recordHistory() {
@@ -54,8 +58,15 @@ class IntentState {
 		this.history[this.historyPos].suggestedEditOperationKey = this.suggestedEditOperationKey;
 		this.history[this.historyPos].suggestedEditOperationKeys = this.suggestedEditOperationKeys.slice(0);
 		this.history[this.historyPos].suggestedEdits = [];
+		this.history[this.historyPos].combinedContribution = [];
 		for (let edit of this.suggestedEdits) {
 			this.history[this.historyPos].suggestedEdits.push(edit.getDeepCopy());
+		}
+		for (let single of this.combinedContribution) {
+			this.history[this.historyPos].combinedContribution.push({
+				text: single.text,
+				type: single.type.slice(0),
+			});
 		}
 	}
 
@@ -68,11 +79,18 @@ class IntentState {
 			suggestedEdits: [],
 			suggestedEditOperationKey: this.suggestedEditOperationKey,
 			suggestedEditOperationKeys: this.suggestedEditOperationKeys.slice(0),
+			combinedContribution: [],
 			processingMode: this.processingMode,
 		};
 
 		for (let edit of this.suggestedEdits) {
 			historyEntry.suggestedEdits.push(edit.getDeepCopy());
+		}
+		for (let single of this.combinedContribution) {
+			historyEntry.combinedContribution.push({
+				text: single.text,
+				type: single.type.slice(0),
+			});
 		}
 		this.history.push(historyEntry);
 	}
@@ -102,8 +120,15 @@ class IntentState {
 		this.suggestedEditOperationKeys = historyEntry.suggestedEditOperationKeys.slice(0);
 		this.processingMode = historyEntry.processingMode;
 		this.suggestedEdits = [];
+		this.combinedContribution = [];
 		for (let edit of historyEntry.suggestedEdits) {
 			this.suggestedEdits.push(edit.getDeepCopy());
+		}
+		for (let single of historyEntry.combinedContribution) {
+			this.combinedContribution.push({
+				text: single.text,
+				type: single.type.slice(0),
+			});
 		}
 	}
 
@@ -152,6 +177,12 @@ class IntentState {
 			newEdit.intent = newIntent;
 			return newEdit;
 		});
+		newIntent.combinedContribution = this.combinedContribution.slice(0).map((single) => {
+			return {
+				text: single.text,
+				type: single.type.slice(0),
+			};
+		});
 		newIntent.processingMode = this.processingMode;
 
 		//copy history
@@ -162,6 +193,7 @@ class IntentState {
 				sketchCommand: entry.sketchCommand.slice(0),
 				sketchPlayPosition: entry.sketchPlayPosition,
 				suggestedEdits: [],
+				combinedContribution: [],
 				suggestedEditOperationKey: entry.suggestedEditOperationKey,
 				suggestedEditOperationKeys: entry.suggestedEditOperationKeys.slice(0),
 				processingMode: entry.processingMode,
@@ -170,6 +202,12 @@ class IntentState {
 				const newEdit = edit.getDeepCopy();
 				newEdit.intent = newIntent;
 				newEntry.suggestedEdits.push(newEdit);
+			}
+			for (let single of entry.combinedContribution) {
+				newEntry.combinedContribution.push({
+					text: single.text,
+					type: single.type.slice(0),
+				});
 			}
 			return newEntry;
 		});
@@ -333,55 +371,20 @@ class IntentState {
 		newEdit.explanation = explanation;
 		newEdit.suggestionSource = suggestionSource;
 		
-		newEdit.contribution = [{
-			text: this.textCommand,
-			type: [],
-		}];
+		newEdit.contribution = this.combinedContribution.map((single) => {
+			return {
+				text: single.text,
+				type: []
+			};
+		});
 		for (let key in newEdit.suggestionSource) {
+			if (key.startsWith("offsets")) {
+				continue;
+			}
 			for (let source of newEdit.suggestionSource[key]) {
-				let newContribution = [];
-				for (let single of newEdit.contribution) {
-					const text = single.text;
-					const type = single.type;
-					if (type.includes(key) === true) {
-						newContribution.push(single);
-						continue;
-					}
-					if (text.includes(source)) {
-						const parts = text.split(source);
-						for (let part_idx = 0; part_idx < parts.length - 1; part_idx++) {
-							let part = parts[part_idx];
-							if (part_idx === 0) {
-								part = part.trimEnd();
-							}
-							else {
-								part = part.trim();
-							}
-							if (part !== "") {
-								newContribution.push({
-									text: part,
-									type: type.slice(0),
-								});
-							}
-							newContribution.push({
-								text: source,
-								type: [...type.slice(0), key],
-							});
-						}
-						let lastPart = parts[parts.length - 1];
-						if (lastPart !== "") {
-							newContribution.push({
-								text: lastPart.trimStart(),
-								type: type.slice(0),
-							});
-						}
-					}
-					else {
-						//console.log("could not find", source, "in", text);
-						newContribution.push(single);
-					}
-				}
-				newEdit.contribution = newContribution.slice(0);
+				source = source.toLowerCase();
+				newEdit.contribution = sliceTextArray(newEdit.contribution, source, key);
+				this.combinedContribution = sliceTextArray(this.combinedContribution, source, key);
 			}
 		}
 
@@ -503,6 +506,11 @@ class IntentState {
 				for (let edit of this.suggestedEdits) {
 					allEditPromises.push(edit.saveFirebase(userId, taskIdx));	
 				}
+				for (let historyEntry of this.history) {
+					for (let edit of historyEntry.suggestedEdits) {
+						allEditPromises.push(edit.saveFirebase(userId, taskIdx));
+					}
+				}
 				await Promise.all(allEditPromises);
 			} catch (error) {
 				reject("edit save error: " + error.message);
@@ -526,6 +534,8 @@ class IntentState {
 				}
 				this.activeEdits = [];
 				this.suggestedEdits = [];
+
+				this.combinedContribution = [];
 
 				this.idx = data.idx;
 				this.textCommand = data.textCommand;
@@ -577,14 +587,22 @@ class IntentState {
 					}
 				}
 
+				for (let single of data.combinedContribution) {
+					this.combinedContribution.push({
+						text: single.text,
+						type: single.type.slice(0),
+					});
+				}
+
 				this.history = [];
 				for (let entry of data.history) {
-					const newEntry = {
+					let newEntry = {
 						summary: entry.summary,
 						textCommand: entry.textCommand,
 						sketchCommand: entry.sketchCommand.slice(0),
 						sketchPlayPosition: entry.sketchPlayPosition,
 						suggestedEdits: [],
+						combinedContribution: [],
 						suggestedEditOperationKey: entry.suggestedEditOperationKey,
 						suggestedEditOperationKeys: entry.suggestedEditOperationKeys.slice(0),
 						processingMode: entry.processingMode,
@@ -608,6 +626,12 @@ class IntentState {
 						}
 					}
 					runInAction(() => {
+						for (let single of entry.combinedContribution) {
+							newEntry.combinedContribution.push({
+								text: single.text,
+								type: single.type.slice(0),
+							});
+						}
 						this.history.push(newEntry);
 					});
 				}
@@ -632,6 +656,7 @@ class IntentState {
 				suggestedEditOperationKeys: intent.suggestedEditOperationKeys,
 				activeEdits: [],
 				suggestedEdits: [],
+				combinedContribution: [],
 				id: intent.id,
 				idx: intent.idx,
 				processingMode: intent.processingMode,
@@ -645,6 +670,12 @@ class IntentState {
 			for (let edit of intent.suggestedEdits) {
 				data.suggestedEdits.push(edit.commonState.id);
 			}
+			for (let single of intent.combinedContribution) {
+				data.combinedContribution.push({
+					text: single.text,
+					type: toJS(single.type).slice(0),
+				});
+			}
 			for (let entry of intent.history) {
 				const newEntry = {
 					summary: entry.summary,
@@ -652,6 +683,7 @@ class IntentState {
 					sketchCommand: toJS(entry.sketchCommand.slice(0)),
 					sketchPlayPosition: entry.sketchPlayPosition,
 					suggestedEdits: [],
+					combinedContribution: [],
 					suggestedEditOperationKey: entry.suggestedEditOperationKey,
 					suggestedEditOperationKeys: entry.suggestedEditOperationKeys,
 					processingMode: entry.processingMode,
@@ -659,6 +691,13 @@ class IntentState {
 				for (let edit of entry.suggestedEdits) {
 					newEntry.suggestedEdits.push(edit.commonState.id);
 				}
+				for (let single of entry.combinedContribution) {
+					newEntry.combinedContribution.push({
+						text: single.text,
+						type: toJS(single.type).slice(0),
+					});
+				}
+				console.log(newEntry);
 				data.history.push(newEntry);
 			}
 			//console.log("intent to", data);

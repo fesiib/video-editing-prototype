@@ -6,6 +6,7 @@ import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { requestSuggestions, requestSummary } from "../services/pipeline";
 import EditState from "./objects/editState";
+import { sliceTextArray } from "../utilities/genericUtilities";
 
 class DomainStore {
 	domainDoc = "domain";
@@ -305,6 +306,10 @@ class DomainStore {
 			newIntent.sketchCommand = randomSketchCommand;
 			newIntent.sketchPlayPosition = randomSketchPlayPosition;
 			newIntent.suggestedEdits = [];
+			newIntent.combinedContribution = [{
+				text: randomTextCommand.toLowerCase(),
+				type: [],
+			}];
 
 			const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
 			for (let i = 0; i < randomSuggestedEditsLength; i++) {
@@ -481,6 +486,7 @@ class DomainStore {
 		this.curIntent.suggestedEdits = [];
 		this.curIntent.suggestedEditOperationKeys = [];
 		this.curIntent.suggestedEditOperationKey = "";
+		this.curIntent.combinedContribution = [];
 		requestSummary({
 			input: requestData.requestParameters.text,
 		}).then(action((responseData) => {
@@ -509,6 +515,12 @@ class DomainStore {
 				const suggestedParameters = responseData.requestParameters.parameters;
 				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
 				const suggestedEdits = responseData.edits;
+				const indexedParameters = responseData.requestParameters.indexedParameters;
+				const indexedEdits = responseData.requestParameters.indexedEdits;
+				this.curIntent.combinedContribution = [{
+					text: requestData.requestParameters.text.toLowerCase(),
+					type: [],
+				}]
 				this.curIntent.suggestedEdits = suggestedEdits.map(action((edit) => {
 					const newEdit = new EditState(this, this.curIntent, true, this.curIntent.trackId);
 					newEdit.commonState.setMetadata({
@@ -520,70 +532,51 @@ class DomainStore {
 						spatial: [],
 						custom: [],
 						edit: [],
+						offsetsTemporal: [],
+						offsetsSpatial: [],
+						offsetsCustom: [],
+						offsetsEdit: [],
 					};
 					newEdit.setResponseBody({
 						...edit,
 						suggestedParameters: suggestedParameters,
 					});
 					
-					newEdit.contribution = [{
-						text: requestData.requestParameters.text.toLowerCase(),
-						type: [],
-					}];
-					for (let parameterKey in suggestedParameters) {
-						newEdit.suggestionSource[`custom.${parameterKey}`] = suggestedParameters[parameterKey].slice(0);
+					newEdit.contribution = this.curIntent.combinedContribution.map((single) => {
+						return {
+							text: single.text,
+							type: []
+						};
+					});
+
+					// for (let parameterKey in suggestedParameters) {
+					// 	newEdit.suggestionSource[`custom.${parameterKey}`] = suggestedParameters[parameterKey].slice(0);
+					// }
+					for (let parameterKey in indexedParameters) {
+						newEdit.suggestionSource[`custom.${parameterKey}`] = indexedParameters[parameterKey].map((single) => single.reference);
+						newEdit.suggestionSource[`offsetsCustom.${parameterKey}`] = indexedParameters[parameterKey].map((single) => single.offset);
+					}
+					for (let single of indexedEdits) {
+						console.log(single);
+						newEdit.suggestionSource['edit'].push(single.reference);
+						newEdit.suggestionSource['offsetsEdit'].push(single.offset);
 					}
 					for (let key in newEdit.suggestionSource) {
+						if (key.startsWith("offsets")) {
+							continue;
+						}
 						for (let source of newEdit.suggestionSource[key]) {
 							source = source.toLowerCase();
-							let newContribution = [];
-							for (let single of newEdit.contribution) {
-								const text = single.text;
-								const type = single.type;
-								if (type.includes(key) === true) {
-									newContribution.push(single);
-									continue;
-								}
-								if (text.includes(source)) {
-									const parts = text.split(source);
-									for (let part_idx = 0; part_idx < parts.length - 1; part_idx++) {
-										let part = parts[part_idx];
-										if (part_idx === 0) {
-											part = part.trimEnd();
-										}
-										else {
-											part = part.trim();
-										}
-										if (part !== "") {
-											newContribution.push({
-												text: part,
-												type: type.slice(0),
-											});
-										}
-										newContribution.push({
-											text: source,
-											type: [...type.slice(0), key],
-										});
-									}
-									let lastPart = parts[parts.length - 1];
-									if (lastPart !== "") {
-										newContribution.push({
-											text: lastPart.trimStart(),
-											type: type.slice(0),
-										});
-									}
-								}
-								else {
-									//console.log("could not find", source, "in", text);
-									newContribution.push(single);
-								}
-							}
-							newEdit.contribution = newContribution.slice(0);
+							newEdit.contribution = sliceTextArray(newEdit.contribution, source, key);
+							this.curIntent.combinedContribution = sliceTextArray(this.curIntent.combinedContribution, source, key);
 						}
 					}
 					return newEdit;
 				}));
 				this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
+				if (suggestedEditOperationKeys.length > 0) {
+					this.curIntent.setEditOperationKey(suggestedEditOperationKeys[0]);
+				}
 				this.processingIntent = false;
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");

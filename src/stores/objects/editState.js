@@ -146,11 +146,15 @@ class EditState {
 		newEdit.isSuggested = this.isSuggested;
 		newEdit.explanation = [...this.explanation];
 		newEdit.suggestionSource = {
-			spatial: this.suggestionSource?.spatial ? this.suggestionSource.spatial.slice(0) : [],
-			temporal: this.suggestionSource?.temporal ? this.suggestionSource.temporal.slice(0) : [],
-			edit: this.suggestionSource?.edit ? this.suggestionSource.edit.slice(0) : [],
-			custom: this.suggestionSource?.custom ? this.suggestionSource.custom.slice(0) : [],
+			spatial: [],
+			temporal: [],
+			edit: [],
+			custom: [],
 		};
+		for (const key in this.suggestionSource) {
+			newEdit.suggestionSource[key] = [...this.suggestionSource[key]];
+		}
+
 		newEdit.contribution = [...this.contribution];
 		newEdit.suggestedParameters = {...this.suggestedParameters};
 		// add all parameters
@@ -288,6 +292,13 @@ class EditState {
 			};
 			this.contribution = [];
 		}
+		if (parameters.offsets !== undefined) {
+			this.suggestionSource = {
+				...this.suggestionSource,
+				offsetsSpatial: [...parameters.offsets],
+			}
+			this.contribution = [];
+		}
 	}
 
 	setTemporalParameters(parameters) {
@@ -314,6 +325,13 @@ class EditState {
 				...this.suggestionSource,
 				temporal: [...parameters.source],
 			};
+			this.contribution = [];
+		}
+		if (parameters.offsets !== undefined) {
+			this.suggestionSource = {
+				...this.suggestionSource,
+				offsetsTemporal: [...parameters.offsets],
+			}
 			this.contribution = [];
 		}
 	}
@@ -794,11 +812,14 @@ class EditState {
 		this.isSuggested = edit.isSuggested;
 		this.explanation = edit.explanation.slice(0);
 		this.suggestionSource = {
-			spatial: edit.suggestionSource.spatial.slice(0),
-			temporal: edit.suggestionSource.temporal.slice(0),
-			edit: edit.suggestionSource.edit.slice(0),
-			custom: edit.suggestionSource.custom.slice(0),
+			spatial: [],
+			temporal: [],
+			edit: [],
+			custom: [],
 		};
+		for (const key in edit.suggestionSource) {
+			this.suggestionSource[key] = [...edit.suggestionSource[key]];
+		}
 		this.contribution = edit.contribution.slice(0);
 		this.suggestedParameters = { ...edit.suggestedParameters };
 	}
@@ -848,11 +869,14 @@ class EditState {
 				this.isSuggested = data.isSuggested;
 				this.explanation = data.explanation.slice(0);
 				this.suggestionSource = {
-					spatial: data.suggestionSource.spatial.slice(0),
-					temporal: data.suggestionSource.temporal.slice(0),
-					edit: data.suggestionSource.edit.slice(0),
-					custom: data.suggestionSource.custom.slice(0),
+					spatial: [],
+					temporal: [],
+					edit: [],
+					custom: [],
 				};
+				for (const key in data.suggestionSource) {
+					this.suggestionSource[key] = [...data.suggestionSource[key]];
+				}
 				this.contribution = data.contribution.slice(0);
 				this.suggestedParameters = { ...data.suggestedParameters };
 				resolve(true);
@@ -876,14 +900,17 @@ class EditState {
 				isSuggested: editState.isSuggested,
 				explanation: editState.explanation.slice(0),
 				suggestionSource: {
-					spatial: editState.suggestionSource.spatial.slice(0),
-					temporal: editState.suggestionSource.temporal.slice(0),
-					edit: editState.suggestionSource.edit.slice(0),
-					custom: editState.suggestionSource.custom.slice(0),
+					spatial: [],
+					temporal: [],
+					edit: [],
+					custom: [],
 				},
 				contribution: editState.contribution.slice(0),
 				suggestedParameters: { ...toJS(editState.suggestedParameters) },
 			};
+			for (const key in editState.suggestionSource) {
+				data.suggestionSource[key] = [...editState.suggestionSource[key]];
+			}
 			//console.log("to", data);
 			return data;
 		},

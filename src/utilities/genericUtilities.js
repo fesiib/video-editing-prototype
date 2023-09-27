@@ -75,3 +75,46 @@ export function rotatePoint({ x, y }, angle) {
 	const rsin = Math.sin(rad);
 	return { x: x * rcos - y * rsin, y: y * rcos + x * rsin };
 };
+
+export function sliceTextArray(textArray, source, key) {
+	let newTextArray = [];
+	for (let single of textArray) {
+		const text = single.text;
+		const type = single.type;
+		if (type.includes(key) === true || text.includes(source) === false) {
+			newTextArray.push({
+				text: text,
+				type: type.slice(0),
+			});
+			continue;
+		}
+		const parts = text.split(source);
+		for (let part_idx = 0; part_idx < parts.length - 1; part_idx++) {
+			let part = parts[part_idx];
+			if (part_idx === 0) {
+				part = part.trimEnd();
+			}
+			else {
+				part = part.trim();
+			}
+			if (part !== "") {
+				newTextArray.push({
+					text: part,
+					type: type.slice(0),
+				});
+			}
+			newTextArray.push({
+				text: source,
+				type: [...type.slice(0), key],
+			});
+		}
+		let lastPart = parts[parts.length - 1];
+		if (lastPart !== "") {
+			newTextArray.push({
+				text: lastPart.trimStart(),
+				type: type.slice(0),
+			});
+		}
+	}
+	return newTextArray;
+}
