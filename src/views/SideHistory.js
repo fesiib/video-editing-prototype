@@ -14,7 +14,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		idx, historyIdx, 
 		collapsed }
 ) {
-	const { domainStore } = useRootContext();
+	const { uiStore, domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const intent = domainStore.intents[idx];
 	const entry = intent.history[historyIdx];
@@ -27,6 +27,9 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 			return;
 		}
 		if (window.confirm("Delete this history point? You cannot restore this history point.")) {
+			uiStore.logData("intentHistoryDelete", {
+				historyIdx: historyIdx,
+			});
 			intent.deleteHistory(historyIdx);
 		}
 	});
@@ -37,6 +40,10 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 		if (intent.idx !== curIntent.idx) {
 			domainStore.setCurIntent(idx);
 		}
+		uiStore.logData("intentHistorySelect", {
+			originalIdx: historyPos,
+			selectedIdx: historyIdx,
+		});
 		if (historyPos !== historyIdx) {
 			intent.restoreHistory(historyIdx);
 		}
@@ -84,7 +91,7 @@ const SuggHistoryItem = observer(function SuggHistoryItem(
 });
 
 const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
-	const { domainStore } = useRootContext();
+	const { uiStore, domainStore } = useRootContext();
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 	const intent = domainStore.intents[idx];
 
@@ -96,6 +103,9 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 			return;
 		}
 		if (window.confirm("Delete this edit? You cannot restore this edit.")) {
+			uiStore.logData("intentDelete", {
+				intentId: domainStore.intents[intentPos].id,
+			});
 			domainStore.deleteIntent(intentPos);
 		}
 	});
@@ -106,12 +116,23 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 		// if (window.confirm("Duplicate this edit to current? Your current edit will be overwritten.")) {
 		// 	domainStore.copyIntentToCurrent(intentPos);
 		// }
+		if (domainStore.processingIntent) {
+			alert("Cannot duplicate edit while processing.");
+			return;
+		}
 		domainStore.duplicateIntent(intentPos);
+		uiStore.logData("intentDuplicate", {
+			originalIntentId: domainStore.intents[intentPos].id,
+			duplicatedIntentId: domainStore.intents[domainStore.intents.length - 1].id,
+		});
 	});
 
 	const onIntentClick = action((event, intentPos) => {
 		event.preventDefault();
 		event.stopPropagation();
+		uiStore.logData("intentSelect", {
+			intentId: domainStore.intents[intentPos].id,
+		});
 		domainStore.setCurIntent(intentPos);
 	});
 

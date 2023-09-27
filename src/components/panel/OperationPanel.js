@@ -77,6 +77,7 @@ const OperationPanel = observer(function OperationPanel() {
 
 	const onTitleClick = () => {
 		setCollapsed(() => !collapsed);
+		uiStore.logData("parameterCollapse", null);
 	}
 
 	useEffect(() => {

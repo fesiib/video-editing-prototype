@@ -41,11 +41,18 @@ const EditorCanvas = observer(function EditorCanvas() {
 
 	const onZoomChange = action((event) => {
         uiStore.canvasControls.scalePos = event.target.value;
+		uiStore.logData("canvasZoomChange", null);
     });
 
-    const isBackground = (target) => {
-        return target.name() === uiStore.backgroundName;
-    };
+	const isObject = (target) => {
+		const object = domainStore.curIntent.getCanvasObjectById(target.id());
+		if (object === undefined || object === null 
+		) {
+			return false;
+		}
+        return true;
+	}
+
     const isVisibleObject = (target) => {
 		const object = domainStore.curIntent.getCanvasObjectById(target.id());
 		if (object === undefined || object === null 
@@ -62,6 +69,15 @@ const EditorCanvas = observer(function EditorCanvas() {
             }
         }
         return false;
+    };
+
+    const isBackground = (target) => {
+		if (target === null || target === undefined) {
+			return false;
+		}
+        return target.name() === uiStore.backgroundName || (
+			!isVisibleObject(target) && isObject(target)
+		);
     };
 
     const onStageMouseDown = action((event) => {
@@ -122,6 +138,9 @@ const EditorCanvas = observer(function EditorCanvas() {
             return Util.haveIntersection(box, object.getClientRect());
         });
 		uiStore.selectCanvasObjects(selected);
+		uiStore.logData("canvasBatchSelect", {
+			count: selected.length,
+		});
     });
 
     const onStageClick = action((event) => {
@@ -151,6 +170,7 @@ const EditorCanvas = observer(function EditorCanvas() {
             // if no key pressed and the node is not selected
             // select just one
 			uiStore.selectCanvasObjects([event.target]);
+			uiStore.logData("canvasSingleSelect", null);
         } else if (metaPressed && isSelected) {
             // if we pressed keys and node was selected
             // we need to remove it from selection:
@@ -161,6 +181,9 @@ const EditorCanvas = observer(function EditorCanvas() {
         } else if (metaPressed && !isSelected) {
             // add the node into selection
             const nodes = transformerRef.current.nodes().concat([event.target]);
+			uiStore.logData("canvasBatchSelect", {
+				count: nodes.length,
+			});
 			uiStore.selectCanvasObjects(nodes);
         }
     });

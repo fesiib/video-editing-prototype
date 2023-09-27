@@ -18,13 +18,26 @@ const REQUEST_TYPES = {
 
 class LogData {
 	userId = null;
+	videoId = null;
+	systemSetting = false;
 	taskIdx = null;
 	time = null;
 	msg = null;
 	data = null;
 
-	constructor(userId, taskIdx, time, msg, data) {
+
+	constructor(
+		userId,
+		videoId,
+		systemSetting,
+		taskIdx,
+		time,
+		msg,
+		data
+	) {
 		this.userId = userId;
+		this.videoId = videoId;
+		this.systemSetting = systemSetting;
 		this.taskIdx = taskIdx;
 		this.time = time;
 		this.msg = msg;
@@ -32,14 +45,16 @@ class LogData {
 	}
 
 	toString() {
-        return `${this.userId}, ${this.taskIdx}, ${this.time}, ${this.msg}, ${this.data}`;
+        return `user: ${this.userId}, video: ${this.videoId}, treatment: ${this.systemSetting}, task: ${this.taskIdx}, time: ${this.time}, message: ${this.msg}, data: ${this.data}`;
 	}
 }
 
 const LogDataConverter = {
 	toFirestore: function(logData) {
 		return {
-			//userId: logData.userId,
+			userId: logData.userId,
+			videoId: logData.videoId,
+			systemSetting: logData.systemSetting,
 			taskIdx: logData.taskIdx,
 			time: logData.time,
 			msg: logData.msg,
@@ -48,7 +63,15 @@ const LogDataConverter = {
 	},
 	fromFirestore: function(snapshot, options) {
 		const curData = snapshot.data(options);
-		return new LogData(curData.userId, curData.taskIdx, curData.time, curData.msg, curData.data);
+		return new LogData(
+			curData.userId,
+			curData.videoId,
+			curData.systemSetting,
+			curData.taskIdx,
+			curData.time,
+			curData.msg,
+			curData.data
+		);
 	}
 };
 
@@ -310,13 +333,22 @@ class RootStore {
 			return;
 		}
 		const userId = this.userStore.userId;
+		const videoId = this.userStore.videoId;
+		const systemSetting = this.userStore.systemSetting;
+		const intentId = this.domainStore.curIntent.id;
 		const taskIdx = this.userStore.curSessionIdx * 2 + this.userStore.curVideoIdx;
 		const time = Date.now();
 		const rootCollection = collection(firestore, this.collection);
 		const userDoc = doc(rootCollection, userId);
 		const logCollection = collection(userDoc, this.logCollection);
 		const curLogDoc = doc(logCollection).withConverter(LogDataConverter);
-		setDoc(curLogDoc, new LogData(userId, taskIdx, time, msg, data)).then(() => {
+		setDoc(curLogDoc, new LogData(
+			userId, videoId, systemSetting,
+			taskIdx, time, msg, {
+				...data,
+				intentId: intentId,
+			}
+		)).then(() => {
 			console.log("logged");
 		}).catch((error) => {
 			console.log("Logger Error:", error);

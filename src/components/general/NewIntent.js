@@ -10,12 +10,15 @@ import BigPlusIcon from '../../icons/BigPlusIcon';
 const NewIntent = observer(function NewIntent({
 	collapsed = false,
 }) {
-	const { domainStore } = useRootContext();
+	const { uiStore, domainStore } = useRootContext();
 
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
 
 	const onAddClick = action(() => {
 		domainStore.addIntent();
+		uiStore.logData("intentAdd", {
+			intentId: curIntent.id,
+		});
 	});
 
 	const onAddRandomClick = action(() => {
@@ -34,7 +37,7 @@ const NewIntent = observer(function NewIntent({
 				<span> Add </span>
 			</div>
 		</button>
-		{collapsed ? null : (
+		{/* {collapsed ? null : (
 			<button
 				className="w-fit bg-green-500 hover:bg-green-700 text-white font-bold h-fit py-2 px-2 rounded"
 				onClick={() => onAddRandomClick(curIntent.idx)}
@@ -42,7 +45,7 @@ const NewIntent = observer(function NewIntent({
 			>
 				Random
 			</button>
-		)}
+		)} */}
 	</div>);
 });
 

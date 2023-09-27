@@ -8,7 +8,7 @@ import { authStateChanged, signInWithGoogle, signOutFromGoogle } from "../servic
 import NewIntent from "../components/general/NewIntent";
 
 const Auth = observer(function Auth() {
-	const { userStore } = useRootContext();
+	const { uiStore, userStore } = useRootContext();
 
 	const login = action(() => {
 		signInWithGoogle().then(action(async (result) => {
@@ -30,6 +30,9 @@ const Auth = observer(function Auth() {
 	});
 
 	const taskDone = action(() => {
+		uiStore.logData("taskDone", {
+			isTutorial: userStore.isTutorial,
+		});
 		userStore.taskDone()
 	});
 
@@ -122,12 +125,12 @@ const Auth = observer(function Auth() {
 				{
 					(!userStore.isTaskChosen && !userStore.loading) ? (
 						<div className="flex flex-row gap-2">
-							<button
+							{/* <button
 								className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 								onClick={() => resetFirebase()}
 							>
 								Reset All Tasks
-							</button>
+							</button> */}
 							<button
 								className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
 								onClick={() => logout()}

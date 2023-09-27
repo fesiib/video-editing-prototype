@@ -56,6 +56,11 @@ const Timeline = observer(function Timeline() {
 		uiStore.commandSpaceControls.viewPortFinish = Math.min(domainStore.projectMetadata.duration,
 			uiStore.commandSpaceControls.viewPortStart + uiStore.pxToSec(uiStore.timelineSize.width));
 		uiStore.commandSpaceControls.viewPortAuthor = "zoom";
+		uiStore.logData("timelineZoomChange", {
+			viewPortStart: uiStore.commandSpaceControls.viewPortStart,
+			viewPortFinish: uiStore.commandSpaceControls.viewPortFinish,
+			value: event.target.value,
+		});
     });
 
     const onPressPlay = action((event) => {
@@ -63,7 +68,7 @@ const Timeline = observer(function Timeline() {
 		event.stopPropagation();
         uiStore.timelineControls.isPlaying = !uiStore.timelineControls.isPlaying;
 		uiStore.logData("play", {
-			isPlaying: uiStore.timelineControls.isPlaying,
+			playing: uiStore.timelineControls.isPlaying,
 		});
     });
 
@@ -72,11 +77,10 @@ const Timeline = observer(function Timeline() {
         event.stopPropagation();
 		uiStore.timelineControls.rangeSelectingTimeline = false;
 		uiStore.timelineControls.rangeSelectingFirstPx = -1;
-        if (uiStore.timelineControls.splitting === true) {
-            uiStore.timelineControls.splitting = false;
-            return;
-        }
-        uiStore.timelineControls.splitting = true;
+		uiStore.timelineControls.splitting = !uiStore.timelineControls.splitting;
+		uiStore.logData("timelineSplit", {
+			splitting: uiStore.timelineControls.splitting,
+		});
     });
 
 	const onPressRangeSelect = action((event) => {
@@ -104,7 +108,11 @@ const Timeline = observer(function Timeline() {
 		}
 
 		newFinish = Math.min(newFinish, newOffset + 10)
-
+		uiStore.logData("timelineAddSegment", {
+			offset: newOffset,
+			finish: newFinish,
+			success: newOffset < newFinish,
+		});
 		if (newOffset >= newFinish) {
 			alert("Cannot add any segment. No space left.");
 			return;
@@ -124,6 +132,9 @@ const Timeline = observer(function Timeline() {
         const selectedSceneIds = uiStore.timelineControls.selectedTimelineItems.map(
             (value) => value.commonState.id
         );
+		uiStore.logData("timelineDelete", {
+			selectedSceneIds: selectedSceneIds,
+		});
         curIntent.deleteEdits(selectedSceneIds);
 		uiStore.selectTimelineObjects([]);
     });
@@ -138,9 +149,6 @@ const Timeline = observer(function Timeline() {
 		if (selectedSceneIds.length !== 1) {
 			return;
 		}
-		uiStore.logData("copy", {
-			selectedSceneIds: selectedSceneIds,
-		});
 		const selectedScenes = curIntent.activeEdits.filter((edit) => {
 			return selectedSceneIds.findIndex((id) => id === edit.commonState.id) >= 0;
 		});
@@ -165,7 +173,12 @@ const Timeline = observer(function Timeline() {
 			}
 
 			newFinish = Math.min(newFinish, newOffset + scene.commonState.sceneDuration)
-
+			uiStore.logData("timelineDuplicate", {
+				selectedSceneIds: selectedSceneIds,
+				offset: newOffset,
+				finish: newFinish,
+				success: newOffset < newFinish,
+			});
 			if (newOffset >= newFinish) {
 				alert("Cannot duplicate this segment. No space left.");
 				return null;
@@ -183,6 +196,9 @@ const Timeline = observer(function Timeline() {
 	});
 
     const onKeyDown = action((event) => {
+		uiStore.logData("timelineKey", {
+			which: event.which,
+		});
         if (event.which === 46 || event.which === 8 || event.which === 68) {
             ///delete key or backspace key or d key
             onDeleteTimelineItems();
@@ -236,12 +252,19 @@ const Timeline = observer(function Timeline() {
 				addedEdits.push(curIntent.addEditFromSuggested(edit.commonState.id));
 			}
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
+			uiStore.logData("timelineDecisionAccept", {
+				deletedEdits: deleteEditIds,
+				addedEdits: addedEdits.map((edit) => edit.commonState.id),
+			});
 			curIntent.deleteEdits(deleteEditIds);
 			uiStore.selectTimelineObjects(addedEdits);
 			return;
 		}
 		else if (decision === "reject") {
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
+			uiStore.logData("timelineDecisionReject", {
+				deletedEdits: deleteEditIds,
+			});
 			curIntent.deleteEdits(deleteEditIds);
 			if (!onNavigationClick("next") && curIntent.suggestedEdits.length > 0) {
 				onNavigationClick("prev");
@@ -259,6 +282,14 @@ const Timeline = observer(function Timeline() {
 					finish: uiStore.commandSpaceControls.viewPortFinish,
 				}
 			);
+			uiStore.logData("timelineSearchMore", {
+				text: curIntent.textCommand,
+				sketch: toJS(curIntent.sketchCommand),
+				sketchTimestamp: curIntent.sketchPlayPosition,
+				mode: domainStore.processingModes.addMore,
+				start: uiStore.commandSpaceControls.viewPortStart,
+				finish: uiStore.commandSpaceControls.viewPortFinish,
+			});
 		}
 	});
 
@@ -291,6 +322,9 @@ const Timeline = observer(function Timeline() {
 			if (prevEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = prevEdit.offset;
 				uiStore.selectTimelineObjects([edits[prevEdit.editIdx]]);
+				uiStore.logData("timelineJumpPrev", {
+					suggested: curIntent.suggestedEdits.length > 0,
+				});
 				return true;
 			}
 			return false;
@@ -311,6 +345,9 @@ const Timeline = observer(function Timeline() {
 			if (nextEdit.editIdx !== -1) {
 				uiStore.timelineControls.playPosition = nextEdit.offset;
 				uiStore.selectTimelineObjects([edits[nextEdit.editIdx]]);
+				uiStore.logData("timelineJumpNext", {
+					suggested: curIntent.suggestedEdits.length > 0,
+				});
 				return true;
 			}
 			return false;

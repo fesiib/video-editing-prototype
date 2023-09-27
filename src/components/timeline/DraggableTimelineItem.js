@@ -50,6 +50,10 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;
 			uiStore.resetTempState();
             const {left, right} = scene.split(uiStore.pxToSec(offsetPx));
+			uiStore.logData("editSplit", {
+				editId: scene.commonState.id,
+				offset: uiStore.pxToSec(offsetPx),
+			});
 			scene.replaceSelf([left, right]);
             return;
         }
@@ -64,6 +68,7 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
               uiStore.timelineControls.selectedTimelineItems[0].commonState.trackId
             : true;
         const metaKey = event.metaKey;
+
         if (metaKey && areItemsSelected && sameTrack && !areItemsSuggested) {
             let newSelectedTimelineItems = [];
             if (index >= 0) {
@@ -90,12 +95,14 @@ const DraggableTimelineItem = observer(function DraggableTimelineItem({ scene, s
                 }
             }
             uiStore.selectTimelineObjects([...newSelectedTimelineItems]);
+			uiStore.logData("editBatchSelect", null);
         } else {
             if (index >= 0) {
                 uiStore.selectTimelineObjects([]);
             } else {
 				uiStore.timelineControls.playPosition = scene.commonState.offset;
                 uiStore.selectTimelineObjects([scene]);
+				uiStore.logData("editSingleSelect", null);
             }
         }
     });

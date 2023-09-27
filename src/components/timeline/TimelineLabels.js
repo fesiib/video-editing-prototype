@@ -42,6 +42,7 @@ const TimelineLabels = observer(function TimelineLabels() {
                 uiStore.timelineControls.playPosition + transformSeconds
             )
         );
+		uiStore.logData("timelineIndicatorDragged", null);
     });
 
     const showPositionIndicator = action((event) => {
@@ -77,6 +78,7 @@ const TimelineLabels = observer(function TimelineLabels() {
             return;
         }
         uiStore.timelineControls.playPosition = uiStore.pxToSec(playPositionPx);
+		uiStore.logData("timelineIndicatorLabelClicked", null);
     });
 
     const positionIndicatorVisibility = uiStore.timelineControls.positionIndicatorVisibility;

@@ -726,7 +726,6 @@ class IntentState {
 						type: toJS(single.type).slice(0),
 					});
 				}
-				console.log(newEntry);
 				data.history.push(newEntry);
 			}
 			//console.log("intent to", data);

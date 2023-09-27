@@ -55,6 +55,9 @@ const CommandSpace = observer(function CommandSpace() {
 	const onChangeTextCommand = action((event) => {
 		const text = event.target.value;
 		curIntent.setTextCommand(text);
+		uiStore.logData("commandspaceTextChange", {
+			text: text,
+		});
 	});
 
 	const onTextAreaScroll = (event) => {
@@ -104,6 +107,14 @@ const CommandSpace = observer(function CommandSpace() {
 				finish: domainStore.projectMetadata.duration,
 			}
 		);
+		uiStore.logData("commandspaceProcess", {
+			text: curIntent.textCommand,
+			sketch: toJS(curIntent.sketchCommand),
+			sketchTimestamp: curIntent.sketchPlayPosition,
+			mode: domainStore.processingModes.fromScratch,
+			start: 0,
+			finish: domainStore.projectMetadata.duration,
+		});
 	});
 
 

@@ -176,6 +176,18 @@ const CropConfig = observer(function CropConfig({ crop }) {
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => crop.commonState.onDragMove(event.target))}
 			onTransform={action((event) => crop.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: crop.commonState.id,
+					objectType: "crop_bg",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: crop.commonState.id,
+					objectType: "crop_bg",
+				});
+			})}
 		/>
 		<Rect 
 			id={"fg_" + crop.commonState.id}
@@ -197,6 +209,18 @@ const CropConfig = observer(function CropConfig({ crop }) {
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => crop.commonState.onDragMove(event.target))}
 			onTransform={action((event) => crop.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: crop.commonState.id,
+					objectType: "crop_fg",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: crop.commonState.id,
+					objectType: "crop_fg",
+				});
+			})}
 		/>
 	</>);
 });

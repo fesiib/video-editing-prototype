@@ -72,12 +72,14 @@ const StaticTimelineItem = observer(function StaticTimelineItem({
 					}
 				}
 				uiStore.selectTimelineObjects([...newSelectedTimelineItems]);
+				uiStore.logData("editBatchSelectSuggested", null);
 			} else {
 				if (index >= 0) {
 					uiStore.selectTimelineObjects([]);
 				} else {
 					uiStore.timelineControls.playPosition = staticScene.commonState.offset;
 					uiStore.selectTimelineObjects([staticScene]);
+					uiStore.logData("editSingleSelectSuggested", null);
 				}
 			}
 		}

@@ -62,6 +62,13 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 			functionToCall(unFlattenObject({
 				[parameterKey]: value
 			}));
+			uiStore.logData("parameterUrlChange", {
+				url: value,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 		}
 	});
 
@@ -114,6 +121,13 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 			functionToCall(unFlattenObject({
 				[parameterKey]: value
 			}));
+			uiStore.logData("parameterTextChange", {
+				text: value,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 		}
 	});
 	return (<div className="flex flex-col items-start">
@@ -182,6 +196,13 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterNumberChange", {
+				number: number,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: number
 			}));
@@ -217,6 +238,13 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterNumberChangeStep", {
+				number: newValue,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: newValue,
 			}));
@@ -348,6 +376,13 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterTimeChange", {
+				time: number,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: number
 			}));
@@ -383,6 +418,13 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterTimeChangeStep", {
+				time: newValue,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: newValue,
 			}));
@@ -474,6 +516,13 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterDropDown", {
+				value: value,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: value
 			}));
@@ -520,6 +569,13 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterColor", {
+				color: fillColor,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: fillColor
 			}));
@@ -582,6 +638,13 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterRange", {
+				number: number,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: number
 			}));
@@ -627,6 +690,13 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterAlign", {
+				align: newAlign,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: newAlign
 			}));
@@ -669,6 +739,13 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 			if (metaKey === "temporal") {
 				functionToCall = edit.setTemporalParameters;
 			}
+			uiStore.logData("parameterToggle", {
+				number: number,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			functionToCall(unFlattenObject({
 				[parameterKey]: number
 			}));
@@ -702,6 +779,13 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 			if (edit.isSuggested) {
 				continue;
 			}
+			uiStore.logData("parameterSearch", {
+				value: value,
+				editId: edit.commonState.id,
+				metaParameter: metaKey,
+				parameterKey: parameterKey,
+				isBatch: selectedEdits.length > 1,
+			});
 			edit.setCustomParameters(unFlattenObject({
 				[parameterKey]: value
 			}));
@@ -739,12 +823,19 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 			/>
 			<button className='text-sm border w-fit px-1 bg-indigo-200 rounded hover:bg-indigo-300 disabled:opacity-50 disabled:hover:bg-indigo-200'
 				disabled={isDisabled}
+				onClick={() => {
+					uiStore.logData("parameterSearchClick", {
+						value: parameter,
+						id: inputId,
+						metaParameter: metaKey,
+						parameterKey: parameterKey,
+					});
+				}}
 			>
 				<Link
 					to={`https://www.google.com/search?tbm=isch&q=${parameter}`}
 					target="_blank"
 					rel="noopener noreferrer"
-					
 				>
 					Search
 				</Link>

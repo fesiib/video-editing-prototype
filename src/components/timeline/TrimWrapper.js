@@ -190,6 +190,12 @@ const TrimWrapper = observer(function TrimWrapper({
 			});
         }
         uiStore.timelineControls.positionIndicatorVisibility -= 1;
+		uiStore.logData("timelineEditTrimmed", {
+			editId: scene.commonState.id,
+			sceneDuration: scene.commonState.sceneDuration,
+			delta: deltaSeconds,
+			isLeftHandler: isLeftHandler,
+		});
     });
 
     return (

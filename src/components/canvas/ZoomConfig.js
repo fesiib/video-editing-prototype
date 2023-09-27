@@ -202,6 +202,18 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => zoom.commonState.onDragMove(event.target))}
 			onTransform={action((event) => zoom.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: zoom.commonState.id,
+					objectType: "zoom",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: zoom.commonState.id,
+					objectType: "zoom",
+				});
+			})}
 		/>
 	</>);
 });

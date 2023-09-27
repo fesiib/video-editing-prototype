@@ -94,6 +94,18 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
             perfectDrawEnabled={false}
             onDragMove={action((event) => curImage.commonState.onDragMove(event.target))}
             onTransform={action((event) => curImage.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curImage.commonState.id,
+					objectType: "image",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curImage.commonState.id,
+					objectType: "image",
+				});
+			})}
         />
 	</>);
 });

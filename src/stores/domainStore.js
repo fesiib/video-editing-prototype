@@ -586,6 +586,18 @@ class DomainStore {
 				}
 				this.curIntent.recordHistory();
 				this.processingIntent = false;
+
+				this.rootStore.uiStore.logData("processingComplete", {
+					edits: toJS(this.curIntent.suggestedEdits.map((edit) => edit.commonState.id)),
+					summary: this.curIntent.summary,
+					text: this.curIntent.textCommand,
+					sketch: toJS(this.curIntent.sketchCommand),
+					sketchTimestamp: this.curIntent.sketchPlayPosition,
+					start: segmentOfInterest.start,
+					finish: segmentOfInterest.finish,
+					explanation: toJS(this.curIntent.combinedContribution),
+					mode: processingMode,
+				});
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");
 				}
@@ -598,6 +610,10 @@ class DomainStore {
 				this.setCurIntent(requestedIntentPos);
 				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 				this.processingIntent = false;
+				this.rootStore.uiStore.logData("processingError", {
+					error: error,
+					stage: "processing",
+				});
 				alert("Sorry error occured");
 			}));
 		})).catch(action((error) => {
@@ -605,6 +621,10 @@ class DomainStore {
 			this.setCurIntent(requestedIntentPos);
 			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
 			this.processingIntent = false;
+			this.rootStore.uiStore.logData("processingError", {
+				error: error,
+				stage: "summary",
+			});
 			alert("Sorry error occured");
 		}));
 	}

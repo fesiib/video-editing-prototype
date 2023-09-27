@@ -79,6 +79,18 @@ const DraggableText = observer(function DraggableText({ curText, stageRef }) {
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curText.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curText.commonState.id,
+					objectType: "text",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curText.commonState.id,
+					objectType: "text",
+				});
+			})}
 		/>
 		<Text
 			id={curText.commonState.id}
@@ -101,6 +113,18 @@ const DraggableText = observer(function DraggableText({ curText, stageRef }) {
             perfectDrawEnabled={false}
             onDragMove={action((event) => curText.commonState.onDragMove(event.target))}
             onTransform={action((event) => curText.commonState.onTransform(event.target))}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curText.commonState.id,
+					objectType: "text",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curText.commonState.id,
+					objectType: "text",
+				});
+			})}
         />
 	</>);
 });

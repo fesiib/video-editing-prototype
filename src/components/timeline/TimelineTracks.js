@@ -171,6 +171,9 @@ const TimelineTracks = observer(function TimelineTracks() {
             sceneTrackChange(active, over, delta);
             setActiveItem(null);
             uiStore.timelineControls.positionIndicatorVisibility -= 1;
+			uiStore.logData("timelineSegmentDragged", {
+				editId: active.data.current.scene.commonState.id,
+			});
         }
     });
 
@@ -238,7 +241,6 @@ const TimelineTracks = observer(function TimelineTracks() {
 		uiStore.commandSpaceControls.viewPortStart = uiStore.pxToSec(tracksContainer.current.scrollLeft);
 		uiStore.commandSpaceControls.viewPortFinish = uiStore.pxToSec(tracksContainer.current.scrollLeft + width);
 		uiStore.commandSpaceControls.viewPortAuthor = "other";
-
 		// for (let i = 0; i < trackCnt; i++) {
 		// 	const videoIndicatorId = `video_indicator_${"track_" + i}`;
 		// 	const videoIndicator = document.getElementById(videoIndicatorId);

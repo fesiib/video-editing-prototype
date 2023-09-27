@@ -24,10 +24,12 @@ const App = observer(function App() {
 
 	const chooseTask = action((taskIdx) => {
 		userStore.chooseTask(taskIdx);
+		uiStore.logData("taskSelect", null);
 	});
 
 	const chooseTutorial = action(() => {
 		userStore.chooseTutorial();
+		uiStore.logData("taskSelectTutorial", null);
 	});
 
     useEffect(

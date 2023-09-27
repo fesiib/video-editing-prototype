@@ -18,7 +18,9 @@ const StarShape = observer(function StarShape({
 	x,
 	y,
 	id,
-	shapeName
+	shapeName,
+	onTransformEnd,
+	onDragEnd,
 }) {
 	if (curShape.customParameters.type !== "star") {
 		return null;
@@ -47,6 +49,8 @@ const StarShape = observer(function StarShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 		<Star
 			id={id}
@@ -69,6 +73,8 @@ const StarShape = observer(function StarShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 	</>);
 });
@@ -83,7 +89,9 @@ const CircleShape = observer(function CircleShape({
 	x,
 	y,
 	id,
-	shapeName
+	shapeName,
+	onTransformEnd,
+	onDragEnd,
 }) {
 	if (curShape.customParameters.type !== "circle") {
 		return null;
@@ -109,6 +117,8 @@ const CircleShape = observer(function CircleShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 		<Ellipse
 			id={id}
@@ -130,6 +140,8 @@ const CircleShape = observer(function CircleShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 	</>);
 });
@@ -145,6 +157,8 @@ const RectangleShape = observer(function RectangleShape({
 	y,
 	id,
 	shapeName,
+	onTransformEnd,
+	onDragEnd,
 }) {
 	if (curShape.customParameters.type !== "rectangle") {
 		return null;
@@ -171,6 +185,8 @@ const RectangleShape = observer(function RectangleShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 		<Rect 
 			id={id}
@@ -194,6 +210,8 @@ const RectangleShape = observer(function RectangleShape({
 			perfectDrawEnabled={false}
 			onDragMove={action((event) => curShape.commonState.onDragMove(event.target))}
 			onTransform={action((event) => curShape.commonState.onTransform(event.target))}
+			onTransformEnd={onTransformEnd}
+			onDragEnd={onDragEnd}
 		/>
 	</>);
 });
@@ -290,6 +308,20 @@ const DraggableShape = observer(function DraggableShape({
 			y={y}
 			id={"re_" + curShape.commonState.id}
 			shapeName={uiStore.objectNames.shape}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "rectangle",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "rectangle",
+				});
+			})}
 		/>);
 	}
 	if (curShape.customParameters.type === "circle") {
@@ -304,6 +336,20 @@ const DraggableShape = observer(function DraggableShape({
 			y={y}
 			id={"ci_" + curShape.commonState.id}
 			shapeName={uiStore.objectNames.shape}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "circle",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "circle",
+				});
+			})}
 		/>);
 	}
 	if (curShape.customParameters.type === "star") {
@@ -318,6 +364,20 @@ const DraggableShape = observer(function DraggableShape({
 			y={adaptCoordinate(curShape.commonState.y, curShape.commonState.width, projectHeight, canvasHeight)}
 			id={"st_" + curShape.commonState.id}
 			shapeName={uiStore.objectNames.shape}
+			onTransformEnd={action((event) => {
+				uiStore.logData("canvasObjectTransformed", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "star",
+				});
+			})}
+			onDragEnd={action((event) => {
+				uiStore.logData("canvasObjectDragged", {
+					id: curShape.commonState.id,
+					objectType: "shape",
+					type: "star",
+				});
+			})}
 		/>);
 	}
 	return null;

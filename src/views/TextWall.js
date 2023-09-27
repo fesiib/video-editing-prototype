@@ -285,10 +285,14 @@ const SentenceBox = observer(function SentenceBox({
 				}
 			}
 			uiStore.selectTimelineObjects([...newSelectedTimelineItems]);
+			uiStore.logData("transcriptBatchSelect", {
+				count: newSelectedTimelineItems.length,
+			});
 		} else {
 			if (index >= 0) {
 				uiStore.selectTimelineObjects([]);
 			} else {
+				uiStore.logData("transcriptSingleSelect", null);
 				uiStore.selectTimelineObjects([part]);
 			}
 		}
@@ -326,6 +330,10 @@ const SentenceBox = observer(function SentenceBox({
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 		}
 		else {
+			uiStore.logData("transcriptSnippetClicked", {
+				start: item.start,
+				finish: item.finish,
+			});
 			uiStore.timelineControls.playPosition = item.start;
 		}
 	});
@@ -470,8 +478,10 @@ const TextWall = observer(function TextWall() {
 		const edit = active.data.current.edit;
 		const isLeftHandler = active.data.current.isLeftHandler;
 		const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
+		let deltaSeconds = 0;
 		if (isLeftHandler) {
 			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.end));
+			deltaSeconds = updatedStart - edit.commonState.offset;
 			edit.commonState.setMetadata({
 				offset: updatedStart,
 				start: updatedStart,
@@ -479,10 +489,17 @@ const TextWall = observer(function TextWall() {
 		}
 		else {
 			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
+			deltaSeconds = updatedFinish - edit.commonState.end;
 			edit.commonState.setMetadata({
 				finish: edit.commonState.start + (updatedFinish - edit.commonState.offset),
 			});
 		}
+		uiStore.logData("transcriptEditTrimmed", {
+			editId: edit.commonState.id,
+			sceneDuration: edit.commonState.sceneDuration,
+			delta: deltaSeconds,
+			isLeftHandler: isLeftHandler,
+		});
 		return;
     });
 

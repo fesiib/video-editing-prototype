@@ -57,9 +57,15 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;
 			uiStore.selectTimelineObjects([newEdit]);
 			uiStore.timelineControls.playPosition = offset;
+			uiStore.logData("editAddEdit", {
+				editId: newEdit.commonState.id,
+				offset: offset,
+				finish: finish,
+			});
 			return;
 		}
 		else {
+			const areItemsSelected = uiStore.timelineControls.selectedTimelineItems.length > 0;
 			uiStore.selectTimelineObjects([]);
 		}
     });

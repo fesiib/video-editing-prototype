@@ -25,10 +25,12 @@ const GPTLike = observer(function GPTLike() {
 
 	const chooseTask = action((taskIdx) => {
 		userStore.chooseTask(taskIdx);
+		uiStore.logData("taskSelect", null);
 	});
 
 	const chooseTutorial = action(() => {
 		userStore.chooseTutorial();
+		uiStore.logData("taskSelectTutorial", null);
 	});
 
 	const chooseFsTask = action((taskIdx) => {
@@ -135,7 +137,7 @@ const GPTLike = observer(function GPTLike() {
 						</div>
 					) : (
 						<div className="flex flex-start gap-2 m-2">
-							<button
+							{/* <button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 								onClick={() => chooseFsTask(2)}
 							>
@@ -164,7 +166,7 @@ const GPTLike = observer(function GPTLike() {
 								onClick={() => chooseFsTask(6)}
 							>
 								FS Task 6
-							</button>
+							</button> */}
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 								onClick={() => chooseTutorial()}
@@ -183,7 +185,7 @@ const GPTLike = observer(function GPTLike() {
 							>
 								Task 2
 							</button>
-							<button
+							{/* <button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 								onClick={() => chooseTask(2)}
 							>
@@ -194,7 +196,7 @@ const GPTLike = observer(function GPTLike() {
 								onClick={() => chooseTask(3)}
 							>
 								Task 4
-							</button>
+							</button> */}
 						</div>
 					)
 				}

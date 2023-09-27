@@ -78,6 +78,7 @@ const SketchCanvas = observer(function SketchCanvas(
 		onClearClick();
 		onCaptureFrameClick();
 		uiStore.canvasControls.sketching = true;
+		uiStore.logData("sketchClick", null);
 	});
 	const onCaptureFrameClick = action(() => {
 		if (videoElement === null
@@ -96,6 +97,7 @@ const SketchCanvas = observer(function SketchCanvas(
 	const onClearClick = action(() => {
 		setCurRect(null);
 		curIntent.setSketchCommand([]);
+		uiStore.logData("sketchClear", null);
 	});
 
 	const onJumpClick = action(() => {
@@ -107,6 +109,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			return;
 		}
 		uiStore.timelineControls.playPosition = curIntent.sketchPlayPosition;
+		uiStore.logData("sketchJump", null);
 		return (() => {});
 	});
 
@@ -185,6 +188,13 @@ const SketchCanvas = observer(function SketchCanvas(
 				setCurRect(null);
 				return;
 			}
+			uiStore.logData("sketchDraw", {
+				x: newRect.x,
+				y: newRect.y,
+				width: newRect.width,
+				height: newRect.height,
+				timestamp: curIntent.sketchPlayPosition,
+			});
 			curIntent.setSketchCommand([...curIntent.sketchCommand, newRect]);
 			setCurRect(null);
 		}
@@ -199,7 +209,8 @@ const SketchCanvas = observer(function SketchCanvas(
 	});
 
 	const onSketchTextClick = action(() => {
-		uiStore.canvasControls.sketching = true;
+		onSketchClick();
+		uiStore.logData("sketchNoticeClick", null);
 	});
 
 	useEffect(() => {
@@ -408,7 +419,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			)
 
 		}
-		<div className={"text-sm flex flex-col"}>
+		{/* <div className={"text-sm flex flex-col"}>
 			<div>
 				Video: {domainStore.projectMetadata.width} x {domainStore.projectMetadata.height}
 			</div>
@@ -430,7 +441,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					</span>
 				})
 			}
-		</div>
+		</div> */}
 	</div>);
 });
 
