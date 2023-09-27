@@ -88,12 +88,6 @@ const Auth = observer(function Auth() {
 					{
 						(!userStore.isTaskChosen && !userStore.loading) ? (
 							<div>
-								<button
-									className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
-									onClick={() => resetFirebase()}
-								>
-									Reset All Tasks
-								</button>
 								<select
 									className="border mx-2 p-1 rounded"
 									onChange={(e) => {
@@ -124,13 +118,25 @@ const Auth = observer(function Auth() {
 					>
 						{userStore.userName}
 					</div>
-					<button
-						className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
-						onClick={() => logout()}
-					>
-						Logout
-					</button>
 				</div>
+				{
+					(!userStore.isTaskChosen && !userStore.loading) ? (
+						<div className="flex flex-row gap-2">
+							<button
+								className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
+								onClick={() => resetFirebase()}
+							>
+								Reset All Tasks
+							</button>
+							<button
+								className="bg-gray-500 hover:bg-gray-700 text-white p-1 rounded"
+								onClick={() => logout()}
+							>
+								Logout
+							</button>
+						</div>
+					) : null
+				}
 			</div>
 		)}
 	</div>);
