@@ -183,13 +183,50 @@ const Timeline = observer(function Timeline() {
 	});
 
     const onKeyDown = action((event) => {
-        if (event.which === 46) {
-            ///delete key
+		console.log(event.which)
+        if (event.which === 46 || event.which === 8 || event.which === 68) {
+            ///delete key or backspace key or d key
             onDeleteTimelineItems();
         }
 		if (event.which === 67 && event.metaKey) {
 			///paste key
 			onCopyPasteTimelineItems();
+		}
+		if (event.which === 32) {
+			///space key
+			onPressPlay(event);
+		}
+		// if (event.which === 83) {
+		// 	///s key
+		// 	onPressSplit(event);
+		// }
+		if (event.which === 65) {
+			///a key
+			onPressRangeSelect(event);
+		}
+		if (event.which === 37) {
+			///left arrow key
+			onNavigationClick("prev");
+		}
+		if (event.which === 39) {
+			///right arrow key 
+			onNavigationClick("next");
+		}
+		if (event.which === 38) {
+			///up arrow key
+			onZoomChange({
+				target: {
+					value: Math.min(100, uiStore.adaptPxPerSec(uiStore.timelineControls.pxPerSec) + 5),
+				}
+			});
+		}
+		if (event.which === 40) {
+			///down arrow key
+			onZoomChange({
+				target: {
+					value: Math.max(0, uiStore.adaptPxPerSec(uiStore.timelineControls.pxPerSec) - 5),
+				}
+			});
 		}
     });
 
@@ -323,7 +360,10 @@ const Timeline = observer(function Timeline() {
 	const buttonClassName = " disabled:hover:bg-gray-300 text-black p-1 rounded disabled:opacity-50";
 	const decisionClassName = " text-black p-1 rounded disabled:opacity-50";
     return (
-        <div className="w-full bg-gray-100 border px-2 disable-select" onKeyDown={onKeyDown}>
+        <div 
+			className="w-full bg-gray-100 border px-2 disable-select"
+			onKeyDown={onKeyDown}
+		>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
 					<button className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
