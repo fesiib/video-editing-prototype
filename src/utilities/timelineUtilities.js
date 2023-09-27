@@ -9,10 +9,29 @@ export function playPositionToFormat(seconds) {
         }) +
         ":" +
         (date.getMilliseconds() + 1000).toString().slice(1, 3)
-        // (date.getMilliseconds() !== 0
-        //     ? ":" + (date.getMilliseconds() + 1000).toString().slice(1)
-        //     : "")
     );
+}
+
+export function secondsToFormat(seconds) {
+	const hh = Math.floor(seconds / 3600);
+	const mm = Math.floor(seconds / 60) % 60;
+	const ss = (seconds % 60).toFixed(1);
+	return {
+		hh, mm, ss
+	};
+
+	const date = new Date();
+	date.setTime(seconds * 1000);
+	return {
+		hh: date.getUTCHours(),
+		mm: date.getUTCMinutes(),
+		ss: date.getUTCSeconds(),
+		ms: date.getUTCMilliseconds() / 10,
+	};
+}
+
+export function zeroPad(num, places) {
+	return String(num).padStart(places, "0");
 }
 
 export function preventCollisionDrag(scene, scenes, transform, uiStore) {

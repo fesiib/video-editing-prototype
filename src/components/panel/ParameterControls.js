@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -9,6 +9,8 @@ import useRootContext from "../../hooks/useRootContext";
 import { isNumeric, unFlattenObject } from '../../utilities/genericUtilities';
 
 import { action } from 'mobx';
+import { secondsToFormat, zeroPad } from '../../utilities/timelineUtilities';
+import InputNumber from 'rc-input-number';
 
 const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}) {
 
@@ -241,6 +243,207 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 			> + </button>
 			<button 
 				className={"w-5 bg-gray-200 hover:bg-gray-300"}
+				onClick={() => onStepClick(-defaultStep)}
+			> - </button>
+		</div>
+	</div>);
+});
+
+const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}) {
+	const {uiStore, domainStore} = useRootContext();
+	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+
+	const operationName = domainStore.operationNameMapping[parameterKey];
+
+	const inputId = `${metaKey}-${parameterKey}-input`;
+	const defaultStep = selectedEdits.length === 0 ? 1 
+		: selectedEdits[0].numberParameterConfig[parameterKey].step;
+
+	const defaultMin = selectedEdits.reduce((min, edit) => {
+		const parameterCfg = edit.numberParameterConfig[parameterKey];
+		if (min === null || parameterCfg.min > min) {
+			return parameterCfg.min;
+		}
+		return min;
+	}, null);
+
+	const defaultMax = selectedEdits.reduce((max, edit) => {
+		const parameterCfg = edit.numberParameterConfig[parameterKey];
+		if (max === null || parameterCfg.max < max) {
+			return parameterCfg.max;
+		}
+		return max;
+	}, null);
+
+	const formattedTime = secondsToFormat(parseFloat(parameter));
+	const formattedMin = secondsToFormat(defaultMin);
+	const formattedMax = secondsToFormat(defaultMax);
+	const refs = {
+		hh: useRef(),
+		mm: useRef(),
+		ss: useRef(),
+		ms: useRef(),
+	};
+	
+	const onInputChange = action((changedNumber, key) => {
+		console.log(changedNumber);
+		if (changedNumber === null) {
+			return;
+		}
+
+		const hhRef = refs.hh;
+		const mmRef = refs.mm;
+		const ssRef = refs.ss;
+		const msRef = refs.ms;
+
+		let hhValue = (hhRef.current == null || hhRef.current == undefined) ? "" : hhRef.current.value;
+		let mmValue = (mmRef.current == null || mmRef.current == undefined) ? "" : mmRef.current.value;
+		let ssValue = (ssRef.current == null || ssRef.current == undefined) ? "" : ssRef.current.value;
+		let msValue = (msRef.current == null || msRef.current == undefined) ? "" : msRef.current.value;
+
+		hhValue = hhValue === "" ? "0" : hhValue;
+		mmValue = mmValue === "" ? "0" : mmValue;
+		ssValue = ssValue === "" ? "0" : ssValue;
+		msValue = msValue === "" ? "0" : msValue;
+
+		if (!isNumeric(hhValue) || !isNumeric(mmValue) || !isNumeric(ssValue) || !isNumeric(msValue)) {
+			return;
+		}
+		hhValue = parseFloat(hhValue);
+		mmValue = parseFloat(mmValue);
+		ssValue = parseFloat(ssValue);
+		msValue = parseFloat(msValue);
+
+		if (key === "hh") {
+			hhValue = changedNumber;
+		}
+		if (key === "mm") {
+			mmValue = changedNumber;
+		}
+		if (key === "ss") {
+			ssValue = changedNumber;
+		}
+		if (key === "ms") {
+			msValue = changedNumber;
+		}
+
+		let number = hhValue * 3600 + mmValue * 60 + ssValue + msValue / 100;
+		if (number < defaultMin) {
+			return;
+		}
+		if (number > defaultMax) {
+			return;
+		}
+		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
+			let functionToCall = null;
+			if (metaKey === "custom") {
+				functionToCall = edit.setCustomParameters;
+			}
+			if (metaKey === "spatial") {
+				functionToCall = edit.setSpatialParameters;
+			}
+			if (metaKey === "temporal") {
+				functionToCall = edit.setTemporalParameters;
+			}
+			functionToCall(unFlattenObject({
+				[parameterKey]: number
+			}));
+		}
+	});
+
+	const onStepClick = action((step) => {
+		let newValue = step;
+		if (!isNumeric(parameter.toString())) {
+			newValue += defaultMin;
+		}
+		else {
+			newValue += parseFloat(parameter);
+		}
+		if (newValue < defaultMin) {
+			newValue = defaultMin;
+		}
+		if (newValue > defaultMax) {
+			newValue = defaultMax;
+		}
+
+		for (let edit of selectedEdits) {
+			if (edit.isSuggested) {
+				continue;
+			}
+			let functionToCall = null;
+			if (metaKey === "custom") {
+				functionToCall = edit.setCustomParameters;
+			}
+			if (metaKey === "spatial") {
+				functionToCall = edit.setSpatialParameters;
+			}
+			if (metaKey === "temporal") {
+				functionToCall = edit.setTemporalParameters;
+			}
+			functionToCall(unFlattenObject({
+				[parameterKey]: newValue,
+			}));
+		}
+	});
+
+	return ((defaultMin === null || defaultMax === null || defaultMin >= defaultMax) ? null :
+	<div className="flex justify-between">
+		<label className="text-left text-sm w-1/3 truncate" htmlFor={inputId}> {operationName} </label>
+		<div className="flex justify-end text-sm w-2/3"
+			id={inputId}
+		>
+			<div className='flex flex-row'>
+			{
+				Object.keys(formattedTime).map((key) => {
+					const curRef = refs[key];
+					const curValue = formattedTime[key];
+					if (key === "hh" && curValue === 0) {
+						return null;
+					}
+					return (
+					<div
+						className="w-2/3 flex flex-col justify-center items-start overflow-hidden"
+						key={inputId + "-" + key}
+					>
+						<InputNumber
+							className='w-10 mr-1 overflow-hidden'
+							maxLength={(key === "hh" || key === "mm") ? 2 : 4}
+							ref={curRef}
+							value={curValue}
+							onChange={(number) => onInputChange(number, key)}
+							min={0}
+							max={(key === "hh" || key === "ms") ? 99 : 59.9}
+							precision={(key === "hh" || key === "ms" || key == "mm") ? 0 : 1}
+							placeholder={key}
+							onClick={(event) => {event.target.select()}}
+							controls={false}
+						/>
+						{/* <input 
+							className="w-full border"
+							ref={curRef}
+							type="text"
+							value={zeroPad(curValue, 2)}
+							placeholder={key}
+							onClick={(event) => {event.target.select()}}
+							onChange={(event) => onInputChange(event)}
+							autoComplete='off'
+						/> */}
+						<label className="text-xs"
+							htmlFor={inputId + "-" + key}
+						> {key} </label>
+					</div>);
+				})
+			}
+			</div>
+			<button 
+				className={"w-5 h-fit bg-gray-200 hover:bg-gray-300"}
+				onClick={() => onStepClick(defaultStep)}
+			> + </button>
+			<button 
+				className={"w-5 h-fit bg-gray-200 hover:bg-gray-300"}
 				onClick={() => onStepClick(-defaultStep)}
 			> - </button>
 		</div>
@@ -562,6 +765,9 @@ const ParameterControls = observer(function ParameterControls({
 	}
 	if (inputOperationMapping.number.includes(parameterKey)) {
 		return (<NumberInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
+	}
+	if (inputOperationMapping.time.includes(parameterKey)) {
+		return (<TimeInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter} />);
 	}
 	if (inputOperationMapping.dropdown.includes(parameterKey)) {
 		return (<DropDownInput metaKey={metaKey} parameterKey={parameterKey} parameter={parameter}

@@ -162,7 +162,7 @@ const OperationPanel = observer(function OperationPanel() {
 												}
 												return (<div
 													key={`metaParameter-${metaKey}`}
-													className="flex flex-col mx-1"
+													className="flex flex-col flex-1 mx-1"
 												> 
 												<MetaKeyLabel metaKey={metaKey} />
 												{
