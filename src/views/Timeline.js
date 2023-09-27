@@ -183,7 +183,6 @@ const Timeline = observer(function Timeline() {
 	});
 
     const onKeyDown = action((event) => {
-		console.log(event.which)
         if (event.which === 46 || event.which === 8 || event.which === 68) {
             ///delete key or backspace key or d key
             onDeleteTimelineItems();

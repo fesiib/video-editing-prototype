@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { observer } from "mobx-react-lite";
-import { action, observe, reaction } from "mobx";
+import { action, observe, reaction, toJS } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
 import NewIntent from "../components/general/NewIntent";
@@ -120,12 +120,10 @@ const HistoryItem = observer(function HistoryItem({ idx, collapsed }) {
 
 	const editOperationTitle = intent.editOperation === null ? "No Edit Selected" : intent.editOperation.title;
 
-	// TODO: summarize all descriptions in the history
 	const title = intent.history.length === 0 ? ("") : (
+		//intent.summary
 		isSelected ? intent.summary : intent.history[intent.history.length - 1].summary
 	);
-	// if (isSelected)
-	// 	console.log("History: ", intent.summary, intent.history.map((entry) => entry.summary));
 
 	const bgColor = "bg-gray-200";
 	const hoverColor = "bg-gray-300";

@@ -579,6 +579,7 @@ class DomainStore {
 				if (suggestedEditOperationKeys.length > 0) {
 					this.curIntent.setEditOperationKey(suggestedEditOperationKeys[0]);
 				}
+				this.curIntent.recordHistory();
 				this.processingIntent = false;
 				if (this.curIntent.suggestedEdits.length === 0) {
 					alert("Could not find relevant segment in the video!");
