@@ -23,7 +23,7 @@ const DraggableHandle = observer(function DraggableHandle({ edit, isLeftHandler,
         disabled: false,
     });
 
-	const handlerClassName = "z-30 text-s";
+	const handlerClassName = "z-30 text-s flex";
 	return <div
 		ref={setNodeRef}
 		className={handlerClassName}

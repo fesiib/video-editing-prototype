@@ -359,7 +359,7 @@ class UIStore {
 	}
 
 	logData(msg, data) {
-		console.log(msg, data);
+		//console.log(msg, data);
 		this.rootStore.logData(msg, data);
 	}
 }

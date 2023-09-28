@@ -129,14 +129,14 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
 
     return (
         <div 
-			className=""
+			className="flex"
 			//style={style}
 			ref={setNodeRef}
 			{...listeners}
 			{...attributes}
 		>
             <button className={(showHandlers || isDragging) ? 
-				"w-2 h-full bg-gray-200 rounded" : ""
+				"w-2 h-full  bg-gray-200 rounded" : ""
 			}>
                 {/* {" "}{isLeftHandler ? <TrimHandlerLeftIcon /> : <TrimHandlerRightIcon />}{" "} */}
             </button>
