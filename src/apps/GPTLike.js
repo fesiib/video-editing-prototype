@@ -28,14 +28,16 @@ const GPTLike = observer(function GPTLike() {
 		uiStore.logData("taskSelect", null);
 	});
 
-	const chooseTutorial = action(() => {
-		userStore.chooseTutorial();
-		uiStore.logData("taskSelectTutorial", null);
+	const chooseTutorial = action((idx) => {
+		userStore.chooseTutorial(idx);
+		uiStore.logData("taskSelectTutorial", {
+			tutorialType: userStore.videoId,
+		});
 	});
 
-	const chooseFsTask = action((taskIdx) => {
-		userStore.chooseFsTask(taskIdx);
-	});
+	// const chooseFsTask = action((taskIdx) => {
+	// 	userStore.chooseFsTask(taskIdx);
+	// });
 
     useEffect(
         action(() => {
@@ -169,9 +171,15 @@ const GPTLike = observer(function GPTLike() {
 							</button> */}
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTutorial()}
+								onClick={() => chooseTutorial(0)}
 							>
-								Tutorial
+								Tutorial T
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTutorial(1)}
+							>
+								Tutorial B
 							</button>
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"

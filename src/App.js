@@ -27,9 +27,11 @@ const App = observer(function App() {
 		uiStore.logData("taskSelect", null);
 	});
 
-	const chooseTutorial = action(() => {
-		userStore.chooseTutorial();
-		uiStore.logData("taskSelectTutorial", null);
+	const chooseTutorial = action((idx) => {
+		userStore.chooseTutorial(idx);
+		uiStore.logData("taskSelectTutorial", {
+			tutorialIdx: idx,
+		});
 	});
 
     useEffect(
@@ -124,15 +126,21 @@ const App = observer(function App() {
 						<div className="flex flex-start gap-2 m-2">
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTutorial()}
+								onClick={() => chooseTutorial(0)}
 							>
-								Tutorial
+								Tutorial 1
 							</button>
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 								onClick={() => chooseTask(0)}
 							>
 								Task 1
+							</button>
+							<button
+								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+								onClick={() => chooseTutorial(1)}
+							>
+								Tutorial 2
 							</button>
 							<button
 								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"

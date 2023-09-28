@@ -61,8 +61,8 @@ export function getTaskAssignments(N = 16) {
 		//console.log(`${prefixText} ${session1}, ${session2}, ${session3}, ${session4}`);
 		taskAssignments[participantId].push(
 			{
-				videoIds: ["tutorial"],
-				baseline: "",
+				videoIds: ["tutorial", "tutorial-baseline"],
+				baseline: "tutorial-baseline",
 			},
 			{
 				videoIds: ["fs-video-2"],

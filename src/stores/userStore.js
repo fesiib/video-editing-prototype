@@ -23,6 +23,7 @@ class UserStore {
 		"video-3": "https://www.youtube.com/watch?v=OKQpOzEY_A4",
 		"video-4": "https://www.youtube.com/watch?v=sz8Lo3NY1m0",
 		// tutorial
+		"tutorial-baseline": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"tutorial1": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"tutorial": "https://www.youtube.com/live/4LdIvyfzoGY?feature=share",
 		"fs-video-2": "https://www.youtube.com/watch?v=kdN41iYTg3U",
@@ -195,7 +196,7 @@ class UserStore {
 		});
 	}
 
-	async chooseTutorial() {
+	async chooseTutorial(videoIdx) {
 		if (this.userId === null) {
 			return;
 		}
@@ -214,7 +215,7 @@ class UserStore {
 		}
 		runInAction(async () => {
 			this.curSessionIdx = 2;
-			this.curVideoIdx = 0;
+			this.curVideoIdx = videoIdx;
 			try {
 				await this.rootStore.fetchTask(this.userId, this.taskIdx);
 			} catch (error) {
@@ -376,7 +377,7 @@ class UserStore {
 	}
 
 	get isTutorial() {
-		return this.curSessionIdx === 2 && this.curVideoIdx === 0;
+		return this.curSessionIdx === 2 && this.curVideoIdx >= 0 && this.curVideoIdx <= 1;
 	}
 
 	get videoId() {
