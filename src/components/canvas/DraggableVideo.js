@@ -37,9 +37,6 @@ const DraggableVideo = observer(function DraggableVideo({ curVideo }) {
     }, [curVideo.source, curVideo.commonState.id]);
 
     const onLoadedMetadata = action((event) => {
-		// if (curVideo.commonState.duration === event.target.duration) {
-		// 	return;
-		// }
 		let passedCurVideo = false;
 		for (let video of domainStore.in_mainVideos) {
 			if (video.commonState.id === curVideo.commonState.id) {

@@ -7,10 +7,18 @@ import { AiOutlineBulb } from "react-icons/ai";
 import useRootContext from "../../hooks/useRootContext";
 import { toJS } from "mobx";
 
+const COMMAND = "command";
+const DISPLAY_NAMES = {
+	[COMMAND]: null,
+	"temporal": "when (timeline)",
+	"spatial": "where (frame)",
+	"edit" : "what (edit)",
+	"custom": "how (parameters)",
+};
+
 const RowsVisualization = observer(function RowsVisualization({
 	contribution,
 }) {
-	const COMMAND = "command";
 	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const curIntent = domainStore.intents[domainStore.curIntentPos];
@@ -21,14 +29,6 @@ const RowsVisualization = observer(function RowsVisualization({
 		"custom": [],
 		"spatial": [],
 		"temporal": [],
-	};
-
-	const DISPLAY_NAMES = {
-		[COMMAND]: null,
-		"temporal": "when (timeline)",
-		"spatial": "where (frame)",
-		"edit" : "what (edit)",
-		"custom": "how (parameters)",
 	};
 
 	// let fullText = "";
@@ -141,7 +141,6 @@ const Explanation = observer(function Explanation() {
 	// 	}).join("");
 	// 	textToExplain = text.trim();
 	// }
-
 	return (
 		curIntent.suggestedEdits.length === 0 || !systemSetting
 	) ? (null) : (
@@ -176,6 +175,22 @@ const Explanation = observer(function Explanation() {
 					curIntent.combinedContribution
 				}
 			/>
+			{
+				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 0) ? (
+				<div className="text-xs">
+					<span> Explanation for {DISPLAY_NAMES["temporal"]} </span>
+					<span> {selectedEdits[0].explanation[0]} </span>
+				</div>
+				) : (null)
+			}
+			{
+				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 1) ? (
+				<div className="text-xs">
+					<span>  Explanation for {DISPLAY_NAMES["spatial"]} </span>
+					<span> {selectedEdits[0].explanation[1]} </span>
+				</div>
+				) : (null)
+			}
 			{/* 
 			Colors on top of the text
 			<div className="flex flex-row flex-wrap gap-1 text-xs p-2 bg-gray-100">

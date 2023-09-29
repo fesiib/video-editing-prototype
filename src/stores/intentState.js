@@ -361,7 +361,8 @@ class IntentState {
 		let y = Math.min(y1, y2);
 		let width = Math.abs(x1 - x2);
 		let height = Math.abs(y1 - y2);
-		let explanation = ["random edit", "random edit 2"];
+		//let explanation = ["random edit", "random edit 2"];
+		let explanation = []
 		let suggestedParameters = {
 			"text": ["cheburek"],
 			"image": ["goal"],

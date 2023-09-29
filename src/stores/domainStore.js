@@ -202,8 +202,8 @@ class DomainStore {
 	};
 
 	skipParameterIfMultiple = [
-		"source",
-		"searchQuery",
+		//"source",
+		//"searchQuery",
 		"start",
 		"finish",
 		"duration",
@@ -474,7 +474,6 @@ class DomainStore {
 				temporalParameters: {
 					start: edit.commonState.offset,
 					finish: edit.commonState.end,
-					duration: edit.commonState.sceneDuration,
 				}
 			};
 		});

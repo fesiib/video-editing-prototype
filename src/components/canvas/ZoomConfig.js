@@ -39,6 +39,9 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 		let durationStart = zoom.customParameters.zoomDurationStart;
 		let durationEnd = zoom.customParameters.zoomDurationEnd;
 		if (durationStart + durationEnd > zoom.commonState.sceneDuration) {
+			zoom.fixZoomDuration();
+			durationStart = zoom.customParameters.zoomDurationStart;
+			durationEnd = zoom.customParameters.zoomDurationEnd;
 			return;
 		}
 		let scaleX = projectWidth / zoom.commonState.width;
@@ -123,9 +126,7 @@ const ZoomConfig = observer(function ZoomConfig({ zoom, videoGroupRef, objectsGr
 		let durationStart = zoom.customParameters.zoomDurationStart;
 		let durationEnd = zoom.customParameters.zoomDurationEnd;
 		if (durationStart + durationEnd > zoom.commonState.sceneDuration) {
-			zoom.customParameters.zoomDurationStart = Math.min(durationStart, zoom.commonState.sceneDuration);
-			zoom.customParameters.zoomDurationEnd = Math.min(durationEnd, 
-				zoom.commonState.sceneDuration - zoom.customParameters.zoomDurationStart);
+			zoom.fixZoomDuration();
 			durationStart = zoom.customParameters.zoomDurationStart;
 			durationEnd = zoom.customParameters.zoomDurationEnd;
 		}

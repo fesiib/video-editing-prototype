@@ -70,18 +70,35 @@ class CommonState {
 					metadata.start = 0;
 					metadata.finish = minDuration;
 				}
-				if (metadata.offset !== undefined) {
+				metadata.offset = metadata.start;
+			}
+			if (metadata.finish !== undefined) {
+				metadata.finish = potentialStart + minDuration;
+				if (metadata.finish > this.domainStore.projectMetadata.duration && !this.id.startsWith("video")) {
+					metadata.finish = this.domainStore.projectMetadata.duration;
+					metadata.start = metadata.finish - minDuration;
 					metadata.offset = metadata.start;
 				}
 			}
-			else if (metadata.finish !== undefined) {
-				metadata.finish = potentialStart + minDuration;
-				if (metadata.finish > this.domainStore.projectMetadata.duration) {
+		}
+		if (metadata.duration === undefined) {
+			metadata.duration = this.duration;
+		}
+		if (potentialFinish - potentialStart > metadata.duration) {
+			if (metadata.start !== undefined) {
+				metadata.start = potentialFinish - metadata.duration;
+				if (metadata.start < 0) {
+					metadata.start = 0;
+					metadata.finish = metadata.duration;
+				}
+				metadata.offset = metadata.start;
+			}
+			if (metadata.finish !== undefined) {
+				metadata.finish = potentialStart + metadata.duration;
+				if (metadata.finish > this.domainStore.projectMetadata.duration && !this.id.startsWith("video")) {
 					metadata.finish = this.domainStore.projectMetadata.duration;
-					metadata.start = this.domainStore.projectMetadata.duration - minDuration;
-					if (metadata.offset !== undefined) {
-						metadata.offset = metadata.start;
-					}
+					metadata.start = metadata.finish - metadata.duration;
+					metadata.offset = metadata.start;
 				}
 			}
 		}
@@ -95,6 +112,9 @@ class CommonState {
         this.start = metadata.start !== undefined ? metadata.start : this.start;
         this.duration = metadata.duration !== undefined ? metadata.duration : this.duration;
         this.finish = metadata.finish !== undefined ? metadata.finish : this.finish;
+		if (this.finish > this.duration) {
+			console.log("WARNING: finish is greater than duration");
+		}
         this.offset = metadata.offset !== undefined ? metadata.offset : this.offset;
         this.speed = metadata.speed !== undefined ? metadata.speed : this.speed;
 
@@ -129,8 +149,15 @@ class CommonState {
         this.processing = metadata.processing !== undefined ? metadata.processing : this.processing;
 
         if (this.end >= this.domainStore.projectMetadata.duration) {
-            this.domainStore.projectMetadata.duration = this.end;
-			this.domainStore.rootStore.uiStore.timelineConst.trackMaxDuration = this.end;
+			if (this.id.startsWith("video")) {
+				this.domainStore.projectMetadata.duration = this.end;
+				this.domainStore.rootStore.uiStore.timelineConst.trackMaxDuration = this.end;
+			}
+			else {
+				this.finish = (this.domainStore.projectMetadata.duration - this.offset) + this.start;
+				this.start = Math.min(this.start, this.finish - minDuration);
+				this.offset = this.start;
+			}
         }
 		return true;
     }

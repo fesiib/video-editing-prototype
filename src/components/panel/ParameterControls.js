@@ -16,6 +16,7 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	const { uiStore, domainStore } = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -74,14 +75,16 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	return (<div className="flex flex-col">
 		<label className="text-left text-sm w-1/2" htmlFor={inputId}> {operationName} </label> 
-		<div id={inputId+"_container"} className="border grid text-sm">
-			<input className="" 
+		<div id={inputId+"_container"} className="text-sm flex flex-row w-full justify-between">
+			<input className="w-full border px-1 text-sm"
 				id={inputId + "_url"} 
 				type="url"
 				value={parameter === "mixed" ? "" : parameter}
 				placeholder={parameter === "mixed" ? "mixed" : ""}
+				onClick={(event) => {event.target.select()}}
 				onChange={(event) => onUrlInputChange(event)} 
 				autoComplete='off'
+				disabled={isDisabled}
 			/>
 			{/* <input className=""
 				id={inputId}
@@ -98,8 +101,8 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 	
 	const { uiStore, domainStore } = useRootContext();
 	const operationName = domainStore.operationNameMapping[parameterKey];
-
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 	const onInputChange = action((event) => {
@@ -140,6 +143,7 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 			placeholder={parameter === "mixed" ? "mixed" : "text"}
 			onChange={(event) => onInputChange(event)} 
 			autoComplete='off'
+			disabled={isDisabled}
 		/>
 	</div>);
 });
@@ -147,6 +151,7 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 const NumberInput = observer(function NumberInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -264,14 +269,17 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 				onClick={(event) => {event.target.select()}}
 				onChange={(event) => onInputChange(event)}
 				autoComplete='off'
+				disabled={isDisabled}
 			/>
 			<button 
 				className={"w-5 bg-gray-200 hover:bg-gray-300"}
 				onClick={() => onStepClick(defaultStep)}
+				disabled={isDisabled}
 			> + </button>
 			<button 
 				className={"w-5 bg-gray-200 hover:bg-gray-300"}
 				onClick={() => onStepClick(-defaultStep)}
+				disabled={isDisabled}
 			> - </button>
 		</div>
 	</div>);
@@ -280,6 +288,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -462,6 +471,7 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 							placeholder={key}
 							onClick={(event) => {event.target.select()}}
 							controls={false}
+							disabled={isDisabled}
 						/>
 						{/* <input 
 							className="w-full border"
@@ -483,10 +493,12 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 			<button 
 				className={"w-5 h-fit bg-gray-200 hover:bg-gray-300"}
 				onClick={() => onStepClick(defaultStep)}
+				disabled={isDisabled}
 			> + </button>
 			<button 
 				className={"w-5 h-fit bg-gray-200 hover:bg-gray-300"}
 				onClick={() => onStepClick(-defaultStep)}
+				disabled={isDisabled}
 			> - </button>
 		</div>
 	</div>);
@@ -495,6 +507,7 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, parameter, options}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -537,6 +550,7 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 			value={parameter === "mixed" ? null : parameter}
 			placeholder={parameter === "mixed" ? "mixed" : parameterKey}
 			onChange={(event) => onSelectChange(event)}
+			disabled={isDisabled}
 		>
 			{options.map((option) => {
 				return (<option key={inputId + option} value={option}> {option} </option>);
@@ -548,6 +562,7 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 const ColorInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -591,6 +606,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 			value={parameter === "mixed" ? "#000000" : parameter}
 			onChange={(event) => onInputChange(event)} 
 			autoComplete='off'
+			disabled={isDisabled}
 		/>
 	</div>);
 });
@@ -598,6 +614,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 const RangeInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -662,7 +679,9 @@ const RangeInput = observer(function ColorInput({metaKey, parameterKey, paramete
 			max={defaultMax}
 			step={defaultStep}
 			value={parameter}
-			onChange={(event) => onInputChange(event)}/>
+			onChange={(event) => onInputChange(event)}
+			disabled={isDisabled}
+		/>
 	</div>);
 });
 
@@ -671,6 +690,8 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 	
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -709,6 +730,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 					key={`${inputId}_${option}`}
 					className={"w-5 bg-gray-200 hover:bg-gray-300" + (parameter === option ? " bg-gray-300" : "")}
 					onClick={() => onInputChange(option)}
+					disabled={isDisabled}
 				> {option.toUpperCase()[0]} </button>);
 			})
 		}
@@ -718,6 +740,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -760,6 +783,7 @@ const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parame
 			type="checkbox"
 			value={parameter}
 			onChange={(event) => onInputChange(event)}
+			disabled={isDisabled}
 		/>
 	</div>);
 });
@@ -769,7 +793,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
-	const isDisabled = parameter === "mixed" || parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -820,6 +844,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 				value={parameter}
 				onChange={(event) => onInputChange(event)}
 				autoComplete='off'
+				disabled={isDisabled}
 			/>
 			<button className='text-sm border w-fit px-1 bg-indigo-200 rounded hover:bg-indigo-300 disabled:opacity-50 disabled:hover:bg-indigo-200'
 				disabled={isDisabled}
@@ -836,6 +861,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 					to={`https://www.google.com/search?tbm=isch&q=${parameter}`}
 					target="_blank"
 					rel="noopener noreferrer"
+					className={isDisabled ? "pointer-events-none" : ""}
 				>
 					Search
 				</Link>

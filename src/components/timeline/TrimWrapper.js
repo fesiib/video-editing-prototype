@@ -82,15 +82,15 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
                 );
             }
         } else {
-            transformSeconds = Math.min(
-                transformSeconds,
-                scene.commonState.duration - scene.commonState.finish
-            );
+			transformSeconds = Math.max(
+				transformSeconds,
+				uiStore.timelineConst.minTimelineItemDuration - scene.commonState.sceneDuration,
+			);
             transformSeconds = Math.min(
 				transformSeconds,
-				scene.rightTimelineLimit - scene.commonState.end
+				scene.rightTimelineLimit - scene.commonState.end,
+				scene.commonState.duration - scene.commonState.finish,
 			);
-            transformSeconds = Math.max(transformSeconds, -scene.commonState.sceneDuration + uiStore.timelineConst.minTimelineItemDuration);
 
             sceneDiv.style.width = `${uiStore.secToPx(
                 scene.commonState.sceneDuration + transformSeconds
@@ -168,7 +168,7 @@ const TrimWrapper = observer(function TrimWrapper({
         let deltaSeconds = uiStore.pxToSec(delta.x);
 
         if (isLeftHandler) {
-            deltaSeconds = Math.min(deltaSeconds, scene.commonState.sceneDuration);
+            deltaSeconds = Math.min(deltaSeconds, scene.commonState.sceneDuration - uiStore.timelineConst.minTimelineItemDuration);
             deltaSeconds = Math.max(
                 deltaSeconds,
                 scene.leftTimelineLimit - scene.commonState.offset,
@@ -179,13 +179,16 @@ const TrimWrapper = observer(function TrimWrapper({
 				start: scene.commonState.start + deltaSeconds,
 			});
         } else {
+			deltaSeconds = Math.max(
+				deltaSeconds,
+				uiStore.timelineConst.minTimelineItemDuration - scene.commonState.sceneDuration
+			);
 			deltaSeconds = Math.min(
                 deltaSeconds,
+				scene.rightTimelineLimit - scene.commonState.end,
                 scene.commonState.duration - scene.commonState.finish
             );
-			deltaSeconds = Math.min(deltaSeconds, scene.rightTimelineLimit - scene.commonState.end);
-            deltaSeconds = Math.max(deltaSeconds, -scene.commonState.sceneDuration);
-			scene.commonState.setMetadata({
+            scene.commonState.setMetadata({
 				finish: scene.commonState.finish + deltaSeconds,
 			});
         }

@@ -187,6 +187,17 @@ class EditState {
 		this.intent.deleteEdits([this.commonState.id]);
 	}
 
+	fixZoomDuration() {
+		let durationStart = this.zoomParameters.zoomDurationStart;
+		let durationEnd = this.zoomParameters.zoomDurationEnd;
+		if (durationStart + durationEnd > this.commonState.sceneDuration) {
+			durationEnd = Math.max(0.0, this.commonState.sceneDuration - durationStart);
+			durationStart = Math.max(0.0, this.commonState.sceneDuration - durationEnd);
+		}
+		this.zoomParameters.zoomDurationStart = roundNumber(durationStart, 1);
+		this.zoomParameters.zoomDurationEnd = roundNumber(durationEnd, 1);
+	}
+
 	setCustomParameters(parameters) {
 		if (this.intent.editOperation === null) {
 			return;
@@ -239,7 +250,7 @@ class EditState {
 				...parameters,
 			};
 			if (this.zoomParameters.zoomDurationEnd + this.zoomParameters.zoomDurationStart > this.commonState.sceneDuration) {
-				this.zoomParameters.zoomDurationEnd = this.commonState.sceneDuration - this.zoomParameters.zoomDurationStart;
+				this.fixZoomDuration();
 			}
 		}
 		if (this.title === "Crop") {
@@ -285,6 +296,12 @@ class EditState {
 			delete parameters.star;
 		}
 		this.commonState.setMetadata({ ...parameters });
+		if (parameters.info !== undefined) {
+			while (this.explanation.length < 2) {
+				this.explanation.push([""]);
+			}
+			this.explanation[1] = parameters.info[0];
+		}
 		if (parameters.source !== undefined) {
 			this.suggestionSource = {
 				...this.suggestionSource,
@@ -309,7 +326,7 @@ class EditState {
 		});
 		if (parameters.duration !== undefined) {
 			this.commonState.setMetadata({
-				finish: this.commonState.start + parameters.duration,
+				finish: Math.min(this.commonState.start + parameters.duration, this.commonState.duration),
 			});
 		}
 		if (parameters.speed !== undefined) {
@@ -318,7 +335,10 @@ class EditState {
 			});
 		}
 		if (parameters.info !== undefined) {
-			this.explanation = parameters.info;
+			while (this.explanation.length < 1) {
+				this.explanation.push([""]);
+			}
+			this.explanation[0] = parameters.info[0];
 		}
 		if (parameters.source !== undefined) {
 			this.suggestionSource = {

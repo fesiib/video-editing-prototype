@@ -139,7 +139,9 @@ const TimelineTracks = observer(function TimelineTracks() {
             const deltaSeconds = newOffset - leftMostScene.commonState.offset;
             for (let selectedScene of selectedScenes) {
 				selectedScene.commonState.setMetadata({
-					offset: selectedScene.commonState.offset + deltaSeconds
+					offset: selectedScene.commonState.offset + deltaSeconds,
+					start: selectedScene.commonState.start + deltaSeconds,
+					finish: selectedScene.commonState.finish + deltaSeconds,
 				});
             }
         }
@@ -219,16 +221,26 @@ const TimelineTracks = observer(function TimelineTracks() {
 	]);
 
 	useEffect(() => {
-		if (tracksContainer.current) {
-			const playPositionPx = uiStore.secToPx(uiStore.timelineControls.playPosition);
-			if (tracksContainer.current.scrollLeft > playPositionPx) {
-				tracksContainer.current.scrollLeft = Math.max(0, playPositionPx - 100);
+		const dispose = reaction(() => {
+			return {
+				pxPerSec: uiStore.timelineControls.pxPerSec,
+				playPosition: uiStore.timelineControls.playPosition,
+			};
+		}, ({ pxPerSec, playPosition }) => {
+			if (tracksContainer.current) {
+				const playPositionPx = uiStore.secToPx(playPosition);
+				if (tracksContainer.current.scrollLeft > playPositionPx) {
+					tracksContainer.current.scrollLeft = Math.max(0, playPositionPx - 100);
+				}
+				if (playPositionPx - tracksContainer.current.scrollLeft > width) {
+					tracksContainer.current.scrollLeft = playPositionPx - width + 100;
+				}
 			}
-			if (playPositionPx - tracksContainer.current.scrollLeft > width) {
-				tracksContainer.current.scrollLeft = playPositionPx - width + 100;
-			}
+		});
+		return () => {
+			dispose();
 		}
-	}, [uiStore.timelineControls.playPosition]);
+	}, []);
 
 	const onTracksContainerScroll = action((event) => {
 		if (tracksContainer.current === null 

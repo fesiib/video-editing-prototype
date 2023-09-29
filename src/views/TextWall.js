@@ -447,23 +447,37 @@ const TextWall = observer(function TextWall() {
 		if (active === null || over === null) {
 			return;
 		}
-		const item = over.data.current.item;
-		const edit = active.data.current.edit;
-		const isLeftHandler = active.data.current.isLeftHandler;
-		const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
-		if (isLeftHandler) {
-			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.end));
-			edit.commonState.setMetadata({
-				offset: updatedStart,
-				start: updatedStart,
-			})
-		}
-		else {
-			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
-			edit.commonState.setMetadata({
-				finish: edit.commonState.start + (updatedFinish - edit.commonState.offset),
-			});
-		}
+		// const item = over.data.current.item;
+		// const edit = active.data.current.edit;
+		// const isLeftHandler = active.data.current.isLeftHandler;
+		// let deltaSeconds = 0;
+		// if (isLeftHandler) {
+		// 	deltaSeconds = item.start - edit.commonState.offset;
+		// 	deltaSeconds = Math.max(
+        //         deltaSeconds,
+        //         edit.leftTimelineLimit - edit.commonState.offset,
+        //         -edit.commonState.start
+        //     );
+		// 	edit.commonState.setMetadata({
+		// 		offset: edit.commonState.offset + deltaSeconds,
+		// 		start: edit.commonState.start + deltaSeconds,
+		// 	});
+		// }
+		// else {
+		// 	deltaSeconds = item.finish - edit.commonState.end;
+		// 	deltaSeconds = Math.max(
+		// 		deltaSeconds,
+		// 		uiStore.timelineConst.minTimelineItemDuration - edit.commonState.sceneDuration
+		// 	);
+		// 	deltaSeconds = Math.min(
+        //         deltaSeconds,
+		// 		edit.rightTimelineLimit - edit.commonState.end,
+		//		edit.commonState.duration - edit.commonState.finish
+        //     );
+		// 	edit.commonState.setMetadata({
+		// 		finish: edit.commonState.start + (edit.commonState.finish + deltaSeconds) - edit.commonState.offset,
+		// 	});
+		// }
 		setActiveHandler(null);
 		return;
 	});
@@ -477,24 +491,35 @@ const TextWall = observer(function TextWall() {
 		const item = over.data.current.item;
 		const edit = active.data.current.edit;
 		const isLeftHandler = active.data.current.isLeftHandler;
-		const limit = isLeftHandler ? edit.leftTimelineLimit : edit.rightTimelineLimit;
 		let deltaSeconds = 0;
 		if (isLeftHandler) {
-			const updatedStart = Math.max(limit, Math.min(item.start, edit.commonState.end));
-			deltaSeconds = updatedStart - edit.commonState.offset;
+			deltaSeconds = item.start - edit.commonState.offset;
+			deltaSeconds = Math.max(
+                deltaSeconds,
+                edit.leftTimelineLimit - edit.commonState.offset,
+                -edit.commonState.start
+            );
 			edit.commonState.setMetadata({
-				offset: updatedStart,
-				start: updatedStart,
-			})
-		}
-		else {
-			const updatedFinish = Math.min(limit, Math.max(item.finish, edit.commonState.offset))
-			deltaSeconds = updatedFinish - edit.commonState.end;
-			edit.commonState.setMetadata({
-				finish: edit.commonState.start + (updatedFinish - edit.commonState.offset),
+				offset: edit.commonState.offset + deltaSeconds,
+				start: edit.commonState.start + deltaSeconds,
 			});
 		}
-		uiStore.logData("transcriptEditTrimmed", {
+		else {
+			deltaSeconds = item.finish - edit.commonState.end;
+			deltaSeconds = Math.max(
+				deltaSeconds,
+				uiStore.timelineConst.minTimelineItemDuration - edit.commonState.sceneDuration
+			);
+			deltaSeconds = Math.min(
+                deltaSeconds,
+				edit.rightTimelineLimit - edit.commonState.end,
+                edit.commonState.duration - edit.commonState.finish
+            );
+			edit.commonState.setMetadata({
+				finish: edit.commonState.start + (edit.commonState.finish + deltaSeconds) - edit.commonState.offset,
+			});
+		}
+		uiStore.logData("transcriptEditTrimming", {
 			editId: edit.commonState.id,
 			sceneDuration: edit.commonState.sceneDuration,
 			delta: deltaSeconds,

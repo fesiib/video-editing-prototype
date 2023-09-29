@@ -247,7 +247,7 @@ class VideoState {
 		return {
 			start: this.commonState.start,
 			finish: this.commonState.finish,
-			duration: this.commonState.duration,
+			duration: this.commonState.sceneDuration,
 			offset: this.commonState.offset,
 			speed: this.commonState.speed,
 		};
