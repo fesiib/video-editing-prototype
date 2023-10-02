@@ -63,7 +63,7 @@ class CommonState {
 		const minDuration = this.domainStore.rootStore.uiStore.timelineConst.minTimelineItemDuration;
 		const potentialStart = metadata.start !== undefined ? metadata.start : this.start;
 		const potentialFinish = metadata.finish !== undefined ? metadata.finish : this.finish;
-		if (potentialFinish - potentialStart <= minDuration) {
+		if (potentialFinish - potentialStart <= minDuration && !this.id.startsWith("video")) {
 			if (metadata.start !== undefined) {
 				metadata.start = potentialFinish - minDuration;
 				if (metadata.start < 0) {
@@ -84,7 +84,7 @@ class CommonState {
 		if (metadata.duration === undefined) {
 			metadata.duration = this.duration;
 		}
-		if (potentialFinish - potentialStart > metadata.duration) {
+		if (potentialFinish - potentialStart > metadata.duration && !this.id.startsWith("video")) {
 			if (metadata.start !== undefined) {
 				metadata.start = potentialFinish - metadata.duration;
 				if (metadata.start < 0) {

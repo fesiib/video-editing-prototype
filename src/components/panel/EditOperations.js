@@ -33,7 +33,6 @@ const EditOperations = observer(function EditOperations() {
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {
 			domainStore.curIntent.setEditOperationKey("");
-			domainStore.curIntent.setEditOperationKey(operationKey);
 			uiStore.logData("operationSelect", {
 				editOperation: null,
 			});

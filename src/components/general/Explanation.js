@@ -82,7 +82,6 @@ const RowsVisualization = observer(function RowsVisualization({
 							const highlight = (type.includes(rowKey) || (
 								rowKey === "custom" && type.some((t) => t.startsWith(`custom.${curIntent.editOperationKey}`))
 							));
-							console.log()
 							// const isCustom = type.startsWith("custom.");
 							// const t = rowKey.startsWith("custom.") ? "custom" : rowKey;
 							if (rowKey === COMMAND) {
@@ -168,6 +167,22 @@ const Explanation = observer(function Explanation() {
 					) : (null)
 				}
 			</div>
+			{
+				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 0) ? (
+				<div className="text-sm italic">
+					<span> *{DISPLAY_NAMES["temporal"]}: </span>
+					<span> {selectedEdits[0].explanation[0]} </span>
+				</div>
+				) : (null)
+			}
+			{
+				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 1) ? (
+				<div className="text-sm italic">
+					<span> *{DISPLAY_NAMES["spatial"]}: </span>
+					<span> {selectedEdits[0].explanation[1]} </span>
+				</div>
+				) : (null)
+			}
 			{/* Lines below */}
 			<RowsVisualization 
 				contribution={selectedSuggestedEdits.length > 0 ?
@@ -175,22 +190,6 @@ const Explanation = observer(function Explanation() {
 					curIntent.combinedContribution
 				}
 			/>
-			{
-				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 0) ? (
-				<div className="text-xs">
-					<span> Explanation for {DISPLAY_NAMES["temporal"]} </span>
-					<span> {selectedEdits[0].explanation[0]} </span>
-				</div>
-				) : (null)
-			}
-			{
-				(selectedSuggestedEdits.length > 0 && selectedEdits[0].explanation.length > 1) ? (
-				<div className="text-xs">
-					<span>  Explanation for {DISPLAY_NAMES["spatial"]} </span>
-					<span> {selectedEdits[0].explanation[1]} </span>
-				</div>
-				) : (null)
-			}
 			{/* 
 			Colors on top of the text
 			<div className="flex flex-row flex-wrap gap-1 text-xs p-2 bg-gray-100">

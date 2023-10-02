@@ -29,12 +29,21 @@ const DraggableImage = observer(function DraggableImage({ curImage }) {
 	const x = adaptCoordinate(curImage.commonState.x, curImage.commonState.width, projectWidth, canvasWidth);
 	const y = adaptCoordinate(curImage.commonState.y, curImage.commonState.height, projectHeight, canvasHeight);
 
+	// const imageObject = useMemo(() => {
+    //     const element = document.createElement("img");
+    //     element.src = curImage.customParameters.source;
+    //     element.id = "image_element_" + curImage.commonState.id;
+    //     return element;
+    // }, [curImage.customParameters.source, curImage.commonState.id]);
+
+
 	const imageObject = useMemo(() => {
-        const element = document.createElement("img");
-        element.src = curImage.customParameters.source;
-        element.id = "image_element_" + curImage.commonState.id;
+        const element = new window.Image();
+    	element.src = curImage.customParameters.source;
+		element.id = "image_element_" + curImage.commonState.id;
         return element;
-    }, [curImage.customParameters.source, curImage.commonState.id]);;
+    }, [curImage.customParameters.source, curImage.commonState.id]);
+	
 
     useEffect(action(() => {
 		if (imageRef.current === null) {

@@ -18,7 +18,8 @@ class UserStore {
 	videoLinks = {
 		// controlled
 		"video-1": "https://www.youtube.com/watch?v=b3TVLNNqgdc",
-		"video-2": "https://www.youtube.com/live/Tih8I3Klw54?si=QXkQ-ID33_FyAmWO",
+		"video-2": "https://www.youtube.com/watch?v=oYMAX90kNkU",
+		//"video-2": "https://www.youtube.com/live/Tih8I3Klw54?si=QXkQ-ID33_FyAmWO",
 		// open-ended
 		"video-3": "https://www.youtube.com/watch?v=OKQpOzEY_A4",
 		"video-4": "https://www.youtube.com/watch?v=sz8Lo3NY1m0",

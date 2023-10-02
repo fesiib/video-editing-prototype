@@ -16,7 +16,7 @@ const FileInput = observer(function FileInput({metaKey, parameterKey, parameter}
 
 	const { uiStore, domainStore } = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -102,7 +102,7 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 	const { uiStore, domainStore } = useRootContext();
 	const operationName = domainStore.operationNameMapping[parameterKey];
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 	const onInputChange = action((event) => {
@@ -151,7 +151,7 @@ const TextInput = observer(function TextInput({metaKey, parameterKey, parameter}
 const NumberInput = observer(function NumberInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -288,7 +288,7 @@ const NumberInput = observer(function NumberInput({metaKey, parameterKey, parame
 const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -507,7 +507,7 @@ const TimeInput = observer(function TimeInput({metaKey, parameterKey, parameter}
 const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, parameter, options}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -562,7 +562,7 @@ const DropDownInput = observer(function DropDownInput({metaKey, parameterKey, pa
 const ColorInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -614,7 +614,7 @@ const ColorInput = observer(function ColorInput({metaKey, parameterKey, paramete
 const RangeInput = observer(function ColorInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -690,7 +690,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 	
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 	
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
@@ -740,7 +740,7 @@ const AlignInput = observer(function AlignInput({metaKey, parameterKey, paramete
 const ToggleInput = observer(function ToggleInput({metaKey, parameterKey, parameter}) {
 	const {uiStore, domainStore} = useRootContext();
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
@@ -793,7 +793,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 	const operationName = domainStore.operationNameMapping[parameterKey];
 
-	const isDisabled = parameter === "" || selectedEdits.some((edit) => edit.isSuggested);
+	const isDisabled = selectedEdits.some((edit) => edit.isSuggested);
 
 	const inputId = `${metaKey}-${parameterKey}-input`;
 
@@ -847,7 +847,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 				disabled={isDisabled}
 			/>
 			<button className='text-sm border w-fit px-1 bg-indigo-200 rounded hover:bg-indigo-300 disabled:opacity-50 disabled:hover:bg-indigo-200'
-				disabled={isDisabled}
+				disabled={parameter === "" || isDisabled}
 				onClick={() => {
 					uiStore.logData("parameterSearchClick", {
 						value: parameter,
@@ -861,7 +861,7 @@ const SearchInput = observer(function SearchInput({metaKey, parameterKey, parame
 					to={`https://www.google.com/search?tbm=isch&q=${parameter}`}
 					target="_blank"
 					rel="noopener noreferrer"
-					className={isDisabled ? "pointer-events-none" : ""}
+					className={(parameter === "" || isDisabled) ? "pointer-events-none" : ""}
 				>
 					Search
 				</Link>

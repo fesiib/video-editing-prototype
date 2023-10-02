@@ -205,7 +205,6 @@ const SketchCanvas = observer(function SketchCanvas(
 		if (!sketching) {
 			return;
 		}
-		setCurRect(null);
 	});
 
 	const onSketchTextClick = action(() => {
@@ -345,7 +344,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					onMouseDown={onStageMouseDown}
 					onMouseMove={onStageMouseMove}
 					onMouseUp={onStageMouseUp}
-					onMouseLeave={onStageMouseLeave}
+					onMouseLeave={onStageMouseUp}
 				>
 					<Layer
 						ref={sketchLayerRef}

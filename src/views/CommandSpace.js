@@ -117,6 +117,11 @@ const CommandSpace = observer(function CommandSpace() {
 		});
 	});
 
+	const onKeyDown = action((event) => {
+		if (event.key === "Enter") {
+			onProcessClick();
+		}
+	});
 
 	const onProcessingMode = action((event) => {
 		curIntent.setProcessingMode(event.target.value);
@@ -242,6 +247,7 @@ const CommandSpace = observer(function CommandSpace() {
 										onChange={onChangeTextCommand}
 										onScroll={onTextAreaScroll}
 										onClick={onTextAreaClick}
+										onKeyDown={onKeyDown}
 									/>
 								</div>
 								<div className="flex flex-row justify-between">
