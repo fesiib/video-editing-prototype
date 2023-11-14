@@ -19,6 +19,8 @@ import SideHistory from "../views/SideHistory";
 import NavigationToggle from "../components/general/NavigationToggle";
 import Explanation from "../components/general/Explanation";
 
+import ChatTemplate from "../views/ChatTemplate";
+
 const GPTLike = observer(function GPTLike() {
     const DISPLAY_STR =
         "Whenever there is laptop seen, highlight it with a transparent star around it";
@@ -111,30 +113,19 @@ const GPTLike = observer(function GPTLike() {
                         // 	</div>
                         // </div>
                         <div className="flex flex-row h-full">
-                            <div className="relative w-1/12 h-full">
+                            {/* <div className="relative w-1/12 h-full">
                                 <SideHistory />
-                            </div>
-                            <div className="flex flex-col w-5/12 mx-1 gap-2">
-                                <div className="flex flex-col m-1 p-1 drop-shadow-lg gap-2">
-                                    <CommandSpace />
-                                    <Explanation />
-                                </div>
-                                <EditPanel />
-                            </div>
-                            {/* <div className="flex flex-col w-6/12 items-center">
-								<EditorCanvas />
-								<NavigationToggle />
-								<Timeline />
-								{
-									uiStore.navigation === "transcript" ? (
-										<TextWall />
-									) : null
-								}
-							</div> */}
-                            <div className="flex flex-col w-6/12 items-center">
+                            </div> */}
+                            <div className="flex flex-col mx-3 w-6/12 items-center">
                                 <EditorCanvas />
                                 <Timeline />
                                 <TextWall />
+                            </div>
+
+                            <div className="flex flex-col w-5/12 mx-10 gap-2">
+                                <div className="flex flex-col m-1 p-1 drop-shadow-lg gap-2">
+                                    <ChatTemplate />
+                                </div>
                             </div>
                         </div>
                     ) : (

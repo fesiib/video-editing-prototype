@@ -8,21 +8,23 @@ import GPTLike from "./apps/GPTLike";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Blocks from "./apps/Blocks";
 
+import ChatAppTemplate from "./apps/ChatAppTemplate";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const router = createBrowserRouter([
-	{
-		path: "/blocks",
-		element: <Blocks />,
-	},
-	{
-		path: "/",
-		element: <GPTLike />,
-	},
-	{
-		path: "/app",
-		element: <App />,
-	},
+    {
+        path: "/blocks",
+        element: <Blocks />,
+    },
+    {
+        path: "/",
+        element: <ChatAppTemplate />,
+    },
+    {
+        path: "/app",
+        element: <App />,
+    },
 ]);
 
 // gptlike
@@ -31,7 +33,7 @@ root.render(
         <Provider>
             <RouterProvider router={router} />
         </Provider>
-    </React.StrictMode> 
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
