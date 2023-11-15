@@ -20,13 +20,13 @@ const NavigationToggle = observer(function NavigationToggle() {
 		className="px-2 flex flex-row w-fit gap-2 justify-start items-center"
 		onClick={() => onToggleClick()}
 	>
+		<span> {uiStore.navigation === "transcript" ? "TRANSCRIPT" : "EDIT OPERATION"} </span>
 		<div className={
 			"flex flex-row w-10 h-5 border hover:brightness-75 rounded"
 				+ (isTimeline ? " justify-start" : " justify-end")
 		}>
 			<div className={"bg-indigo-300 w-5 h-5 border hover:brightness-75 rounded"}> </div>
 		</div>
-		<span> {uiStore.navigation.toUpperCase()} </span>
 	</button>);
 });
 

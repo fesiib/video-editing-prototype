@@ -11,7 +11,7 @@ const EditPanel = observer(function EditPanel() {
 
 	const selectedOperationKey = domainStore.curIntent.editOperation;
 
-	return (<div className="flex flex-col">
+	return (<div className="flex flex-col w-full">
 		<EditOperations />
 		{
 			selectedOperationKey === null ? null : (

@@ -549,7 +549,7 @@ const Timeline = observer(function Timeline() {
 				</div>
             </div>
 			{
-				uiStore.navigation === "timeline" ? (<div className="flex flex-col">
+				<div className="flex flex-col">
 					<div className="self-end flex flex-row items-center">
 						<label htmlFor="timeline_zoom">
 							{" "}
@@ -569,7 +569,7 @@ const Timeline = observer(function Timeline() {
 						/>
 					</div>
 					<TimelineTracks />
-				</div>) : null
+				</div>
 			}
         </div>
     );

@@ -21,7 +21,7 @@ import Explanation from "../components/general/Explanation";
 
 import ChatTemplate from "../views/ChatTemplate";
 
-const GPTLike = observer(function GPTLike() {
+const ChatApp = observer(function ChatApp() {
     const DISPLAY_STR =
         "Whenever there is laptop seen, highlight it with a transparent star around it";
     const { userStore, uiStore, domainStore } = useRootContext();
@@ -76,42 +76,6 @@ const GPTLike = observer(function GPTLike() {
                 <div className="flex flex-col h-screen">
                     <Header />
                     {userStore.isTaskChosen ? (
-                        // <div className="grid grid-cols-7 grid-rows-4 h-full overflow-hidden">
-                        // 	<div className="col-span-full row-span-3 grid grid-cols-7 gap-4">
-                        // 		<div className="col-span-1">
-                        // 			<EditPanel />
-                        // 		</div>
-                        // 		<div className="col-span-3 flex flex-col items-center">
-                        // 			<EditorCanvas />
-                        // 			<Timeline />
-                        // 		</div>
-                        // 		<div className="col-span-3">
-                        // 			<TextWall />
-                        // 		</div>
-                        // 	</div>
-                        // 	<div className="col-span-6 col-start-2 place-content-around mx-5 justify-around object-top">
-                        // 		<CommandSpace />
-                        // 	</div>
-                        // </div>
-                        // <div className="grid grid-cols-7 h-full">
-                        // 	<div className="col-span-1">
-                        // 		<EditPanel />
-                        // 	</div>
-                        // 	<div className="col-span-6 flex flex-col justify-start  mx-8">
-                        // 		<div className="grid grid-cols-2 items-center gap-2">
-                        // 			<div className="col-span-1 row-span-full flex flex-col items-center">
-                        // 				<EditorCanvas />
-                        // 				<Timeline />
-                        // 			</div>
-                        // 			<div className="col-span-1 row-span-full mx-4">
-                        // 				<TextWall />
-                        // 			</div>
-                        // 		</div>
-                        // 		<div className="col-span-6 col-start-2">
-                        // 			<CommandSpace />
-                        // 		</div>
-                        // 	</div>
-                        // </div>
                         <div className="flex flex-row h-full">
                             {/* <div className="relative w-1/12 h-full">
                                 <SideHistory />
@@ -119,7 +83,14 @@ const GPTLike = observer(function GPTLike() {
                             <div className="flex flex-col mx-3 w-6/12 items-center">
                                 <EditorCanvas />
                                 <Timeline />
-                                <TextWall />
+								<div className="w-full flex flex-row justify-end">
+									<NavigationToggle />
+								</div>
+								{
+									uiStore.navigation === "transcript" ? (
+										<TextWall />
+									) : <EditPanel />
+								}
                             </div>
 
                             <div className="flex flex-col w-5/12 mx-10 gap-2">
@@ -220,4 +191,4 @@ const GPTLike = observer(function GPTLike() {
     );
 });
 
-export default GPTLike;
+export default ChatApp;
