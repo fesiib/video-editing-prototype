@@ -1,36 +1,36 @@
 mark {
-	color: transparent;
-	background-color: lightblue; /* or whatever */
+    color: transparent;
+    background-color: lightblue; /* or whatever */
 }
-
+/* 
 textarea {
-	margin: 0;
-	border-radius: 0;
-	color: #444; /* or whatever */
-  	background-color: transparent;
-}
+    margin: 0;
+    border-radius: 0;
+    color: #444;
+    background-color: transparent;
+} */
 
 .textarea-backdrop {
-	overflow: auto;
-	background-color: #fff;
+    overflow: auto;
+    background-color: #fff;
 }
 
 .textarea-highlights {
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	color: transparent;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent;
 }
 
 .disable-select {
-	-webkit-user-select: none;  
-	-moz-user-select: none;    
-	-ms-user-select: none;      
-	user-select: none;
-}  
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 .App {
     text-align: center;
-	height: 100vh;
+    height: 100vh;
 }
 
 .App-logo {
@@ -76,130 +76,157 @@ textarea {
 	checked color 		cc	#4d7c0f	
 */
 
-input[type=range] {
-	height: 5px;
-	width: 50%;
-	-webkit-appearance: none;
+input[type="range"] {
+    height: 5px;
+    width: 50%;
+    -webkit-appearance: none;
 }
-input[type=range]:focus {
-	outline: none;
+input[type="range"]:focus {
+    outline: none;
 }
 
 /* Track */
-input[type=range]::-webkit-slider-runnable-track {
-	height: 5px;
-	width: 100%;
-	cursor: pointer;
-	background: /*bc*/#64748b;
-	border-radius: 1px;
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px;
+    width: 100%;
+    cursor: pointer;
+    background: /*bc*/ #64748b;
+    border-radius: 1px;
 }
-input[type=range]::-moz-range-track {
-	height: 5px;
-	width: 100%;
-	cursor: pointer;
-	background: /*bc*/#64748b;
-	border-radius: 1px;
+input[type="range"]::-moz-range-track {
+    height: 5px;
+    width: 100%;
+    cursor: pointer;
+    background: /*bc*/ #64748b;
+    border-radius: 1px;
 }
 
 /* Thumb */
-input[type=range]::-webkit-slider-thumb {
-	height: 20px;
-	width: 5px;
-	background: /*pc*/#c7d2fe;
-	cursor: pointer;
-	-webkit-appearance: none;
-	margin-top: -7px;
-	border-radius: 15px;
-	border: 1px solid /*bg*/#64748b;
+input[type="range"]::-webkit-slider-thumb {
+    height: 20px;
+    width: 5px;
+    background: /*pc*/ #c7d2fe;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -7px;
+    border-radius: 15px;
+    border: 1px solid /*bg*/ #64748b;
 }
-input[type=range]:focus::-webkit-slider-runnable-track {
-	background: /*bf*/#4b5563;
-}
-
-input[type=range]::-moz-range-thumb {
-	height: 20px;
-	width: 5px;
-	background: /*pc*/#c7d2fe;
-	cursor: pointer;
-	border-radius: 15px;
-	border: 1px solid /*bg*/#64748b;
-}
-input[type=range]::-ms-track {
-	width: 50%;
-	height: 5px;
-	cursor: pointer;
-	background: transparent;
-	border-color: transparent;
-	color: transparent;
-}
-input[type=range]::-ms-thumb {
-	margin-top: 1px;
-	height: 20px;
-	width: 5px;
-	border-radius: 15px;
-	background: /*pc*/#c7d2fe;
-	cursor: pointer;
-}
-input[type=range]::-ms-fill-lower {
-	background: /*pc*/#c7d2fe;
-	border-radius: 2px;
-}
-input[type=range]::-ms-fill-upper {
-	background: /*bf*/#4b5563;
-	border-radius: 2px;
-}
-input[type=range]:focus::-ms-fill-lower {
-	background: /*pc*/#c7d2fe;
-}
-input[type=range]:focus::-ms-fill-upper {
-	background: /*bf*/#4b5563;
+input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: /*bf*/ #4b5563;
 }
 
-input[type=radio] {
-	/* Add if not using autoprefixer */
-	-webkit-appearance: none;
-	appearance: none;
-	/* For iOS < 15 to remove gradient background */
-	background-color: transparent;
-	/* Not removed via appearance */
-	margin: 0;
+input[type="range"]::-moz-range-thumb {
+    height: 20px;
+    width: 5px;
+    background: /*pc*/ #c7d2fe;
+    cursor: pointer;
+    border-radius: 15px;
+    border: 1px solid /*bg*/ #64748b;
+}
+input[type="range"]::-ms-track {
+    width: 50%;
+    height: 5px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+input[type="range"]::-ms-thumb {
+    margin-top: 1px;
+    height: 20px;
+    width: 5px;
+    border-radius: 15px;
+    background: /*pc*/ #c7d2fe;
+    cursor: pointer;
+}
+input[type="range"]::-ms-fill-lower {
+    background: /*pc*/ #c7d2fe;
+    border-radius: 2px;
+}
+input[type="range"]::-ms-fill-upper {
+    background: /*bf*/ #4b5563;
+    border-radius: 2px;
+}
+input[type="range"]:focus::-ms-fill-lower {
+    background: /*pc*/ #c7d2fe;
+}
+input[type="range"]:focus::-ms-fill-upper {
+    background: /*bf*/ #4b5563;
+}
 
-	font: inherit;
-	color: /*bg*/#64748b;
-	width: 15px;
-	height: 15px;
-	border: 0.15em solid /*bg*/#64748b;
-	border-radius: 50%;
+input[type="radio"] {
+    /* Add if not using autoprefixer */
+    -webkit-appearance: none;
+    appearance: none;
+    /* For iOS < 15 to remove gradient background */
+    background-color: transparent;
+    /* Not removed via appearance */
+    margin: 0;
 
-	display: grid;
-  	place-content: center;
-	margin: 3px;
+    font: inherit;
+    color: /*bg*/ #64748b;
+    width: 15px;
+    height: 15px;
+    border: 0.15em solid /*bg*/ #64748b;
+    border-radius: 50%;
+
+    display: grid;
+    place-content: center;
+    margin: 3px;
 }
 
 input[type="radio"]::before {
-	content: "";
-	width: 0.65em;
-	height: 0.65em;
-	border-radius: 50%;
-	transform: scale(0);
-	transition: 120ms transform ease-in-out;
-	box-shadow: inset 1em 1em var(--form-control-color);
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
 }
-  
+
 input[type="radio"]:checked::before {
-	transform: scale(1);
+    transform: scale(1);
 }
 
 input[type="radio"]:checked {
-	background-color: /*cc*/#4d7c0f;
-	outline: max(2px, 0.15em) solid /*bg*/#64748b;
-	outline-offset: max(2px, 0.15em);
+    background-color: /*cc*/ #4d7c0f;
+    outline: max(2px, 0.15em) solid /*bg*/ #64748b;
+    outline-offset: max(2px, 0.15em);
 }
 
 input[type="radio"]:focus {
-	outline: max(2px, 0.15em) solid /*bg*/#64748b;
-	outline-offset: max(2px, 0.15em);
+    outline: max(2px, 0.15em) solid /*bg*/ #64748b;
+    outline-offset: max(2px, 0.15em);
 }
-  
 
+/* Chat-based Interface */
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    transition: background-color 0.3s;
+}
 
+.tab:hover {
+    background-color: #f0f0f0;
+}
+
+.active-tab {
+    background-color: #fff;
+}
+
+.add-tab {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-left: 8px;
+    transition: background-color 0.3s;
+}
+
+.add-tab:hover {
+    background-color: #f0f0f0;
+}
