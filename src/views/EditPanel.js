@@ -9,7 +9,9 @@ import useRootContext from "../hooks/useRootContext";
 const EditPanel = observer(function EditPanel() {
 	const { domainStore } = useRootContext();
 
-	const selectedOperationKey = domainStore.curIntent.editOperation;
+	const curTab = domainStore.curTab;
+
+	const selectedOperationKey = curTab.editOperation;
 
 	return (<div className="flex flex-col w-full">
 		<EditOperations />

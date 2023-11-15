@@ -36,8 +36,8 @@ const TimelineTracks = observer(function TimelineTracks() {
 
 	const videos = domainStore.videos;
 	const skippedParts = domainStore.skippedParts;
-	const edits = domainStore.curIntent.activeEdits;
-	const suggestedEdits = userStore.systemSetting ? domainStore.curIntent.suggestedEdits : [];
+	const edits = domainStore.curTab.activeEdits;
+	const suggestedEdits = [];
 	const editIds = edits.map((edit) => toJS(edit.commonState.id));
 	const suggestedEditIds = suggestedEdits.map((edit) => toJS(edit.commonState.id));
 
@@ -203,9 +203,11 @@ const TimelineTracks = observer(function TimelineTracks() {
 			newTracks[id].skippedScenes.push(skipped);
 		}
         for (let edit of edits) {
-            const id = edit.commonState.trackId;
+			const id = edit.commonState.trackId;
+			console.log(toJS(edit));
             newTracks[id].scenes.push(edit);
-        }
+		}
+        
 		for (let suggestedEdit of suggestedEdits) {
 			const id = suggestedEdit.commonState.trackId;
 			newTracks[id].staticScenes.push(suggestedEdit);
@@ -217,7 +219,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 		JSON.stringify(editIds),
 		JSON.stringify(suggestedEditIds),
 		trackCnt,
-		domainStore.curIntentPos,
+		domainStore.curTabPos,
 	]);
 
 	useEffect(() => {

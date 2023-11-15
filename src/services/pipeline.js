@@ -4,7 +4,7 @@ const URL = "http://internal.kixlab.org:7778/";
 
 export function requestSuggestionsSplit(requestData) {
 	return new Promise((resolve, reject) => {
-		const url = `${URL}intent`;
+		const url = `${URL}intent-split`;
 		const data = requestData;
 		const config = {
 			headers: {

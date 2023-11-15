@@ -12,12 +12,9 @@ import useRootContext from "../hooks/useRootContext";
 // import VideoState from "./stores/objects/videoState";
 
 import TextWall from "../views/TextWall";
-import CommandSpace from "../views/CommandSpace";
 import EditPanel from "../views/EditPanel";
 import Header from "../views/Header";
-import SideHistory from "../views/SideHistory";
 import NavigationToggle from "../components/general/NavigationToggle";
-import Explanation from "../components/general/Explanation";
 
 import ChatTemplate from "../views/ChatTemplate";
 
@@ -77,9 +74,6 @@ const ChatApp = observer(function ChatApp() {
                     <Header />
                     {userStore.isTaskChosen ? (
                         <div className="flex flex-row h-full">
-                            {/* <div className="relative w-1/12 h-full">
-                                <SideHistory />
-                            </div> */}
                             <div className="flex flex-col mx-3 w-6/12 items-center">
                                 <EditorCanvas />
                                 <Timeline />

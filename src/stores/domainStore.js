@@ -1,12 +1,15 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 
+import EditState from "./objects/editState";
+import TabState from "./tabState";
 import VideoState from "./objects/videoState";
+
 import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+
 import { requestSuggestions, requestSummary } from "../services/pipeline";
-import EditState from "./objects/editState";
+
 import { sliceTextArray } from "../utilities/genericUtilities";
-import TabState from "./tabState";
 
 class DomainStore {
 	domainDoc = "domain";
@@ -866,8 +869,7 @@ class DomainStore {
 			if (!this.rootStore.userStore.systemSetting) {
 				return [...objects, ...this.curTab.activeEdits];
 			}	
-			suggestedEdits =
-			return [...objects, ...this.curTab.activeEdits,];
+			return [...objects, ...this.curTab.activeEdits, this.curTab.suggestedEdits];
 		}
 		return objects;
 	}
@@ -899,13 +901,13 @@ class DomainStore {
 				reject("videos save error: " + error);
 			}
 			try {
-				let allIntentPromises = [];
-				for (let intent of this.intents) {
-					allIntentPromises.push(intent.saveFirebase(userId, taskIdx));
+				let allTabPromises = [];
+				for (let tab of this.tabs) {
+					allTabPromises.push(tab.saveFirebase(userId, taskIdx));
 				}		
-				await Promise.all(allIntentPromises);
+				await Promise.all(allTabPromises);
 			} catch (error) {
-				reject("intents save error: " + error);
+				reject("tabs save error: " + error);
 			}
 			setDoc(projectDomain, this, {merge: false}).then(() => {
 				resolve();
@@ -926,11 +928,11 @@ class DomainStore {
 					resolve();
 				}
 				this.in_mainVideos = [];
-				this.intents = [];
+				this.tabs = [];
 				this.projectMetadata = {
 					...data.projectMetadata,
 				};
-				this.curIntentPos = data.curIntentPos;
+				this.curTabPos = data.curTabPos;
 				for (let videoId of data.in_mainVideos) {
 					const newVideo = new VideoState(
 						this,
@@ -950,9 +952,9 @@ class DomainStore {
 						console.log(error);
 					}
 				}
-
-				for (let intentId of data.intents) {
-					const newIntent = new IntentState(
+				
+				for (let tabId of data.tabs) {
+					const newTab = new TabState(
 						this,
 						0,
 						"",
@@ -961,10 +963,10 @@ class DomainStore {
 						0, 
 					);
 					try {
-						const success = await newIntent.fetchFirebase(userId, taskIdx, intentId);
+						const success = await newTab.fetchFirebase(userId, taskIdx, tabId);
 						if (success) {
 							runInAction(() => {
-								this.intents.push(newIntent);
+								this.tabs.push(newTab);
 							});
 						}
 					} catch (error) {
@@ -986,18 +988,15 @@ class DomainStore {
 				projectMetadata: {
 					...toJS(domainStore.projectMetadata)
 				},
-				intents: [],
-				curIntentPos: domainStore.curIntentPos,
+				tabs: [],
+				curTabPos: domainStore.curTabPos,
 			};
 			for (let video of domainStore.in_mainVideos) {
-				//const convertedVideo = video.videoStateConverter.toFirestore(video);
 				data.in_mainVideos.push(video.commonState.id);
 			}
-			for (let intent of domainStore.intents) {
-				//const convertedIntent = intent.intentStateConverter.toFirestore(intent);
-				data.intents.push(intent.id);
+			for (let tab of domainStore.tabs) {
+				data.tabs.push(tab.id);
 			}
-			//console.log("to", data);
 			return data;
 		},
 		fromFirestore: function(snapshot, options) {

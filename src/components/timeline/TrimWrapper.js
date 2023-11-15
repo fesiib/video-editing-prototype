@@ -44,9 +44,9 @@ const DraggableRangeHandle = observer(function DraggableRangeHandle({
         const positionIndicatorLabelDiv = document.getElementById(
             uiStore.timelineConst.positionIndicatorLabelId
         );
-        const lowLabel = scene.intent === undefined ?
+        const lowLabel = scene.parent === undefined ?
 			(scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "")
-			: scene.intent.editOperationKey;
+			: scene.parent.editOperationKey;
 
         if (isLeftHandler) {
             transformSeconds = Math.min(transformSeconds, scene.commonState.sceneDuration - uiStore.timelineConst.minTimelineItemDuration);

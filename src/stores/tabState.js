@@ -5,7 +5,7 @@ import EditState from "./objects/editState";
 import { randomUUID, sliceTextArray } from "../utilities/genericUtilities";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
-import Bubble from "./objects/bubbleState";
+import BubbleState from "./objects/bubbleState";
 
 class TabState {
 	trackId = 0;
@@ -24,6 +24,9 @@ class TabState {
 
 	editOperationKey = "";
 	activeEdits = [];
+
+	suggestedEditOperations = [];
+	suggestedEdits = [];
 	
 	processingMode = "from-scratch"; // from-scratch, add-more, adjust-selected
 
@@ -47,6 +50,9 @@ class TabState {
 
 		this.editOperationKey = Object.keys(domainStore.editOperations)[0];
 		this.activeEdits = [];
+
+		this.suggestedEditOperations = [];
+		this.suggestedEdits = [];
 		
 		this.processingMode = "from-scratch";
     }
@@ -75,6 +81,14 @@ class TabState {
 
 	setSketchPlayPosition(pos) {
 		this.sketchPlayPosition = pos;
+	}
+
+	setSuggestedEditOperations(operations) {
+		this.suggestedEditOperations = [...operations];
+	}
+
+	setSuggestedEdits(edits) {
+		this.suggestedEdits = [...edits];
 	}
 
 	addActiveEdit(first, second) {
@@ -106,7 +120,7 @@ class TabState {
 
 	addBubble(time, type) {
 		// userCommand, systemMessage, parsingResult, edit;
-		let newBubble = new Bubble(this.domainStore, this, this.trackId, time, type);
+		let newBubble = new BubbleState(this.domainStore, this, this.trackId, time, type);
 		if (type === this.domainStore.bubbleTypes.userCommand) {
 			this.userBubbles.push(newBubble);
 			return;
@@ -228,7 +242,9 @@ class TabState {
 		this.deleteEdits(deleteIds);
 		this.activeEdits.push(...newEdits);
 		return newEdits;
-	}
+	} 
+
+	show
 
 	getObjectById(id) {
 		const fromActive = this.activeEdits.find((edit) => edit.commonState.id === id);
@@ -273,6 +289,7 @@ class TabState {
 		if (this.editOperationKey === "") {
 			return null;
 		}
+		return this.domainStore.editOperations[this.editOperationKey];
 	}
 
 	get requestParameters() {

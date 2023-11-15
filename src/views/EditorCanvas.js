@@ -23,6 +23,8 @@ const EditorCanvas = observer(function EditorCanvas() {
 
     const { uiStore, domainStore } = useRootContext();
 
+	const curTab = domainStore.curTab;
+
 	const canvasWidth = uiStore.canvasSize.width;
 	const canvasHeight = uiStore.canvasSize.height;
     const projectWidth = domainStore.projectMetadata.width;
@@ -45,7 +47,7 @@ const EditorCanvas = observer(function EditorCanvas() {
     });
 
 	const isObject = (target) => {
-		const object = domainStore.curIntent.getCanvasObjectById(target.id());
+		const object = curTab.getCanvasObjectById(target.id());
 		if (object === undefined || object === null 
 		) {
 			return false;
@@ -54,7 +56,7 @@ const EditorCanvas = observer(function EditorCanvas() {
 	}
 
     const isVisibleObject = (target) => {
-		const object = domainStore.curIntent.getCanvasObjectById(target.id());
+		const object = curTab.getCanvasObjectById(target.id());
 		if (object === undefined || object === null 
 		) {
 			return false;
@@ -152,7 +154,7 @@ const EditorCanvas = observer(function EditorCanvas() {
             return;
         }
 		// if (event.target.name() === uiStore.objectNames.video
-		// 	&& domainStore.curIntent.editOperationKey === uiStore.objectNames.crop
+		// 	&& curTab.editOperationKey === uiStore.objectNames.crop
 		// ) {
 		// 	uiStore.selectCanvasObjects([event.target]);
         //     return;
@@ -206,18 +208,18 @@ const EditorCanvas = observer(function EditorCanvas() {
 	useEffect(() => reaction(() => {
 		return{
 			nodeIds: uiStore.canvasControls.transformerNodeIds,
-			editOperationKey: domainStore.curIntent.editOperationKey,
+			editOperationKey: curTab.editOperationKey,
 		}
 	}, 
 		({ nodeIds }) => {
 			let nodes = [];
 			for (let nodeId of nodeIds) {
-				const object = domainStore.curIntent.getCanvasObjectById(nodeId);
+				const object = curTab.getCanvasObjectById(nodeId);
 				const node = stageRef.current.findOne(`#${nodeId}`);
 				if (node === undefined) {
 					continue;
 				}
-				// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
+				// if (curTab.editOperationKey === uiStore.objectNames.crop) {
 				// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
 				// 		nodes.push(node);
 				// 	}

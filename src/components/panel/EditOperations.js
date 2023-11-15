@@ -26,19 +26,20 @@ const EditOperations = observer(function EditOperations() {
 	const suggestedRadioClassName = "w-4 h-4 hover:cursor-pointer";
 	const activeRadioClassName = "w-4 h-4 hover:cursor-pointer";
 	
+	const curTab = domainStore.curTab;
 
-	const selectedOperationKey = domainStore.curIntent.editOperationKey;
-	const suggestedOperationKey = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKey : "";
-	const suggestedOperationKeys = userStore.systemSetting ? domainStore.curIntent.suggestedEditOperationKeys : [];
+	const selectedOperationKey = curTab.editOperationKey;
+	const suggestedOperationKey = userStore.systemSetting ? curTab.suggestedEditOperationKey : "";
+	const suggestedOperationKeys = userStore.systemSetting ? curTab.suggestedEditOperationKeys : [];
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {
-			domainStore.curIntent.setEditOperationKey("");
+			curTab.setEditOperationKey("");
 			uiStore.logData("operationSelect", {
 				editOperation: null,
 			});
 			return;
 		}
-		domainStore.curIntent.setEditOperationKey(operationKey);
+		curTab.setEditOperationKey(operationKey);
 		uiStore.logData("operationSelect", {
 			editOperation: operationKey,
 		});

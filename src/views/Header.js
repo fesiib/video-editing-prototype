@@ -5,7 +5,6 @@ import { observer } from "mobx-react-lite";
 import useRootContext from "../hooks/useRootContext";
 import { action, set } from "mobx";
 import { authStateChanged, signInWithGoogle, signOutFromGoogle } from "../services/firebase";
-import NewIntent from "../components/general/NewIntent";
 
 const Auth = observer(function Auth() {
 	const { uiStore, userStore } = useRootContext();
@@ -70,11 +69,6 @@ const Auth = observer(function Auth() {
 			</div>
 		) : (
 			<div className="w-full flex flex-row justify-between gap-2">
-				{/* {
-					userStore.isTaskChosen && !userStore.loading ? (
-						<NewIntent />
-					) : null
-				} */}
 				<div className="flex flex-row gap-2">
 					{
 						(userStore.isTaskChosen && !userStore.loading) ? (

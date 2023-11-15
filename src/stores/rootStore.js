@@ -76,7 +76,7 @@ const LogDataConverter = {
 };
 
 class RootStore {
-	collection = "pilots";
+	collection = "chat";
 	logCollection = "logs";
 	videoCollection = "videos";
 	editCollection = "edits";

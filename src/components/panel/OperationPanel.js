@@ -43,7 +43,7 @@ const OperationPanel = observer(function OperationPanel() {
 
 	const { uiStore, domainStore } = useRootContext();
 
-	const selectedOperation = domainStore.curIntent.editOperation;
+	const selectedOperation = domainStore.curTab.editOperation;
 	const [collapsed, setCollapsed] = React.useState(false);
 	
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
@@ -116,7 +116,7 @@ const OperationPanel = observer(function OperationPanel() {
 								) : (
 									<div className="flex flex-col divide-y divide-gray-300 gap-2">
 										{/* {
-											(selectedSuggestedEdits.length !== 1 || domainStore.processingIntent
+											(selectedSuggestedEdits.length !== 1 || domainStore.processingRequest
 											) ? null : (
 												<div className="flex flex-col justify-start px-1 divider-1">
 													<div className="">
@@ -132,14 +132,14 @@ const OperationPanel = observer(function OperationPanel() {
 															JSON.stringify(toJS(selectedEdits[0].suggestionSource))
 														} </span>
 													</div>
-													{ domainStore.curIntent.editOperation === null ? null : (
+													{ domainStore.curTab.editOperation === null ? null : (
 														<div className="">
 															<span className="text-sm"> Specifications: </span>
 															<span className="text-bold text-sm">
 																{
 																	
-																	selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]?.length === 1 ?
-																		JSON.stringify(toJS(selectedEdits[0].suggestedParameters[domainStore.curIntent.editOperationKey]))
+																	selectedEdits[0].suggestedParameters[domainStore.curTab.editOperationKey]?.length === 1 ?
+																		JSON.stringify(toJS(selectedEdits[0].suggestedParameters[domainStore.curTab.editOperationKey]))
 																		: "None"
 																}
 															</span>

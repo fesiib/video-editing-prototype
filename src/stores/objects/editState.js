@@ -102,12 +102,12 @@ class EditState {
 
 	suggestedParameters = {};
 
-    constructor(domainStore, parent, isSuggested, isSystem, trackId) {
+    constructor(domainStore, parent, isSuggested, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
 		this.parent = parent;
-		
+	
 		this.isSuggested = isSuggested;
 		this.explanation = [];
 		this.suggestionSource = {

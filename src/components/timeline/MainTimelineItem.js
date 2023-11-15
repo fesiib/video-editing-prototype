@@ -51,7 +51,7 @@ const MainTimelineItem = observer(function MainTimelineItem({ mainScene, mainSce
 					finish = Math.min(finish, scene.commonState.offset);
 				}
 			}
-			const newEdit = domainStore.curIntent.addActiveEdit(offset, finish);
+			const newEdit = domainStore.curTab.addActiveEdit(offset, finish);
 			uiStore.timelineControls.rangeSelectingTimeline = false;
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 			uiStore.timelineControls.positionIndicatorVisibility -= 1;

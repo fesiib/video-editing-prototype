@@ -25,13 +25,7 @@ import { playPositionToFormat } from "../utilities/timelineUtilities";
 
 const Timeline = observer(function Timeline() {
     const { uiStore, domainStore } = useRootContext();
-	const curIntent = domainStore.curIntent;
-
-	// const selectedSuggestedEdits = curIntent.suggestedEdits.filter((edit) => {
-	// 	return uiStore.timelineControls.selectedTimelineItems.findIndex((item) => {
-	// 		return item.commonState.id === edit.commonState.id;
-	// 	}) >= 0;
-	// });
+	const curTab = domainStore.curTab;
 
 	const selectedSuggestedEdits = uiStore.timelineControls.selectedTimelineItems.filter((item) => {
 		return item.isSuggested;
@@ -92,7 +86,7 @@ const Timeline = observer(function Timeline() {
 		let newOffset = uiStore.timelineControls.playPosition;
 		let newFinish = domainStore.projectMetadata.duration;
 
-		const sortedScenes = [...curIntent.activeEdits].sort((a, b) => {
+		const sortedScenes = [...curTab.activeEdits].sort((a, b) => {
 			return a.commonState.offset - b.commonState.offset;
 		});
 		
@@ -117,7 +111,7 @@ const Timeline = observer(function Timeline() {
 			alert("Cannot add any segment. No space left.");
 			return;
 		}
-		const newScene = curIntent.addActiveEdit(
+		const newScene = curTab.addActiveEdit(
 			newOffset, newFinish,
 		);	
 		uiStore.timelineControls.playPosition = newOffset;
@@ -135,7 +129,7 @@ const Timeline = observer(function Timeline() {
 		uiStore.logData("timelineDelete", {
 			selectedSceneIds: selectedSceneIds,
 		});
-        curIntent.deleteEdits(selectedSceneIds);
+        curTab.deleteEdits(selectedSceneIds);
 		uiStore.selectTimelineObjects([]);
     });
 
@@ -149,7 +143,7 @@ const Timeline = observer(function Timeline() {
 		if (selectedSceneIds.length !== 1) {
 			return;
 		}
-		const selectedScenes = curIntent.activeEdits.filter((edit) => {
+		const selectedScenes = curTab.activeEdits.filter((edit) => {
 			return selectedSceneIds.findIndex((id) => id === edit.commonState.id) >= 0;
 		});
 		const newScenes = selectedScenes.map(action((scene) => {
@@ -157,7 +151,7 @@ const Timeline = observer(function Timeline() {
 			let newOffset = scene.commonState.offset + scene.commonState.sceneDuration;
 			let newFinish = domainStore.projectMetadata.duration;
 
-			const sortedScenes = [...curIntent.activeEdits].sort((a, b) => {
+			const sortedScenes = [...curTab.activeEdits].sort((a, b) => {
 				return a.commonState.offset - b.commonState.offset;
 			});
 			
@@ -188,7 +182,7 @@ const Timeline = observer(function Timeline() {
 				start: newOffset,
 				finish: newFinish,
 			});
-			curIntent.activeEdits.push(newScene);
+			curTab.activeEdits.push(newScene);
 			uiStore.timelineControls.playPosition = newOffset;
 			return newScene;
 		}));
@@ -249,14 +243,14 @@ const Timeline = observer(function Timeline() {
 		if (decision === "accept") {
 			let addedEdits = [];
 			for (const edit of selectedSuggestedEdits) {
-				addedEdits.push(curIntent.addEditFromSuggested(edit.commonState.id));
+				addedEdits.push(curTab.addEditFromSuggested(edit.commonState.id));
 			}
 			const deleteEditIds = selectedSuggestedEdits.map((edit) => edit.commonState.id);
 			uiStore.logData("timelineDecisionAccept", {
 				deletedEdits: deleteEditIds,
 				addedEdits: addedEdits.map((edit) => edit.commonState.id),
 			});
-			curIntent.deleteEdits(deleteEditIds);
+			curTab.deleteEdits(deleteEditIds);
 			uiStore.selectTimelineObjects(addedEdits);
 			return;
 		}
@@ -265,8 +259,8 @@ const Timeline = observer(function Timeline() {
 			uiStore.logData("timelineDecisionReject", {
 				deletedEdits: deleteEditIds,
 			});
-			curIntent.deleteEdits(deleteEditIds);
-			if (!onNavigationClick("next") && curIntent.suggestedEdits.length > 0) {
+			curTab.deleteEdits(deleteEditIds);
+			if (!onNavigationClick("next") && curTab.suggestedEdits.length > 0) {
 				onNavigationClick("prev");
 			}
 			return;
@@ -274,7 +268,8 @@ const Timeline = observer(function Timeline() {
 	});
 
 	const onMoreClick = action(() => {
-		if (curIntent.processingAllowed && curIntent.searchMoreAllowed) {
+		//TODO???
+		if (curTab.processingAllowed && curTab.searchMoreAllowed) {
 			domainStore.processIntent(
 				domainStore.processingModes.addMore,
 				{
@@ -283,9 +278,9 @@ const Timeline = observer(function Timeline() {
 				}
 			);
 			uiStore.logData("timelineSearchMore", {
-				text: curIntent.textCommand,
-				sketch: toJS(curIntent.sketchCommand),
-				sketchTimestamp: curIntent.sketchPlayPosition,
+				text: curTab.textCommand,
+				sketch: toJS(curTab.sketchCommand),
+				sketchTimestamp: curTab.sketchPlayPosition,
 				mode: domainStore.processingModes.addMore,
 				start: uiStore.commandSpaceControls.viewPortStart,
 				finish: uiStore.commandSpaceControls.viewPortFinish,
@@ -294,8 +289,8 @@ const Timeline = observer(function Timeline() {
 	});
 
 	const onNavigationClick = action((direction) => {
-		const edits = (curIntent.suggestedEdits.length > 0 ?
-			curIntent.suggestedEdits : curIntent.activeEdits);
+		const edits = (curTab.suggestedEdits.length > 0 ?
+			curTab.suggestedEdits : curTab.activeEdits);
 
 		if (edits.length > 0 && uiStore.timelineControls.selectedTimelineItems.length === 0) {
 			for (let edit of edits) {
@@ -323,7 +318,7 @@ const Timeline = observer(function Timeline() {
 				uiStore.timelineControls.playPosition = prevEdit.offset;
 				uiStore.selectTimelineObjects([edits[prevEdit.editIdx]]);
 				uiStore.logData("timelineJumpPrev", {
-					suggested: curIntent.suggestedEdits.length > 0,
+					suggested: curTab.suggestedEdits.length > 0,
 				});
 				return true;
 			}
@@ -346,7 +341,7 @@ const Timeline = observer(function Timeline() {
 				uiStore.timelineControls.playPosition = nextEdit.offset;
 				uiStore.selectTimelineObjects([edits[nextEdit.editIdx]]);
 				uiStore.logData("timelineJumpNext", {
-					suggested: curIntent.suggestedEdits.length > 0,
+					suggested: curTab.suggestedEdits.length > 0,
 				});
 				return true;
 			}
@@ -402,7 +397,7 @@ const Timeline = observer(function Timeline() {
 		>
             <div className="flex flex-row justify-between my-2">
 				<div className="flex flex-row gap-2 h-fit">
-					<button className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+					<button className={((curTab.suggestedEdits.length === 0 || domainStore.processingRequest)
 								? "bg-gray-300 hover:bg-gray-400" : "bg-yellow-300 hover:bg-yellow-400"
 							) 
 							+ decisionClassName}
@@ -415,21 +410,21 @@ const Timeline = observer(function Timeline() {
 				<div className="flex flex-col justify-center gap-1">
 					<div className="flex gap-1 justify-center">
 						<button
-							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+							className={((curTab.suggestedEdits.length === 0 || domainStore.processingRequest)
 									? "bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 								) 
 								+ decisionClassName}
 							id="prev_button"
 							onClick={() => onNavigationClick("prev")}
 							disabled={
-								curIntent.suggestedEdits.length === 0
-								&& curIntent.activeEdits.length === 0
+								curTab.suggestedEdits.length === 0
+								&& curTab.activeEdits.length === 0
 							}
 						>
 							<BsFillSkipBackwardFill />
 						</button>
 						<div className={ ("flex flex-row gap-1 justify-center"
-								+ ((selectedSuggestedEdits.length === 0 || domainStore.processingIntent) ? " invisible" : " visible")
+								+ ((selectedSuggestedEdits.length === 0 || domainStore.processingRequest) ? " invisible" : " visible")
 								)}
 						>
 							<button
@@ -450,22 +445,22 @@ const Timeline = observer(function Timeline() {
 							</button>
 						</div>
 						<button
-							className={((curIntent.suggestedEdits.length === 0 || domainStore.processingIntent)
+							className={((curTab.suggestedEdits.length === 0 || domainStore.processingRequest)
 								? "bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200" : "bg-yellow-300 hover:bg-yellow-400 disabled:hover:bg-yellow-300"
 							) 
 							+ decisionClassName}
 							id="next_button"
 							onClick={() => onNavigationClick("next")}
 							disabled={
-								curIntent.suggestedEdits.length === 0
-								&& curIntent.activeEdits.length === 0
+								curTab.suggestedEdits.length === 0
+								&& curTab.activeEdits.length === 0
 							}
 						>
 							<BsFillSkipForwardFill />
 						</button>
 					</div>
-					{curIntent.suggestedEdits.length === 0 ? (
-						(curIntent.processingAllowed === true && curIntent.searchMoreAllowed
+					{curTab.suggestedEdits.length === 0 ? (
+						(curTab.processingAllowed === true && curTab.searchMoreAllowed
 							&& uiStore.commandSpaceControls.viewPortStart < uiStore.commandSpaceControls.viewPortFinish
 						) ? (
 							<div className="flex gap-1 justify-center">
@@ -473,7 +468,7 @@ const Timeline = observer(function Timeline() {
 									className={"items-center bg-indigo-200 hover:bg-indigo-300 disabled:hover:bg-indigo-200 flex flex-row gap-1"
 										+ decisionClassName}
 									onClick={() => onMoreClick()}
-									disabled={curIntent.processingAllowed === false || domainStore.processingIntent}
+									disabled={curTab.processingAllowed === false || domainStore.processingRequest}
 								>
 									<FaSearch />
 									<span className="font-bold">
@@ -489,14 +484,14 @@ const Timeline = observer(function Timeline() {
 								selectedSuggestedEdits.map((edit, idx) => {
 									const isLast = idx === selectedSuggestedEdits.length - 1;
 									let pos = 0;
-									for (let sugestedEdit of curIntent.suggestedEdits) {
+									for (let sugestedEdit of curTab.suggestedEdits) {
 										if (sugestedEdit.commonState.offset <= edit.commonState.offset) {
 											pos += 1;
 										}
 									}
 									return pos + (isLast ? "" : ", ");
 								})
-							}] / {curIntent.suggestedEdits.length} </span>
+							}] / {curTab.suggestedEdits.length} </span>
 						</div>
 					)}
 				</div>
@@ -523,7 +518,7 @@ const Timeline = observer(function Timeline() {
 						}
 						onClick={onPressSplit}
 						id="split_button"
-						disabled={curIntent.activeEdits.length === 0}
+						disabled={curTab.activeEdits.length === 0}
 					>
 						<TfiSplitH />
 					</button>

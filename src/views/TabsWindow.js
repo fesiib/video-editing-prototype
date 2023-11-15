@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import { action, observe, reaction, toJS } from "mobx";
 
 import useRootContext from "../hooks/useRootContext";
-import NewIntent from "../components/general/NewIntent";
 import NewTab from "../components/general/NewTab";
 
 const TabsWindow = observer(function SideHistory() {

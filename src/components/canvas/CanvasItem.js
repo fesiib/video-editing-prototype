@@ -15,7 +15,7 @@ import { toJS } from "mobx";
 
 const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef, videoGroupRef, objectsGroupRef }) {
     const { uiStore, domainStore } = useRootContext();
-	const type = item.intent.editOperationKey;
+	const type = item.parent.editOperationKey;
 	const isVisible = item.isVisible(uiStore.timelineControls.playPosition);
 
 	useEffect(() => {
@@ -24,17 +24,11 @@ const CanvasItem = observer(function CanvasItem({ item, stageRef, transformerRef
 		}
 		let nodes = [];
 		for (let nodeId of uiStore.canvasControls.transformerNodeIds) {
-			const object = domainStore.curIntent.getCanvasObjectById(nodeId);
+			const object = domainStore.curTab.getCanvasObjectById(nodeId);
 			const node = stageRef.findOne(`#${nodeId}`);
 			if (node === undefined) {
 				continue;
 			}
-			// if (domainStore.curIntent.editOperationKey === uiStore.objectNames.crop) {
-			// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
-			// 		nodes.push(node);
-			// 	}
-			// 	continue;
-			// }
 			if (object !== undefined &&
 				object.isVisible(uiStore.timelineControls.playPosition)) {
 				nodes.push(node);

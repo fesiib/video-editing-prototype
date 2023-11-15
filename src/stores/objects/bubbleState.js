@@ -7,7 +7,7 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 import EditState from "./editState";
 
-class Bubble extends EditState {
+class BubbleState extends EditState {
 	toggle = false;
 	time = 0;
 	type = ""; // userCommand, parsingResult, edit, systemMessage
@@ -19,13 +19,11 @@ class Bubble extends EditState {
 		this.type = type;
 	}
 
-	setContent(content) {
-		this.content = content;
-	}
+	
 
 	get content() {
 		return this.type;
 	}
 }
 
-export default Bubble;
+export default BubbleState;

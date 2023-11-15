@@ -309,8 +309,8 @@ class UserStore {
 		if (this.userId === null) {
 			return;
 		}
-		const pilots = collection(firestore, this.rootStore.collection);
-		const userDoc = doc(pilots, this.userId).withConverter(userStoreConverter);	
+		const root = collection(firestore, this.rootStore.collection);
+		const userDoc = doc(root, this.userId).withConverter(userStoreConverter);	
 		return new Promise((resolve, reject) => {
 			getDoc(userDoc).then(action((fetchedUserStore) => {
 				const data = fetchedUserStore.exists() ? fetchedUserStore.data() : null;

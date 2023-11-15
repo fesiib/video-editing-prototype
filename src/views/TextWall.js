@@ -54,7 +54,7 @@ const DraggableParts = observer(function DraggableParts({
 	let parts = [];
 	
 	if (type === "active") {
-		parts = domainStore.curIntent.activeEdits.filter((edit) => {
+		parts = domainStore.curTab.activeEdits.filter((edit) => {
 			return (
 				(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
 				|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
@@ -96,7 +96,7 @@ const DraggableParts = observer(function DraggableParts({
 				style={{
 					borderTopWidth: "2px",
 					borderBottomWidth: "2px",
-					borderColor: uiStore.editColorPalette[edit.intent.editOperationKey],
+					borderColor: uiStore.editColorPalette[edit.parent.editOperationKey],
 					marginLeft: `${left}%`,
 					width: `${width}%`,
 				}}
@@ -143,7 +143,7 @@ const StaticParts = observer(function StaticParts({
 		});
 	}
 	else if (type === "suggested") {
-		parts = userStore.systemSetting ? domainStore.curIntent.suggestedEdits.filter((edit) => {
+		parts = userStore.systemSetting ? domainStore.curTab.suggestedEdits.filter((edit) => {
 			return (
 				(edit.commonState.offset >= item.start && edit.commonState.offset < item.finish)
 				|| (edit.commonState.end > item.start && edit.commonState.end < item.finish)
@@ -209,7 +209,7 @@ const StaticParts = observer(function StaticParts({
 						borderBottomWidth: (type === "skipped" ? "0px" : (
 							isSelected ? "3px" : "1px"
 						)),
-						borderColor: uiStore.editColorPalette[part.intent.editOperationKey],
+						borderColor: uiStore.editColorPalette[part.parent.editOperationKey],
 						marginLeft: `${left}%`,
 						width: `${width}%`,
 					}}
@@ -274,7 +274,7 @@ const SentenceBox = observer(function SentenceBox({
 					rightMostEnd = Math.max(rightMostEnd, otherScene.commonState.end);
 				}
 				const allParts = isSuggested ?
-					domainStore.curIntent.suggestedEdits : domainStore.curIntent.activeEdits;
+					domainStore.curTab.suggestedEdits : domainStore.curTab.activeEdits;
 				for (let somePart of allParts) {
 					if (
 						somePart.commonState.offset >= leftMostOffset &&
@@ -313,7 +313,7 @@ const SentenceBox = observer(function SentenceBox({
 		if (uiStore.timelineControls.rangeSelectingTimeline) {
 			let offset = item.start;
 			let finish = item.finish;
-			for (let edit of domainStore.curIntent.activeEdits) {
+			for (let edit of domainStore.curTab.activeEdits) {
 				if (edit.commonState.offset > offset) {
 					finish = Math.min(finish, edit.commonState.offset);
 				}
@@ -325,7 +325,7 @@ const SentenceBox = observer(function SentenceBox({
 				alert("intersects with exsiting edit");
 				return;
 			}
-			domainStore.curIntent.addActiveEdit(offset, finish);
+			domainStore.curTab.addActiveEdit(offset, finish);
 			uiStore.timelineControls.rangeSelectingTimeline = false;
 			uiStore.timelineControls.rangeSelectingFirstPx = -1;
 		}

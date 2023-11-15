@@ -5,7 +5,6 @@ import { action, set, toJS } from "mobx";
 
 import { AiOutlineHistory } from "react-icons/ai";
 import { AiOutlineSend } from "react-icons/ai";
-import { BiLoader } from "react-icons/bi";
 
 import useRootContext from "../hooks/useRootContext";
 import SketchCanvas from "../components/command-space/SketchCanvas";
@@ -20,7 +19,7 @@ const CommandSpace = observer(function CommandSpace() {
 	const { userStore, uiStore, domainStore } = useRootContext();
 	const systemSetting = userStore.systemSetting;
 	
-	const curIntent = domainStore.intents[domainStore.curIntentPos];
+	const curTab = domainStore.curTab;
 	
 	const selectedEdits = uiStore.timelineControls.selectedTimelineItems;
 
@@ -54,7 +53,7 @@ const CommandSpace = observer(function CommandSpace() {
 
 	const onChangeTextCommand = action((event) => {
 		const text = event.target.value;
-		curIntent.setTextCommand(text);
+		curTab.setTextCommand(text);
 		uiStore.logData("commandspaceTextChange", {
 			text: text,
 		});
@@ -68,7 +67,7 @@ const CommandSpace = observer(function CommandSpace() {
 
 	const onMarkClick = action((mark) => {
 		const text = mark.innerText;
-		const idx = curIntent.textCommand.indexOf(text);
+		const idx = curTab.textCommand.indexOf(text);
 		const len = text.length;
 		if (mark.style.backgroundColor === "lightgreen") {
 			mark.style.backgroundColor = "lightblue";
@@ -108,9 +107,9 @@ const CommandSpace = observer(function CommandSpace() {
 			}
 		);
 		uiStore.logData("commandspaceProcess", {
-			text: curIntent.textCommand,
-			sketch: toJS(curIntent.sketchCommand),
-			sketchTimestamp: curIntent.sketchPlayPosition,
+			text: curTab.textCommand,
+			sketch: toJS(curTab.sketchCommand),
+			sketchTimestamp: curTab.sketchPlayPosition,
 			mode: domainStore.processingModes.fromScratch,
 			start: 0,
 			finish: domainStore.projectMetadata.duration,
@@ -124,7 +123,7 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessingMode = action((event) => {
-		curIntent.setProcessingMode(event.target.value);
+		curTab.setProcessingMode(event.target.value);
 
 	});
 
@@ -133,7 +132,7 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	useEffect(action(() => {
-		const text = curIntent.textCommand;
+		const text = curTab.textCommand;
 		const words = text.trim().match(/\S+/g);
 		if (textCommandRef.current === null) {
 			setShouldSketch(() => false);
@@ -172,7 +171,7 @@ const CommandSpace = observer(function CommandSpace() {
 			uiStore.commandSpaceControls.requestingAmbiguousParts = false;
 			setShouldSketch(() => false);
 		}));
-	}), [curIntent.textCommand]);
+	}), [curTab.textCommand]);
 
 	return (<IconContext.Provider value={{ 
 		color: "black", 
@@ -181,29 +180,25 @@ const CommandSpace = observer(function CommandSpace() {
 	}}>
 		<div className="w-full flex flex-col items-center">
 			<div className="w-full flex flex-row gap-2 items-center"> 
-				{
-					curIntent.historyPos === curIntent.history.length - 1 ? (null) : (
-						<span> <AiOutlineHistory /> </span>
-					)
-				}
+				<span> <AiOutlineHistory /> </span>
 				<span>
 					<span className="text-s">
-						{`Edit ${curIntent.idx}`}
+						{`Edit ${curTab.idx}`}
 					</span>
 					<span className="font-bold">
 						{
-							curIntent.summary === "" ? (
-								curIntent.editOperation === null ? (null) : (
-									`: ${curIntent.editOperation.title}`
+							curTab.summary === "" ? (
+								curTab.editOperation === null ? (null) : (
+									`: ${curTab.editOperation.title}`
 							)) : (
-								`: ${curIntent.summary}`
+								`: ${curTab.summary}`
 							)
 						}
 					</span>
 				</span>
 			</div>
 			{systemSetting ? (
-				domainStore.processingIntent ? (
+				domainStore.processingRequest ? (
 					<div className="flex flex-row gap-2 items-center"> 
 						<span> Processing... </span> 
 						<ReactLoading type={"bars"} color={"black"} height={20} width={20} />
@@ -236,7 +231,7 @@ const CommandSpace = observer(function CommandSpace() {
 										type="text"
 										rows="4"
 										placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
-										value={curIntent.textCommand}
+										value={curTab.textCommand}
 										className="w-full resize-none relative z-10"
 										style={{
 											margin: 0,
@@ -256,7 +251,7 @@ const CommandSpace = observer(function CommandSpace() {
 									/>
 									<span
 										className="text-xs"
-									> {curIntent.textCommand.length}/{textCommandLimit}</span>
+									> {curTab.textCommand.length}/{textCommandLimit}</span>
 								</div>
 							</div>
 							<div className="flex flex-col gap-1 justify-end items-end">
@@ -265,7 +260,7 @@ const CommandSpace = observer(function CommandSpace() {
 									<label htmlFor="processingMode"
 										className="w-full"
 									> Mode: </label>
-									<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
+									<select id={"processingMode"} value={curTab.processingMode} onChange={onProcessingMode}
 										className="p-1"
 									>
 										<option value={domainStore.processingModes.fromScratch}> From scratch </option>
@@ -279,7 +274,7 @@ const CommandSpace = observer(function CommandSpace() {
 									}
 
 									onClick={() => onProcessClick()}
-									disabled={curIntent.processingAllowed === false}
+									disabled={curTab.processingAllowed === false}
 								>
 									<AiOutlineSend />
 								</button>

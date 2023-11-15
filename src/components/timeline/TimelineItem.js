@@ -34,9 +34,9 @@ export const TimelineItem = observer(
 
 		const [hovering, setHovering] = useState(false);
 
-        const lowLabel = scene.intent === undefined ?
+        const lowLabel = scene.parent === undefined ?
         	(scene.commonState.thumbnails.length > 0 ? scene.commonState.thumbnails[0] : "")
-			: scene.intent.editOperationKey;
+			: scene.parent.editOperationKey;
 
 		const isOverlay = itemType === "overlay";
 		const isMain = itemType === "main";

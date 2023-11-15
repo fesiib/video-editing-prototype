@@ -24,7 +24,7 @@ const SketchCanvas = observer(function SketchCanvas(
 	const sketchCanvasId = "sketch-canvas";
 	
 	const { uiStore, domainStore } = useRootContext();
-	const curIntent = domainStore.intents[domainStore.curIntentPos];
+	const curTab = domainStore.curTab;
 	const sketching = uiStore.canvasControls.sketching;
 	const minWidth = uiStore.canvasConst.minWidth;
 	const minHeight = uiStore.canvasConst.minHeight;
@@ -90,13 +90,13 @@ const SketchCanvas = observer(function SketchCanvas(
 		}
 		const adaptedPlayPosition = uiStore.timelineControls.playPosition -
 			curVideo.commonState.offset + curVideo.commonState.start;
-		curIntent.setSketchPlayPosition(adaptedPlayPosition);
+		curTab.setSketchPlayPosition(adaptedPlayPosition);
 		return (() => {});
 	});
 
 	const onClearClick = action(() => {
 		setCurRect(null);
-		curIntent.setSketchCommand([]);
+		curTab.setSketchCommand([]);
 		uiStore.logData("sketchClear", null);
 	});
 
@@ -108,7 +108,7 @@ const SketchCanvas = observer(function SketchCanvas(
 		) {
 			return;
 		}
-		uiStore.timelineControls.playPosition = curIntent.sketchPlayPosition;
+		uiStore.timelineControls.playPosition = curTab.sketchPlayPosition;
 		uiStore.logData("sketchJump", null);
 		return (() => {});
 	});
@@ -193,9 +193,9 @@ const SketchCanvas = observer(function SketchCanvas(
 				y: newRect.y,
 				width: newRect.width,
 				height: newRect.height,
-				timestamp: curIntent.sketchPlayPosition,
+				timestamp: curTab.sketchPlayPosition,
 			});
-			curIntent.setSketchCommand([...curIntent.sketchCommand, newRect]);
+			curTab.setSketchCommand([...curTab.sketchCommand, newRect]);
 			setCurRect(null);
 		}
 	});
@@ -227,10 +227,10 @@ const SketchCanvas = observer(function SketchCanvas(
 
 	useEffect(() => {
 		const disposer = reaction(() => uiStore.timelineControls.playPosition, (playPosition) => {
-			if (videoElement === null || curIntent === null || sketchRef.current === null) {
+			if (videoElement === null || curTab === null || sketchRef.current === null) {
 				return;
 			}
-			if (curIntent.sketchCommand.length === 0) {
+			if (curTab.sketchCommand.length === 0) {
 				onCaptureFrameClick();
 			}
 		});
@@ -241,14 +241,14 @@ const SketchCanvas = observer(function SketchCanvas(
 
 
 	useEffect(() => {
-		if (videoElement === null || curIntent === null || sketchRef.current === null) {
+		if (videoElement === null || curTab === null || sketchRef.current === null) {
 			return;
 		}
-		if (curIntent.sketchPlayPosition >= 0) {
+		if (curTab.sketchPlayPosition >= 0) {
 			sketchRef.current.setAttrs({
 				visible: true,
 			});
-			videoElement.currentTime = curIntent.sketchPlayPosition;
+			videoElement.currentTime = curTab.sketchPlayPosition;
 		}
 		else {
 			sketchRef.current.setAttrs({
@@ -257,7 +257,7 @@ const SketchCanvas = observer(function SketchCanvas(
 		}
 	}, [
 		sketchRef.current,
-		curIntent?.sketchPlayPosition,
+		curTab?.sketchPlayPosition,
 		videoElement,
 	]);
 
@@ -298,7 +298,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					// 	<button
 					// 		className="w-fit bg-indigo-200 hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50"
 					// 		onClick={() => onCaptureFrameClick()}
-					// 		disabled={!canDraw || curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
+					// 		disabled={!canDraw || curTab.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					// 	>
 					// 		{/* Capture Fram */}
 					// 		<TbCaptureFilled />
@@ -306,7 +306,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					// ) : null
 				}
 				{
-					curIntent.sketchCommand.length === 0 ? null : (
+					curTab.sketchCommand.length === 0 ? null : (
 						
 						<button
 							className="w-fit bg-gray-300 hover:bg-gray-400 text-black p-1 rounded"
@@ -323,11 +323,11 @@ const SketchCanvas = observer(function SketchCanvas(
 				}
 			</div>
 			{
-				sketching && curIntent.sketchPlayPosition >= 0 ? (
+				sketching && curTab.sketchPlayPosition >= 0 ? (
 					<button
 						className="w-fit bg-indigo-200 hover:bg-indigo-300 text-black p-1 rounded disabled:opacity-50 disabled:hover:bg-indigo-200"
 						onClick={() => onJumpClick()}
-						disabled={curIntent.sketchPlayPosition === uiStore.timelineControls.playPosition}
+						disabled={curTab.sketchPlayPosition === uiStore.timelineControls.playPosition}
 					>
 						<BiTime />
 					</button>
@@ -335,7 +335,7 @@ const SketchCanvas = observer(function SketchCanvas(
 			}
 		</div>
 		{
-			(!sketching && curIntent.sketchCommand.length === 0) ? null : (
+			(!sketching && curTab.sketchCommand.length === 0) ? null : (
 				<Stage
 					ref={stageRef}
 					className="my-2"
@@ -378,7 +378,7 @@ const SketchCanvas = observer(function SketchCanvas(
 					<Layer
 						ref={rectsLayerRef}
 					>
-						{curIntent.sketchCommand.map((rect, i) => {
+						{curTab.sketchCommand.map((rect, i) => {
 							const adaptedRect = {
 								x: rect.x / videoWidth * stageWidth,
 								y: rect.y / videoHeight * stageHeight,
@@ -423,12 +423,12 @@ const SketchCanvas = observer(function SketchCanvas(
 				Video: {domainStore.projectMetadata.width} x {domainStore.projectMetadata.height}
 			</div>
 			{
-				curIntent.sketchPlayPosition >= 0 ? (
-					<span > Time (seconds): {curIntent.sketchPlayPosition}</span>
+				curTab.sketchPlayPosition >= 0 ? (
+					<span > Time (seconds): {curTab.sketchPlayPosition}</span>
 				) : null
 			}
 			{
-				curIntent.sketchCommand.map((rect, i) => {
+				curTab.sketchCommand.map((rect, i) => {
 					const outputRect = {
 						x: roundNumber(rect.x, 2),
 						y: roundNumber(rect.y, 2),
