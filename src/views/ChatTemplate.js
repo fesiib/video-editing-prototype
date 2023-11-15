@@ -1,46 +1,48 @@
 import React, { useState } from "react";
+import { observer } from "mobx-react-lite";
+import { action } from "mobx";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import ChatTabTemplate from "./ChatTabTemplate";
 
-const ChatTemplate = () => {
-    const [activeTab, setActiveTab] = useState(0);
-    const [tabs, setTabs] = useState([
-        { label: "1", content: <ChatTabTemplate /> },
-        { label: "2", content: <ChatTabTemplate /> },
-        // Add more tabs as needed
-    ]);
+import useRootContext from "../hooks/useRootContext";
 
-    const addTab = () => {
-        const newTab = {
-            label: `${tabs.length + 1}`,
-            content: <ChatTabTemplate />,
-        };
-        setTabs([...tabs, newTab]);
-        setActiveTab(tabs.length);
-    };
+const ChatTemplate = observer(function ChatTemplate() {
+	const { userStore, uiStore, domainStore } = useRootContext();
+
+	const curTab = domainStore.curTab;
+	const tabs = domainStore.tabs;
+
+    const addTab = action(() => {
+		domainStore.addTab();
+    });
+
+	const setCurTab = action((tabIdx) => {
+		domainStore.setCurTab(tabIdx);
+	});
 
     return (
         <div className="w-100">
-            <div>{tabs[activeTab].content}</div>
+			<ChatTabTemplate />
             <div className="flex flex-start overflow-auto text-xs">
-                {tabs.map((tab, index) => (
-                    <div
-                        key={index}
-                        className={`tab ${index === activeTab ? "active-tab" : ""}`}
-                        onClick={() => setActiveTab(index)}
+                {tabs.map((tab) => {
+					const idx = tab.idx;
+					return (<div
+                        key={`tab-${idx}`}
+                        className={`tab ${curTab.id === tab.id ? "active-tab" : ""} truncate`}
+                        onClick={() => setCurTab(tab.idx)}
                     >
-                        {tab.label}
-                    </div>
-                ))}
+                        {tab.idx}: {tab.title}
+                    </div>);
+				})}
                 <div className="add-tab" onClick={addTab}>
                     <FontAwesomeIcon icon={faPlus} />
                 </div>
             </div>
         </div>
     );
-};
+});
 
 export default ChatTemplate;

@@ -29,7 +29,6 @@ const EditOperations = observer(function EditOperations() {
 	const curTab = domainStore.curTab;
 
 	const selectedOperationKey = curTab.editOperationKey;
-	const suggestedOperationKey = userStore.systemSetting ? curTab.suggestedEditOperationKey : "";
 	const suggestedOperationKeys = userStore.systemSetting ? curTab.suggestedEditOperationKeys : [];
 	const handleButtonClick = action((operationKey) => {
 		if (operationKey === selectedOperationKey) {
@@ -70,16 +69,12 @@ const EditOperations = observer(function EditOperations() {
 						currentClassName = activeButtonClassName;
 					} else if (suggestedOperationKeys.includes(operationKey)) {
 						currentClassName = suggestedButtonClassName;
-					} else if (suggestedOperationKey === operationKey) {
-						currentClassName = suggestedButtonClassName;
 					}
 
 					let currentRadioClassName = inactiveRadioClassName;
 					if (selectedOperationKey === operationKey) {
 						currentRadioClassName = activeRadioClassName;
 					} else if (suggestedOperationKeys.includes(operationKey)) {
-						currentRadioClassName = suggestedRadioClassName;
-					} else if (suggestedOperationKey === operationKey) {
 						currentRadioClassName = suggestedRadioClassName;
 					}
 					return (<div
@@ -103,15 +98,6 @@ const EditOperations = observer(function EditOperations() {
 								borderWidth: "2px",
 							}}
 						>
-							{/* {
-								//notification
-								suggestedOperationKeys.includes(operationKey) ? (
-									<>
-										<span class="absolute -right-3 -top-3 rounded-full h-4 w-4 bg-yellow-300">
-										<span class="animate-ping absolute left-0 top-0 h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-										</span>
-									</>) : null
-							} */}
 							{operationIcons[operationKey]}
 							{operation.title}
 						</button>

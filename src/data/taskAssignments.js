@@ -29,7 +29,8 @@ export function getTaskAssignments(N = 16) {
 	}
 
 	//const participantIds = shuffle([...Array(N).keys()]);
-	const participantIds = [7, 13, 8, 11, 5, 15, 1, 6, 9, 3, 4, 10, 0, 14, 2, 12];
+	//const participantIds = [7, 13, 8, 11, 5, 15, 1, 6, 9, 3, 4, 10, 0, 14, 2, 12];
+	const participantIds = [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 	for (let participantId = 0; participantId < N; participantId++) {
 		const task1Num = participantId % 4;

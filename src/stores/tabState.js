@@ -25,7 +25,7 @@ class TabState {
 	editOperationKey = "";
 	activeEdits = [];
 
-	suggestedEditOperations = [];
+	suggestedEditOperationKeys = [];
 	suggestedEdits = [];
 	
 	processingMode = "from-scratch"; // from-scratch, add-more, adjust-selected

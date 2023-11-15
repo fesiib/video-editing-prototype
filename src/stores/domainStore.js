@@ -869,7 +869,7 @@ class DomainStore {
 			if (!this.rootStore.userStore.systemSetting) {
 				return [...objects, ...this.curTab.activeEdits];
 			}	
-			return [...objects, ...this.curTab.activeEdits, this.curTab.suggestedEdits];
+			return [...objects, ...this.curTab.activeEdits, ...this.curTab.suggestedEdits];
 		}
 		return objects;
 	}

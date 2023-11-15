@@ -180,20 +180,12 @@ const CommandSpace = observer(function CommandSpace() {
 	}}>
 		<div className="w-full flex flex-col items-center">
 			<div className="w-full flex flex-row gap-2 items-center"> 
-				<span> <AiOutlineHistory /> </span>
 				<span>
 					<span className="text-s">
-						{`Edit ${curTab.idx}`}
+						{`Tab ${curTab.idx}: `}
 					</span>
 					<span className="font-bold">
-						{
-							curTab.summary === "" ? (
-								curTab.editOperation === null ? (null) : (
-									`: ${curTab.editOperation.title}`
-							)) : (
-								`: ${curTab.summary}`
-							)
-						}
+						{ curTab.title }
 					</span>
 				</span>
 			</div>
