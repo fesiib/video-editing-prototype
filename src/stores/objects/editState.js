@@ -23,6 +23,8 @@ change the video properties
 
 class EditState {
 
+	parent = null;
+
 	isSuggested = false;
 
 	explanation = [];
@@ -100,11 +102,11 @@ class EditState {
 
 	suggestedParameters = {};
 
-    constructor(domainStore, intent, isSuggested, trackId) {
+    constructor(domainStore, parent, isSuggested, isSystem, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
-		this.intent = intent;
+		this.parent = parent;
 		
 		this.isSuggested = isSuggested;
 		this.explanation = [];
@@ -130,7 +132,7 @@ class EditState {
     }
 
 	getDeepCopy() {
-		const newEdit = new EditState(this.domainStore, this.intent, this.isSuggested, this.commonState.trackId);
+		const newEdit = new EditState(this.domainStore, this.parent, this.isSuggested, this.commonState.trackId);
 		newEdit.commonState.setMetadata(this.commonState.metadata);
 		
 		newEdit.textParameters = {...this.textParameters};
@@ -177,14 +179,14 @@ class EditState {
 
 	replaceSelf(edits) {
 		if (!this.isSuggested) {
-			this.intent.activeEdits = [
-				...this.intent.activeEdits, ...edits];
+			this.parent.activeEdits = [
+				...this.parent.activeEdits, ...edits];
 		}
 		if (this.isSuggested) {
-			this.intent.suggestedEdits = [
-				...this.intent.suggestedEdits, ...edits];
+			this.parent.systemBubbles = [
+				...this.parent.systemBubbles, ...edits];
 		}
-		this.intent.deleteEdits([this.commonState.id]);
+		this.parent.deleteEdits([this.commonState.id]);
 	}
 
 	fixZoomDuration() {
@@ -199,7 +201,7 @@ class EditState {
 	}
 
 	setCustomParameters(parameters) {
-		if (this.intent.editOperation === null) {
+		if (this.parent.editOperation === null) {
 			return;
 		}
 		if (this.title === "Text") {
@@ -397,7 +399,7 @@ class EditState {
 	}
 
 	get customParameters() {
-		if (this.intent.editOperation === null) {
+		if (this.parent.editOperation === null) {
 			return {};
 		}
 		if (this.title === "Text") {
@@ -437,7 +439,7 @@ class EditState {
 	}
 
 	get metaParameters() {
-		if (this.intent.editOperation === null) {
+		if (this.parent.editOperation === null) {
 			return {
 				spatial: this.spatialParameters,
 				temporal: this.temporalParameters,
@@ -462,14 +464,14 @@ class EditState {
 	}
 
 	get title() {
-		if (this.intent.editOperation === null) {
+		if (this.parent.editOperation === null) {
 			return null;
 		}
-		return this.intent.editOperation.title;
+		return this.parent.editOperation.title;
 	}
 
 	get isActive() {
-		return this.intent.id === this.domainStore.curIntent.id;
+		return this.parent.id === this.domainStore.curTab.id;
 	}
 
 	static getCustomParameters(editOperation) {
@@ -554,46 +556,32 @@ class EditState {
 		if (this.commonState.offset > playPosition || this.commonState.end <= playPosition) {
 			return false;
 		}
-		if (this.intent.editOperation === null) {
+		if (this.parent.editOperation === null) {
 			return true;
 		}
-		if (this.isSuggested && this.intent.idx === this.domainStore.curIntent.idx) {
+		if (this.isSuggested && this.parent.idx === this.domainStore.curTab.idx) {
 			return true;
 		}
-		// if (this.domainStore.rootStore.uiStore.timelineControls.selectedTimelineItems.findIndex(item => item.commonState.id === this.commonState.id) >= 0) {
-		// 	return true;
-		// }
-		// for (const item of this.domainStore.rootStore.uiStore.timelineControls.selectedTimelineItems) {
-		// 	if (item.commonState.id !== this.commonState.id) {
-		// 		continue;
-		// 	}
-		// 	if (item.intent.editOperation === null || item.intent.editOperationKey !== this.intent.editOperationKey) {
-		// 		continue;
-		// 	}
-		// 	if (item.commonState.offset <= playPosition && item.commonState.end > playPosition) {
-		// 		return false;
-		// 	}
-		// }
 
-		if (this.domainStore.curIntent.editOperationKey === this.intent.editOperationKey) {
-			for (let suggestedEdit of this.domainStore.curIntent.suggestedEdits) {
+		if (this.domainStore.curTab.editOperationKey === this.parent.editOperationKey) {
+			for (let suggestedEdit of this.domainStore.curTab.suggestedEdits) {
 				if (suggestedEdit.commonState.offset <= playPosition && suggestedEdit.commonState.end > playPosition) {
 					return false;
 				}
 			}
 		}
 
-		if (this.intent.editOperation.linearize === false) {
+		if (this.parent.editOperation.linearize === false) {
 			return true;
 		}
 
-		const intents = this.domainStore.intents;
-		for (let intentIdx = this.intent.intentPos + 1; intentIdx < intents.length; intentIdx++) {
-			const intent = intents[intentIdx];
-			if (intent.editOperation === null || intent.editOperationKey !== this.intent.editOperationKey) {
+		const tabs = this.domainStore.tabs;
+		for (let i = this.parent.tabPos + 1; i < tabs.length; i++) {
+			const tab = tabs[i];
+			if (tab.editOperation === null || tab.editOperationKey !== this.parent.editOperationKey) {
 				continue;
 			}
-			for (let edit of intent.activeEdits) {
+			for (let edit of tab.activeEdits) {
 				if (edit.commonState.offset <= playPosition && edit.commonState.end > playPosition) {
 					return false;
 				}
@@ -603,7 +591,7 @@ class EditState {
 	}
 
 	get leftTimelineLimit() {
-		return this.intent.activeEdits.reduce((prev, otherEdit) => {
+		return this.parent.activeEdits.reduce((prev, otherEdit) => {
 			if (otherEdit.commonState.id === this.commonState.id) {
 				return prev;
 			}
@@ -615,7 +603,7 @@ class EditState {
 	}
 
 	get rightTimelineLimit() {
-		return this.intent.activeEdits.reduce((prev, otherEdit) => {
+		return this.parent.activeEdits.reduce((prev, otherEdit) => {
 			if (otherEdit.commonState.id === this.commonState.id) {
 				return prev;
 			}
@@ -815,7 +803,7 @@ class EditState {
 	}
 
 	fetchedFromFirebase(edit) {
-		/* domainStore, intent, isSuggested, trackId */
+		/* domainStore, tab, isSuggested, trackId */
 		this.textParameters = { ...edit.textParameters };
 		this.imageParameters = { ...edit.imageParameters };
 		this.shapeParameters = { ...edit.shapeParameters };

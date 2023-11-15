@@ -8,7 +8,7 @@ import GPTLike from "./apps/GPTLike";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Blocks from "./apps/Blocks";
 
-import ChatAppTemplate from "./apps/ChatAppTemplate";
+import ChatApp from "./apps/ChatApp";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -19,8 +19,12 @@ const router = createBrowserRouter([
     },
     {
         path: "/",
-        element: <ChatAppTemplate />,
+        element: <ChatApp />,
     },
+	{
+		path: "/old",
+		element: <GPTLike />,
+	},
     {
         path: "/app",
         element: <App />,

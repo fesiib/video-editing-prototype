@@ -23,11 +23,9 @@ class Bubble extends EditState {
 		this.content = content;
 	}
 
-	get tab() {
-		return this.intent;
-	}
-
 	get content() {
 		return this.type;
 	}
 }
+
+export default Bubble;

@@ -1,22 +1,23 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 
 import VideoState from "./objects/videoState";
-import IntentState from "./intentState";
 import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { requestSuggestions, requestSummary } from "../services/pipeline";
 import EditState from "./objects/editState";
 import { sliceTextArray } from "../utilities/genericUtilities";
+import TabState from "./tabState";
 
 class DomainStore {
 	domainDoc = "domain";
 
-	processingIntent = false;
+	processingRequest = false;
 
 	in_mainVideos = [];
-	
-	intents = [];
-	curIntentPos = 0;
+
+	// new
+	tabs = [];
+	curTabPos = 0;
 
     projectMetadata = {
         projectId: "test",
@@ -26,8 +27,15 @@ class DomainStore {
         height: 480, //720p
         duration: 10, // seconds
         trackCnt: 1,
-		totalIntentCnt: 0,
+		totalTabsCnt: 0,
     };
+
+	bubbleTypes = {
+		systemMessage: "systemMessage",
+		userCommand: "userCommand",
+		parsingResult: "parsingResult",
+		edit: "edit",
+	};
 
 	editOperations = {
 		"text": {
@@ -222,11 +230,12 @@ class DomainStore {
 
 		this.in_mainVideos = [];
 
-		this.projectMetadata.totalIntentCnt = 1;
-        this.intents = [
-				new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+		this.projectMetadata.totalTabsCnt = 1;
+
+		this.tabs = [
+			new TabState(this, this.projectMetadata.totalTabsCnt, "", [], -1, 0),
 		];
-		this.curIntentPos = 0;
+		this.curTabPos = 0;
     }
 
 	loadVideo(videoLink, videoId) {
@@ -254,193 +263,112 @@ class DomainStore {
 			height: 480, //720p
 			duration: 10, // seconds
 			trackCnt: 1,
-			totalIntentCnt: 1,
+			totalTabsCnt: 1,
 		};
-		this.intents = [
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+
+		this.tabs = [
+			new TabState(this, this.projectMetadata.totalTabsCnt, "", [], -1, 0),
 		];
-		this.curIntentPos = 0;
+		this.curTabPos = 0;
 	}
 
-	addIntent() {
-		this.curIntentPos = this.intents.length;
-		this.projectMetadata.totalIntentCnt += 1;
-		this.intents.push(
-			new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0)
+	addTab() {
+		this.curTabPos = this.tabs.length;
+		this.projectMetadata.totalTabsCnt += 1;
+		this.tabs.push(
+			new TabState(this, this.projectMetadata.totalTabsCnt, "", [], -1, 0)
 		);
 		this.rootStore.resetTempState();
 	}
-	
-	addRandomIntent() {
-		const systemSetting = this.rootStore.userStore.systemSetting;
-		this.curIntentPos = this.intents.length;
-		this.projectMetadata.totalIntentCnt += 1;
-		const newIntent = new IntentState(this, this.projectMetadata.totalIntentCnt, "", [], -1, 0);
 
-		const randomEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
-		
-		newIntent.setEditOperationKey(randomEditOperationKey);
-
-		const historyLength = Math.floor(Math.random() * 5);
-				
-		const randomEditsLength = Math.floor(Math.random() * 5);
-		for (let i = 0; i < randomEditsLength; i++) {
-			newIntent.addRandomEdit(false);
-		}
-
-		for (let h = 0; h < historyLength; h++) {
-			const randomSuggestedEditOperationKey = Object.keys(this.editOperations)[Math.floor(Math.random() * Object.keys(this.editOperations).length)];
-			const randomSuggestedEditOperationKeys = [randomSuggestedEditOperationKey];
-			//const randomProcessingMode = Math.random() < 0.5 ? "from-scratch" : "add-more";
-			const randomProcessingMode = "from-scratch";
-			const randomTextCommand = (Math.random() > 0.5 ? "Whenever there is something happening do another thing with this!!!"
-				: "random goal goal random 2 goalie lol kek cheburek 22 kljaldf 10");
-			const randomSketchCommand = Math.random() > 0.5 ? [
-				{"x":301.33360941977077,"y":89.85530200080066,"width":389.0716332378223,"height":348.4185179622882,"stroke":"red","strokeWidth":2,"lineCap":"round","lineJoin":"round"}
-			] : [];
-			const randomSketchPlayPosition = Math.random() * this.projectMetadata.duration;
-
-			newIntent.suggestedEditOperationKey = randomSuggestedEditOperationKey;
-			newIntent.suggestedEditOperationKeys = randomSuggestedEditOperationKeys;
-			newIntent.processingMode = randomProcessingMode;
-			newIntent.textCommand = randomTextCommand;
-			newIntent.summary = randomTextCommand;
-			newIntent.sketchCommand = randomSketchCommand;
-			newIntent.sketchPlayPosition = randomSketchPlayPosition;
-			newIntent.suggestedEdits = [];
-			newIntent.combinedContribution = [{
-				text: randomTextCommand.toLowerCase(),
-				type: [],
-			}];
-
-			const randomSuggestedEditsLength = systemSetting ? Math.floor(Math.random() * 5) : 0;
-			for (let i = 0; i < randomSuggestedEditsLength; i++) {
-				newIntent.addRandomEdit(true);
-			}
-			newIntent.enterHistory();
-		}
-		newIntent.historyPos = newIntent.history.length - 1;
-
-		this.intents.push(newIntent);
-
-		this.rootStore.resetTempState();
-	}
-
-	deleteIntent(intentPos) {
-		if (intentPos >= this.intents.length || intentPos < 0) {
+	deleteTab(tabPos) {
+		if (tabPos >= this.tabs.length || tabPos < 0) {
 			return;
 		}
-		this.intents = this.intents.filter((intent, idx) => idx !== intentPos);
-		this.intents = this.intents.map((intent, idx) => {
-			if (idx < intentPos) {
-				return intent;
+		this.tabs = this.tabs.filter((tab, idx) => idx !== tabPos);
+		this.tabs = this.tabs.map((tab, idx) => {
+			if (idx < tabPos) {
+				return tab;
 			}
-			for (let edit of intent.activeEdits) {
+			for (let edit of tab.activeEdits) {
 				edit.commonState.setMetadata({
 					z: idx + 1,
 				});
 			}
-			for (let edit of intent.suggestedEdits) {
-				edit.commonState.setMetadata({
+			for (let bubble of tab.systemBubbles) {
+				bubble.commonState.setMetadata({
 					z: idx + 1,
 				});
 			}
-			for (let entry of intent.history) {
-				for (let edit of entry.suggestedEdits) {
-					edit.commonState.setMetadata({
-						z: idx + 1,
-					});
-				}
-			}
-			return intent;
+			return tab;
 		});
-		this.curIntentPos = this.intents.length - 1;
-		if (this.curIntentPos < 0) {
-			this.addIntent();
+		this.curTabPos = this.tabs.length - 1;
+		if (this.curTabPos < 0) {
+			this.addTab();
 		}
 		this.rootStore.resetTempState();
 	}
 
-	moveIntent(intentPos, newPos) {
-		console.log("moving", intentPos, newPos);
+	moveTab(tabPos, newPos) {
+		console.log("moving", tabPos, newPos);
 	}
 
-	copyIntentToCurrent(intentPos) {
-		if (intentPos >= this.intents.length || intentPos < 0) {
+	copyTabToCurrent(tabPos) {
+		if (tabPos >= this.tabs.length || tabPos < 0) {
 			return;
 		}
-		const deepCopy = this.intents[intentPos].getDeepCopy();
-		deepCopy.idx = this.intents[this.curIntentPos].idx;
-		this.intents[this.curIntentPos] = deepCopy;
+		const deepCopy = this.tabs[tabPos].getDeepCopy();
+		deepCopy.idx = this.tabs[this.curTabPos].idx;
+		this.tabs[this.curTabPos] = deepCopy;
 		for (let edit of deepCopy.activeEdits) {
 			edit.commonState.setMetadata({
-				z: this.curIntentPos + 1,
+				z: this.curTabPos + 1,
 			});
 		}
-		for (let edit of deepCopy.suggestedEdits) {
-			edit.commonState.setMetadata({
-				z: this.curIntentPos + 1,
+		for (let bubble of deepCopy.systemBubbles) {
+			bubble.commonState.setMetadata({
+				z: this.curTabPos + 1,
 			});
-		}
-		for (let entry of deepCopy.history) {
-			for (let edit of entry.suggestedEdits) {
-				edit.commonState.setMetadata({
-					z: this.curIntentPos + 1,
-				});
-			}
 		}
 		this.rootStore.resetTempState();
 	}
 
-	duplicateIntent(intentPos) {
-		if (intentPos >= this.intents.length || intentPos < 0) {
+	duplicateTab(tabPos) {
+		if (tabPos >= this.tabs.length || tabPos < 0) {
 			return;
 		}
-		const deepCopy = this.intents[intentPos].getDeepCopy();
-		this.curIntentPos = this.intents.length;
-		this.projectMetadata.totalIntentCnt += 1;
-		deepCopy.idx = this.projectMetadata.totalIntentCnt;
-		this.intents.push(deepCopy);
+		const deepCopy = this.tabs[tabPos].getDeepCopy();
+		this.curTabPos = this.tabs.length;
+		this.projectMetadata.totalTabsCnt += 1;
+		deepCopy.idx = this.projectMetadata.totalTabsCnt;
+		this.tabs.push(deepCopy);
 		for (let edit of deepCopy.activeEdits) {
 			edit.commonState.setMetadata({
-				z: this.curIntentPos + 1,
+				z: this.curTabPos + 1,
 			});
 		}
-		for (let edit of deepCopy.suggestedEdits) {
-			edit.commonState.setMetadata({
-				z: this.curIntentPos + 1,
+		for (let bubble of deepCopy.systemBubbles) {
+			bubble.commonState.setMetadata({
+				z: this.curTabPos + 1,
 			});
-		}
-		for (let entry of deepCopy.history) {
-			for (let edit of entry.suggestedEdits) {
-				edit.commonState.setMetadata({
-					z: this.curIntentPos + 1,
-				});
-			}
 		}
 		this.rootStore.resetTempState();
 	}
 
-	setCurIntent(intentPos) {
-		if (intentPos >= this.intents.length || intentPos < 0) {
+	setCurTab(tabPos) {
+		if (tabPos >= this.tabs.length || tabPos < 0) {
 			return;
 		}
-		if (intentPos === this.curIntentPos) {
+		if (tabPos === this.curTabPos) {
 			return;
 		}
-		this.curIntentPos = intentPos;
-		if (this.curIntentPos >= 0 && this.curIntentPos < this.intents.length
-			&& this.intents[this.curIntentPos].history.length > 0
-		) {
-			this.intents[this.curIntentPos].restoreHistory(
-				this.intents[this.curIntentPos].history.length - 1,
-			);
-		}
+		this.curTabPos = tabPos;
+		//TODO: fix scroll position
 		this.rootStore.resetTempState();
 	}
 
 	processIntent(processingMode, segmentOfInterest) {
-		if (this.processingIntent) {
+		if (this.processingRequest) {
 			return;
 		}
 		const isAddMore = processingMode === this.processingModes.addMore;
@@ -628,6 +556,11 @@ class DomainStore {
 		}));
 	}
 
+	processRequest(processingMode, segmentOfInterest) {
+		this.curTab.addBubble(new Date().getTime(), this.bubbleTypes.userCommand);
+		//TODO: processing;
+	}
+
 	getVideoById(id) {
 		return this.in_mainVideos.find((video) => video.commonState.id === id);
 	}
@@ -706,12 +639,12 @@ class DomainStore {
 
 	get texts() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Text") {
+				if (tab.editOperation.title === "Text") {
 					result.push(edit);
 				}
 			}
@@ -719,12 +652,12 @@ class DomainStore {
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Text") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Text") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -732,12 +665,12 @@ class DomainStore {
 
 	get images() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Image") {
+				if (tab.editOperation.title === "Image") {
 					result.push(edit);
 				}
 			}	
@@ -746,12 +679,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Image") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Image") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -759,12 +692,12 @@ class DomainStore {
 
 	get shapes() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Shape") {
+				if (tab.editOperation.title === "Shape") {
 					result.push(edit);
 				}
 			}	
@@ -773,12 +706,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Shape") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Shape") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -786,15 +719,15 @@ class DomainStore {
 
 	get skippedParts() {
 		let result = [];
-		for (let intent of this.intents) {
-			if (intent.id === this.curIntent.id) {
+		for (let tab of this.tabs) {
+			if (tab.id === this.curTab.id) {
 				continue;
 			}
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Cut") {
+				if (tab.editOperation.title === "Cut") {
 					result.push(edit);
 				}
 			}
@@ -804,12 +737,12 @@ class DomainStore {
 
 	get allSkippedParts() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Cut") {
+				if (tab.editOperation.title === "Cut") {
 					result.push(edit);
 				}
 			}
@@ -818,12 +751,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Cut") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Cut") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -831,12 +764,12 @@ class DomainStore {
 
 	get crops() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Crop") {
+				if (tab.editOperation.title === "Crop") {
 					result.push(edit);
 				}
 			}
@@ -845,12 +778,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Crop") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Crop") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -858,12 +791,12 @@ class DomainStore {
 
 	get zooms() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Zoom") {
+				if (tab.editOperation.title === "Zoom") {
 					result.push(edit);
 				}
 			}
@@ -872,12 +805,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Zoom") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Zoom") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -885,12 +818,12 @@ class DomainStore {
 
 	get blurs() {
 		let result = [];
-		for (let intent of this.intents) {
-			for (let edit of intent.activeEdits) {
-				if (intent.editOperation === null) {
+		for (let tab of this.tabs) {
+			for (let edit of tab.activeEdits) {
+				if (tab.editOperation === null) {
 					continue;
 				}
-				if (intent.editOperation.title === "Blur") {
+				if (tab.editOperation.title === "Blur") {
 					result.push(edit);
 				}
 			}
@@ -899,12 +832,12 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let edit of this.curIntent.suggestedEdits) {
-			if (this.curIntent.editOperation === null) {
+		for (let bubble of this.curTab.systemBubbles) {
+			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
 				continue;
 			}
-			if (this.curIntent.editOperation.title === "Blur") {
-				result.push(edit);
+			if (this.curTab.editOperation.title === "Blur") {
+				result.push(bubble);
 			}
 		}
 		return result;
@@ -926,20 +859,21 @@ class DomainStore {
 			...crops,
 			...zooms,
 			...blurs
-		].filter((object) => object.intent.idx !== this.curIntent.idx);
+		].filter((object) => object.parent.idx !== this.curTab.idx);
 		objects.sort((a, b) => a.commonState.z - b.commonState.z);
 		
-		if (this.curIntent.editOperation !== null) {
+		if (this.curTab.editOperation !== null) {
 			if (!this.rootStore.userStore.systemSetting) {
-				return [...objects, ...this.curIntent.activeEdits];
+				return [...objects, ...this.curTab.activeEdits];
 			}	
-			return [...objects, ...this.curIntent.activeEdits, ...this.curIntent.suggestedEdits];
+			suggestedEdits =
+			return [...objects, ...this.curTab.activeEdits,];
 		}
 		return objects;
 	}
 
-	get curIntent() {
-		return this.intents[this.curIntentPos];
+	get curTab() {
+		return this.tabs[this.curTabPos];
 	}
 
 	get curVideo() {

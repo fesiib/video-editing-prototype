@@ -31,7 +31,7 @@ const CommandWindow = observer(function CommandWindow() {
 	});
 
 	const onProcessClick = action(() => {
-		domainStore.processIntentSplit(
+		domainStore.processRequest(
 			domainStore.processingModes.fromScratch,
 			{
 				start: 0,
@@ -76,7 +76,7 @@ const CommandWindow = observer(function CommandWindow() {
 			return;
 		}
 		setShouldSketch(() => true);
-	}), [curIntent.textCommand]);
+	}), [curTab.textCommand]);
 
 	return (<IconContext.Provider value={{ 
 		color: "black", 
@@ -130,7 +130,7 @@ const CommandWindow = observer(function CommandWindow() {
 								<label htmlFor="processingMode"
 									className="w-full"
 								> Mode: </label>
-								<select id={"processingMode"} value={curIntent.processingMode} onChange={onProcessingMode}
+								<select id={"processingMode"} value={curTab.processingMode} onChange={onProcessingMode}
 									className="p-1"
 								>
 									<option value={domainStore.processingModes.fromScratch}> From scratch </option>

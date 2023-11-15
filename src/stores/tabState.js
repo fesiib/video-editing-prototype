@@ -5,6 +5,7 @@ import EditState from "./objects/editState";
 import { randomUUID, sliceTextArray } from "../utilities/genericUtilities";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../services/firebase";
+import Bubble from "./objects/bubbleState";
 
 class TabState {
 	trackId = 0;
@@ -34,7 +35,7 @@ class TabState {
 
 		this.title = "Untitled";
 		
-		this.id = `intent-${randomUUID()}`;
+		this.id = `tab-${randomUUID()}`;
 		this.idx = idx;
 
 		this.textCommand = textCommand;
@@ -85,7 +86,7 @@ class TabState {
 			start: start,
 			finish: finish, 
 			offset: start,
-			z: this.intentPos + 1,
+			z: this.tabPos + 1,
 		});
 		this.activeEdits.push(newEdit);
 		newEdit.zoomParameters = {
@@ -103,15 +104,33 @@ class TabState {
 		this.activeEdits = [...edits];
 	}
 
+	addBubble(time, type) {
+		// userCommand, systemMessage, parsingResult, edit;
+		let newBubble = new Bubble(this.domainStore, this, this.trackId, time, type);
+		if (type === this.domainStore.bubbleTypes.userCommand) {
+			this.userBubbles.push(newBubble);
+			return;
+		}
+		if (type === this.domainStore.bubbleTypes.systemMessage) {
+			this.systemBubbles.push(newBubble);
+			return;
+		}
+		if (type === this.domainStore.bubbleTypes.parsingResult) {
+			this.systemBubbles.push(newBubble);
+			return;
+		}
+		if (type === this.domainStore.bubbleTypes.edit) {
+			this.systemBubbles.push(newBubble);
+			return;
+		}
+		console.log("Error adding Bubble");
+	}
+
 	deleteEdits(selectedIds) {
 		this.activeEdits = this.activeEdits.filter((edit) => {
             const isSelected = selectedIds.includes(edit.commonState.id);
             return !isSelected;
         });
-		this.userBubbles = this.userBubbles.filter((bubble) => {
-			const isSelected = selectedIds.includes(bubble.id);
-			return !isSelected;
-		});
 		this.systemBubbles = this.systemBubbles.filter((bubble) => {
 			const isSelected = selectedIds.includes(bubble.id);
 			return !isSelected;
@@ -123,14 +142,21 @@ class TabState {
 		); 
 	}
 
+	deleteUserBubbles(selectedIds) {
+		this.userBubbles = this.userBubbles.filter((bubble) => {
+			const isSelected = selectedIds.includes(bubble.id);
+			return !isSelected;
+		});
+	}
+
 	clearBubbles() {
 		this.systemBubbles = [];
 		this.userBubbles = [];
 	}
 
 	getDeepCopy() {
-		systemBubbles = [];
-		userBubbles = [];
+		let systemBubbles = [];
+		let userBubbles = [];
 		for (let bubble of this.systemBubbles) {
 			systemBubbles.push(bubble.getDeepCopy());
 		}
@@ -266,3 +292,5 @@ class TabState {
 	}
 
 }
+
+export default TabState;

@@ -79,8 +79,9 @@ class RootStore {
 	collection = "pilots";
 	logCollection = "logs";
 	videoCollection = "videos";
-	intentCollection = "intents";
 	editCollection = "edits";
+	tabCollection = "tabs";
+	bubbleCollection = "bubbles";
 
 	// doc = userId
 	// data = {userStore, uiStore, domainStore}
@@ -175,7 +176,8 @@ class RootStore {
 		const rootCollection = collection(firestore, this.collection);
 		const curUserStore = doc(rootCollection, userId);
 		const curVideoCollection = collection(curUserStore, this.videoCollection);
-		const curIntentCollection = collection(curUserStore, this.intentCollection);
+		const curTabCollection = collection(curUserStore, this.tabCollection);
+		const curBubbleCollection = collection(curUserStore, this.bubbleCollection);
 		const curEditCollection = collection(curUserStore, this.editCollection);
 		const taskCollections = taskKeys.map((taskKey) => {
 			return collection(curUserStore, taskKey);
@@ -200,17 +202,24 @@ class RootStore {
 						querySnapshot.forEach((singleDoc) => {
 							deleteDoc(singleDoc.ref);
 						});
-						getDocs(curIntentCollection).then((querySnapshot) => {
+						getDocs(curTabCollection).then((querySnapshot) => {
 							querySnapshot.forEach((singleDoc) => {
 								deleteDoc(singleDoc.ref);
 							});
-							getDocs(curEditCollection).then((querySnapshot) => {
+							getDocs(curBubbleCollection).then((querySnapshot) => {
 								querySnapshot.forEach((singleDoc) => {
 									deleteDoc(singleDoc.ref);
 								});
-								deleteDoc(curUserStore).then(() => {
-									console.log("deleted User");
-									resolve();
+								getDocs(curEditCollection).then((querySnapshot) => {
+									querySnapshot.forEach((singleDoc) => {
+										deleteDoc(singleDoc.ref);
+									});
+									deleteDoc(curUserStore).then(() => {
+										console.log("deleted User");
+										resolve();
+									}).catch((error) => {
+										reject("user save error: " + error.message);
+									});
 								}).catch((error) => {
 									reject("user save error: " + error.message);
 								});
@@ -241,7 +250,8 @@ class RootStore {
 		const rootCollection = collection(firestore, this.collection);
 		const curUserStore = doc(rootCollection, userId);
 		const curVideoCollection = collection(curUserStore, this.videoCollection);
-		const curIntentCollection = collection(curUserStore, this.intentCollection);
+		const curTabCollection = collection(curUserStore, this.tabCollection);
+		const curBubbleCollection = collection(curUserStore, this.bubbleCollection);
 		const curEditCollection = collection(curUserStore, this.editCollection);
 		const logsCollection = collection(curUserStore, this.logCollection);
 		const taskCollections = taskKeys.map((taskKey) => {
@@ -254,7 +264,8 @@ class RootStore {
 			userStore: {},
 			tasks: [],
 			videos: [],
-			intents: [],
+			tabs: [],
+			bubbles: [],
 			edits: [],
 			logs: [],
 		};
@@ -273,29 +284,34 @@ class RootStore {
 					});
 				}
 				const videos = getDocs(curVideoCollection);
-				const intents = getDocs(curIntentCollection);
+				const tabs = getDocs(curTabCollection);
+				const bubbles = getDocs(curBubbleCollection);
 				const edits = getDocs(curEditCollection);
 				const userStore = getDoc(curUserStore);
 				const logs = getDocs(logsCollection);
 				Promise.all([
-					videos, intents, edits, userStore, logs
+					videos, tabs, bubbles, edits, userStore, logs
 				]).then((querySnapshots) => {
 					const viodeoQuerySnapshot = querySnapshots[0];
 					viodeoQuerySnapshot.forEach((singleDoc) => {
 						allData.videos.push(singleDoc.data());
 					});
-					const intentQuerySnapshot = querySnapshots[1];
-					intentQuerySnapshot.forEach((singleDoc) => {
-						allData.intents.push(singleDoc.data());
+					const tabQuerySnapshot = querySnapshots[1];
+					tabQuerySnapshot.forEach((singleDoc) => {
+						allData.tabs.push(singleDoc.data());
 					});
-					const editQuerySnapshot = querySnapshots[2];
+					const bubbleQuerySnapshot = querySnapshots[2];
+					bubbleQuerySnapshot.forEach((singleDoc) => {
+						allData.bubbles.push(singleDoc.data());
+					});
+					const editQuerySnapshot = querySnapshots[3];
 					editQuerySnapshot.forEach((singleDoc) => {
 						allData.edits.push(singleDoc.data());
 					});
-					const userStoreSnapshot = querySnapshots[3];
+					const userStoreSnapshot = querySnapshots[4];
 					allData.userStore = userStoreSnapshot.data();
 					
-					const logQuerySnapshot = querySnapshots[4];
+					const logQuerySnapshot = querySnapshots[5];
 					logQuerySnapshot.forEach((singleDoc) => {
 						allData.logs.push(singleDoc.data());
 					});
@@ -335,7 +351,7 @@ class RootStore {
 		const userId = this.userStore.userId;
 		const videoId = this.userStore.videoId;
 		const systemSetting = this.userStore.systemSetting;
-		const intentId = this.domainStore.curIntent.id;
+		const tabId = this.domainStore.curTab.id;
 		const taskIdx = this.userStore.curSessionIdx * 2 + this.userStore.curVideoIdx;
 		const time = Date.now();
 		const rootCollection = collection(firestore, this.collection);
@@ -346,7 +362,7 @@ class RootStore {
 			userId, videoId, systemSetting,
 			taskIdx, time, msg, {
 				...data,
-				intentId: intentId,
+				tabId: tabId,
 			}
 		)).then(() => {
 			console.log("logged");

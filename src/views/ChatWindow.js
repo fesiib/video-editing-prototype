@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { observer } from "mobx-react-lite";
 import { action, set, toJS } from "mobx";
+import useRootContext from "../hooks/useRootContext";
 
 const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();

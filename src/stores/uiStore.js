@@ -296,8 +296,8 @@ class UIStore {
 
 	selectCanvasObjects(objects) {
 		const objectIds = objects.map((object) => object.id());
-		const curIntent = this.rootStore.domainStore.curIntent;
-		const edits = objectIds.map((id) => curIntent.getCanvasObjectById(id));
+		const curTab = this.rootStore.domainStore.curTab;
+		const edits = objectIds.map((id) => curTab.getCanvasObjectById(id));
 
 		const onlySuggested = edits.some((edit) => {
 			if (edit === undefined) {
@@ -310,7 +310,7 @@ class UIStore {
 		let selectedNodeIds = [];
 
 		for (const id of objectIds) {
-			const edit = curIntent.getCanvasObjectById(id);
+			const edit = curTab.getCanvasObjectById(id);
 			if (edit !== undefined) {
 				if (onlySuggested && edit.isSuggested === false) {
 					continue;
@@ -319,7 +319,7 @@ class UIStore {
 					selectedTimelineItems.push(edit);
 				}
 				else {
-					if (curIntent.editOperationKey === this.objectNames.crop) {
+					if (curTab.editOperationKey === this.objectNames.crop) {
 						if (id.substring(0, 2) === "bg") {
 							continue;
 						}
@@ -337,10 +337,10 @@ class UIStore {
 
 	selectTimelineObjects(objects) {
 		this.timelineControls.selectedTimelineItems = objects;
-		const curIntent = this.rootStore.domainStore.curIntent;
+		const curTab = this.rootStore.domainStore.curTab;
 		if (objects.length === 1) {
 			const object = objects[0];
-			if (curIntent.editOperationKey === this.objectNames.crop) {
+			if (curTab.editOperationKey === this.objectNames.crop) {
 				this.canvasControls.transformerNodeIds = ["fg_" + object.commonState.id];
 			}
 			else {
