@@ -43,7 +43,6 @@ const ChatTemplate = observer(function ChatTemplate() {
 
     return (
         <div className="w-100">
-			<ChatTab />
 			{/* <ChatTabTemplate /> */}
             <div className="flex flex-start overflow-auto text-xs">
                 {tabs.map((tab, idx) => {
@@ -69,6 +68,7 @@ const ChatTemplate = observer(function ChatTemplate() {
                     <FontAwesomeIcon icon={faPlus} />
                 </div>
             </div>
+			<ChatTab />
         </div>
     );
 });

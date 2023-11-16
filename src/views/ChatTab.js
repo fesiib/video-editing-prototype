@@ -198,6 +198,16 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 		bubble.setToggle(!bubble.toggle);
 	});
 
+	const requestMore = action((event) => {
+		domainStore.processRequest(
+			domainStore.processingModes.addMore,
+			{
+				start: 0,
+				finish: domainStore.projectMetadata.duration,
+			}
+		);
+	});
+
 	const content = bubble.content;
 	const time = new Date(bubble.time).toLocaleTimeString("en-US", {
 		hour12: false,
@@ -224,6 +234,13 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 					{toggle && <FontAwesomeIcon icon={faCheck} />}
 				</button>
 				{!toggle ? "Select All" : "Deselect All"})
+			</div>
+			<div>
+				<button
+					onClick={requestMore}
+				>
+					Get More Edits
+				</button>
 			</div>
 		</div>
 	</div>);
