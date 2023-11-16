@@ -345,6 +345,7 @@ class RootStore {
 	}
 
 	logData(msg, data) {
+		return;
 		if (!this.userStore.isLoggedIn || !this.userStore.isTaskChosen) {
 			return;
 		}

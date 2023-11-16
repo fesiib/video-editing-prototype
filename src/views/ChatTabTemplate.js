@@ -8,22 +8,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 
 import ChatBubbleTemplate from "./ChatBubbleTemplate";
 
-import CommandSpace from "./CommandSpace";
-
-import useRootContext from "../hooks/useRootContext";
-
-const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
-	const { userStore, uiStore, domainStore } = useRootContext();
-
-	return (<div>
-		{bubble.time} {bubble.content}
-	</div>);
-});
-
 const ChatTabTemplate = observer(function ChatTabTemplate() {
-	const { userStore, uiStore, domainStore } = useRootContext();
-
-
     const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
     const [editSuggestions, setEditSuggestions] = useState([
         {
@@ -50,8 +35,7 @@ const ChatTabTemplate = observer(function ChatTabTemplate() {
     return (
         <div>
             <div>✨ Describe edits you want to implement!</div>
-			<CommandSpace />
-            {/* <div className="flex items-center mt-2">
+            <div className="flex items-center mt-2">
                 <textarea
                     // id="textCommand"
                     className="rounded-md border-black border w-full p-2"
@@ -72,7 +56,7 @@ const ChatTabTemplate = observer(function ChatTabTemplate() {
                 <button className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-3 rounded">
                     Enter
                 </button>
-            </div> */}
+            </div>
             <div className="overflow-auto mt-3" style={{ maxHeight: "720px" }}>
                 {/* Explanation */}
                 <div className="mb-3">

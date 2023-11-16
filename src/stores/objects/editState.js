@@ -25,6 +25,8 @@ class EditState {
 
 	parent = null;
 
+	parentBubble = null;
+
 	isSuggested = false;
 
 	explanation = [];
@@ -100,13 +102,12 @@ class EditState {
 		cropHeight: 0, // number input
 	};
 
-	suggestedParameters = {};
-
-    constructor(domainStore, parent, isSuggested, trackId) {
+    constructor(domainStore, parent, parentBubble, isSuggested, trackId) {
         makeAutoObservable(this, {}, { autoBind: true });
         this.domainStore = domainStore;
         this.commonState = new CommonState(domainStore, this, "edit-" + randomUUID(), trackId);
 		this.parent = parent;
+		this.parentBubble = parentBubble;
 	
 		this.isSuggested = isSuggested;
 		this.explanation = [];
@@ -117,7 +118,6 @@ class EditState {
 			custom: [],
 		};
 		this.contribution = []
-		this.suggestedParameters = {};
 
 		this.cropParameters = {
 			x: 0,
@@ -132,7 +132,9 @@ class EditState {
     }
 
 	getDeepCopy() {
-		const newEdit = new EditState(this.domainStore, this.parent, this.isSuggested, this.commonState.trackId);
+		const newEdit = new EditState(
+			this.domainStore, this.parent, this.parentBubble, this.isSuggested, this.commonState.trackId
+		);
 		newEdit.commonState.setMetadata(this.commonState.metadata);
 		
 		newEdit.textParameters = {...this.textParameters};
@@ -158,7 +160,6 @@ class EditState {
 		}
 
 		newEdit.contribution = [...this.contribution];
-		newEdit.suggestedParameters = {...this.suggestedParameters};
 		// add all parameters
 		return newEdit;
 	}
@@ -178,13 +179,10 @@ class EditState {
     }
 
 	replaceSelf(edits) {
+		//TODO: consider if suggested edit is being replaced?
 		if (!this.isSuggested) {
 			this.parent.activeEdits = [
 				...this.parent.activeEdits, ...edits];
-		}
-		if (this.isSuggested) {
-			this.parent.systemBubbles = [
-				...this.parent.systemBubbles, ...edits];
 		}
 		this.parent.deleteEdits([this.commonState.id]);
 	}
@@ -799,7 +797,6 @@ class EditState {
 		this.blurParameters = { ...responseBody.blurParameters };
 		this.setSpatialParameters(responseBody.spatialParameters);
 		this.setTemporalParameters(responseBody.temporalParameters);
-		this.suggestedParameters = { ...responseBody.suggestedParameters };
 	}
 
 	fetchedFromFirebase(edit) {
@@ -829,7 +826,6 @@ class EditState {
 			this.suggestionSource[key] = [...edit.suggestionSource[key]];
 		}
 		this.contribution = edit.contribution.slice(0);
-		this.suggestedParameters = { ...edit.suggestedParameters };
 	}
 
 	saveFirebase(userId, taskIdx) {
@@ -886,7 +882,6 @@ class EditState {
 					this.suggestionSource[key] = [...data.suggestionSource[key]];
 				}
 				this.contribution = data.contribution.slice(0);
-				this.suggestedParameters = { ...data.suggestedParameters };
 				resolve(true);
 			})).catch((error) => {
 				reject("edit fetch error: " + error.message);
@@ -914,7 +909,6 @@ class EditState {
 					custom: [],
 				},
 				contribution: editState.contribution.slice(0),
-				suggestedParameters: { ...toJS(editState.suggestedParameters) },
 			};
 			for (const key in editState.suggestionSource) {
 				data.suggestionSource[key] = [...editState.suggestionSource[key]];

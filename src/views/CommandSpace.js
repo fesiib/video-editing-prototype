@@ -99,7 +99,7 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessClick = action(() => {
-		domainStore.processIntent(
+		domainStore.processRequest(
 			domainStore.processingModes.fromScratch,
 			{
 				start: 0,
@@ -190,90 +190,83 @@ const CommandSpace = observer(function CommandSpace() {
 				</span>
 			</div>
 			{systemSetting ? (
-				domainStore.processingRequest ? (
-					<div className="flex flex-row gap-2 items-center"> 
-						<span> Processing... </span> 
-						<ReactLoading type={"bars"} color={"black"} height={20} width={20} />
-					</div>
-				) : (
-					<div className="w-full p-1 bg-gray-100">
-						<div className="flex flex-row w-full gap-2"> 
-							<div className="flex flex-col w-full gap-1 border p-1">
-								<div
-									id="textarea-container"
-									className="textarea-container relative w-full h-full"
-									ref={textCommandRef}
+				<div className="w-full p-1 bg-gray-100">
+					<div className="flex flex-row w-full gap-2"> 
+						<div className="flex flex-col w-full gap-1 border p-1">
+							<div
+								id="textarea-container"
+								className="textarea-container relative w-full h-full"
+								ref={textCommandRef}
+							>
+								<div  
+									id="textarea-backdrop"
+									className="textarea-backdrop absolute w-full h-full"
 								>
-									<div  
-										id="textarea-backdrop"
-										className="textarea-backdrop absolute w-full h-full"
-									>
-										<div
-											id="textarea-highlights"
-											className="textarea-highlights z-0"
-											style = {{
-												pointerEvents: "auto",
-											}}
-										>
-										</div>
-									</div>
-									<textarea 
-										id="textCommand" 
-										maxLength={textCommandLimit}
-										type="text"
-										rows="4"
-										placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
-										value={curTab.textCommand}
-										className="w-full resize-none relative z-10"
-										style={{
-											margin: 0,
-											borderRadius: 0,
-											color: "#444444",
-											backgroundColor: "transparent",
+									<div
+										id="textarea-highlights"
+										className="textarea-highlights z-0"
+										style = {{
+											pointerEvents: "auto",
 										}}
-										onChange={onChangeTextCommand}
-										onScroll={onTextAreaScroll}
-										onClick={onTextAreaClick}
-										onKeyDown={onKeyDown}
-									/>
-								</div>
-								<div className="flex flex-row justify-between">
-									<SketchCanvas 
-										shouldSketch={shouldSketch}
-									/>
-									<span
-										className="text-xs"
-									> {curTab.textCommand.length}/{textCommandLimit}</span>
-								</div>
-							</div>
-							<div className="flex flex-col gap-1 justify-end items-end">
-								{/* <div className="flex flex-col">
-
-									<label htmlFor="processingMode"
-										className="w-full"
-									> Mode: </label>
-									<select id={"processingMode"} value={curTab.processingMode} onChange={onProcessingMode}
-										className="p-1"
 									>
-										<option value={domainStore.processingModes.fromScratch}> From scratch </option>
-										<option value={domainStore.processingModes.addMore}> Add more </option>
-										<option value={domainStore.processingModes.adjustSelected}> Adjust existing </option>
-									</select>
-								</div> */}
-								<button 
-									className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"
-										+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-200"
-									}
-
-									onClick={() => onProcessClick()}
-									disabled={curTab.processingAllowed === false}
-								>
-									<AiOutlineSend />
-								</button>
+									</div>
+								</div>
+								<textarea 
+									id="textCommand" 
+									maxLength={textCommandLimit}
+									type="text"
+									rows="4"
+									placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
+									value={curTab.textCommand}
+									className="w-full resize-none relative z-10"
+									style={{
+										margin: 0,
+										borderRadius: 0,
+										color: "#444444",
+										backgroundColor: "transparent",
+									}}
+									onChange={onChangeTextCommand}
+									onScroll={onTextAreaScroll}
+									onClick={onTextAreaClick}
+									onKeyDown={onKeyDown}
+								/>
+							</div>
+							<div className="flex flex-row justify-between">
+								<SketchCanvas 
+									shouldSketch={shouldSketch}
+								/>
+								<span
+									className="text-xs"
+								> {curTab.textCommand.length}/{textCommandLimit}</span>
 							</div>
 						</div>
+						<div className="flex flex-col gap-1 justify-end items-end">
+							{/* <div className="flex flex-col">
+
+								<label htmlFor="processingMode"
+									className="w-full"
+								> Mode: </label>
+								<select id={"processingMode"} value={curTab.processingMode} onChange={onProcessingMode}
+									className="p-1"
+								>
+									<option value={domainStore.processingModes.fromScratch}> From scratch </option>
+									<option value={domainStore.processingModes.addMore}> Add more </option>
+									<option value={domainStore.processingModes.adjustSelected}> Adjust existing </option>
+								</select>
+							</div> */}
+							<button 
+								className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"
+									+ " disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-200"
+								}
+
+								onClick={() => onProcessClick()}
+								disabled={curTab.processingAllowed === false}
+							>
+								<AiOutlineSend />
+							</button>
+						</div>
 					</div>
-				)
+				</div>
 			) : null}
 		</div>
 	</IconContext.Provider>);

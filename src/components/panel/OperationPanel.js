@@ -115,39 +115,6 @@ const OperationPanel = observer(function OperationPanel() {
 									<div className="italic text-gray-400"> Please select an edit </div>
 								) : (
 									<div className="flex flex-col divide-y divide-gray-300 gap-2">
-										{/* {
-											(selectedSuggestedEdits.length !== 1 || domainStore.processingRequest
-											) ? null : (
-												<div className="flex flex-col justify-start px-1 divider-1">
-													<div className="">
-														<span className="text-sm"> Explanation: </span>
-														<span className="text-bold text-sm"> {
-															
-															JSON.stringify(toJS(selectedEdits[0].explanation))
-														} </span>
-													</div>
-													<div className="">
-														<span className="text-sm"> Source: </span>
-														<span className="text-bold text-sm"> {
-															JSON.stringify(toJS(selectedEdits[0].suggestionSource))
-														} </span>
-													</div>
-													{ domainStore.curTab.editOperation === null ? null : (
-														<div className="">
-															<span className="text-sm"> Specifications: </span>
-															<span className="text-bold text-sm">
-																{
-																	
-																	selectedEdits[0].suggestedParameters[domainStore.curTab.editOperationKey]?.length === 1 ?
-																		JSON.stringify(toJS(selectedEdits[0].suggestedParameters[domainStore.curTab.editOperationKey]))
-																		: "None"
-																}
-															</span>
-														</div>)
-													}
-												</div>
-											)
-										} */}
 										<div className="flex flex-row"> {
 											Object.keys(metaParameters).map((metaKey) => {
 												const metaParameter = metaParameters[metaKey];

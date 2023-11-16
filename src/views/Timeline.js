@@ -270,7 +270,7 @@ const Timeline = observer(function Timeline() {
 	const onMoreClick = action(() => {
 		//TODO???
 		if (curTab.processingAllowed && curTab.searchMoreAllowed) {
-			domainStore.processIntent(
+			domainStore.processRequest(
 				domainStore.processingModes.addMore,
 				{
 					start: uiStore.commandSpaceControls.viewPortStart,

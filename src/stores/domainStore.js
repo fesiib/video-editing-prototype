@@ -7,11 +7,29 @@ import VideoState from "./objects/videoState";
 import { firestore } from "../services/firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 
-import { requestSuggestions, requestSummary } from "../services/pipeline";
+import { requestSuggestions, requestSuggestionsSplit, requestSummary } from "../services/pipeline";
 
 import { sliceTextArray } from "../utilities/genericUtilities";
+import BubbleState from "./objects/bubbleState";
 
 class DomainStore {
+	SYSTEM_ERROR_MESSAGE() {
+		return "Error occured! Please try again!";
+	}
+
+	SYSTEM_PARSER_MESSAGE() {
+		return "Parsing Results are: "
+	}
+
+	SYSTEM_TEMPORAL_MESSAGE(start, finish) {
+		return `${this.curTab.editOperation.title} edit from ${start} to ${finish}`;
+	}
+
+	SYSTEM_SUMMARY_MESSAGE(numEdits) {
+		return `Suggested ${numEdits} edits of type ${this.curTab.editOperation.title}!`;
+	}
+
+	
 	domainDoc = "domain";
 
 	processingRequest = false;
@@ -38,6 +56,7 @@ class DomainStore {
 		userCommand: "userCommand",
 		parsingResult: "parsingResult",
 		edit: "edit",
+		summaryMessage: "summaryMessage",
 	};
 
 	editOperations = {
@@ -239,6 +258,7 @@ class DomainStore {
 			new TabState(this, this.projectMetadata.totalTabsCnt, "", [], -1, 0),
 		];
 		this.curTabPos = 0;
+		this.processingRequest = false;
     }
 
 	loadVideo(videoLink, videoId) {
@@ -299,9 +319,11 @@ class DomainStore {
 				});
 			}
 			for (let bubble of tab.systemBubbles) {
-				bubble.commonState.setMetadata({
-					z: idx + 1,
-				});
+				if (bubble.edit !== null) {
+					bubble.edit.commonState.setMetadata({
+						z: idx + 1,
+					});
+				}
 			}
 			return tab;
 		});
@@ -329,9 +351,11 @@ class DomainStore {
 			});
 		}
 		for (let bubble of deepCopy.systemBubbles) {
-			bubble.commonState.setMetadata({
-				z: this.curTabPos + 1,
-			});
+			if (bubble.edit !== null) {				
+				bubble.commonState.setMetadata({
+					z: this.curTabPos + 1,
+				});
+			}
 		}
 		this.rootStore.resetTempState();
 	}
@@ -351,9 +375,11 @@ class DomainStore {
 			});
 		}
 		for (let bubble of deepCopy.systemBubbles) {
-			bubble.commonState.setMetadata({
-				z: this.curTabPos + 1,
-			});
+			if (bubble.edit !== null) {
+				bubble.commonState.setMetadata({
+					z: this.curTabPos + 1,
+				});
+			}
 		}
 		this.rootStore.resetTempState();
 	}
@@ -370,13 +396,27 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
-	processIntent(processingMode, segmentOfInterest) {
+	processRequest(processingMode, segmentOfInterest) {
 		if (this.processingRequest) {
+			// TODO: stop previous
 			return;
 		}
+
+		this.processingRequest = true;
+		
 		const isAddMore = processingMode === this.processingModes.addMore;
-		this.processingIntent = true;
+		
+		if (!isAddMore) {
+
+			const userCommandBubble = this.curTab.addBubble(
+				new Date().getTime(),
+				this.bubbleTypes.userCommand
+			);
+			userCommandBubble.setContent(this.curTab.textCommand);
+		}
+
 		// request
+		// stage : parse -> temporal -> spatial -> edit
 		const requestData = {
 			videoId: "",
 			projectMetadata: {},
@@ -384,7 +424,9 @@ class DomainStore {
 			curPlayPosition: this.rootStore.uiStore.timelineControls.playPosition,
 			segmentOfInterest: segmentOfInterest,
 			skippedSegments: [],
-			requestParameters: {},
+			requestParameters: {
+				parsingResults: {},
+			},
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
 		};
@@ -392,15 +434,26 @@ class DomainStore {
 		requestData.projectMetadata = toJS({
 			...this.projectMetadata,
 		});
-		requestData.edits = [...this.curIntent.activeEdits].map((edit) => {
+		requestData.edits = [...this.curTab.activeEdits].map((edit) => {
 			return toJS(edit.requestBody);
 		});
 		requestData.requestParameters = toJS({
-			...this.curIntent.requestParameters,
+			...requestData.requestParameters,
+			...this.curTab.requestParameters,
 			processingMode: processingMode,
 		});
 
-		requestData.skippedSegments = [...this.skippedParts].map((edit) => {
+
+		requestData.skippedSegments = [
+			...this.skippedParts, ...(
+				isAddMore ? 
+					this.curTab.systemBubbles.filter(
+						(bubble) => bubble.type === this.bubbleTypes.edit && bubble.edit !== null
+					).map(
+						(bubble) => bubble.edit
+					) : []
+			)
+		].map((edit) => {
 			return {
 				temporalParameters: {
 					start: edit.commonState.offset,
@@ -409,159 +462,209 @@ class DomainStore {
 			};
 		});
 
-		// response
-		// make sure zIndex is fine
-		// make sure to edit suggesteEditOperationKey and remove it if they are equal
-		const requestedIntentPos = this.curIntentPos;
-		if (isAddMore == false) {
-			this.curIntent.enterHistory();
-			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-			this.curIntent.summary = "";
-		}	
-		this.curIntent.suggestedEdits = [];
-		this.curIntent.suggestedEditOperationKeys = [];
-		this.curIntent.suggestedEditOperationKey = "";
-		this.curIntent.combinedContribution = [];
+		const requestedTabPos = this.curTabPos;
+		this.curTab.suggestedEdits = [];
+		this.curTab.suggestedEditOpeartionKeys = [];
+
+		console.log(requestData);
+
+		// request summary
 		requestSummary({
 			input: requestData.requestParameters.text,
 		}).then(action((responseData) => {
+			this.setCurTab(requestedTabPos);
 			if (responseData === null || responseData.summary === undefined) {
-				this.processingIntent = false;
+				console.log("no summary");
+				this.processingRequest = false;
+				const systemMessageBubble = this.curTab.addBubble(
+					new Date().getTime(),
+					this.bubbleTypes.systemMessage
+				);
+				systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 				return;
 			}
 			const summary = responseData.summary;
-			// if (this.curIntent.summary === "") {
-			// 	this.curIntent.summary = summary;
-			// } else {
-			// 	this.curIntent.summary = this.curIntent.summary + "\n" + summary;
-			// }
-			this.setCurIntent(requestedIntentPos);
-			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-			if (isAddMore === false) {
-				this.curIntent.setSummary(summary);
-			}
-			requestSuggestions(requestData).then(action((responseData) => {
-				console.log(responseData);
-				if (responseData === null || responseData.edits === undefined) {
-					this.processingIntent = false;
+			this.curTab.setTitle(summary);
+			console.log(summary);
+			//parsing results
+			requestSuggestionsSplit({
+				stage: "parse",
+				...requestData,
+			}).then(action((responseData) => {
+				this.setCurTab(requestedTabPos);
+				if (responseData === null || responseData.parsingResults === undefined) {
+					console.log("no parsing results");
+					this.processingRequest = false;
+					const systemMessageBubble = this.curTab.addBubble(
+						new Date().getTime(),
+						this.bubbleTypes.systemMessage
+					);
+					systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 					return;
 				}
-				this.setCurIntent(requestedIntentPos);
-				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-				const suggestedEditOperationKeys = responseData.requestParameters.editOperations;
-				const suggestedParameters = responseData.requestParameters.parameters;
-				const suggestedEditOperationKey	= responseData.requestParameters.editOperation;
-				const suggestedEdits = responseData.edits;
-				const indexedParameters = responseData.requestParameters.indexedParameters;
-				const indexedEdits = responseData.requestParameters.indexedEdits;
-				this.curIntent.combinedContribution = [{
-					text: requestData.requestParameters.text.toLowerCase(),
-					type: [],
-				}]
-				this.curIntent.suggestedEdits = suggestedEdits.map(action((edit) => {
-					const newEdit = new EditState(this, this.curIntent, true, this.curIntent.trackId);
-					newEdit.commonState.setMetadata({
-						duration: this.projectMetadata.duration,
-						z: this.curIntent.intentPos + 1,
-					});
-					newEdit.suggestionSource = {
-						temporal: [],
-						spatial: [],
-						custom: [],
-						edit: [],
-						offsetsTemporal: [],
-						offsetsSpatial: [],
-						offsetsCustom: [],
-						offsetsEdit: [],
+				const relevantText = responseData.relevantText;
+				const parsingResults = responseData.parsingResults;
+				const suggestedEditOperationKeys = responseData.editOperations;
+
+				if (!isAddMore) {
+					const requestResultBubble = this.curTab.addBubble(
+						new Date().getTime(),
+						this.bubbleTypes.parsingResult
+					);
+					requestResultBubble.setContent(this.SYSTEM_PARSER_MESSAGE());
+					requestResultBubble.setParsingResult(
+						//TODO: requestData.requestParameters.text,
+						"Whenever the person engages with the screen, draw a sparkling mark near his head",
+						relevantText["spatial"].map((item) => [item.offset, item.offset + item.reference.length]),
+						relevantText["temporal"].map((item) => [item.offset, item.offset + item.reference.length]),
+						relevantText["edit"].map((item) => [item.offset, item.offset + item.reference.length]),
+						Object.values(relevantText["parameters"]).flat().map((item) => [item.offset, item.offset + item.reference.length]),
+					);
+					this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
+					if (suggestedEditOperationKeys.length > 0) {
+						this.curTab.setEditOperationKey(suggestedEditOperationKeys[0]);
+					}
+				}
+				// temporal
+				for (let temporal of parsingResults.temporal_references) {
+					requestData.requestParameters.parsingResults = {
+						...parsingResults,
+						temporal_references: [temporal],
 					};
-					newEdit.setResponseBody({
-						...edit,
-						suggestedParameters: suggestedParameters,
-					});
-					
-					newEdit.contribution = this.curIntent.combinedContribution.map((single) => {
-						return {
-							text: single.text,
-							type: []
-						};
-					});
-
-					// for (let parameterKey in suggestedParameters) {
-					// 	newEdit.suggestionSource[`custom.${parameterKey}`] = suggestedParameters[parameterKey].slice(0);
-					// }
-					for (let parameterKey in indexedParameters) {
-						newEdit.suggestionSource[`custom.${parameterKey}`] = indexedParameters[parameterKey].map((single) => single.reference);
-						newEdit.suggestionSource[`offsetsCustom.${parameterKey}`] = indexedParameters[parameterKey].map((single) => single.offset);
-					}
-					for (let single of indexedEdits) {
-						console.log(single);
-						newEdit.suggestionSource['edit'].push(single.reference);
-						newEdit.suggestionSource['offsetsEdit'].push(single.offset);
-					}
-					for (let key in newEdit.suggestionSource) {
-						if (key.startsWith("offsets")) {
-							continue;
+					requestSuggestionsSplit({
+						stage: "temporal",
+						...requestData,
+					}).then(action((responseData) => {
+						this.setCurTab(requestedTabPos);
+						if (responseData === null || responseData.edits === undefined) {
+							console.log("no temporal edits");
+							this.processingRequest = false;
+							const systemMessageBubble = this.curTab.addBubble(
+								new Date().getTime(),
+								this.bubbleTypes.systemMessage
+							);
+							systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+							return;
 						}
-						for (let source of newEdit.suggestionSource[key]) {
-							source = source.toLowerCase();
-							newEdit.contribution = sliceTextArray(newEdit.contribution, source, key);
-							this.curIntent.combinedContribution = sliceTextArray(this.curIntent.combinedContribution, source, key);
+						const edits = responseData.edits;
+						let editPromises = [];
+						for (let edit of edits){
+							const newEditBubble = this.curTab.addBubble(new Date().getTime(), this.bubbleTypes.edit);
+							newEditBubble.edit.commonState.setMetadata({
+								duration: this.projectMetadata.duration,
+								z: this.curTab.tabPos + 1,
+							});
+							newEditBubble.edit.suggestionSource = {
+								temporal: [temporal.reference],
+								spatial: relevantText.spatial,
+								custom: relevantText.parameters,
+								edit: relevantText.edit,
+							};
+							newEditBubble.edit.setResponseBody({
+								...edit,
+							});
+							editPromises.push(new Promise(action((resolve, reject) => {
+								requestSuggestionsSplit({
+									stage: "spatial",
+									...requestData,
+									edits: [toJS(newEditBubble.edit.requestBody)],
+								}).then(action((responseData) => {
+									this.setCurTab(requestedTabPos);
+									if (responseData === null || responseData.edits === undefined) {
+										newEditBubble.edit.setContent(this.SYSTEM_ERROR_MESSAGE());
+										reject("no spatial parameters");
+									}
+									const editWithSpatial = responseData.edits[0];
+									newEditBubble.edit.setResponseBody({
+										...editWithSpatial,
+									});
+									requestSuggestionsSplit({
+										stage: "edit",
+										...requestData,
+										edits: [toJS(newEditBubble.edit.requestBody)],
+									}).then(action((responseData) => {
+										this.setCurTab(requestedTabPos);
+										if (responseData === null || responseData.edits === undefined) {
+											newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+											reject("no edit parameters");
+										}
+										newEditBubble.setContent(this.SYSTEM_TEMPORAL_MESSAGE(
+											newEditBubble.edit.commonState.offset,
+											newEditBubble.edit.commonState.end,
+										));
+										const editWithEdit = responseData.edits[0];
+										newEditBubble.edit.setResponseBody({
+											...editWithEdit,
+										});
+										newEditBubble.completedProcessing();
+										resolve("Successful");
+									})).catch(action((error) => {
+										console.log("cannot retrieve the edit parameters: ", error);
+										this.setCurTab(requestedTabPos);
+										newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+										reject(error);
+									}));
+								})).catch(action((error) => {
+									console.log("cannot retrieve the spatial results: ", error);
+									this.setCurTab(requestedTabPos);
+									newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+									reject(error);
+								}));
+							})));
 						}
-					}
-					return newEdit;
-				}));
-				this.curIntent.suggestedEditOperationKeys = suggestedEditOperationKeys;
-				if (suggestedEditOperationKeys.length > 0) {
-					this.curIntent.setEditOperationKey(suggestedEditOperationKeys[0]);
-				}
-				this.curIntent.recordHistory();
-				this.processingIntent = false;
+						Promise.all(editPromises).then(action(() => {
+							this.setCurTab(requestedTabPos);
+							
+							const summaryMessageBubble = this.curTab.addBubble(
+								new Date().getTime(),
+								this.bubbleTypes.summaryMessage
+							);
+							summaryMessageBubble.setContent(this.SYSTEM_SUMMARY_MESSAGE(
+								editPromises.length,
+							));
 
-				this.rootStore.uiStore.logData("processingComplete", {
-					edits: toJS(this.curIntent.suggestedEdits.map((edit) => edit.commonState.id)),
-					summary: this.curIntent.summary,
-					text: this.curIntent.textCommand,
-					sketch: toJS(this.curIntent.sketchCommand),
-					sketchTimestamp: this.curIntent.sketchPlayPosition,
-					start: segmentOfInterest.start,
-					finish: segmentOfInterest.finish,
-					explanation: toJS(this.curIntent.combinedContribution),
-					mode: processingMode,
-				});
-				if (this.curIntent.suggestedEdits.length === 0) {
-					alert("Could not find relevant segment in the video!");
-				}
-				else {
-					this.rootStore.uiStore.selectTimelineObjects([this.curIntent.suggestedEdits[0]]);
-					this.rootStore.uiStore.timelineControls.playPosition = this.curIntent.suggestedEdits[0].commonState.offset;
+							this.processingRequest = false;
+						})).catch(action((error) => {
+							console.log("cannot retrieve the edit parameters: ", error);
+							this.setCurTab(requestedTabPos);
+							this.processingRequest = false;
+							const systemMessageBubble = this.curTab.addBubble(
+								new Date().getTime(),
+								this.bubbleTypes.systemMessage
+							);
+							systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+						}));
+					})).catch(action((error) => {
+						console.log("cannot retrieve the temporal results: ", error);
+						this.setCurTab(requestedTabPos);
+						this.processingRequest = false;
+						const systemMessageBubble = this.curTab.addBubble(
+							new Date().getTime(),
+							this.bubbleTypes.systemMessage
+						);
+						systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+					}));
 				}
 			})).catch(action((error) => {
-				console.log("error", error);
-				this.setCurIntent(requestedIntentPos);
-				this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-				this.processingIntent = false;
-				this.rootStore.uiStore.logData("processingError", {
-					error: error,
-					stage: "processing",
-				});
-				alert("Sorry error occured");
+				console.log("cannot retrieve the parsing results: ", error);
+				this.setCurTab(requestedTabPos);
+				this.processingRequest = false;
+				const systemMessageBubble = this.curTab.addBubble(
+					new Date().getTime(),
+					this.bubbleTypes.systemMessage
+				);
+				systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 			}));
 		})).catch(action((error) => {
-			console.log("error", error);
-			this.setCurIntent(requestedIntentPos);
-			this.curIntent.restoreHistory(this.curIntent.history.length - 1);
-			this.processingIntent = false;
-			this.rootStore.uiStore.logData("processingError", {
-				error: error,
-				stage: "summary",
-			});
-			alert("Sorry error occured");
+			console.log("cannot retrieve the summary: ", error);
+			this.setCurTab(requestedTabPos);
+			this.processingRequest = false;
+			const systemMessageBubble = this.curTab.addBubble(
+				new Date().getTime(),
+				this.bubbleTypes.systemMessage
+			);
+			systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 		}));
-	}
-
-	processRequest(processingMode, segmentOfInterest) {
-		this.curTab.addBubble(new Date().getTime(), this.bubbleTypes.userCommand);
-		//TODO: processing;
 	}
 
 	getVideoById(id) {
@@ -655,14 +758,6 @@ class DomainStore {
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Text") {
-				result.push(bubble);
-			}
-		}
 		return result;
 	}
 
@@ -682,14 +777,6 @@ class DomainStore {
 			return result;
 		}
 		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Image") {
-				result.push(bubble);
-			}
-		}
 		return result;
 	}
 
@@ -707,15 +794,6 @@ class DomainStore {
 		}
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
-		}
-		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Shape") {
-				result.push(bubble);
-			}
 		}
 		return result;
 	}
@@ -753,15 +831,6 @@ class DomainStore {
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
-		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Cut") {
-				result.push(bubble);
-			}
-		}
 		return result;
 	}
 
@@ -779,15 +848,6 @@ class DomainStore {
 		}
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
-		}
-		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Crop") {
-				result.push(bubble);
-			}
 		}
 		return result;
 	}
@@ -807,15 +867,6 @@ class DomainStore {
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
 		}
-		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Zoom") {
-				result.push(bubble);
-			}
-		}
 		return result;
 	}
 
@@ -833,15 +884,6 @@ class DomainStore {
 		}
 		if (!this.rootStore.userStore.systemSetting) {
 			return result;
-		}
-		
-		for (let bubble of this.curTab.systemBubbles) {
-			if (this.curTab.editOperation === null || bubble.type !== this.bubbleTypes.edit) {
-				continue;
-			}
-			if (this.curTab.editOperation.title === "Blur") {
-				result.push(bubble);
-			}
 		}
 		return result;
 	}

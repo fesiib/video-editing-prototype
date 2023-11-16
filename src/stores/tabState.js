@@ -51,7 +51,7 @@ class TabState {
 		this.editOperationKey = Object.keys(domainStore.editOperations)[0];
 		this.activeEdits = [];
 
-		this.suggestedEditOperations = [];
+		this.suggestedEditOperationKeys = [];
 		this.suggestedEdits = [];
 		
 		this.processingMode = "from-scratch";
@@ -83,8 +83,8 @@ class TabState {
 		this.sketchPlayPosition = pos;
 	}
 
-	setSuggestedEditOperations(operations) {
-		this.suggestedEditOperations = [...operations];
+	setSuggestedEditOperationKeys(operations) {
+		this.suggestedEditOperationKeys = [...operations];
 	}
 
 	setSuggestedEdits(edits) {
@@ -94,7 +94,7 @@ class TabState {
 	addActiveEdit(first, second) {
 		const start = Math.min(first, second);
 		const finish = Math.max(first, second);
-		let newEdit = new EditState(this.domainStore, this, false, this.trackId);
+		let newEdit = new EditState(this.domainStore, this, null, false, this.trackId);
 		newEdit.commonState.setMetadata({
 			duration: this.domainStore.projectMetadata.duration,
 			start: start,
@@ -123,21 +123,24 @@ class TabState {
 		let newBubble = new BubbleState(this.domainStore, this, this.trackId, time, type);
 		if (type === this.domainStore.bubbleTypes.userCommand) {
 			this.userBubbles.push(newBubble);
-			return;
 		}
-		if (type === this.domainStore.bubbleTypes.systemMessage) {
+		else if (type === this.domainStore.bubbleTypes.systemMessage) {
 			this.systemBubbles.push(newBubble);
-			return;
 		}
-		if (type === this.domainStore.bubbleTypes.parsingResult) {
+		else if (type === this.domainStore.bubbleTypes.parsingResult) {
 			this.systemBubbles.push(newBubble);
-			return;
 		}
-		if (type === this.domainStore.bubbleTypes.edit) {
+		else if (type === this.domainStore.bubbleTypes.edit) {
 			this.systemBubbles.push(newBubble);
-			return;
 		}
-		console.log("Error adding Bubble");
+		else if (type === this.domainStore.bubbleTypes.summaryMessage) {
+			this.systemBubbles.push(newBubble);
+		}
+		else {
+			console.log("Error adding Bubble");
+			return null;
+		}
+		return newBubble;
 	}
 
 	deleteEdits(selectedIds) {
@@ -146,7 +149,10 @@ class TabState {
             return !isSelected;
         });
 		this.systemBubbles = this.systemBubbles.filter((bubble) => {
-			const isSelected = selectedIds.includes(bubble.id);
+			if (bubble.type !== this.domainStore.bubbleTypes.edit) {
+				return true;
+			}
+			const isSelected = selectedIds.includes(bubble.edit.id);
 			return !isSelected;
 		});
 		this.domainStore.rootStore.uiStore.selectTimelineObjects(
@@ -156,7 +162,11 @@ class TabState {
 		); 
 	}
 
-	deleteUserBubbles(selectedIds) {
+	deleteBubbles(selectedIds) {
+		this.systemBubbles = this.systemBubbles.filter((bubble) => {
+			const isSelected = selectedIds.includes(bubble.id);
+			return !isSelected;
+		});
 		this.userBubbles = this.userBubbles.filter((bubble) => {
 			const isSelected = selectedIds.includes(bubble.id);
 			return !isSelected;
@@ -200,10 +210,18 @@ class TabState {
 	}
 
 	addEditFromBubble(bubbleId) {
-		const suggestedEdit = this.systemBubbles.find((bubble) => bubble.id === bubbleId);
-		if (suggestedEdit === undefined) {
+		const suggestedBubble = this.systemBubbles.find((bubble) => bubble.id === bubbleId);
+		if (suggestedBubble === undefined) {
 			return [];
 		}
+		
+		const suggestedEdit = suggestedBubble.edit;
+		if (suggestedEdit === null
+			|| suggestedBubble.type !== this.domainStore.bubbleTypes.edit
+		) {
+			return []
+		}
+		
 		const newEdit = suggestedEdit.getDeepCopy();
 		newEdit.isSuggested = false;
 		let deleteIds = [];
@@ -244,12 +262,19 @@ class TabState {
 		return newEdits;
 	} 
 
-	show
+	showEditFromBubble(bubbleId) {
+		//TODO: preview of the edit
+		return;
+	}
 
 	getObjectById(id) {
 		const fromActive = this.activeEdits.find((edit) => edit.commonState.id === id);
-		const fromUser = this.userBubbles.find((bubble) => bubble.id === id);
-		const fromSystem = this.systemBubbles.find((bubble) => bubble.id === id);
+		const fromUser = this.userBubbles.find(
+			(bubble) => bubble.edit !== null && bubble.edit.id === id
+		);
+		const fromSystem = this.systemBubbles.find(
+			(bubble) => bubble.edit !== null &&  bubble.edit.id === id
+		);
 		if (fromActive !== undefined) {
 			return fromActive;
 		}
@@ -308,6 +333,208 @@ class TabState {
 		return this.textCommand !== "" || (this.sketchCommand.length > 0 && this.sketchPlayPosition >= 0);
 	}
 
+	get timeOrderedBubbles() {
+		const bubbles = [...this.systemBubbles,
+			...this.userBubbles
+		].sort((a, b) => {
+			return a.time - b.time;
+		});
+		return bubbles;
+	}
+
+	saveFirebase(userId, taskIdx) {
+		const tabCollection = collection(
+			firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.tabCollection
+		);
+		const tabId = this.id;
+		const tabDoc = doc(tabCollection, tabId).withConverter(this.tabStateConverter);
+		return new Promise(async (resolve, reject) => {
+			try {
+				let allEditPromises = [];
+				let allBubblePromises = [];
+				for (let edit of this.activeEdits) {
+					allEditPromises.push(edit.saveFirebase(userId, taskIdx));
+				}	
+				for (let edit of this.suggestedEdits) {
+					allEditPromises.push(edit.saveFirebase(userId, taskIdx));	
+				}
+				for (let bubble of this.systemBubbles) {
+					allBubblePromises.push(bubble.saveFirebase(userId, taskIdx));
+				}
+				for (let bubble of this.userBubbles) {
+					allBubblePromises.push(bubble.saveFirebase(userId, taskIdx));
+				}
+				await Promise.all(allEditPromises);
+				await Promise.all(allBubblePromises);
+			} catch (error) {
+				reject("edit/bubble save error: " + error.message);
+			}
+			setDoc(tabDoc, this, {merge: false}).then(() => {
+				resolve();
+			}).catch((error) => {
+				reject("tab save error: " + error);
+			});
+		});
+	}
+
+	fetchFirebase(userId, taskIdx, tabId) {
+		const tabCollection = collection(
+			firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.tabCollection
+		);
+		const tabDoc = doc(tabCollection, tabId).withConverter(this.tabStateConverter);
+		return new Promise((resolve, reject) => {
+			getDoc(tabDoc).then(action(async (fetchedTabState) => {
+				const data = fetchedTabState.exists() ? fetchedTabState.data() : null;
+				if (data === null || data.id === undefined) {
+					resolve(false);
+				}
+
+				this.id = data.id;
+				this.idx = data.idx;
+				this.trackId = data.trackId;
+
+				this.title = data.title;
+
+				this.textCommand = data.textCommand;
+				this.sketchCommand = data.sketchCommand;
+				this.sketchPlayPosition = data.sketchPlayPosition;
+
+				this.editOperationKey = data.editOperationKey;
+				this.suggestedEditOperationKeys = data.suggestedEditOperationKeys;
+				
+				this.processingMode = data.processingMode;
+
+				this.activeEdits = [];
+				this.suggestedEdits = [];
+				
+				this.systemBubbles = [];
+				this.userBubbles = [];
+
+				for (let editId of data.activeEdits) {
+					const newEdit = new EditState(
+						this.domainStore,
+						this,
+						null,
+						false,
+						this.trackId,
+					);
+					try {
+						const success = await newEdit.fetchFirebase(userId, taskIdx, editId);
+						if (success) {
+							runInAction(() => {
+								this.activeEdits.push(newEdit);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+				for (let editId of data.suggestedEdits) {
+					const newEdit = new EditState(
+						this.domainStore,
+						this,
+						null,
+						true,
+						this.trackId,
+					);
+					try {
+						const success = await newEdit.fetchFirebase(userId, taskIdx, editId);
+						if (success) {
+							runInAction(() => {
+								this.suggestedEdits.push(newEdit);
+							});
+						}
+					} catch (error) {
+						console.log(error);
+					}
+				}
+
+				for (let bubbleId of data.systemBubbles) {
+					const newBubble = new BubbleState(
+						this.domainStore,
+						this,
+						this.trackId,
+						0,
+						this.domainStore.bubbleTypes.systemMessage,
+					);
+					try {
+						const success = await newBubble.fetchFirebase(userId, taskIdx, bubbleId);
+						if (success) {
+							runInAction(() => {
+								this.systemBubbles.push(newBubble);
+							});
+						}
+					}
+					catch (error) {
+						console.log(error);
+					}
+				}
+
+				for (let bubbleId of data.userBubbles) {
+					const newBubble = new BubbleState(
+						this.domainStore,
+						this,
+						this.trackId,
+						0,
+						this.domainStore.bubbleTypes.userCommand,
+					);
+					try {
+						const success = await newBubble.fetchFirebase(userId, taskIdx, bubbleId);
+						if (success) {
+							runInAction(() => {
+								this.userBubbles.push(newBubble);
+							});
+						}
+					}
+					catch (error) {
+						console.log(error);
+					}
+				}
+				resolve(true);
+			})).catch((error) => {
+				reject("domain fetch error: " + error.message);
+			});
+		});
+	}
+	
+	tabStateConverter = {
+		toFirestore: function(tab) {
+			const data = {
+				id: tab.id,
+				idx: tab.idx,
+				trackId: tab.trackId,
+				title: tab.title,
+				textCommand: tab.textCommand,
+				sketchCommand: tab.sketchCommand,
+				sketchPlayPosition: tab.sketchPlayPosition,
+				systemBubbles: [],
+				userBubbles: [],
+				activeEdits: [],
+				suggestedEdits: [],
+				editOperationKey: tab.editOperationKey,
+				suggestedEditOperationKeys: tab.suggestedEditOperationKeys,
+				processingMode: tab.processingMode,
+			};
+	
+			for (let edit of tab.activeEdits) {
+				data.activeEdits.push(edit.commonState.id);
+			}
+			for (let edit of tab.suggestedEdits) {
+				data.suggestedEdits.push(edit.commonState.id);
+			}
+			for (let bubble of tab.systemBubbles) {
+				data.systemBubbles.push(bubble.id);
+			}
+			for (let bubble of tab.userBubbles) {
+				data.userBubbles.push(bubble.id);
+			}
+			return data;
+		},
+		fromFirestore: function(snapshot, options) {
+			const data = snapshot.data(options);
+			return data;
+		},
+	};
 }
 
 export default TabState;
