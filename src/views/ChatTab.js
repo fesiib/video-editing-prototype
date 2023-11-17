@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCamera, faCheck, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
 import CheckIcon from "@mui/icons-material/Check";
 import ToggleButton from "@mui/material/ToggleButton";
 
@@ -11,7 +11,8 @@ import SnapshotImg from "../snapshot_example.png";
 import CommandSpace from "./CommandSpace";
 
 import useRootContext from "../hooks/useRootContext";
-import { action } from "mobx";
+import { action, toJS } from "mobx";
+import { Divider } from "@mui/material";
 
 const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
@@ -21,20 +22,41 @@ const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
 		hour: "numeric",
 		minute: "numeric",
 	});
-	return (<div className="mb-3 text-left">
-		<div className="bg-slate-200 w-auto px-2 py-1 ml-20 mt-1 rounded-md">
+	const isAddMore = bubble.requestProcessingMode === domainStore.processingModes.addMore;
+	return (<>
+		<div className="self-end mb-3 mr-4 text-left w-fit">
 			<div className="text-xs text-right">
 				{time}
 			</div>
-			<div className="text-m">
-				{content}
+			<div className="bg-slate-200 w-auto p-2 mt-1 rounded-md">
+				{
+					isAddMore ? (
+						<div className="font-semibold">
+							Adding More Edits for:
+						</div>
+					) : (
+						<div className="font-semibold">
+							User Command:
+						</div>
+					)
+				}
+				<div className="text-m">
+					{content}
+				</div>
 			</div>
 		</div>
-	</div>);
+		<Divider />
+	</>);
 });
 
 const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
+	
+	const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+
+	const onExplanationClick = action((event) => {
+		setIsExplanationOpen((prev) => !prev);
+	});
 
 	const content = bubble.content;
 	const time = new Date(bubble.time).toLocaleTimeString("en-US", {
@@ -57,12 +79,12 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	parsingResultStarts.sort((a, b) => a - b);
 
 
-	return (<div className="mb-3">
-		<div className="bg-slate-200 w-auto px-2 py-1 mr-10 mt-1 rounded-md">
-			<div className="text-xs text-left">
-				{time}
-			</div>
-			<div className="italic">
+	return (<div className="mb-3 w-fit">
+		<div className="text-xs text-left">
+			{time}
+		</div>
+		<div className="bg-slate-200 w-auto p-2 mr-10 mt-1 rounded-md">
+			<div className="font-semibold">
 				{content}
 			</div>
 			<div>
@@ -105,32 +127,64 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 					})
 				}
 			</div>
+			<div className="text-s mb-1">
+				<button
+					onClick={onExplanationClick}
+				>
+					<FontAwesomeIcon
+						icon={isExplanationOpen ? faCaretDown : faCaretRight}
+						className="mx-1"
+					/>
+					<span className="italic"> Breakdown </span>
+				</button>
+				{
+					isExplanationOpen ? (
+						<div>
+							<div> Temporal: {bubble.parsingResult.temporal.map(
+								(range) => range.join("-")
+							).join("; ")} </div>
+							<div> Spatial: {bubble.parsingResult.spatial.map(
+								(range) => range.join("-")
+							).join("; ")} </div>
+							<div> Edit: {bubble.parsingResult.edit.map(
+								(range) => range.join("-")
+							).join("; ")} </div>
+							<div> Parameters: {bubble.parsingResult.custom.map(
+								(range) => range.join("-")
+							).join("; ")} </div>
+						</div>
+					) : (null)
+				}
+			</div>
 			<div
 				className="text-xs text-left"
 			>
-				<div> Temporal: {bubble.parsingResult.temporal.map(
-					(range) => range.join("-")
-				).join("; ")} </div>
-				<div> Spatial: {bubble.parsingResult.spatial.map(
-					(range) => range.join("-")
-				).join("; ")} </div>
-				<div> Edit: {bubble.parsingResult.edit.map(
-					(range) => range.join("-")
-				).join("; ")} </div>
-				<div> Parameters: {bubble.parsingResult.custom.map(
-					(range) => range.join("-")
-				).join("; ")} </div>
+				
 			</div>
 		</div>
 	</div>);
 });
 
-const EditBubble = observer(function EditBubble({ bubble }) {
+const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
+	
+	const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+
+	const onExplanationClick = action((event) => {
+		setIsExplanationOpen((prev) => !prev);
+	});
 
 	const setToggle = action((event) => {
 		//TODO: add edit or not
-		bubble.setToggle(!bubble.toggle);
+		const edits = bubble.setToggle(!bubble.toggle);
+		if (edits.length > 0) {
+			uiStore.selectTimelineObjects(edits);
+			let minStart = edits[0].commonState.start;
+			for (let edit of edits) {
+				minStart = Math.min(minStart, edit.commonState.offset);
+			}
+			uiStore.timelineControls.playPosition = minStart;
+		}
 	});
 
 	const content = bubble.content;
@@ -140,31 +194,64 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 		minute: "numeric",
 	});
 	const toggle = bubble.toggle;
-	return (<div className="mb-3">
-		<div className="flex flex-row items-center">
-			<button
-				className={`w-5 h-5 mr-2 rounded-full border border-black flex items-center justify-center focus:outline-none ${
-					toggle ? "bg-black text-white" : ""
-				}`}
-				onClick={setToggle}
-			>
-				{toggle && <FontAwesomeIcon icon={faCheck} />}
-			</button>
-			<div className="font-semibold hover:cursor-pointer" onClick={setToggle}>
-				Edit # TODO
-			</div>
+
+	return (<div className="mb-3 w-fit">
+		<div className="text-xs text-left">
+			{time}
 		</div>
 		<div
-			className={`mt-1 bg-slate-200 w-96 h-56 pl-5 pt-2 rounded-md hover:cursor-pointer ${
-				toggle ? "border-2 border-black" : ""
+			className={`bg-slate-200 h-fit p-2 rounded-md hover:cursor-pointer ${
+				toggle ? "border-2 border-indigo-300" : ""
 			}`}
-			onClick={setToggle}
 		>
-			<div className="text-xs text-left">
-				{time}
+			<div className="flex flex-row items-center">
+				<button
+					className={`w-5 h-5 mr-2 rounded-full border border-black flex items-center justify-center focus:outline-none ${
+						toggle ? "bg-indigo-300 text-black" : ""
+					}`}
+					onClick={setToggle}
+				>
+					{toggle && <FontAwesomeIcon icon={faCheck} />}
+				</button>
+				<div className="font-semibold hover:cursor-pointer" onClick={setToggle}>
+					Edit #{editIdx + 1}
+				</div>
 			</div>
-			<div className="italic">
+			
+			<div className="">
 				{content}
+			</div>
+			<div className="text-s mb-1">
+				<button
+					onClick={onExplanationClick}
+				>
+					<FontAwesomeIcon
+						icon={isExplanationOpen ? faCaretDown : faCaretRight}
+						className="mx-1"
+					/>
+					<span className="italic"> Explanation </span>
+				</button>
+				{
+					isExplanationOpen ? (
+						<div>
+							{bubble.edit.explanation.map((explanation, idx) => {
+								const label = idx === 0 ? "Time Segment" : "Frame Position";
+								if (explanation === "") {
+									return null;
+								}
+								return (<div key={`explanation-${idx}`} className="text-s">
+									<span className="italic">
+										{label}:
+									</span>
+									{" "}
+									<span>
+										{explanation}
+									</span>
+								</div>);
+							})}
+						</div>
+					) : (null)
+				}
 			</div>
 			{/* TODO: update image */}
 			<img src={SnapshotImg} alt="snapshot" width="280" />
@@ -180,11 +267,11 @@ const SystemMessageBubble = observer(function SystemMessageBubble({ bubble }) {
 		hour: "numeric",
 		minute: "numeric",
 	});
-	return (<div className="mb-3">
+	return (<div className="mb-3 w-fit h-fit">
 		<div className="text-xs text-left">
 			{time}
 		</div>
-		<div className="bg-slate-200 w-auto px-2 py-1 mr-10 mt-1 rounded-md">
+		<div className="bg-slate-200 w-auto p-2 mr-10 mt-1 rounded-md">
 			{content}
 		</div>
 	</div>);
@@ -193,9 +280,41 @@ const SystemMessageBubble = observer(function SystemMessageBubble({ bubble }) {
 const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 
+	const curTab = domainStore.curTab;
+	const bubbles = curTab.timeOrderedBubbles;
+
 	const setToggle = action((event) => {
-		//TODO: add all edits or not
+		let addedEdits = [];
+		for (let otherBubble of bubbles) {
+			if (otherBubble.id === bubble.id) {
+				continue;
+			}
+			if (otherBubble.requestId !== bubble.requestId) {
+				continue;
+			}
+			if (otherBubble.type === domainStore.bubbleTypes.edit
+				&& otherBubble.processed === true
+				&& otherBubble.toggle === bubble.toggle
+			) {
+				const edits = otherBubble.setToggle(!otherBubble.toggle);
+				addedEdits = addedEdits.concat(edits);
+			}
+			if (otherBubble.type === domainStore.bubbleTypes.summaryMessage
+				&& otherBubble.processed === true
+				&& otherBubble.toggle === bubble.toggle
+			) {
+				otherBubble.setToggle(!otherBubble.toggle);
+			}
+		}
 		bubble.setToggle(!bubble.toggle);
+		if (addedEdits.length > 0) {
+			uiStore.selectTimelineObjects(addedEdits);
+			let minStart = addedEdits[0].commonState.start;
+			for (let edit of addedEdits) {
+				minStart = Math.min(minStart, edit.commonState.offset);
+			}
+			uiStore.timelineControls.playPosition = minStart;
+		}
 	});
 
 	const requestMore = action((event) => {
@@ -215,19 +334,21 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 		minute: "numeric",
 	});
 	const toggle = bubble.toggle;
-	return (<div className="mb-3">
-		<div className="font-semibold">
-			Summary of Edits
+
+	return (<div className="mb-3 w-fit h-fit">
+		<div className="text-xs text-left">
+			{time}
 		</div>
-		<div className="bg-slate-200 w-auto px-2 py-1 mr-10 mt-1 rounded-md">
-			<div className="text-xs text-left">
-				{time}
+		<div className="bg-slate-200 w-auto p-2 mr-10 mt-1 rounded-md">
+			<div className="font-semibold">
+				Summary of Edits
 			</div>
 			{content}
-			<div className="mb-3 flex flex-row items-center">({"  "}
+			<div className="mb-3 flex flex-row items-center">
+				({"  "}
 				<button
 					className={`w-4 h-4 mr-1 border border-black flex items-center justify-center focus:outline-none ${
-						toggle ? "bg-black text-white" : ""
+						toggle ? "bg-indigo-300 text-black" : ""
 					}`}
 					onClick={setToggle}
 				>
@@ -237,8 +358,10 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 			</div>
 			<div>
 				<button
+					className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"}
 					onClick={requestMore}
 				>
+					<FontAwesomeIcon icon={faPlus} className="mr-1" />
 					Get More Edits
 				</button>
 			</div>
@@ -251,39 +374,62 @@ const ChatTab = observer(function ChatTab() {
 
 	const curTab = domainStore.curTab;
 
-	const timeOrderedBubbles = curTab.timeOrderedBubbles;
+	const timeOrderedBubbles = [...curTab.timeOrderedBubbles].reverse();
+
+	const [showScrollUp, setShowScrollUp] = useState(false);
+
+	const onScroll = action((event) => {
+		const chatTab = document.getElementById("chat-tab");
+		if (chatTab) {
+			setShowScrollUp(chatTab.scrollTop > chatTab.clientHeight / 2);
+		}
+	});
+
+	const onScrollUpClick = action((event) => {
+		const chatTab = document.getElementById("chat-tab");
+		if (chatTab) {
+			chatTab.scrollTop = 0;
+		}
+	});
+
+	const cancelRequest = action((event) => {
+		domainStore.cancelRequest();
+	});
+
+	useEffect(() => {
+		const chatTab = document.getElementById("chat-tab");
+		// when chatTab is at the top, scroll to the top
+		if (chatTab && chatTab.scrollHeight > chatTab.clientHeight) {
+			chatTab.scrollTop = 0;
+			setShowScrollUp(false);
+		}
+	}, [
+		timeOrderedBubbles.length,
+		curTab.id,
+	])
 
     return (
         <div>
-            <div>✨ Describe edits you want to implement!</div>
 			<CommandSpace />
-            <div className="overflow-auto mt-3" style={{ maxHeight: "720px" }}>
+            <div 
+				className="relative overflow-auto mt-3 flex flex-col gap-3"
+				style={{ maxHeight: "720px" }}
+				id={"chat-tab"}
+				onScroll={onScroll}
+			>
 				{
-					timeOrderedBubbles.map((bubble) => {
-						if (bubble.processed === false) {
-							return null;
-						}
-						if (bubble.type === domainStore.bubbleTypes.userCommand) {
-							return <UserCommandBubble bubble={bubble} />;
-						}
-						if (bubble.type === domainStore.bubbleTypes.parsingResult) {
-							return <ParsingResultBubble bubble={bubble} />;
-						}
-						if (bubble.type === domainStore.bubbleTypes.edit) {
-							return <EditBubble bubble={bubble} />;
-						}
-						if (bubble.type === domainStore.bubbleTypes.systemMessage) {
-							return <SystemMessageBubble bubble={bubble} />;
-						}
-						if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
-							return <SummaryMessageBubble bubble={bubble} />;
-						}
-						console.log("no bubble type", bubble.type);
-						return null;
-					})
+					showScrollUp ? (
+						<div
+							className="sticky top-1 m-auto p-2 w-fit z-50 bg-indigo-200 rounded-full flex items-center justify-center hover:bg-indigo-300 cursor-pointer"
+							onClick={onScrollUpClick}
+						>
+							<FontAwesomeIcon icon={faArrowUp} className="mr-2"/>
+							Scroll Up
+						</div>
+					) : (null)
 				}
-
-                {/* Generating one */}
+				
+				{/* Generating one */}
 				{
 					domainStore.processingRequest ? (
 						// loading
@@ -295,10 +441,52 @@ const ChatTab = observer(function ChatTab() {
 								style={{ fontSize: "22px" }}
 							/>{" "}
 							Generating...
+							<button 
+								onClick={cancelRequest}
+								className="w-fit h-fit bg-gray-200 text-black p-1 rounded hover:bg-gray-300 ml-2"
+							>
+								<FontAwesomeIcon icon={faXmark} className="mr-2" />
+								Cancel
+							</button>
 						</div>
 					) : (null)
 				}
 
+				{
+					timeOrderedBubbles.map((bubble, idx) => {
+						if (bubble.processed === false) {
+							return null;
+						}
+						if (bubble.type === domainStore.bubbleTypes.userCommand) {
+							return <UserCommandBubble bubble={bubble} />;
+						}
+						if (bubble.type === domainStore.bubbleTypes.parsingResult) {
+							return <ParsingResultBubble bubble={bubble} />;
+						}
+						if (bubble.type === domainStore.bubbleTypes.edit) {
+							let editIdx = 0;
+							for (let i = idx + 1; i < timeOrderedBubbles.length; i++) {
+								if (timeOrderedBubbles[i].requestId !== bubble.requestId) {
+									break;
+								}
+								if (timeOrderedBubbles[i].type === domainStore.bubbleTypes.edit
+									&& timeOrderedBubbles[i].processed === true
+								) {
+									editIdx += 1;
+								}
+							}
+							return <EditBubble bubble={bubble} editIdx={editIdx} />;
+						}
+						if (bubble.type === domainStore.bubbleTypes.systemMessage) {
+							return <SystemMessageBubble bubble={bubble} />;
+						}
+						if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
+							return <SummaryMessageBubble bubble={bubble} />;
+						}
+						console.log("no bubble type", bubble.type);
+						return null;
+					})
+				}
             </div>
         </div>
     );

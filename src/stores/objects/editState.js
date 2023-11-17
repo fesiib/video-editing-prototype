@@ -158,9 +158,9 @@ class EditState {
 		for (const key in this.suggestionSource) {
 			newEdit.suggestionSource[key] = [...this.suggestionSource[key]];
 		}
-
 		newEdit.contribution = [...this.contribution];
 		// add all parameters
+
 		return newEdit;
 	}
 

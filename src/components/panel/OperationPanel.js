@@ -80,14 +80,14 @@ const OperationPanel = observer(function OperationPanel() {
 		uiStore.logData("parameterCollapse", null);
 	}
 
-	useEffect(() => {
-		if (selectedOperation === null || uiStore.canvasControls.sketching) {
-		// if (selectedOperation === null) {
-			setCollapsed(true);
-		} else {
-			setCollapsed(false);
-		}
-	}, [selectedOperation, uiStore.canvasControls.sketching]);
+	// useEffect(() => {
+	// 	if (selectedOperation === null || uiStore.canvasControls.sketching) {
+	// 	// if (selectedOperation === null) {
+	// 		setCollapsed(true);
+	// 	} else {
+	// 		setCollapsed(false);
+	// 	}
+	// }, [selectedOperation, uiStore.canvasControls.sketching]);
 
 	return (<div className="w-full">
 		<button 

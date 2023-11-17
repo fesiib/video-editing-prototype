@@ -118,9 +118,11 @@ class TabState {
 		this.activeEdits = [...edits];
 	}
 
-	addBubble(time, type) {
+	addBubble(time, type, requestProcessingMode, requestId) {
 		// userCommand, systemMessage, parsingResult, edit;
-		let newBubble = new BubbleState(this.domainStore, this, this.trackId, time, type);
+		let newBubble = new BubbleState(
+			this.domainStore, this, this.trackId, time, type, requestProcessingMode, requestId,
+		);
 		if (type === this.domainStore.bubbleTypes.userCommand) {
 			this.userBubbles.push(newBubble);
 		}
@@ -211,18 +213,20 @@ class TabState {
 
 	addEditFromBubble(bubbleId) {
 		const suggestedBubble = this.systemBubbles.find((bubble) => bubble.id === bubbleId);
+
 		if (suggestedBubble === undefined) {
 			return [];
 		}
 		
 		const suggestedEdit = suggestedBubble.edit;
-		if (suggestedEdit === null
-			|| suggestedBubble.type !== this.domainStore.bubbleTypes.edit
+		if (suggestedBubble.type !== this.domainStore.bubbleTypes.edit
+			|| suggestedEdit === null
 		) {
 			return []
 		}
 		
 		const newEdit = suggestedEdit.getDeepCopy();
+		suggestedBubble.setAppliedEditId(newEdit.commonState.id);
 		newEdit.isSuggested = false;
 		let deleteIds = [];
 		let newEdits = [newEdit];
@@ -323,8 +327,8 @@ class TabState {
 			hasText: this.textCommand !== "",
 			hasSketch: this.sketchCommand.length > 0,
 			text: this.textCommand,
-			sketchRectangles: [...this.sketchCommand],
-			sketchFrameTimestamp: this.sketchCommand.length > 0 ? this.sketchFrameTimestamp : -1,
+			sketchRectangles: this.sketchPlayPosition >= 0 ? [...this.sketchCommand] : [],
+			sketchFrameTimestamp: this.sketchCommand.length > 0 ? this.sketchPlayPosition : -1,
 			editOperation: this.editOperationKey,
 		}
 	}
@@ -456,6 +460,8 @@ class TabState {
 						this.trackId,
 						0,
 						this.domainStore.bubbleTypes.systemMessage,
+						this.domainStore.processingModes.fromScratch,
+						"",
 					);
 					try {
 						const success = await newBubble.fetchFirebase(userId, taskIdx, bubbleId);
@@ -477,6 +483,8 @@ class TabState {
 						this.trackId,
 						0,
 						this.domainStore.bubbleTypes.userCommand,
+						this.domainStore.processingModes.fromScratch,
+						"",
 					);
 					try {
 						const success = await newBubble.fetchFirebase(userId, taskIdx, bubbleId);

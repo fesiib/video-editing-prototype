@@ -44,7 +44,7 @@ const ChatTemplate = observer(function ChatTemplate() {
     return (
         <div className="w-100">
 			{/* <ChatTabTemplate /> */}
-            <div className="flex flex-start overflow-auto text-xs">
+            <div className="flex flex-start overflow-auto text-xs my-2">
                 {tabs.map((tab, idx) => {
 					return (<div
 						key={`tab-${tab.idx}`}
@@ -57,7 +57,7 @@ const ChatTemplate = observer(function ChatTemplate() {
 						<span
 							className="truncate"
 						> 
-							{tab.idx + 1}: {tab.title}
+							{tab.idx}: {tab.title}
 						</span> 
 						<div className="h-full hover:bg-gray-300 flex items-center" onClick={action(() => deleteTab(idx))}>
 							<TbBucket />

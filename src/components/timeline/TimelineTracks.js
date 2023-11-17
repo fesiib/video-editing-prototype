@@ -204,7 +204,6 @@ const TimelineTracks = observer(function TimelineTracks() {
 		}
         for (let edit of edits) {
 			const id = edit.commonState.trackId;
-			console.log(toJS(edit));
             newTracks[id].scenes.push(edit);
 		}
         

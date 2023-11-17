@@ -13,6 +13,10 @@ class BubbleState {
 
 	edit = null;
 	parsingResult = [];
+	requestProcessingMode = "";
+	requestId = "";
+
+	appliedEditId = "";
 
 	toggle = false;
 	time = 0;
@@ -22,8 +26,9 @@ class BubbleState {
 
 	trackId = 0;
 
-	constructor(domainStore, tab, trackId, time, type) {
+	constructor(domainStore, tab, trackId, time, type, requestProcessingMode, requestId) {
 		makeAutoObservable(this, {}, { autoBind: true });
+		this.domainStore = domainStore;
 		this.parent = tab;
 		this.id = "bubble-" + randomUUID();
 
@@ -49,11 +54,21 @@ class BubbleState {
 		this.type = type;
 		this.content = "";
 		this.processed = (type !== domainStore.bubbleTypes.edit);
+		this.requestProcessingMode = requestProcessingMode;
+		this.requestId = requestId;
+
+		this.appliedEditId = "";
 	}
 
 	getDeepCopy() {
 		const newBubble = new BubbleState(
-			this.domainStore, this.parent, this.trackId, this.time, this.type
+			this.domainStore,
+			this.parent,
+			this.trackId,
+			this.time,
+			this.type,
+			this.requestProcessingMode,
+			this.requestId,
 		);
 		if (this.type === this.domainStore.bubbleTypes.edit) {
 			newBubble.edit = this.edit.getDeepCopy();
@@ -64,10 +79,38 @@ class BubbleState {
 		newBubble.toggle = this.toggle;
 		newBubble.content = this.content;
 		newBubble.processed = this.processed;
+		newBubble.parsingResult = {
+			text: this.parsingResult.text,
+			spatial: [ ...this.parsingResult.spatial ],
+			temporal: [ ...this.parsingResult.temporal ],
+			edit: [ ...this.parsingResult.edit ],
+			custom: [ ...this.parsingResult.custom ],
+		};
+		// NOTE: not sure if this is the right behavior
+		newBubble.appliedEditId = "";
+		return newBubble;
 	}
 
 	setToggle(toggle) {
+		let result = [];
+		if (this.toggle === toggle) {
+			return result;
+		}
+		if (this.type === this.domainStore.bubbleTypes.edit
+			&& this.edit !== null
+		) {
+			if (toggle && this.appliedEditId === "") {
+				// add edit & appliedEditId
+				result = this.parent.addEditFromBubble(this.id);
+			}
+			else if (!toggle && this.appliedEditId !== "") {
+				// remove edit appliedEditId
+				this.parent.deleteEdits([this.appliedEditId]);
+				this.appliedEditId = "";
+			}
+		}
 		this.toggle = toggle;
+		return result;
 	}
 
 	setContent(content) {
@@ -80,6 +123,18 @@ class BubbleState {
 		this.parsingResult.temporal = [...temporal];
 		this.parsingResult.edit = [...edit];
 		this.parsingResult.custom = [...custom];
+	}
+
+	setRequestProcessingMode(mode) {
+		this.requestProcessingMode = mode;
+	}
+
+	setRequestId(requestId) {
+		this.requestId = requestId;
+	}
+
+	setAppliedEditId(editId) {
+		this.appliedEditId = editId;
 	}
 
 	completedProcessing() {
@@ -121,6 +176,9 @@ class BubbleState {
 				this.content = data.content;
 				this.processed = data.processed;
 				this.trackId = data.trackId;
+				this.requestProcessingMode = data.requestProcessingMode;
+				this.requestId = data.requestId;
+				this.appliedEditId = data.appliedEditId;
 				
 				if (this.type === this.domainStore.bubbleTypes.edit) {
 					const newEdit = new EditState(
@@ -175,6 +233,9 @@ class BubbleState {
 					edit: [ ...bubbleState.parsingResult.edit ],
 					custom: [ ...bubbleState.parsingResult.custom ],
 				},
+				requestProcessingMode: bubbleState.requestProcessingMode,
+				requestId: bubbleState.requestId,
+				appliedEditId: bubbleState.appliedEditId,
 			};
 			return data;
 		},

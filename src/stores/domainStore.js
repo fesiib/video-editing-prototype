@@ -9,23 +9,36 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 import { requestSuggestions, requestSuggestionsSplit, requestSummary } from "../services/pipeline";
 
-import { sliceTextArray } from "../utilities/genericUtilities";
+import { randomUUID, sliceTextArray } from "../utilities/genericUtilities";
 import BubbleState from "./objects/bubbleState";
+import { playPositionToFormat } from "../utilities/timelineUtilities";
 
 class DomainStore {
+	SYSTEM_USER_COMMAND_MESSAGE(isAddMore) {
+		if (isAddMore) {
+			return `${this.curTab.textCommand}`;
+		}
+		return `${this.curTab.textCommand}`;
+	}
+
 	SYSTEM_ERROR_MESSAGE() {
 		return "Error occured! Please try again!";
 	}
 
 	SYSTEM_PARSER_MESSAGE() {
-		return "Parsing Results are: "
+		return "Parsing Results:"
 	}
 
 	SYSTEM_TEMPORAL_MESSAGE(start, finish) {
-		return `${this.curTab.editOperation.title} edit from ${start} to ${finish}`;
+		const startStr = playPositionToFormat(start);
+		const finishStr = playPositionToFormat(finish);
+		return `${this.curTab.editOperation.title} edit: ${startStr} - ${finishStr}`;
 	}
 
 	SYSTEM_SUMMARY_MESSAGE(numEdits) {
+		if (numEdits === 0) {
+			return "No edits suggested!";
+		}
 		return `Suggested ${numEdits} edits of type ${this.curTab.editOperation.title}!`;
 	}
 
@@ -33,6 +46,7 @@ class DomainStore {
 	domainDoc = "domain";
 
 	processingRequest = false;
+	lastRequestId = `request-${randomUUID()}`;
 
 	in_mainVideos = [];
 
@@ -259,6 +273,7 @@ class DomainStore {
 		];
 		this.curTabPos = 0;
 		this.processingRequest = false;
+		this.lastRequestId = `request-${randomUUID()}`;
     }
 
 	loadVideo(videoLink, videoId) {
@@ -396,6 +411,10 @@ class DomainStore {
 		this.rootStore.resetTempState();
 	}
 
+	cancelRequest() {
+		this.processingRequest = false;
+	}
+
 	processRequest(processingMode, segmentOfInterest) {
 		if (this.processingRequest) {
 			// TODO: stop previous
@@ -405,19 +424,22 @@ class DomainStore {
 		this.processingRequest = true;
 		
 		const isAddMore = processingMode === this.processingModes.addMore;
-		
 		if (!isAddMore) {
-
-			const userCommandBubble = this.curTab.addBubble(
-				new Date().getTime(),
-				this.bubbleTypes.userCommand
-			);
-			userCommandBubble.setContent(this.curTab.textCommand);
+			this.lastRequestId = `request-${randomUUID()}`;
 		}
+
+		const userCommandBubble = this.curTab.addBubble(
+			new Date().getTime(),
+			this.bubbleTypes.userCommand,
+			processingMode,
+			this.lastRequestId,
+		);
+		userCommandBubble.setContent(this.SYSTEM_USER_COMMAND_MESSAGE(isAddMore));
 
 		// request
 		// stage : parse -> temporal -> spatial -> edit
 		const requestData = {
+			requestId: "",
 			videoId: "",
 			projectMetadata: {},
 			edits: [],
@@ -430,6 +452,7 @@ class DomainStore {
 			editParameterOptions: toJS({ ...this.dropdownOptions }),
 			editOperations: Object.keys(toJS(this.editOperations)),
 		};
+		requestData.requestId = toJS(this.lastRequestId);
 		requestData.videoId = toJS(this.projectMetadata.title);
 		requestData.projectMetadata = toJS({
 			...this.projectMetadata,
@@ -472,13 +495,18 @@ class DomainStore {
 		requestSummary({
 			input: requestData.requestParameters.text,
 		}).then(action((responseData) => {
+			if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+				return;
+			}
 			this.setCurTab(requestedTabPos);
 			if (responseData === null || responseData.summary === undefined) {
 				console.log("no summary");
 				this.processingRequest = false;
 				const systemMessageBubble = this.curTab.addBubble(
 					new Date().getTime(),
-					this.bubbleTypes.systemMessage
+					this.bubbleTypes.systemMessage,
+					processingMode,
+					this.lastRequestId,
 				);
 				systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 				return;
@@ -491,13 +519,18 @@ class DomainStore {
 				stage: "parse",
 				...requestData,
 			}).then(action((responseData) => {
+				if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+					return;
+				}
 				this.setCurTab(requestedTabPos);
 				if (responseData === null || responseData.parsingResults === undefined) {
 					console.log("no parsing results");
 					this.processingRequest = false;
 					const systemMessageBubble = this.curTab.addBubble(
 						new Date().getTime(),
-						this.bubbleTypes.systemMessage
+						this.bubbleTypes.systemMessage,
+						processingMode,
+						this.lastRequestId,
 					);
 					systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 					return;
@@ -509,16 +542,18 @@ class DomainStore {
 				if (!isAddMore) {
 					const requestResultBubble = this.curTab.addBubble(
 						new Date().getTime(),
-						this.bubbleTypes.parsingResult
+						this.bubbleTypes.parsingResult,
+						processingMode,
+						this.lastRequestId,
 					);
 					requestResultBubble.setContent(this.SYSTEM_PARSER_MESSAGE());
 					requestResultBubble.setParsingResult(
 						//TODO: requestData.requestParameters.text,
 						"Whenever the person engages with the screen, draw a sparkling mark near his head",
-						relevantText["spatial"].map((item) => [item.offset, item.offset + item.reference.length]),
-						relevantText["temporal"].map((item) => [item.offset, item.offset + item.reference.length]),
-						relevantText["edit"].map((item) => [item.offset, item.offset + item.reference.length]),
-						Object.values(relevantText["parameters"]).flat().map((item) => [item.offset, item.offset + item.reference.length]),
+						relevantText.spatial.map((item) => [item.offset, item.offset + item.reference.length]),
+						relevantText.temporal.map((item) => [item.offset, item.offset + item.reference.length]),
+						relevantText.edit.map((item) => [item.offset, item.offset + item.reference.length]),
+						Object.values(relevantText.parameters).flat().map((item) => [item.offset, item.offset + item.reference.length]),
 					);
 					this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
 					if (suggestedEditOperationKeys.length > 0) {
@@ -527,6 +562,7 @@ class DomainStore {
 				}
 				// temporal
 				for (let temporal of parsingResults.temporal_references) {
+					console.log(toJS(requestData));
 					requestData.requestParameters.parsingResults = {
 						...parsingResults,
 						temporal_references: [temporal],
@@ -535,13 +571,18 @@ class DomainStore {
 						stage: "temporal",
 						...requestData,
 					}).then(action((responseData) => {
+						if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+							return;
+						}
 						this.setCurTab(requestedTabPos);
 						if (responseData === null || responseData.edits === undefined) {
 							console.log("no temporal edits");
 							this.processingRequest = false;
 							const systemMessageBubble = this.curTab.addBubble(
 								new Date().getTime(),
-								this.bubbleTypes.systemMessage
+								this.bubbleTypes.systemMessage,
+								processingMode,
+								this.lastRequestId,
 							);
 							systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 							return;
@@ -549,7 +590,12 @@ class DomainStore {
 						const edits = responseData.edits;
 						let editPromises = [];
 						for (let edit of edits){
-							const newEditBubble = this.curTab.addBubble(new Date().getTime(), this.bubbleTypes.edit);
+							const newEditBubble = this.curTab.addBubble(
+								new Date().getTime(),
+								this.bubbleTypes.edit,
+								processingMode,
+								this.lastRequestId,
+							);
 							newEditBubble.edit.commonState.setMetadata({
 								duration: this.projectMetadata.duration,
 								z: this.curTab.tabPos + 1,
@@ -557,8 +603,10 @@ class DomainStore {
 							newEditBubble.edit.suggestionSource = {
 								temporal: [temporal.reference],
 								spatial: relevantText.spatial,
-								custom: relevantText.parameters,
 								edit: relevantText.edit,
+								custom: Object.values(relevantText.parameters).flat().map(
+									(item) => [item.offset, item.offset + item.reference.length]
+								),
 							};
 							newEditBubble.edit.setResponseBody({
 								...edit,
@@ -569,6 +617,9 @@ class DomainStore {
 									...requestData,
 									edits: [toJS(newEditBubble.edit.requestBody)],
 								}).then(action((responseData) => {
+									if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+										return;
+									}
 									this.setCurTab(requestedTabPos);
 									if (responseData === null || responseData.edits === undefined) {
 										newEditBubble.edit.setContent(this.SYSTEM_ERROR_MESSAGE());
@@ -583,6 +634,9 @@ class DomainStore {
 										...requestData,
 										edits: [toJS(newEditBubble.edit.requestBody)],
 									}).then(action((responseData) => {
+										if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+											return;
+										}
 										this.setCurTab(requestedTabPos);
 										if (responseData === null || responseData.edits === undefined) {
 											newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
@@ -613,11 +667,16 @@ class DomainStore {
 							})));
 						}
 						Promise.all(editPromises).then(action(() => {
+							if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+								return;
+							}
 							this.setCurTab(requestedTabPos);
 							
 							const summaryMessageBubble = this.curTab.addBubble(
 								new Date().getTime(),
-								this.bubbleTypes.summaryMessage
+								this.bubbleTypes.summaryMessage,
+								processingMode,
+								this.lastRequestId,
 							);
 							summaryMessageBubble.setContent(this.SYSTEM_SUMMARY_MESSAGE(
 								editPromises.length,
@@ -626,42 +685,62 @@ class DomainStore {
 							this.processingRequest = false;
 						})).catch(action((error) => {
 							console.log("cannot retrieve the edit parameters: ", error);
+							if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+								return;
+							}
 							this.setCurTab(requestedTabPos);
 							this.processingRequest = false;
 							const systemMessageBubble = this.curTab.addBubble(
 								new Date().getTime(),
-								this.bubbleTypes.systemMessage
+								this.bubbleTypes.systemMessage,
+								processingMode,
+								this.lastRequestId,
 							);
 							systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 						}));
 					})).catch(action((error) => {
 						console.log("cannot retrieve the temporal results: ", error);
+						if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+							return;
+						}
 						this.setCurTab(requestedTabPos);
 						this.processingRequest = false;
 						const systemMessageBubble = this.curTab.addBubble(
 							new Date().getTime(),
-							this.bubbleTypes.systemMessage
+							this.bubbleTypes.systemMessage,
+							processingMode,
+							this.lastRequestId,
 						);
 						systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 					}));
 				}
 			})).catch(action((error) => {
 				console.log("cannot retrieve the parsing results: ", error);
+				if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+					return;
+				}
 				this.setCurTab(requestedTabPos);
 				this.processingRequest = false;
 				const systemMessageBubble = this.curTab.addBubble(
 					new Date().getTime(),
-					this.bubbleTypes.systemMessage
+					this.bubbleTypes.systemMessage,
+					processingMode,
+					this.lastRequestId,
 				);
 				systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 			}));
 		})).catch(action((error) => {
 			console.log("cannot retrieve the summary: ", error);
+			if (this.processingRequest === false || this.lastRequestId !== requestData.requestId) {
+				return;
+			}
 			this.setCurTab(requestedTabPos);
 			this.processingRequest = false;
 			const systemMessageBubble = this.curTab.addBubble(
 				new Date().getTime(),
-				this.bubbleTypes.systemMessage
+				this.bubbleTypes.systemMessage,
+				processingMode,
+				this.lastRequestId,
 			);
 			systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 		}));

@@ -205,8 +205,8 @@ input[type="radio"]:focus {
 .tab {
     padding: 8px 16px;
     cursor: pointer;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
     transition: background-color 0.3s;
 }
 
@@ -221,8 +221,8 @@ input[type="radio"]:focus {
 .add-tab {
     padding: 8px;
     cursor: pointer;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
     margin-left: 8px;
     transition: background-color 0.3s;
 }
