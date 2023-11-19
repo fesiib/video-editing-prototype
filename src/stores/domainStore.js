@@ -32,12 +32,18 @@ class DomainStore {
 	SYSTEM_TEMPORAL_MESSAGE(start, finish) {
 		const startStr = playPositionToFormat(start);
 		const finishStr = playPositionToFormat(finish);
-		return `${this.curTab.editOperation.title} edit: ${startStr} - ${finishStr}`;
+		if (this.curTab.editOperation === null) {
+			return `Edit: ${startStr} - ${finishStr}! Please select an edit type!`;
+		}
+		return `${this.curTab.editOperation.title} edit: ${startStr} - ${finishStr}!`;
 	}
 
 	SYSTEM_SUMMARY_MESSAGE(numEdits) {
 		if (numEdits === 0) {
 			return "No edits suggested!";
+		}
+		if (this.curTab.editOperation === null) {
+			return `Suggested ${numEdits} edits!`;
 		}
 		return `Suggested ${numEdits} edits of type ${this.curTab.editOperation.title}!`;
 	}

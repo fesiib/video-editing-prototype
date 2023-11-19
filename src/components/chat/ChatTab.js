@@ -9,6 +9,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import SnapshotImg from "../../snapshot_example.png";
 
 import CommandSpace from "../../views/CommandSpace";
+import ChatEditPreview from "./ChatEditPreview";
 
 import useRootContext from "../../hooks/useRootContext";
 import { action, toJS } from "mobx";
@@ -254,7 +255,8 @@ const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
 				}
 			</div>
 			{/* TODO: update image */}
-			<img src={SnapshotImg} alt="snapshot" width="280" />
+			<ChatEditPreview edit={bubble.edit} />
+			{/* <img src={SnapshotImg} alt="snapshot" width="280" /> */}
 		</div>
 	</div>);
 });
@@ -415,7 +417,7 @@ const ChatTab = observer(function ChatTab() {
 			<CommandSpace />
             <div 
 				className="relative overflow-auto mt-3 flex flex-col gap-3"
-				style={{ maxHeight: "720px" }}
+				style={{ maxHeight: uiStore.chatConst.maxHeight }}
 				id={"chat-tab"}
 				onScroll={onScroll}
 			>

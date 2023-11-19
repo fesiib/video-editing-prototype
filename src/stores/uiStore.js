@@ -14,6 +14,12 @@ class UIStore {
 
 	navigation = "timeline";
 
+	chatConst = {
+		maxHeight: (window.innerHeight / 3) * 2,
+		editPreviewWidth: 280,
+		editPreviewHeight: 200,
+	}
+
 	commandSpaceControls = {
 		requestingAmbiguousParts: false,
 		viewPortStart: 0,
