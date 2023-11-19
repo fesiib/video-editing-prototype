@@ -99,6 +99,7 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onProcessClick = action(() => {
+		uiStore.canvasControls.sketching = false;
 		domainStore.processRequest(
 			domainStore.processingModes.fromScratch,
 			{
@@ -215,7 +216,7 @@ const CommandSpace = observer(function CommandSpace() {
 									id="textCommand" 
 									maxLength={textCommandLimit}
 									type="text"
-									rows="4"
+									// rows="1"
 									placeholder="Ex) Whenever laptop is mentioned, put a white text with transparent background."
 									value={curTab.textCommand}
 									className="w-full resize-none relative z-10"

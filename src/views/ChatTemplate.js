@@ -5,8 +5,8 @@ import { action } from "mobx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import ChatTabTemplate from "./ChatTabTemplate";
-import ChatTab from "./ChatTab";
+import ChatTabTemplate from "../components/chat/ChatTabTemplate";
+import ChatTab from "../components/chat/ChatTab";
 
 import useRootContext from "../hooks/useRootContext";
 import { TbBucket } from "react-icons/tb";

@@ -5,7 +5,7 @@ import { faCamera, faCheck } from "@fortawesome/free-solid-svg-icons";
 import CheckIcon from "@mui/icons-material/Check";
 import ToggleButton from "@mui/material/ToggleButton";
 
-import SnapshotImg from "../snapshot_example.png";
+import SnapshotImg from "../../snapshot_example.png";
 
 const ChatBubbleTemplate = ({ description, screenshot, explanation, index }) => {
     const [isChecked, setChecked] = useState(false);

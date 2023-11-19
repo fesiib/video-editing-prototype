@@ -4,6 +4,50 @@ export function randomUUID() {
 	return uuidv4();
 }
 
+function sameText(text1, text2) {
+	if (text1 === text2) {
+		return true;
+	}
+	if (text1 === null || text2 === null) {
+		return false;
+	}
+	text1 = text1.trim().lowerCase();
+	text2 = text2.trim().lowerCase();
+	
+	if (text1.length !== text2.length) {
+		return false;
+	}
+
+	for (let idx = 0; idx < text1.length; idx++) {
+		if (text1[idx] !== text2[idx]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+export function findSubstr(text, offset, targetText) {
+	// if offset is correct
+	// return [offset, offset + targetText.length];
+
+	const targetTextLength = targetText.length;
+	const textLength = text.length;
+
+	const start = Math.min(textLength - targetTextLength + 1, Math.max(0, offset));
+
+	for (let idx = start; idx < textLength - targetTextLength + 1; idx++) {
+		if (text.slice(idx, idx + targetTextLength) === targetText) {
+			return [idx, idx + targetTextLength];
+		}
+	}
+	for (let idx = 0; idx < start; idx++) {
+		if (text.slice(idx, idx + targetTextLength) === targetText) {
+			return [idx, idx + targetTextLength];
+		}
+	}
+	return null;
+}
+
 export function flattenObject(object) {
 	const flattened = {};
 	if (object === null) {

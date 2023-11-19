@@ -9,7 +9,7 @@ import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 import { requestSuggestions, requestSuggestionsSplit, requestSummary } from "../services/pipeline";
 
-import { randomUUID, sliceTextArray } from "../utilities/genericUtilities";
+import { findSubstr, randomUUID, sliceTextArray } from "../utilities/genericUtilities";
 import BubbleState from "./objects/bubbleState";
 import { playPositionToFormat } from "../utilities/timelineUtilities";
 
@@ -539,6 +539,8 @@ class DomainStore {
 				const parsingResults = responseData.parsingResults;
 				const suggestedEditOperationKeys = responseData.editOperations;
 
+				console.log(relevantText);
+
 				if (!isAddMore) {
 					const requestResultBubble = this.curTab.addBubble(
 						new Date().getTime(),
@@ -548,12 +550,19 @@ class DomainStore {
 					);
 					requestResultBubble.setContent(this.SYSTEM_PARSER_MESSAGE());
 					requestResultBubble.setParsingResult(
-						//TODO: requestData.requestParameters.text,
-						"Whenever the person engages with the screen, draw a sparkling mark near his head",
-						relevantText.spatial.map((item) => [item.offset, item.offset + item.reference.length]),
-						relevantText.temporal.map((item) => [item.offset, item.offset + item.reference.length]),
-						relevantText.edit.map((item) => [item.offset, item.offset + item.reference.length]),
-						Object.values(relevantText.parameters).flat().map((item) => [item.offset, item.offset + item.reference.length]),
+						requestData.requestParameters.text,
+						relevantText.spatial.map((item) => findSubstr(
+							requestData.requestParameters.text, item.offset, item.reference
+							)).filter((item) => item !== null),
+						relevantText.temporal.map((item) => findSubstr(
+							requestData.requestParameters.text, item.offset, item.reference
+							)).filter((item) => item !== null),
+						relevantText.edit.map((item) => findSubstr(
+							requestData.requestParameters.text, item.offset, item.reference
+							)).filter((item) => item !== null),
+						Object.values(relevantText.parameters).flat().map((item) => findSubstr(
+							requestData.requestParameters.text, item.offset, item.reference
+							)).filter((item) => item !== null),
 					);
 					this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
 					if (suggestedEditOperationKeys.length > 0) {
@@ -561,11 +570,11 @@ class DomainStore {
 					}
 				}
 				// temporal
-				for (let temporal of parsingResults.temporal_references) {
-					console.log(toJS(requestData));
+				const temporal_references = parsingResults.temporal_references.length > 0 ? parsingResults.temporal_references : [null];
+				for (let temporal of temporal_references) {
 					requestData.requestParameters.parsingResults = {
 						...parsingResults,
-						temporal_references: [temporal],
+						temporal_references: temporal !== null ? [temporal] : [],
 					};
 					requestSuggestionsSplit({
 						stage: "temporal",
@@ -601,7 +610,7 @@ class DomainStore {
 								z: this.curTab.tabPos + 1,
 							});
 							newEditBubble.edit.suggestionSource = {
-								temporal: [temporal.reference],
+								temporal: temporal !== null ? [temporal.reference] : [],
 								spatial: relevantText.spatial,
 								edit: relevantText.edit,
 								custom: Object.values(relevantText.parameters).flat().map(

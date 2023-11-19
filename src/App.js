@@ -19,8 +19,6 @@ import History from "./views/History";
 import NewIntent from "./components/general/NewIntent";
 import NavigationToggle from "./components/general/NavigationToggle";
 
-import ChatTemplate from "./views/ChatTabTemplate";
-
 const App = observer(function App() {
     const { userStore, uiStore, domainStore } = useRootContext();
 

@@ -6,11 +6,11 @@ import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCar
 import CheckIcon from "@mui/icons-material/Check";
 import ToggleButton from "@mui/material/ToggleButton";
 
-import SnapshotImg from "../snapshot_example.png";
+import SnapshotImg from "../../snapshot_example.png";
 
-import CommandSpace from "./CommandSpace";
+import CommandSpace from "../../views/CommandSpace";
 
-import useRootContext from "../hooks/useRootContext";
+import useRootContext from "../../hooks/useRootContext";
 import { action, toJS } from "mobx";
 import { Divider } from "@mui/material";
 
@@ -318,6 +318,7 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 	});
 
 	const requestMore = action((event) => {
+		uiStore.canvasControls.sketching = false;
 		domainStore.processRequest(
 			domainStore.processingModes.addMore,
 			{
@@ -325,6 +326,7 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 				finish: domainStore.projectMetadata.duration,
 			}
 		);
+
 	});
 
 	const content = bubble.content;
