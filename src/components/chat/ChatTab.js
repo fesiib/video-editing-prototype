@@ -195,6 +195,7 @@ const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
 		minute: "numeric",
 	});
 	const toggle = bubble.toggle;
+	const edit = bubble.edit;
 
 	return (<div className="mb-3 w-fit">
 		<div className="text-xs text-left">
@@ -205,57 +206,62 @@ const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
 				toggle ? "border-2 border-indigo-300" : ""
 			}`}
 		>
-			<div className="flex flex-row items-center">
-				<button
-					className={`w-5 h-5 mr-2 rounded-full border border-black flex items-center justify-center focus:outline-none ${
-						toggle ? "bg-indigo-300 text-black" : ""
-					}`}
-					onClick={setToggle}
-				>
-					{toggle && <FontAwesomeIcon icon={faCheck} />}
-				</button>
-				<div className="font-semibold hover:cursor-pointer" onClick={setToggle}>
-					Edit #{editIdx + 1}
-				</div>
-			</div>
-			
 			<div className="">
 				{content}
 			</div>
-			<div className="text-s mb-1">
-				<button
-					onClick={onExplanationClick}
-				>
-					<FontAwesomeIcon
-						icon={isExplanationOpen ? faCaretDown : faCaretRight}
-						className="mx-1"
-					/>
-					<span className="italic"> Explanation </span>
-				</button>
-				{
-					isExplanationOpen ? (
-						<div>
-							{bubble.edit.explanation.map((explanation, idx) => {
-								const label = idx === 0 ? "Time Segment" : "Frame Position";
-								if (explanation === "") {
-									return null;
-								}
-								return (<div key={`explanation-${idx}`} className="text-s">
-									<span className="italic">
-										{label}:
-									</span>
-									{" "}
-									<span>
-										{explanation}
-									</span>
-								</div>);
-							})}
-						</div>
-					) : (null)
-				}
-			</div>
 			{/* TODO: update image */}
-			<ChatEditPreview edit={bubble.edit} />
+			{edit !== null ? (<>
+				<div className="flex flex-row items-center">
+					<button
+						className={`w-5 h-5 mr-2 rounded-full border border-black flex items-center justify-center focus:outline-none ${
+							toggle ? "bg-indigo-300 text-black" : ""
+						}`}
+						onClick={setToggle}
+					>
+						{toggle && <FontAwesomeIcon icon={faCheck} />}
+					</button>
+					<div className="font-semibold hover:cursor-pointer" onClick={setToggle}>
+						Edit #{editIdx + 1}
+					</div>
+				</div>
+				<div className="text-s mb-1">
+					<button
+						onClick={onExplanationClick}
+					>
+						<FontAwesomeIcon
+							icon={isExplanationOpen ? faCaretDown : faCaretRight}
+							className="mx-1"
+						/>
+						<span className="italic"> Explanation </span>
+					</button>
+					{
+						isExplanationOpen ? (
+							<div>
+								{edit.explanation.map((explanation, idx) => {
+									const label = idx === 0 ? "Time Segment" : "Frame Position";
+									if (explanation === "") {
+										return null;
+									}
+									return (<div key={`explanation-${idx}`} className="text-s">
+										<span className="italic">
+											{label}:
+										</span>
+										{" "}
+										<span>
+											{explanation}
+										</span>
+									</div>);
+								})}
+							</div>
+						) : (null)
+					}
+				</div>
+				<div
+					onClick={setToggle}
+				>
+					<ChatEditPreview edit={edit} />
+				</div>
+			</>) : (null)}
 			{/* <img src={SnapshotImg} alt="snapshot" width="280" /> */}
 		</div>
 	</div>);

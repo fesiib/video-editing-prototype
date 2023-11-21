@@ -91,6 +91,10 @@ class BubbleState {
 		return newBubble;
 	}
 
+	setTime(time) {
+		this.time = time;
+	}
+
 	setToggle(toggle) {
 		let result = [];
 		if (this.toggle === toggle) {
@@ -135,6 +139,10 @@ class BubbleState {
 
 	setAppliedEditId(editId) {
 		this.appliedEditId = editId;
+	}
+
+	setEdit(edit) {
+		this.edit = edit;
 	}
 
 	completedProcessing() {

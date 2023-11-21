@@ -665,18 +665,25 @@ class DomainStore {
 										newEditBubble.edit.setResponseBody({
 											...editWithEdit,
 										});
+										newEditBubble.setTime(new Date().getTime());
 										newEditBubble.completedProcessing();
 										resolve("Successful");
 									})).catch(action((error) => {
 										console.log("cannot retrieve the edit parameters: ", error);
 										this.setCurTab(requestedTabPos);
 										newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+										newEditBubble.setEdit(null);
+										newEditBubble.setTime(new Date().getTime());
+										newEditBubble.completedProcessing();
 										reject(error);
 									}));
 								})).catch(action((error) => {
 									console.log("cannot retrieve the spatial results: ", error);
 									this.setCurTab(requestedTabPos);
 									newEditBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
+									newEditBubble.setEdit(null);
+									newEditBubble.setTime(new Date().getTime());
+									newEditBubble.completedProcessing();
 									reject(error);
 								}));
 							})));
