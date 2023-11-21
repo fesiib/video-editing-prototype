@@ -14,6 +14,10 @@ class UIStore {
 
 	navigation = "timeline";
 
+	annotationControls = {
+		step: 0,
+	}
+
 	chatConst = {
 		maxHeight: (window.innerHeight / 3) * 2,
 		editPreviewWidth: 280,
