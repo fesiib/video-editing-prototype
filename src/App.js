@@ -47,22 +47,6 @@ const ChatApp = observer(function ChatApp() {
         [window.innerWidth, window.innerHeight]
     );
 
-    // useEffect(
-    //     action(() => {
-    // 		domainStore.in_mainVideos = [
-    // 			new VideoState(
-    // 				domainStore,
-    // 				domainStore.in_mainVideos,
-    // 				DUMMY_VIDEO_LINKS[0],
-    // 				0,
-    // 				true,
-    // 			),
-    // 		];
-    // 		domainStore.projectMetadata.trackCnt = 1;
-    //     }),
-    //     [JSON.stringify(DUMMY_VIDEO_LINKS)]
-    // );
-
     return (
         <div className="h-screen">
             {userStore.loading ? (
@@ -121,54 +105,9 @@ const ChatApp = observer(function ChatApp() {
                             >
                                 Tutorial T
                             </button>
-                            {/* <button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTutorial(1)}
-							>
-								Tutorial B
-							</button> */}
-                            <button
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                onClick={() => chooseTask(0)}
-                            >
-                                Task
-                            </button>
-                            {/* <button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTask(1)}
-							>
-								Task 2
-							</button> */}
-                            {/* <button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTask(2)}
-							>
-								Task 3
-							</button>
-							<button
-								className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								onClick={() => chooseTask(3)}
-							>
-								Task 4
-							</button> */}
                         </div>
                     )}
-                    {/* <div className="flex flex-row gap-1 divide-x divide-solid flex-wrap">
-					{
-						Array(...DISPLAY_STR).map((char, idx) => {
-							return (
-								<div key={idx} className="m-1 flex flex-col">
-									<span>
-										{idx}
-									</span>
-									<span>
-										{char}
-									</span>	
-								</div>
-							);
-						})
-					}
-				</div>  */}
+
                 </div>
             )}
         </div>

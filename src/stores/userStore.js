@@ -1,7 +1,7 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { firestore } from "../services/firebase";
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
-import { getTaskAssignments } from "../data/taskAssignments";
+import { getAnnotationTasks, getTaskAssignments } from "../data/taskAssignments";
 
 class UserStore {
 	userId = null;
@@ -35,6 +35,7 @@ class UserStore {
 	}
 
 	taskAssignments = getTaskAssignments(16);
+	annotationTasks = getAnnotationTasks();
     
 	constructor(rootStore) {
         makeAutoObservable(this);
@@ -413,6 +414,13 @@ class UserStore {
 		}
 		const baselineId = this.taskAssignments[this.participantId][this.curSessionIdx].baseline;
 		return baselineId !== this.videoId;
+	}
+
+	get annotationTask() {
+		if (this.isTutorial === true) {
+			return this.annotationTasks[2];
+		}
+		return this.annotationTasks[this.curSessionIdx - 1];
 	}
 }
 

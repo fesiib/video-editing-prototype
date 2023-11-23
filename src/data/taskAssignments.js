@@ -1,3 +1,4 @@
+import json_object from "./annotations.json";
 
 export function getTaskAssignments(N = 16) {
 	let taskAssignments = {};
@@ -88,4 +89,25 @@ export function getTaskAssignments(N = 16) {
 		);
 	}
 	return taskAssignments;
+}
+
+export function getAnnotationTasks() {
+	// read json
+	const annotationTasks = {};
+	for (let annotation of json_object) {
+		const taskId = annotation.task_id;
+		const participantId = annotation.participant_id;
+		const intentId = annotation.intent_id;
+		const description = annotation.description;
+
+		if (!(taskId in annotationTasks)) {
+			annotationTasks[taskId] = [];
+		}
+		annotationTasks[taskId].push({
+			participantId,
+			intentId,
+			description,
+		});
+	} 
+	return annotationTasks;
 }

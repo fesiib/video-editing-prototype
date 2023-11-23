@@ -18,6 +18,11 @@ class UIStore {
 		step: 0,
 	}
 
+	annotationConst = {
+		imageWidth: 400,
+		imageHeight: 300,
+	}
+
 	chatConst = {
 		maxHeight: (window.innerHeight / 3) * 2,
 		editPreviewWidth: 280,
