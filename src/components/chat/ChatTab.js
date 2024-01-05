@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faRightFromBracket, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
 import CheckIcon from "@mui/icons-material/Check";
 import ToggleButton from "@mui/material/ToggleButton";
 
@@ -12,7 +12,7 @@ import CommandSpace from "../../views/CommandSpace";
 import ChatEditPreview from "./ChatEditPreview";
 
 import useRootContext from "../../hooks/useRootContext";
-import { action, toJS } from "mobx";
+import { action, reaction, toJS } from "mobx";
 import { Divider } from "@mui/material";
 
 const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
@@ -166,7 +166,7 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	</div>);
 });
 
-const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
+const EditBubble = observer(function EditBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 	
 	const [isExplanationOpen, setIsExplanationOpen] = useState(false);
@@ -196,6 +196,7 @@ const EditBubble = observer(function EditBubble({ bubble, editIdx }) {
 	});
 	const toggle = bubble.toggle;
 	const edit = bubble.edit;
+	const editIdx = bubble.timeOrderedIdx;
 
 	return (<div className="mb-3 w-fit">
 		<div className="text-xs text-left">
@@ -285,21 +286,15 @@ const SystemMessageBubble = observer(function SystemMessageBubble({ bubble }) {
 	</div>);
 });
 
-const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) {
+const SummaryMessageBubble = observer(function SummaryMessageBubble({ 
+	bubble, relevantEditBubbles, isLastSummaryForRequest }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 
 	const curTab = domainStore.curTab;
-	const bubbles = curTab.timeOrderedBubbles;
 
 	const setToggle = action((event) => {
 		let addedEdits = [];
-		for (let otherBubble of bubbles) {
-			if (otherBubble.id === bubble.id) {
-				continue;
-			}
-			if (otherBubble.requestId !== bubble.requestId) {
-				continue;
-			}
+		for (let otherBubble of relevantEditBubbles) {
 			if (otherBubble.type === domainStore.bubbleTypes.edit
 				&& otherBubble.processed === true
 				&& otherBubble.toggle === bubble.toggle
@@ -307,18 +302,24 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 				const edits = otherBubble.setToggle(!otherBubble.toggle);
 				addedEdits = addedEdits.concat(edits);
 			}
-			if (otherBubble.type === domainStore.bubbleTypes.summaryMessage
-				&& otherBubble.processed === true
-				&& otherBubble.toggle === bubble.toggle
-			) {
-				otherBubble.setToggle(!otherBubble.toggle);
-			}
 		}
 		bubble.setToggle(!bubble.toggle);
 		if (addedEdits.length > 0) {
 			uiStore.selectTimelineObjects(addedEdits);
 			let minStart = addedEdits[0].commonState.start;
 			for (let edit of addedEdits) {
+				minStart = Math.min(minStart, edit.commonState.offset);
+			}
+			uiStore.timelineControls.playPosition = minStart;
+		}
+	});
+
+	const setEditToggle = action((event, curEditBubble) => {
+		const edits = curEditBubble.setToggle(!curEditBubble.toggle);
+		if (edits.length > 0) {
+			uiStore.selectTimelineObjects(edits);
+			let minStart = edits[0].commonState.start;
+			for (let edit of edits) {
 				minStart = Math.min(minStart, edit.commonState.offset);
 			}
 			uiStore.timelineControls.playPosition = minStart;
@@ -334,7 +335,11 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 				finish: domainStore.projectMetadata.duration,
 			}
 		);
+	});
 
+	const moveToNewTab = action((event) => {
+		//TODO: move to new Tab: make sure to ask for confirmation
+		return null;
 	});
 
 	const content = bubble.content;
@@ -350,10 +355,17 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 			{time}
 		</div>
 		<div className="bg-slate-200 w-auto p-2 mr-10 mt-1 rounded-md">
-			<div className="font-semibold">
+			<div className="font-semibold flex flex-row justify-between">
 				Summary of Edits
+				<button
+					className={"w-fit h-fit bg-green-200 text-black p-1 rounded hover:bg-green-300"}
+					onClick={moveToNewTab}
+				>
+					<FontAwesomeIcon icon={faRightFromBracket} className="mr-1" />
+				</button>
 			</div>
 			{content}
+
 			<div className="mb-3 flex flex-row items-center">
 				({"  "}
 				<button
@@ -367,13 +379,47 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({ bubble }) 
 				{!toggle ? "Select All" : "Deselect All"})
 			</div>
 			<div>
-				<button
-					className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"}
-					onClick={requestMore}
-				>
-					<FontAwesomeIcon icon={faPlus} className="mr-1" />
-					Get More Edits
-				</button>
+				{relevantEditBubbles.map((editBubble) => {
+					if (editBubble.type !== domainStore.bubbleTypes.edit) {
+						return null;
+					}
+					if (editBubble.processed === false) {
+						return null;
+					}
+					// small button with the id of the edit
+					const edit = editBubble.edit;
+					const editIdx = editBubble.timeOrderedIdx;
+					const editToggle = editBubble.toggle;
+					return (<div
+						key={`edit-${editIdx}`}
+						className="flex flex-row items-center mb-1"
+					>
+						<button
+							className={`w-4 h-4 mr-1 border border-black flex items-center justify-center focus:outline-none ${
+								editToggle ? "bg-indigo-300 text-black" : ""
+							}`}
+							onClick={(event) => setEditToggle(event, editBubble)}
+						>
+							{editToggle && <FontAwesomeIcon icon={faCheck} />}
+						</button>
+						<div className="text-s">
+							Edit #{editIdx + 1}
+						</div>
+					</div>);
+				})}
+			</div>
+			<div className="flex flex-col gap-2">
+			{
+				isLastSummaryForRequest ? (
+					<button
+						className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"}
+						onClick={requestMore}
+					>
+						<FontAwesomeIcon icon={faPlus} className="mr-1" />
+						Get More Edits
+					</button>
+				) : (null)
+			}
 			</div>
 		</div>
 	</div>);
@@ -406,17 +452,33 @@ const ChatTab = observer(function ChatTab() {
 		domainStore.cancelRequest();
 	});
 
-	useEffect(() => {
+	useEffect(action(() => {
 		const chatTab = document.getElementById("chat-tab");
 		// when chatTab is at the top, scroll to the top
 		if (chatTab && chatTab.scrollHeight > chatTab.clientHeight) {
 			chatTab.scrollTop = 0;
 			setShowScrollUp(false);
 		}
-	}, [
+		
+		// set TimeOrderIdxs
+		let firstEditBubble = null;
+		let editBubbleIdx = -1;
+		for (let i = timeOrderedBubbles.length - 1; i >= 0; i--) {
+			const bubble = timeOrderedBubbles[i];
+			if (bubble.type === domainStore.bubbleTypes.edit) {
+				if (firstEditBubble === null || firstEditBubble.requestId !== bubble.requestId) {
+					firstEditBubble = bubble;
+					editBubbleIdx = -1;
+				}
+				editBubbleIdx += 1;
+				console.log("editBubbleIdx", editBubbleIdx);
+				bubble.setTimeOrderedIdx(editBubbleIdx);
+			}
+		}
+	}), [
 		timeOrderedBubbles.length,
 		curTab.id,
-	])
+	]);
 
     return (
         <div>
@@ -474,24 +536,43 @@ const ChatTab = observer(function ChatTab() {
 							return <ParsingResultBubble bubble={bubble} />;
 						}
 						if (bubble.type === domainStore.bubbleTypes.edit) {
-							let editIdx = 0;
-							for (let i = idx + 1; i < timeOrderedBubbles.length; i++) {
-								if (timeOrderedBubbles[i].requestId !== bubble.requestId) {
-									break;
-								}
-								if (timeOrderedBubbles[i].type === domainStore.bubbleTypes.edit
-									&& timeOrderedBubbles[i].processed === true
-								) {
-									editIdx += 1;
-								}
-							}
-							return <EditBubble bubble={bubble} editIdx={editIdx} />;
+							// let editIdx = 0;
+							// for (let i = idx + 1; i < timeOrderedBubbles.length; i++) {
+							// 	if (timeOrderedBubbles[i].requestId !== bubble.requestId) {
+							// 		break;
+							// 	}
+							// 	if (timeOrderedBubbles[i].type === domainStore.bubbleTypes.edit
+							// 		&& timeOrderedBubbles[i].processed === true
+							// 	) {
+							// 		editIdx += 1;
+							// 	}
+							// }
+							return <EditBubble bubble={bubble} />;
 						}
 						if (bubble.type === domainStore.bubbleTypes.systemMessage) {
 							return <SystemMessageBubble bubble={bubble} />;
 						}
 						if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
-							return <SummaryMessageBubble bubble={bubble} />;
+							const relevantEditBubbles = [];
+							const isLastSummaryForRequest = (
+								idx === 0 || timeOrderedBubbles[idx - 1].requestId !== bubble.requestId
+							);
+							for (let i = idx + 1; i < timeOrderedBubbles.length; i++) {
+								if (timeOrderedBubbles[i].requestId !== bubble.requestId) {
+									break;
+								}
+								if (timeOrderedBubbles[i].type !== domainStore.bubbleTypes.edit) {
+									break;
+								}
+								if (timeOrderedBubbles[i].processed === true) {
+									relevantEditBubbles.push(timeOrderedBubbles[i]);
+								}
+							}
+							return <SummaryMessageBubble 
+								bubble={bubble} 
+								relevantEditBubbles={relevantEditBubbles}
+								isLastSummaryForRequest={isLastSummaryForRequest}
+							/>;
 						}
 						console.log("no bubble type", bubble.type);
 						return null;

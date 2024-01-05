@@ -109,6 +109,10 @@ const CropConfig = observer(function CropConfig({ crop }) {
 					cropHeight: crop.customParameters.cropHeight * originalY / scaleY,
 				};
 			}
+			console.log(crop.customParameters.width, crop.customParameters.height,
+				cropMetadata.width, cropMetadata.height,
+				);
+
 			video.commonState.setMetadata({
 				updateAuthorCrop: crop.commonState.id,
 				cropped: true,

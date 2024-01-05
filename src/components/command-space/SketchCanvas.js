@@ -28,6 +28,7 @@ const SketchCanvas = observer(function SketchCanvas(
 	const sketching = uiStore.canvasControls.sketching;
 	const minWidth = uiStore.canvasConst.minWidth;
 	const minHeight = uiStore.canvasConst.minHeight;
+	const maxHeight = uiStore.canvasConst.maxHeight;
 
 	const sketchRef = useRef(null);
 	const stageRef = useRef(null);
@@ -41,8 +42,8 @@ const SketchCanvas = observer(function SketchCanvas(
 
 	const curVideo = domainStore.curVideo;
 
-	const videoWidth = curVideo?.commonState?.width ? curVideo?.commonState?.width : minWidth;
-	const videoHeight = curVideo?.commonState?.height ? curVideo?.commonState?.height : minHeight;
+	const projectWidth = domainStore.projectMetadata.width;
+	const projectHeight = domainStore.projectMetadata.height;
 	const videoSource = curVideo?.source ? curVideo?.source : "";
 	const videoId = curVideo?.commonState?.id ? curVideo?.commonState?.id : "";
 
@@ -180,10 +181,10 @@ const SketchCanvas = observer(function SketchCanvas(
 			newRect.width = Math.min(stageWidth - newRect.x, newRect.width);
 			newRect.height = Math.min(stageHeight - newRect.y, newRect.height);
 
-			newRect.x = newRect.x / stageWidth * videoWidth;
-			newRect.y = newRect.y / stageHeight * videoHeight;
-			newRect.width = newRect.width / stageWidth * videoWidth;
-			newRect.height = newRect.height / stageHeight * videoHeight;						
+			newRect.x = newRect.x / stageWidth * projectWidth;
+			newRect.y = newRect.y / stageHeight * projectHeight;
+			newRect.width = newRect.width / stageWidth * projectWidth;
+			newRect.height = newRect.height / stageHeight * projectHeight;						
 			if (newRect.width < minWidth || newRect.height < minHeight) {
 				setCurRect(null);
 				return;
@@ -217,13 +218,25 @@ const SketchCanvas = observer(function SketchCanvas(
 		if (curVideo === null || div === null) {
 			return;
 		}
-		let newStageWidth = div.clientWidth - 20;
+		// let newStageWidth = div.clientWidth - 20;
+		// if (!sketching) {
+		// 	newStageWidth = newStageWidth / 6;
+		// }
+		// setStageWidth(newStageWidth);
+		// setStageHeight(newStageWidth / videoWidth * videoHeight);
+		let newStageHeight = maxHeight;
+		let newStageWidth = newStageHeight / projectHeight * projectWidth;
+		if (newStageWidth > div.clientWidth - 20) {
+			newStageWidth = div.clientWidth - 20;
+			newStageHeight = newStageWidth / projectWidth * projectHeight;
+		}
 		if (!sketching) {
-			newStageWidth = newStageWidth / 6;
+			newStageHeight = newStageHeight / 6;
+			newStageWidth = newStageHeight / projectHeight * projectWidth;
 		}
 		setStageWidth(newStageWidth);
-		setStageHeight(newStageWidth / videoWidth * videoHeight);
-	}, [sketching, videoWidth, videoHeight]);
+		setStageHeight(newStageHeight);
+	}, [sketching, projectWidth, projectHeight]);
 
 	useEffect(() => {
 		const disposer = reaction(() => uiStore.timelineControls.playPosition, (playPosition) => {
@@ -380,10 +393,10 @@ const SketchCanvas = observer(function SketchCanvas(
 					>
 						{curTab.sketchCommand.map((rect, i) => {
 							const adaptedRect = {
-								x: rect.x / videoWidth * stageWidth,
-								y: rect.y / videoHeight * stageHeight,
-								width: rect.width / videoWidth * stageWidth,
-								height: rect.height / videoHeight * stageHeight,
+								x: rect.x / projectWidth * stageWidth,
+								y: rect.y / projectHeight * stageHeight,
+								width: rect.width / projectWidth * stageWidth,
+								height: rect.height / projectHeight * stageHeight,
 								stroke: rect.stroke,
 								strokeWidth: rect.strokeWidth,
 								lineCap: rect.lineCap,

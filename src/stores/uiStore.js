@@ -45,6 +45,7 @@ class UIStore {
         margin: 2,
 		minWidth: 10,
 		minHeight: 10,
+		maxHeight: window.innerHeight / 4,
     };
 
     timelineSize = {
@@ -83,7 +84,7 @@ class UIStore {
         positionIndicatorId: "position_indicator",
         positionIndicatorLabelId: "position_indicator_label",
         minTimelineItemWidthPx: 120,
-		minTimelineItemDuration: 0.5,
+		minTimelineItemDuration: 0.1, //seconds
         timelineLabelsId: "timeline_labels",
     };
 

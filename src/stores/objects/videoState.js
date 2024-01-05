@@ -212,6 +212,15 @@ class VideoState {
 			this.commonState.end > playPosition);
 	}
 
+	frameLink(timestamp) {
+		const requestCfg = REQUEST_TYPES.displayVideo;
+		const videoFile = this.source.split("/").slice(-1)[0];
+		const timestamp_str = timestamp.toString();
+
+		const url = requestCfg.serverAddr + requestCfg.route + "/" + videoFile + "/" + timestamp_str;
+		return url;
+	}
+
 	get title() {
 		return "Video";
 	}

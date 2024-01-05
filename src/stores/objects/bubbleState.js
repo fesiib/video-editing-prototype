@@ -20,6 +20,7 @@ class BubbleState {
 
 	toggle = false;
 	time = 0;
+	timeOrderedIdx = -1;
 	type = ""; // userCommand, parsingResult, edit, systemMessage, summaryMessage
 	content = "";
 	processed = false;
@@ -51,6 +52,7 @@ class BubbleState {
 
 		this.toggle = false;
 		this.time = time;
+		this.timeOrderedIdx = -1;
 		this.type = type;
 		this.content = "";
 		this.processed = (type !== domainStore.bubbleTypes.edit);
@@ -93,6 +95,10 @@ class BubbleState {
 
 	setTime(time) {
 		this.time = time;
+	}
+	
+	setTimeOrderedIdx(idx) {
+		this.timeOrderedIdx = idx;
 	}
 
 	setToggle(toggle) {
@@ -180,6 +186,7 @@ class BubbleState {
 				this.id = data.id;
 				this.toggle = data.toggle;
 				this.time = data.time;
+				this.timeOrderedIdx = data.timeOrderedIdx;
 				this.type = data.type;
 				this.content = data.content;
 				this.processed = data.processed;
@@ -229,6 +236,7 @@ class BubbleState {
 				id: bubbleState.id,
 				toggle: bubbleState.toggle,
 				time: bubbleState.time,
+				timeOrderedIdx: bubbleState.timeOrderedIdx,
 				type: bubbleState.type,
 				content: bubbleState.content,
 				processed: bubbleState.processed,
