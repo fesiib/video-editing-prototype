@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -53,6 +53,7 @@ const UserCommandBubble = observer(function UserCommandBubble({ bubble }) {
 const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 	
+	const parsingResultsRef = useRef(null);
 	const [isExplanationOpen, setIsExplanationOpen] = useState(false);
 
 	const onExplanationClick = action((event) => {
@@ -79,6 +80,53 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	}
 	parsingResultStarts.sort((a, b) => a - b);
 
+	const onBreakdownMouseEvent = action((event, range, rgb) => {
+		console.log(event)
+		const isEntering = event.type === "mouseenter";
+		const parsingResultSpans = parsingResultsRef.current.getElementsByTagName("span");
+		for (const span of parsingResultSpans) {
+			const start = parseInt(span.getAttribute("data-start"));
+			const end = parseInt(span.getAttribute("data-end"));
+			const defaultColor = span.getAttribute("data-default-color");
+			const highlightColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`;
+			if (range[0] <= start && end <= range[1]) {
+				if (isEntering) {
+					event.target.style.backgroundColor = highlightColor;
+					event.target.style.borderTop = "1px solid black";
+					event.target.style.borderBottom = "1px solid black";
+
+					span.style.backgroundColor = highlightColor;
+					span.style.borderTop = "1px solid black";
+					span.style.borderBottom = "1px solid black";
+				}
+				else {
+					event.target.style.backgroundColor = defaultColor;
+					event.target.style.borderTop = "none";
+					event.target.style.borderBottom = "none";
+
+					span.style.backgroundColor = defaultColor;
+					span.style.borderTop = "none";
+					span.style.borderBottom = "none";
+				}
+			}
+		}
+	});
+
+	const breakdownSpan = action((range, rgb) => {
+		const text = bubble.parsingResult.text.slice(range[0], range[1]);
+		console.log(text)
+		return (<span 
+			key={`temporal-${range[0]}-${range[1]}`}
+			style = {{
+				backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
+			}}
+			onMouseEnter={action((event) => onBreakdownMouseEvent(event, range, rgb))}
+			onMouseLeave={action((event) => onBreakdownMouseEvent(event, range, rgb))}
+		>
+			{text}
+		</span>);
+	});
+
 
 	return (<div className="mb-3 w-fit">
 		<div className="text-xs text-left">
@@ -88,7 +136,7 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 			<div className="font-semibold">
 				{content}
 			</div>
-			<div>
+			<div ref={parsingResultsRef}>
 				{
 					parsingResultStarts.map((start, idx) => {
 						const end = (idx + 1 === parsingResultStarts.length ? 
@@ -100,24 +148,35 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 						let rgb = [0, 0, 0];
 						for (let range of bubble.parsingResult.temporal) {
 							if (range[0] <= start && end <= range[1]) {
-								backgroundTransparency = 0.3;
+								backgroundTransparency = 0.2;
 								rgb[0] = 255;
 							}
 						}
 						for (let range of bubble.parsingResult.spatial) {
 							if (range[0] <= start && end <= range[1]) {
-								backgroundTransparency = 0.3;
+								backgroundTransparency = 0.2;
 								rgb[1] = 255;
 							}
 						}
 						for (let range of bubble.parsingResult.edit) {
 							if (range[0] <= start && end <= range[1]) {
-								backgroundTransparency = 0.3;
+								backgroundTransparency = 0.2;
+								rgb[2] = 255;
+							}
+						}
+						for (let range of bubble.parsingResult.custom) {
+							if (range[0] <= start && end <= range[1]) {
+								backgroundTransparency = 0.2;
+								rgb[0] = 255;
+								rgb[1] = 255;
 								rgb[2] = 255;
 							}
 						}
 						return (<span
 							key={`parsing-result-${start}-${end}`}
+							data-start={start}
+							data-end={end}
+							data-default-color={`rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${backgroundTransparency})`}
 							style={{
 								backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${backgroundTransparency})`,
 							}}
@@ -141,18 +200,25 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 				{
 					isExplanationOpen ? (
 						<div>
-							<div> Temporal: {bubble.parsingResult.temporal.map(
-								(range) => range.join("-")
-							).join("; ")} </div>
-							<div> Spatial: {bubble.parsingResult.spatial.map(
-								(range) => range.join("-")
-							).join("; ")} </div>
-							<div> Edit: {bubble.parsingResult.edit.map(
-								(range) => range.join("-")
-							).join("; ")} </div>
-							<div> Parameters: {bubble.parsingResult.custom.map(
-								(range) => range.join("-")
-							).join("; ")} </div>
+							<div> <span className="text-s italic"> Temporal: </span> 
+							{bubble.parsingResult.temporal.map(
+								(range) => breakdownSpan(range, [255, 0, 0])
+							)} </div>
+
+							<div> <span className="text-s italic"> Spatial: </span> 
+							{bubble.parsingResult.spatial.map(
+								(range) => breakdownSpan(range, [0, 255, 0])
+							)} </div>
+							
+							<div> <span className="text-s italic"> Edit: </span> 
+							{bubble.parsingResult.edit.map(
+								(range) => breakdownSpan(range, [0, 0, 255])
+							)} </div>
+
+							<div> <span className="text-s italic"> Parameters: </span>
+							{bubble.parsingResult.custom.map(
+								(range) => breakdownSpan(range, [255, 255, 255])
+							)} </div>
 						</div>
 					) : (null)
 				}
@@ -160,7 +226,6 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 			<div
 				className="text-xs text-left"
 			>
-				
 			</div>
 		</div>
 	</div>);
