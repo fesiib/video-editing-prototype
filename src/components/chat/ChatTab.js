@@ -3,10 +3,6 @@ import { observer } from "mobx-react-lite";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faRightFromBracket, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
-import CheckIcon from "@mui/icons-material/Check";
-import ToggleButton from "@mui/material/ToggleButton";
-
-import SnapshotImg from "../../snapshot_example.png";
 
 import CommandSpace from "../../views/CommandSpace";
 import ChatEditPreview from "./ChatEditPreview";
@@ -75,13 +71,15 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 			...bubble.parsingResult.custom,
 		]
 	) {
-		parsingResultStarts.push(range[0]);
-		parsingResultStarts.push(range[1]);
+		if (range === null) {
+			continue;
+		}
+		parsingResultStarts.push(range.start);
+		parsingResultStarts.push(range.end);
 	}
 	parsingResultStarts.sort((a, b) => a - b);
 
 	const onBreakdownMouseEvent = action((event, range, rgb) => {
-		console.log(event)
 		const isEntering = event.type === "mouseenter";
 		const parsingResultSpans = parsingResultsRef.current.getElementsByTagName("span");
 		for (const span of parsingResultSpans) {
@@ -89,7 +87,7 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 			const end = parseInt(span.getAttribute("data-end"));
 			const defaultColor = span.getAttribute("data-default-color");
 			const highlightColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.5)`;
-			if (range[0] <= start && end <= range[1]) {
+			if (range.start <= start && end <= range.end) {
 				if (isEntering) {
 					event.target.style.backgroundColor = highlightColor;
 					event.target.style.borderTop = "1px solid black";
@@ -113,12 +111,12 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 	});
 
 	const breakdownSpan = action((range, rgb) => {
-		const text = bubble.parsingResult.text.slice(range[0], range[1]);
-		console.log(text)
+		const text = bubble.parsingResult.text.slice(range.start, range.end);
 		return (<span 
-			key={`temporal-${range[0]}-${range[1]}`}
+			key={`temporal-${range.start}-${range.end}`}
 			style = {{
 				backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
+				marginRight: "1em",
 			}}
 			onMouseEnter={action((event) => onBreakdownMouseEvent(event, range, rgb))}
 			onMouseLeave={action((event) => onBreakdownMouseEvent(event, range, rgb))}
@@ -147,25 +145,25 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 						let backgroundTransparency = 0;
 						let rgb = [0, 0, 0];
 						for (let range of bubble.parsingResult.temporal) {
-							if (range[0] <= start && end <= range[1]) {
+							if (range.start <= start && end <= range.end) {
 								backgroundTransparency = 0.2;
 								rgb[0] = 255;
 							}
 						}
 						for (let range of bubble.parsingResult.spatial) {
-							if (range[0] <= start && end <= range[1]) {
+							if (range.start <= start && end <= range.end) {
 								backgroundTransparency = 0.2;
 								rgb[1] = 255;
 							}
 						}
 						for (let range of bubble.parsingResult.edit) {
-							if (range[0] <= start && end <= range[1]) {
+							if (range.start <= start && end <= range.end) {
 								backgroundTransparency = 0.2;
 								rgb[2] = 255;
 							}
 						}
 						for (let range of bubble.parsingResult.custom) {
-							if (range[0] <= start && end <= range[1]) {
+							if (range.start <= start && end <= range.end) {
 								backgroundTransparency = 0.2;
 								rgb[0] = 255;
 								rgb[1] = 255;
@@ -261,7 +259,7 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 	});
 	const toggle = bubble.toggle;
 	const edit = bubble.edit;
-	const editIdx = bubble.timeOrderedIdx;
+	const editIdx = bubble.timeOrderedIdxGlobal;
 
 	return (<div className="mb-3 w-fit">
 		<div className="text-xs text-left">
@@ -354,7 +352,6 @@ const SystemMessageBubble = observer(function SystemMessageBubble({ bubble }) {
 const SummaryMessageBubble = observer(function SummaryMessageBubble({ 
 	bubble, relevantEditBubbles, isLastSummaryForRequest }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
-
 	const curTab = domainStore.curTab;
 
 	const setToggle = action((event) => {
@@ -404,7 +401,39 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 
 	const moveToNewTab = action((event) => {
 		//TODO: move to new Tab: make sure to ask for confirmation
-		return null;
+		// ask for confirmation
+		if (!window.confirm("Are you sure you want to move this to a new tab?")) {
+			return;
+		}
+		// delete the part from the current tab
+		const movedBubbles = [];
+		const deletedBubbleIds = [];
+		for (let moveBubble of curTab.timeOrderedBubbles) {
+			if (moveBubble.requestId === bubble.requestId) {
+				movedBubbles.push(moveBubble.getDeepCopy());
+				deletedBubbleIds.push(moveBubble.id);
+				moveBubble.setToggle(false);
+			}
+		}
+		console.log(toJS(deletedBubbleIds))
+		curTab.deleteBubbles(deletedBubbleIds);
+
+		// add new tab
+		const newTab = domainStore.addTab(); 
+		newTab.setTitle(curTab.title);
+		newTab.setTextCommand(curTab.textCommand);
+		newTab.setSketchCommand(curTab.sketchCommand);
+		newTab.setSketchPlayPosition(curTab.sketchPlayPosition);
+		newTab.setEditOperationKey(curTab.editOperationKey);
+		newTab.setProcessingMode(curTab.processingMode);
+		console.log(movedBubbles.length)
+		for (let moveBubble of movedBubbles) {
+			newTab.addBubbleObj(moveBubble);
+			if (moveBubble.toggle === true) {
+				moveBubble.setToggle(false);
+				moveBubble.setToggle(true);
+			}
+		}
 	});
 
 	const content = bubble.content;
@@ -429,8 +458,9 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 					<FontAwesomeIcon icon={faRightFromBracket} className="mr-1" />
 				</button>
 			</div>
-			{content}
-
+			<div>
+				{content}
+			</div>
 			<div className="mb-3 flex flex-row items-center">
 				({"  "}
 				<button
@@ -441,7 +471,7 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 				>
 					{toggle && <FontAwesomeIcon icon={faCheck} />}
 				</button>
-				{!toggle ? "Select All" : "Deselect All"})
+				{toggle ? "Deselect All" : "Select All"})
 			</div>
 			<div>
 				{relevantEditBubbles.map((editBubble) => {
@@ -452,11 +482,11 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 						return null;
 					}
 					// small button with the id of the edit
-					const edit = editBubble.edit;
-					const editIdx = editBubble.timeOrderedIdx;
+					const editIdx = editBubble.timeOrderedIdxGlobal;
 					const editToggle = editBubble.toggle;
 					return (<div
 						key={`edit-${editIdx}`}
+						id={`edit-${editIdx}`}
 						className="flex flex-row items-center mb-1"
 					>
 						<button
@@ -525,24 +555,23 @@ const ChatTab = observer(function ChatTab() {
 			setShowScrollUp(false);
 		}
 		
-		// set TimeOrderIdxs
-		let firstEditBubble = null;
-		let editBubbleIdx = -1;
-		for (let i = timeOrderedBubbles.length - 1; i >= 0; i--) {
-			const bubble = timeOrderedBubbles[i];
-			if (bubble.type === domainStore.bubbleTypes.edit) {
-				if (firstEditBubble === null || firstEditBubble.requestId !== bubble.requestId) {
-					firstEditBubble = bubble;
-					editBubbleIdx = -1;
-				}
-				editBubbleIdx += 1;
-				console.log("editBubbleIdx", editBubbleIdx);
-				bubble.setTimeOrderedIdx(editBubbleIdx);
-			}
-		}
+		// // set TimeOrderIdxs
+		// let firstEditBubble = null;
+		// let editBubbleIdx = -1;
+		// for (let i = timeOrderedBubbles.length - 1; i >= 0; i--) {
+		// 	const bubble = timeOrderedBubbles[i];
+		// 	if (bubble.type === domainStore.bubbleTypes.edit) {
+		// 		if (firstEditBubble === null || firstEditBubble.requestId !== bubble.requestId) {
+		// 			firstEditBubble = bubble;
+		// 			editBubbleIdx = -1;
+		// 		}
+		// 		editBubbleIdx += 1;
+		// 		bubble.setTimeOrderedIdx(editBubbleIdx);
+		// 	}
+		// }
 	}), [
 		timeOrderedBubbles.length,
-		curTab.id,
+		domainStore.curTabPos,
 	]);
 
     return (
@@ -618,7 +647,7 @@ const ChatTab = observer(function ChatTab() {
 							return <SystemMessageBubble bubble={bubble} />;
 						}
 						if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
-							const relevantEditBubbles = [];
+							let relevantEditBubbles = [];
 							const isLastSummaryForRequest = (
 								idx === 0 || timeOrderedBubbles[idx - 1].requestId !== bubble.requestId
 							);

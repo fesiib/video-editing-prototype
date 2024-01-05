@@ -102,25 +102,28 @@ class BubbleState {
 	}
 
 	setToggle(toggle) {
-		let result = [];
+		let appliedEdits = [];
 		if (this.toggle === toggle) {
-			return result;
+			return appliedEdits;
 		}
-		if (this.type === this.domainStore.bubbleTypes.edit
-			&& this.edit !== null
-		) {
-			if (toggle && this.appliedEditId === "") {
-				// add edit & appliedEditId
-				result = this.parent.addEditFromBubble(this.id);
+		if (this.type !== this.domainStore.bubbleTypes.edit || this.edit === null) {
+			this.toggle = toggle;
+			return appliedEdits;
+		}
+		if (toggle && this.appliedEditId === "") {
+			// add edit & appliedEditId
+			appliedEdits = this.parent.addEditFromBubble(this.id);
+			for (const appliedEdit of appliedEdits) {
+				this.setAppliedEditId(appliedEdit.commonState.id);
 			}
-			else if (!toggle && this.appliedEditId !== "") {
-				// remove edit appliedEditId
-				this.parent.deleteEdits([this.appliedEditId]);
-				this.appliedEditId = "";
-			}
+		}
+		else if (!toggle && this.appliedEditId !== "") {
+			// remove edit appliedEditId
+			this.parent.deleteEdits([this.appliedEditId]);
+			this.setAppliedEditId("");
 		}
 		this.toggle = toggle;
-		return result;
+		return appliedEdits;
 	}
 
 	setContent(content) {
@@ -154,13 +157,37 @@ class BubbleState {
 	completedProcessing() {
 		this.processed = true;
 	}
+	
+	get timeOrderedIdxGlobal() {
+		if (this.parent === null) {
+			return -1;
+		}
+		const timeOrderedBubbles = this.parent.timeOrderedBubbles;
+		let editIdx = 0
+		for (let i = 0; i < timeOrderedBubbles.length; i++) {
+			if (timeOrderedBubbles[i].id === this.id) {
+				return editIdx;
+			}
+			if (timeOrderedBubbles[i].type === this.type) {
+				editIdx++;
+			}
+		}
+		return -1;
+	}
 
 	saveFirebase(userId, taskIdx) {
 		const bubbleCollection = collection(firestore,
 			this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.bubbleCollection);
 		const bubbleId = this.id;
 		const bubbleDoc = doc(bubbleCollection, bubbleId).withConverter(this.bubbleStateConverter);		
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (this.edit !== null) {
+					await this.edit.saveFirebase(userId, taskIdx);
+				}
+			} catch (error) {
+				reject("edit/bubble save error: " + error.message);
+			}
 			setDoc(bubbleDoc, this, {merge: false}).then(() => {
 				//console.log(`edit ${editId} saved: `, editId, userId, this.domainStore.rootStore.editCollection);
 				resolve();
@@ -195,7 +222,7 @@ class BubbleState {
 				this.requestId = data.requestId;
 				this.appliedEditId = data.appliedEditId;
 				
-				if (this.type === this.domainStore.bubbleTypes.edit) {
+				if (this.type === this.domainStore.bubbleTypes.edit && data.editId !== "") {
 					const newEdit = new EditState(
 						this.domainStore, this.parent, this, true, this.trackId
 					);
@@ -232,6 +259,7 @@ class BubbleState {
 
 	bubbleStateConverter = {
 		toFirestore: function(bubbleState) {
+			console.log("bubble to", bubbleState.appliedEditId, bubbleState.edit?.commonState.id, toJS(bubbleState));
 			const data = {
 				id: bubbleState.id,
 				toggle: bubbleState.toggle,
@@ -241,7 +269,7 @@ class BubbleState {
 				content: bubbleState.content,
 				processed: bubbleState.processed,
 				trackId: bubbleState.trackId,
-				editId: bubbleState.edit.id,
+				editId: bubbleState.edit === null ? "" : bubbleState.edit.commonState.id,
 				parsingResult: {
 					text: bubbleState.parsingResult.text,
 					spatial: [ ...bubbleState.parsingResult.spatial ],

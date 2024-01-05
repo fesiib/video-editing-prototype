@@ -118,9 +118,8 @@ const CommandSpace = observer(function CommandSpace() {
 	});
 
 	const onKeyDown = action((event) => {
-		if (event.key === "Enter") {
-			onProcessClick();
-		}
+		return;
+		//event.key === "Enter"
 	});
 
 	const onProcessingMode = action((event) => {

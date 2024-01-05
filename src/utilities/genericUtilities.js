@@ -37,12 +37,18 @@ export function findSubstr(text, offset, targetText) {
 
 	for (let idx = start; idx < textLength - targetTextLength + 1; idx++) {
 		if (text.slice(idx, idx + targetTextLength) === targetText) {
-			return [idx, idx + targetTextLength];
+			return {
+				start: idx,
+				end: idx + targetTextLength
+			};
 		}
 	}
 	for (let idx = 0; idx < start; idx++) {
 		if (text.slice(idx, idx + targetTextLength) === targetText) {
-			return [idx, idx + targetTextLength];
+			return {
+				start: idx,
+				end: idx + targetTextLength
+			};
 		}
 	}
 	return null;

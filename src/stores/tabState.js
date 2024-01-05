@@ -123,6 +123,12 @@ class TabState {
 		let newBubble = new BubbleState(
 			this.domainStore, this, this.trackId, time, type, requestProcessingMode, requestId,
 		);
+		return this.addBubbleObj(newBubble);
+	}
+
+	addBubbleObj(newBubble) {
+		newBubble.parent = this;
+		const type = newBubble.type;
 		if (type === this.domainStore.bubbleTypes.userCommand) {
 			this.userBubbles.push(newBubble);
 		}
@@ -146,6 +152,15 @@ class TabState {
 	}
 
 	deleteEdits(selectedIds) {
+		for (let bubble of this.systemBubbles) {
+			if (bubble.type !== this.domainStore.bubbleTypes.edit) {
+				continue;
+			}
+			if (bubble.toggle === true && selectedIds.includes(bubble.appliedEditId)) {
+				bubble.toggle = false;
+				bubble.setAppliedEditId("");
+			}
+		}
 		this.activeEdits = this.activeEdits.filter((edit) => {
             const isSelected = selectedIds.includes(edit.commonState.id);
             return !isSelected;
@@ -154,7 +169,10 @@ class TabState {
 			if (bubble.type !== this.domainStore.bubbleTypes.edit) {
 				return true;
 			}
-			const isSelected = selectedIds.includes(bubble.edit.id);
+			const isSelected = selectedIds.includes(bubble.edit.commonState.id);
+			if (isSelected) {
+				bubble.setToggle(false);
+			}
 			return !isSelected;
 		});
 		this.domainStore.rootStore.uiStore.selectTimelineObjects(
@@ -167,15 +185,23 @@ class TabState {
 	deleteBubbles(selectedIds) {
 		this.systemBubbles = this.systemBubbles.filter((bubble) => {
 			const isSelected = selectedIds.includes(bubble.id);
+			bubble.setToggle(false);
 			return !isSelected;
 		});
 		this.userBubbles = this.userBubbles.filter((bubble) => {
 			const isSelected = selectedIds.includes(bubble.id);
+			bubble.setToggle(false);
 			return !isSelected;
 		});
 	}
 
 	clearBubbles() {
+		for (let bubble of this.systemBubbles) {
+			bubble.setToggle(false);
+		}
+		for (let bubble of this.userBubbles) {
+			bubble.setToggle(false);
+		}
 		this.systemBubbles = [];
 		this.userBubbles = [];
 	}
@@ -226,7 +252,6 @@ class TabState {
 		}
 		
 		const newEdit = suggestedEdit.getDeepCopy();
-		suggestedBubble.setAppliedEditId(newEdit.commonState.id);
 		newEdit.isSuggested = false;
 		let deleteIds = [];
 		let newEdits = [newEdit];
@@ -274,10 +299,10 @@ class TabState {
 	getObjectById(id) {
 		const fromActive = this.activeEdits.find((edit) => edit.commonState.id === id);
 		const fromUser = this.userBubbles.find(
-			(bubble) => bubble.edit !== null && bubble.edit.id === id
+			(bubble) => bubble.edit !== null && bubble.edit.commonState.id === id
 		);
 		const fromSystem = this.systemBubbles.find(
-			(bubble) => bubble.edit !== null &&  bubble.edit.id === id
+			(bubble) => bubble.edit !== null &&  bubble.edit.commonState.id === id
 		);
 		if (fromActive !== undefined) {
 			return fromActive;
@@ -338,6 +363,7 @@ class TabState {
 	}
 
 	get timeOrderedBubbles() {
+		console.log(this.systemBubbles.length, this.userBubbles.length)
 		const bubbles = [...this.systemBubbles,
 			...this.userBubbles
 		].sort((a, b) => {

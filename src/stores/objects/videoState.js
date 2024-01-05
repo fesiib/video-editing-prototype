@@ -82,7 +82,7 @@ class VideoState {
 
     setVideoLink(videoLink) {
         this.videoLink = videoLink;
-		this.source = false;
+		this.source = null;
         this.commonState.processing = true;
         this.transcript = [];
 		this.moments = [];
@@ -213,6 +213,9 @@ class VideoState {
 	}
 
 	frameLink(timestamp) {
+		if (!this.source) {
+			return null;
+		}
 		const requestCfg = REQUEST_TYPES.displayVideo;
 		const videoFile = this.source.split("/").slice(-1)[0];
 		const timestamp_str = timestamp.toString();

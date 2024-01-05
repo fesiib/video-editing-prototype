@@ -323,6 +323,7 @@ class DomainStore {
 			new TabState(this, this.projectMetadata.totalTabsCnt, "", [], -1, 0)
 		);
 		this.rootStore.resetTempState();
+		return this.tabs[this.tabs.length - 1]
 	}
 
 	deleteTab(tabPos) {
@@ -517,9 +518,7 @@ class DomainStore {
 				systemMessageBubble.setContent(this.SYSTEM_ERROR_MESSAGE());
 				return;
 			}
-			const summary = responseData.summary;
-			this.curTab.setTitle(summary);
-			console.log(summary);
+			const tabTitle = responseData.summary;
 			//parsing results
 			requestSuggestionsSplit({
 				stage: "parse",
@@ -603,8 +602,9 @@ class DomainStore {
 							return;
 						}
 						const edits = responseData.edits;
+						console.log(edits.length)
 						let editPromises = [];
-						for (let edit of edits){
+						for (let edit of edits) {
 							const newEditBubble = this.curTab.addBubble(
 								new Date().getTime(),
 								this.bubbleTypes.edit,
@@ -667,6 +667,10 @@ class DomainStore {
 										});
 										newEditBubble.setTime(new Date().getTime());
 										newEditBubble.completedProcessing();
+
+										// tabSummary
+										this.curTab.setTitle(tabTitle);
+										console.log(tabTitle);
 										resolve("Successful");
 									})).catch(action((error) => {
 										console.log("cannot retrieve the edit parameters: ", error);

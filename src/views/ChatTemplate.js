@@ -26,6 +26,10 @@ const ChatTemplate = observer(function ChatTemplate() {
 	});
 
 	const deleteTab = action((tabIdx) => {
+		// ask for confirmation
+		if (curTab.timeOrderedBubbles.length > 0 && !window.confirm("Are you sure you want to delete this tab?")) {
+			return;
+		}
 		domainStore.deleteTab(tabIdx);
 	});
 
@@ -44,7 +48,7 @@ const ChatTemplate = observer(function ChatTemplate() {
     return (
         <div className="w-100">
 			{/* <ChatTabTemplate /> */}
-            <div className="flex flex-start overflow-auto text-xs my-2">
+            <div className="w-100 flex flex-start flex-wrap text-xs my-2">
                 {tabs.map((tab, idx) => {
 					return (<div
 						key={`tab-${tab.idx}`}
