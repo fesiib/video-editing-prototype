@@ -59,6 +59,7 @@ class DomainStore {
 	// new
 	tabs = [];
 	curTabPos = 0;
+	minRequestCountForNewTab = 1;
 
     projectMetadata = {
         projectId: "test",
@@ -422,6 +423,40 @@ class DomainStore {
 		this.processingRequest = false;
 	}
 
+	moveLastToNewTab(bubble) {
+		const curTab = this.curTab;
+		// delete the part from the current tab
+		const movedBubbles = [];
+		const deletedBubbleIds = [];
+		for (let moveBubble of curTab.timeOrderedBubbles) {
+			if (moveBubble.requestId === bubble.requestId) {
+				movedBubbles.push(moveBubble.getDeepCopy());
+				deletedBubbleIds.push(moveBubble.id);
+				moveBubble.setToggle(false);
+			}
+		}
+		console.log(toJS(deletedBubbleIds))
+		curTab.deleteBubbles(deletedBubbleIds);
+
+		// add new tab
+		const newTab = this.addTab(); 
+		newTab.setTitle(curTab.title);
+		newTab.setTextCommand(curTab.textCommand);
+		newTab.setSketchCommand(curTab.sketchCommand);
+		newTab.setSketchPlayPosition(curTab.sketchPlayPosition);
+		newTab.setEditOperationKey(curTab.editOperationKey);
+		newTab.setProcessingMode(curTab.processingMode);
+		console.log(movedBubbles.length)
+		for (let moveBubble of movedBubbles) {
+			newTab.addBubbleObj(moveBubble);
+			if (moveBubble.toggle === true) {
+				moveBubble.setToggle(false);
+				moveBubble.setToggle(true);
+			}
+		}
+		return newTab
+	}
+
 	processRequest(processingMode, segmentOfInterest) {
 		if (this.processingRequest) {
 			// TODO: stop previous
@@ -492,7 +527,7 @@ class DomainStore {
 			};
 		});
 
-		const requestedTabPos = this.curTabPos;
+		let requestedTabPos = this.curTabPos;
 		this.curTab.suggestedEdits = [];
 		this.curTab.suggestedEditOpeartionKeys = [];
 
@@ -569,9 +604,31 @@ class DomainStore {
 							requestData.requestParameters.text, item.offset, item.reference
 							)).filter((item) => item !== null),
 					);
-					this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
 					if (suggestedEditOperationKeys.length > 0) {
-						this.curTab.setEditOperationKey(suggestedEditOperationKeys[0]);
+						// prompt to move to new tab
+						if (!suggestedEditOperationKeys.includes(this.curTab.editOperationKey)) {
+							if (this.curTab.requestCount > this.minRequestCountForNewTab) {
+								// TODO: prompt to go to new tab
+								// ask to move the current request to new tab
+								if (window.confirm("The current request will be moved to a new tab. Continue?")) {
+									const newTab = this.moveLastToNewTab(requestResultBubble);
+									newTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
+									newTab.setEditOperationKey(suggestedEditOperationKeys[0]);
+									requestedTabPos = newTab.tabPos;									
+								}
+								else {
+									this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
+									this.curTab.setEditOperationKey(suggestedEditOperationKeys[0]);
+								}
+							}
+							else {
+								this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
+								this.curTab.setEditOperationKey(suggestedEditOperationKeys[0]);
+							}
+						}
+					}
+					else {
+						this.curTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
 					}
 				}
 				// temporal

@@ -400,40 +400,11 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 	});
 
 	const moveToNewTab = action((event) => {
-		//TODO: move to new Tab: make sure to ask for confirmation
 		// ask for confirmation
 		if (!window.confirm("Are you sure you want to move this to a new tab?")) {
 			return;
 		}
-		// delete the part from the current tab
-		const movedBubbles = [];
-		const deletedBubbleIds = [];
-		for (let moveBubble of curTab.timeOrderedBubbles) {
-			if (moveBubble.requestId === bubble.requestId) {
-				movedBubbles.push(moveBubble.getDeepCopy());
-				deletedBubbleIds.push(moveBubble.id);
-				moveBubble.setToggle(false);
-			}
-		}
-		console.log(toJS(deletedBubbleIds))
-		curTab.deleteBubbles(deletedBubbleIds);
-
-		// add new tab
-		const newTab = domainStore.addTab(); 
-		newTab.setTitle(curTab.title);
-		newTab.setTextCommand(curTab.textCommand);
-		newTab.setSketchCommand(curTab.sketchCommand);
-		newTab.setSketchPlayPosition(curTab.sketchPlayPosition);
-		newTab.setEditOperationKey(curTab.editOperationKey);
-		newTab.setProcessingMode(curTab.processingMode);
-		console.log(movedBubbles.length)
-		for (let moveBubble of movedBubbles) {
-			newTab.addBubbleObj(moveBubble);
-			if (moveBubble.toggle === true) {
-				moveBubble.setToggle(false);
-				moveBubble.setToggle(true);
-			}
-		}
+		domainStore.moveLastToNewTab(bubble);
 	});
 
 	const content = bubble.content;

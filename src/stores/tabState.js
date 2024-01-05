@@ -372,6 +372,12 @@ class TabState {
 		return bubbles;
 	}
 
+	get requestCount() {
+		return this.timeOrderedBubbles.filter((bubble) => {
+			return bubble.type === this.domainStore.bubbleTypes.userCommand;
+		}).length;
+	}
+
 	saveFirebase(userId, taskIdx) {
 		const tabCollection = collection(
 			firestore, this.domainStore.rootStore.collection, userId, this.domainStore.rootStore.tabCollection
