@@ -51,7 +51,7 @@ const ChatTemplate = observer(function ChatTemplate() {
             <div className="w-100 flex flex-start flex-wrap text-xs my-2">
                 {tabs.map((tab, idx) => {
 					return (<div
-						key={`tab-${tab.idx}`}
+						key={tab.id}
 						onClick={action(() => setCurTab(idx))}
 						className={
 							`tab ${curTab.id === tab.id ? "active-tab" : ""} ` + 

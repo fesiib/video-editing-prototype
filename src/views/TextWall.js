@@ -359,7 +359,7 @@ const SentenceBox = observer(function SentenceBox({
 		if (div === null) {
 			return;
 		}
-		const disposer = reaction(() => domainStore.transcriptSelectedIndex, (selectedIndex, prevIndex) => {
+		const dispose = reaction(() => domainStore.transcriptSelectedIndex, (selectedIndex, prevIndex) => {
 			if (selectedIndex === index) {
 				div.style.textDecoration = "underline";
 				div.style.textDecorationColor = "red";
@@ -379,10 +379,7 @@ const SentenceBox = observer(function SentenceBox({
 			}
 		});
 		return () => {
-			if (div === null) {
-				return;
-			}
-			disposer();
+			dispose();
 		}
 	}, []);
 
@@ -607,7 +604,7 @@ const TextWall = observer(function TextWall() {
 			|| filteredScript.length == 0) {
 			return;
 		}
-		const disposal = reaction(() => uiStore.commandSpaceControls.viewPortStart, (targetStart) => {
+		const dispose = reaction(() => uiStore.commandSpaceControls.viewPortStart, (targetStart) => {
 			if (uiStore.commandSpaceControls.viewPortAuthor !== "timeline") {
 				return;
 			}
@@ -637,7 +634,7 @@ const TextWall = observer(function TextWall() {
 			});
 		});	
 		return () => {
-			disposal();
+			dispose();
 		};
 	}, [
 		textWallRef.current,

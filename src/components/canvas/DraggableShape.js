@@ -280,18 +280,22 @@ const DraggableShape = observer(function DraggableShape({
 		uiStore.timelineControls.selectedTimelineItems.length,
 	]);
 
-	useEffect(() => reaction(() => {
-		return {
-			nodeIds: uiStore.canvasControls.transformerNodeIds,
-		}
-	}, 
+	useEffect(() => {
+		const dispose = reaction(() => {
+			return {
+				nodeIds: uiStore.canvasControls.transformerNodeIds,
+			}
+		}, 
 		({ nodeIds }) => {
 			if (shapeRef.current === null) {
 				return;
 			}
 			setIsSelected(nodeIds.indexOf(shapeRef.current.id()) >= 0);
+		});
+		return () => {
+			dispose();
 		}
-	), []);
+	}, [shapeRef.current]);
 
 	if (curShape.title !== shapeTitleConst || curShape.customParameters.type === undefined) {
 		return null;

@@ -297,25 +297,20 @@ class TabState {
 	}
 
 	getObjectById(id) {
-		const fromActive = this.activeEdits.find((edit) => edit.commonState.id === id);
-		const fromUser = this.userBubbles.find(
-			(bubble) => bubble.edit !== null && bubble.edit.commonState.id === id
-		);
-		const fromSystem = this.systemBubbles.find(
-			(bubble) => bubble.edit !== null &&  bubble.edit.commonState.id === id
-		);
-		if (fromActive !== undefined) {
-			return fromActive;
+		const fromActive = this.activeEdits.findIndex((edit) => edit.commonState.id === id);
+		const fromUser = this.userBubbles.findIndex((bubble) => bubble.edit !== null && bubble.edit.commonState.id === id);
+		const fromSystem = this.systemBubbles.findIndex((bubble) => bubble.edit !== null && bubble.edit.commonState.id === id);
+		console.log(this.idx, id, fromActive, fromUser, fromSystem, this.activeEdits.map((edit) => edit.commonState.id))
+		if (fromActive >= 0) {
+			return this.activeEdits[fromActive];
 		}
-		else if (fromUser !== undefined) {
-			return fromUser;
+		else if (fromUser >= 0) {
+			return this.userBubbles[fromUser].edit;
 		}
-		else if (fromSystem !== undefined) {
-			return fromSystem;
+		else if (fromSystem >= 0) {
+			return this.systemBubbles[fromSystem].edit;
 		}
-		else {
-			return null;
-		}
+		return undefined;
 	}
 
 	getCanvasObjectById(id) {
@@ -363,7 +358,6 @@ class TabState {
 	}
 
 	get timeOrderedBubbles() {
-		console.log(this.systemBubbles.length, this.userBubbles.length)
 		const bubbles = [...this.systemBubbles,
 			...this.userBubbles
 		].sort((a, b) => {

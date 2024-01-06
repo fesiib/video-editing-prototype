@@ -239,7 +239,7 @@ const SketchCanvas = observer(function SketchCanvas(
 	}, [sketching, projectWidth, projectHeight]);
 
 	useEffect(() => {
-		const disposer = reaction(() => uiStore.timelineControls.playPosition, (playPosition) => {
+		const dispose = reaction(() => uiStore.timelineControls.playPosition, (playPosition) => {
 			if (videoElement === null || curTab === null || sketchRef.current === null) {
 				return;
 			}
@@ -248,9 +248,9 @@ const SketchCanvas = observer(function SketchCanvas(
 			}
 		});
 		return () => {
-			disposer();
+			dispose();
 		}
-	})
+	}, [curTab.id])
 
 
 	useEffect(() => {

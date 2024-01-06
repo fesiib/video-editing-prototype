@@ -272,7 +272,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 		if (tracksContainer.current === null || tracksContainer.current === undefined) {
 			return;
 		}
-		const disposal = reaction(() => {
+		const dispose = reaction(() => {
 			return {
 				viewPortStart: uiStore.commandSpaceControls.viewPortStart,
 				viewPortFinish: uiStore.commandSpaceControls.viewPortFinish,
@@ -286,7 +286,7 @@ const TimelineTracks = observer(function TimelineTracks() {
 			tracksContainer.current.scrollLeft = uiStore.secToPx(viewPortStart);
 		});
 		return () => {
-			disposal();
+			dispose();
 		}
 	}, [tracksContainer.current]);
 

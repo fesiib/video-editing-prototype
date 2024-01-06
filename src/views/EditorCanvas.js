@@ -48,17 +48,12 @@ const EditorCanvas = observer(function EditorCanvas() {
 
 	const isObject = (target) => {
 		const object = curTab.getCanvasObjectById(target.id());
-		if (object === undefined || object === null 
-		) {
-			return false;
-		}
-        return true;
+		return !(object === undefined);
 	}
 
     const isVisibleObject = (target) => {
 		const object = curTab.getCanvasObjectById(target.id());
-		if (object === undefined || object === null 
-		) {
+		if (object === undefined) {
 			return false;
 		}
 		if (!object.isVisible(uiStore.timelineControls.playPosition)) {
@@ -205,34 +200,42 @@ const EditorCanvas = observer(function EditorCanvas() {
         [projectHeight, projectWidth]
     );
 
-	useEffect(() => reaction(() => {
-		return{
-			nodeIds: uiStore.canvasControls.transformerNodeIds,
-			editOperationKey: curTab.editOperationKey,
-		}
-	}, 
-		({ nodeIds }) => {
-			let nodes = [];
-			for (let nodeId of nodeIds) {
-				const object = curTab.getCanvasObjectById(nodeId);
-				const node = stageRef.current.findOne(`#${nodeId}`);
-				if (node === undefined) {
-					continue;
+	useEffect(() => {
+		const dispose = reaction(() => {
+				return {
+					nodeIds: uiStore.canvasControls.transformerNodeIds,
+					editOperationKey: curTab.editOperationKey,
 				}
-				// if (curTab.editOperationKey === uiStore.objectNames.crop) {
-				// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
-				// 		nodes.push(node);
-				// 	}
-				// 	continue;
-				// }
-				if (object !== undefined &&
-					object.isVisible(uiStore.timelineControls.playPosition)) {
-					nodes.push(node);
+			}, 
+			({ nodeIds }) => {
+				let nodes = [];
+				for (let nodeId of nodeIds) {
+					const object = curTab.getCanvasObjectById(nodeId);
+					const node = stageRef.current.findOne(`#${nodeId}`);
+					if (node === undefined) {
+						continue;
+					}
+					// if (curTab.editOperationKey === uiStore.objectNames.crop) {
+					// 	if (object === undefined && domainStore.getVideoById(nodeId) !== undefined) {
+					// 		nodes.push(node);
+					// 	}
+					// 	continue;
+					// }
+					if (object !== undefined &&
+						object.isVisible(uiStore.timelineControls.playPosition)) {
+						nodes.push(node);
+					}
 				}
+				transformerRef.current.nodes(nodes);
 			}
-			transformerRef.current.nodes(nodes);
-		}
-	), []);
+		);
+		return () => {
+			dispose();
+		};
+	}, [
+		curTab.id,
+		transformerRef.current,
+	]);
 
 	useEffect(() => {
         const opacity = uiStore.canvasControls.opacity;
@@ -280,7 +283,9 @@ const EditorCanvas = observer(function EditorCanvas() {
 			// transformerRef.current.findOne(".rotater").off("mouseenter");
 			// transformerRef.current.findOne(".rotater").off("mouseleave");
 		};
-	}), []);
+	}), [
+		curTab.id,
+	]);
 
 
     return (
