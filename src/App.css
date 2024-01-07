@@ -215,7 +215,7 @@ input[type="radio"]:focus {
 }
 
 .active-tab {
-    background-color: #fff;
+    background-color: #f8f8f8;
 }
 
 .add-tab {

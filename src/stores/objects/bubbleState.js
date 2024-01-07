@@ -27,11 +27,13 @@ class BubbleState {
 
 	trackId = 0;
 
+	BUBBLE_ID_PREFIX = "bubble-";
+
 	constructor(domainStore, tab, trackId, time, type, requestProcessingMode, requestId) {
 		makeAutoObservable(this, {}, { autoBind: true });
 		this.domainStore = domainStore;
 		this.parent = tab;
-		this.id = "bubble-" + randomUUID();
+		this.id = this.BUBBLE_ID_PREFIX + randomUUID();
 
 		// edit
 		if (type === domainStore.bubbleTypes.edit) {

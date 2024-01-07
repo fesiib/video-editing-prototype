@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import ChatTabTemplate from "../components/chat/ChatTabTemplate";
 import ChatTab from "../components/chat/ChatTab";
@@ -64,7 +64,7 @@ const ChatTemplate = observer(function ChatTemplate() {
 							{tab.idx}: {tab.title}
 						</span> 
 						<div className="h-full hover:bg-gray-300 flex items-center" onClick={action(() => deleteTab(idx))}>
-							<TbBucket />
+							<FontAwesomeIcon icon={faClose} />
 						</div>
                     </div>);
 				})}

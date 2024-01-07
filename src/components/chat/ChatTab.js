@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowAltCircleDown, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faRightFromBracket, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleDown, faArrowLeft, faArrowUp, faArrowUp19, faCamera, faCancel, faCaretDown, faCaretRight, faCheck, faCross, faExpand, faExpandArrowsAlt, faInfoCircle, faPlus, faRightFromBracket, faSpinner, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 import CommandSpace from "../../views/CommandSpace";
 import ChatEditPreview from "./ChatEditPreview";
@@ -112,17 +112,19 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 
 	const breakdownSpan = action((range, rgb) => {
 		const text = bubble.parsingResult.text.slice(range.start, range.end);
-		return (<span 
-			key={`temporal-${range.start}-${range.end}`}
-			style = {{
-				backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
-				marginRight: "1em",
-			}}
-			onMouseEnter={action((event) => onBreakdownMouseEvent(event, range, rgb))}
-			onMouseLeave={action((event) => onBreakdownMouseEvent(event, range, rgb))}
-		>
-			{text}
-		</span>);
+		return (<div>
+			<span 
+				key={`temporal-${range.start}-${range.end}`}
+				style = {{
+					backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.2)`,
+				}}
+				onMouseEnter={action((event) => onBreakdownMouseEvent(event, range, rgb))}
+				onMouseLeave={action((event) => onBreakdownMouseEvent(event, range, rgb))}
+			>
+				{text}
+			</span>
+			<span>;</span>
+		</div>);
 	});
 
 
@@ -167,7 +169,7 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 								backgroundTransparency = 0.2;
 								rgb[0] = 255;
 								rgb[1] = 255;
-								rgb[2] = 255;
+								rgb[2] = 0;
 							}
 						}
 						return (<span
@@ -188,35 +190,60 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 			<div className="text-s mb-1">
 				<button
 					onClick={onExplanationClick}
+					className="hover:text-gray-500"
 				>
 					<FontAwesomeIcon
 						icon={isExplanationOpen ? faCaretDown : faCaretRight}
-						className="mx-1"
+						className="mx-1 w-2"
 					/>
-					<span className="italic"> Breakdown </span>
+					{" "} <span className="underline">Reference Breakdown </span>
 				</button>
 				{
 					isExplanationOpen ? (
 						<div>
-							<div> <span className="text-s italic"> Temporal: </span> 
-							{bubble.parsingResult.temporal.map(
-								(range) => breakdownSpan(range, [255, 0, 0])
-							)} </div>
+							<div className="flex flex-row gap-1 flex-wrap"> 
+								<span className="text-s italic"> Temporal: </span> 
+								{bubble.parsingResult.temporal.length === 0 ? (
+									<span className="text-s"> N/A </span>
+								) : (
+									bubble.parsingResult.temporal.map(
+										(range) => breakdownSpan(range, [255, 0, 0])
+									)
+								)} 
+							</div>
 
-							<div> <span className="text-s italic"> Spatial: </span> 
-							{bubble.parsingResult.spatial.map(
-								(range) => breakdownSpan(range, [0, 255, 0])
-							)} </div>
+							<div className="flex flex-row gap-1 flex-wrap"> 
+								<span className="text-s italic"> Spatial: </span> 
+								{bubble.parsingResult.spatial.length === 0 ? (
+									<span className="text-s"> N/A </span>
+								) : (
+									bubble.parsingResult.spatial.map(
+										(range) => breakdownSpan(range, [0, 255, 0])
+									)
+								)}
+							</div>
 							
-							<div> <span className="text-s italic"> Edit: </span> 
-							{bubble.parsingResult.edit.map(
-								(range) => breakdownSpan(range, [0, 0, 255])
-							)} </div>
+							<div className="flex flex-row gap-1 flex-wrap">  
+								<span className="text-s italic"> Edit: </span> 
+								{bubble.parsingResult.edit.length === 0 ? (
+									<span className="text-s"> N/A </span>
+								) : (
+									bubble.parsingResult.edit.map(
+										(range) => breakdownSpan(range, [0, 0, 255])
+									)
+								)} 
+							</div>
 
-							<div> <span className="text-s italic"> Parameters: </span>
-							{bubble.parsingResult.custom.map(
-								(range) => breakdownSpan(range, [255, 255, 255])
-							)} </div>
+							<div className="flex flex-row gap-1 flex-wrap"> 
+								<span className="text-s italic"> Parameters: </span>
+								{bubble.parsingResult.custom.length === 0 ? (
+									<span className="text-s"> N/A </span>
+								) : (
+									bubble.parsingResult.custom.map(
+										(range) => breakdownSpan(range, [255, 255, 0])
+									)
+								)}
+							</div>
 						</div>
 					) : (null)
 				}
@@ -232,7 +259,7 @@ const ParsingResultBubble = observer(function ParsingResultBubble({ bubble }) {
 const EditBubble = observer(function EditBubble({ bubble }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 	
-	const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+	const [isExplanationOpen, setIsExplanationOpen] = useState(true);
 
 	const onExplanationClick = action((event) => {
 		setIsExplanationOpen((prev) => !prev);
@@ -266,7 +293,7 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 			{time}
 		</div>
 		<div
-			className={`bg-slate-200 h-fit p-2 rounded-md hover:cursor-pointer ${
+			className={`bg-slate-200 h-fit p-2 rounded-md ${
 				toggle ? "border-2 border-indigo-300" : ""
 			}`}
 		>
@@ -275,7 +302,7 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 			</div>
 			{/* TODO: update image */}
 			{edit !== null ? (<>
-				<div className="flex flex-row items-center">
+				<div className="flex flex-row items-center hover:cursor-pointer">
 					<button
 						className={`w-5 h-5 mr-2 rounded-full border border-black flex items-center justify-center focus:outline-none ${
 							toggle ? "bg-indigo-300 text-black" : ""
@@ -291,20 +318,22 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 				<div className="text-s mb-1">
 					<button
 						onClick={onExplanationClick}
+						className="hover:text-gray-500"
 					>
 						<FontAwesomeIcon
 							icon={isExplanationOpen ? faCaretDown : faCaretRight}
-							className="mx-1"
+							className="mx-1 w-2"
 						/>
-						<span className="italic"> Explanation </span>
+						{" "} <span className="underline">Explanation </span>
 					</button>
 					{
 						isExplanationOpen ? (
 							<div>
 								{edit.explanation.map((explanation, idx) => {
-									const label = idx === 0 ? "Time Segment" : "Frame Position";
-									if (explanation === "") {
-										return null;
+									const label = idx === 0 ? "Temporal" : "Spatial";
+									let trimmed_explanation = explanation.trim();
+									if (trimmed_explanation === "") {
+										trimmed_explanation = "None";
 									}
 									return (<div key={`explanation-${idx}`} className="text-s">
 										<span className="italic">
@@ -312,7 +341,7 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 										</span>
 										{" "}
 										<span>
-											{explanation}
+											{trimmed_explanation}
 										</span>
 									</div>);
 								})}
@@ -320,8 +349,14 @@ const EditBubble = observer(function EditBubble({ bubble }) {
 						) : (null)
 					}
 				</div>
+				<div>
+					<span className="text-xs">
+						Preview (not accurate): 
+					</span>
+				</div>
 				<div
 					onClick={setToggle}
+					className=" hover:cursor-pointer"
 				>
 					<ChatEditPreview edit={edit} />
 				</div>
@@ -350,7 +385,7 @@ const SystemMessageBubble = observer(function SystemMessageBubble({ bubble }) {
 });
 
 const SummaryMessageBubble = observer(function SummaryMessageBubble({ 
-	bubble, relevantEditBubbles, isLastSummaryForRequest }) {
+	bubble, relevantEditBubbles, isLastSummaryForRequest, isFirstSummary }) {
 	const { userStore, uiStore, domainStore } = useRootContext();
 	const curTab = domainStore.curTab;
 
@@ -401,10 +436,32 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 
 	const moveToNewTab = action((event) => {
 		// ask for confirmation
-		if (!window.confirm("Are you sure you want to move this to a new tab?")) {
+		if (!window.confirm(domainStore.MOVE_TO_NEW_TAB_CONFIRMATION)) {
 			return;
 		}
 		domainStore.moveLastToNewTab(bubble);
+	});
+
+	const scrollToPrevCommand = action((event) => {
+		const chatTab = document.getElementById("chat-tab");
+		if (chatTab) {
+			let newScrollTop = -2;
+			for (let child of chatTab.children) {
+				if (child.id === bubble.id) {
+					newScrollTop = -1;
+					continue;
+				}
+				if (child.id.startsWith(bubble.BUBBLE_ID_PREFIX)
+					&& newScrollTop === -1
+				) {
+					newScrollTop = child.offsetTop;
+					break;
+				}
+			}
+			if (newScrollTop >= 0) {
+				chatTab.scrollTop = newScrollTop;
+			}
+		}
 	});
 
 	const content = bubble.content;
@@ -415,25 +472,37 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 	});
 	const toggle = bubble.toggle;
 
-	return (<div className="mb-3 w-fit h-fit">
+	useEffect(() => {
+		const disposer = reaction(() => {
+			const toggles = relevantEditBubbles.map((editBubble) => editBubble.toggle);
+			return toggles;
+		}, (toggles) => {
+			if (toggles.length === 0) {
+				return;
+			}
+			const allSame = toggles.every((toggle) => toggle === toggles[0]);
+			if (allSame) {
+				bubble.setToggle(toggles[0]);
+			}
+		});
+		return () => disposer();
+	}, [relevantEditBubbles.length, bubble.id]);
+
+	return (<div className="mb-3 w-fit h-fit" id={bubble.id}>
 		<div className="text-xs text-left">
 			{time}
 		</div>
 		<div className="bg-slate-200 w-auto p-2 mr-10 mt-1 rounded-md">
-			<div className="font-semibold flex flex-row justify-between">
-				Summary of Edits
-				<button
-					className={"w-fit h-fit bg-green-200 text-black p-1 rounded hover:bg-green-300"}
-					onClick={moveToNewTab}
-				>
-					<FontAwesomeIcon icon={faRightFromBracket} className="mr-1" />
-				</button>
+			<div className="font-semibold flex flex-row justify-between gap-2">
+				<div className="p-1">
+					Summary of Edits
+				</div>
 			</div>
 			<div>
 				{content}
 			</div>
 			<div className="mb-3 flex flex-row items-center">
-				({"  "}
+				{"  "}
 				<button
 					className={`w-4 h-4 mr-1 border border-black flex items-center justify-center focus:outline-none ${
 						toggle ? "bg-indigo-300 text-black" : ""
@@ -442,7 +511,7 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 				>
 					{toggle && <FontAwesomeIcon icon={faCheck} />}
 				</button>
-				{toggle ? "Deselect All" : "Select All"})
+				{toggle ? "Deselect All" : "Select All"}
 			</div>
 			<div>
 				{relevantEditBubbles.map((editBubble) => {
@@ -475,17 +544,35 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 				})}
 			</div>
 			<div className="flex flex-col gap-2">
-			{
-				isLastSummaryForRequest ? (
-					<button
-						className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"}
-						onClick={requestMore}
-					>
-						<FontAwesomeIcon icon={faPlus} className="mr-1" />
-						Get More Edits
-					</button>
-				) : (null)
-			}
+				{
+					isLastSummaryForRequest ? (<>
+						<button
+							className={"w-fit h-fit bg-indigo-200 text-black p-1 rounded hover:bg-indigo-300"}
+							onClick={requestMore}
+						>
+							<FontAwesomeIcon icon={faPlus} className="mr-1" />
+							Get More Edits
+						</button>
+						<button
+							className={"w-fit h-fit bg-green-200 text-black p-1 rounded hover:bg-green-300"}
+							onClick={moveToNewTab}
+						>
+							<FontAwesomeIcon icon={faRightFromBracket} className="mr-1" />
+							<span> Move to New Tab </span>
+						</button>
+					</>) : (null)
+				}
+				{
+					isFirstSummary === false ? (
+						<button
+							className={"w-fit h-fit bg-gray-300 text-black p-1 rounded hover:bg-gray-400"}
+							onClick={scrollToPrevCommand}
+						>
+							<FontAwesomeIcon icon={faArrowLeft} className="mr-1" />
+							<span> Prev. Summary </span>
+						</button>
+					) : (null)
+				}
 			</div>
 		</div>
 	</div>);
@@ -497,6 +584,12 @@ const ChatTab = observer(function ChatTab() {
 	const curTab = domainStore.curTab;
 
 	const timeOrderedBubbles = [...curTab.timeOrderedBubbles].reverse();
+	const firstSummaryBubbleId = timeOrderedBubbles.reduce((bubbleId, bubble) => {
+		if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
+			return bubble.id;
+		}
+		return bubbleId;
+	}, null);
 
 	const [showScrollUp, setShowScrollUp] = useState(false);
 
@@ -618,10 +711,11 @@ const ChatTab = observer(function ChatTab() {
 							return <SystemMessageBubble bubble={bubble} />;
 						}
 						if (bubble.type === domainStore.bubbleTypes.summaryMessage) {
-							let relevantEditBubbles = [];
 							const isLastSummaryForRequest = (
 								idx === 0 || timeOrderedBubbles[idx - 1].requestId !== bubble.requestId
 							);
+							let isFirstSummary = firstSummaryBubbleId === bubble.id;
+							let relevantEditBubbles = [];
 							for (let i = idx + 1; i < timeOrderedBubbles.length; i++) {
 								if (timeOrderedBubbles[i].requestId !== bubble.requestId) {
 									break;
@@ -637,6 +731,7 @@ const ChatTab = observer(function ChatTab() {
 								bubble={bubble} 
 								relevantEditBubbles={relevantEditBubbles}
 								isLastSummaryForRequest={isLastSummaryForRequest}
+								isFirstSummary={isFirstSummary}
 							/>;
 						}
 						console.log("no bubble type", bubble.type);

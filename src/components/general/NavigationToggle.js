@@ -17,16 +17,29 @@ const NavigationToggle = observer(function NavigationToggle() {
 		}
 	});
 	return (<button
-		className="px-2 flex flex-row w-fit gap-2 justify-start items-center"
+		className="my-1 flex flex-row w-fit justify-start items-center"
 		onClick={() => onToggleClick()}
 	>
-		<span> {uiStore.navigation === "transcript" ? "TRANSCRIPT" : "EDIT OPERATION"} </span>
+		<div className="flex flex-row border rounded">
+			<span className={
+				"px-1 hover:brightness-75" + (isTimeline ? " bg-indigo-300 text-black" : " text-gray-500")
+			}> Edit Panel </span>
+			<div
+				id="separator"
+				className="vert"
+			></div>
+			<span className={
+				"px-1 hover:brightness-75" + (!isTimeline ? " bg-indigo-300 text-black" : " text-gray-500")
+			}> Transcript </span>
+		</div>
+		{/* <span> Edit Panel </span>
 		<div className={
 			"flex flex-row w-10 h-5 border hover:brightness-75 rounded"
 				+ (isTimeline ? " justify-start" : " justify-end")
 		}>
 			<div className={"bg-indigo-300 w-5 h-5 border hover:brightness-75 rounded"}> </div>
 		</div>
+		<span> Transcript </span> */}
 	</button>);
 });
 

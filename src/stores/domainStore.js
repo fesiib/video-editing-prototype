@@ -33,9 +33,9 @@ class DomainStore {
 		const startStr = playPositionToFormat(start);
 		const finishStr = playPositionToFormat(finish);
 		if (this.curTab.editOperation === null) {
-			return `Edit: ${startStr} - ${finishStr}! Please select an edit type!`;
+			return `Edit: ${startStr} - ${finishStr}\nPlease select an edit type!`;
 		}
-		return `${this.curTab.editOperation.title} edit: ${startStr} - ${finishStr}!`;
+		return `${this.curTab.editOperation.title} edit: ${startStr} - ${finishStr}`;
 	}
 
 	SYSTEM_SUMMARY_MESSAGE(numEdits) {
@@ -43,10 +43,13 @@ class DomainStore {
 			return "No edits suggested!";
 		}
 		if (this.curTab.editOperation === null) {
-			return `Suggested ${numEdits} edits!`;
+			return `Suggested ${numEdits} edit${numEdits === 1 ? "" : "s"}!`;
 		}
 		return `Suggested ${numEdits} edits of type ${this.curTab.editOperation.title}!`;
 	}
+
+	MOVE_TO_NEW_TAB_CONFIRMATION = "Do you want to move this set of edits to a new tab?";
+	PROMPT_TO_MOVE_TO_NEW_TAB = "Seems like you are requesting edits of a different type. Do you want to move to a new tab?";
 
 	
 	domainDoc = "domain";
@@ -145,13 +148,13 @@ class DomainStore {
 			"stroke.alpha",
 		],
 		time: [
+			"zoomDurationStart",
+			"zoomDurationEnd",
 			"start",
 			"finish",
 			"duration",
 		],
 		number: [
-			"zoomDurationStart",
-			"zoomDurationEnd",
 			"star.numPoints",
 			"star.innerRadius",
 			"star.outerRadius",
@@ -610,7 +613,7 @@ class DomainStore {
 							if (this.curTab.requestCount > this.minRequestCountForNewTab) {
 								// TODO: prompt to go to new tab
 								// ask to move the current request to new tab
-								if (window.confirm("The current request will be moved to a new tab. Continue?")) {
+								if (window.confirm(this.PROMPT_TO_MOVE_TO_NEW_TAB)) {
 									const newTab = this.moveLastToNewTab(requestResultBubble);
 									newTab.setSuggestedEditOperationKeys(suggestedEditOperationKeys);
 									newTab.setEditOperationKey(suggestedEditOperationKeys[0]);

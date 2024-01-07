@@ -55,7 +55,9 @@ const EditSpecificPreview = observer(function EditSpecificPreview({
 		backgroundFill = edit.textParameters.background.fill;
 		fill = edit.textParameters.style.fill;
 		if (edit.textParameters.content?.length > 0) {
-			content = edit.textParameters.content;
+			content = (edit.textParameters.content.substring(0, 10) 
+				+ (edit.textParameters.content.length > 10 ? "..." : "")
+			);
 		}
 	}
 	else if (curTab.editOperationKey === "image") {
@@ -99,7 +101,7 @@ const EditSpecificPreview = observer(function EditSpecificPreview({
 	else if (curTab.editOperationKey === "zoom") {
 		backgroundFill = "red";
 		fill = "white";
-		content = `in: ${edit.zoomParameters.zoomDurationStart}\n out: ${edit.zoomParameters.zoomDurationEnd}`;
+		content = `Zoom: ${edit.zoomParameters.zoomDurationStart}, ${edit.zoomParameters.zoomDurationEnd}\n`;
 	}
 	else if (curTab.editOperationKey === "blur") {
 		fill = "white"
