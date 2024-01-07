@@ -55,8 +55,8 @@ const EditSpecificPreview = observer(function EditSpecificPreview({
 		backgroundFill = edit.textParameters.background.fill;
 		fill = edit.textParameters.style.fill;
 		if (edit.textParameters.content?.length > 0) {
-			content = (edit.textParameters.content.substring(0, 10) 
-				+ (edit.textParameters.content.length > 10 ? "..." : "")
+			content = (edit.textParameters.content.substring(0, 6) 
+				+ (edit.textParameters.content.length > 7 ? "..." : "")
 			);
 		}
 	}
