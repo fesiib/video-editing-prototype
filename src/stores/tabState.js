@@ -300,7 +300,6 @@ class TabState {
 		const fromActive = this.activeEdits.findIndex((edit) => edit.commonState.id === id);
 		const fromUser = this.userBubbles.findIndex((bubble) => bubble.edit !== null && bubble.edit.commonState.id === id);
 		const fromSystem = this.systemBubbles.findIndex((bubble) => bubble.edit !== null && bubble.edit.commonState.id === id);
-		console.log(this.idx, id, fromActive, fromUser, fromSystem, this.activeEdits.map((edit) => edit.commonState.id))
 		if (fromActive >= 0) {
 			return this.activeEdits[fromActive];
 		}

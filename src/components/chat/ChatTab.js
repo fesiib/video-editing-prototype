@@ -644,7 +644,6 @@ const ChatTab = observer(function ChatTab() {
             <div 
 				className="relative overflow-auto mt-3 flex flex-col gap-3"
 				style={{ maxHeight: uiStore.chatConst.maxHeight }}
-				id={"chat-tab"}
 				onScroll={onScroll}
 			>
 				{

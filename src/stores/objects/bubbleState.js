@@ -261,7 +261,6 @@ class BubbleState {
 
 	bubbleStateConverter = {
 		toFirestore: function(bubbleState) {
-			console.log("bubble to", bubbleState.appliedEditId, bubbleState.edit?.commonState.id, toJS(bubbleState));
 			const data = {
 				id: bubbleState.id,
 				toggle: bubbleState.toggle,

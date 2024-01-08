@@ -891,7 +891,6 @@ class EditState {
 
 	editStateConverter = {
 		toFirestore: function(editState) {
-			console.log("to", editState);
 			const data = {
 				textParameters: { ...toJS(editState.textParameters) },
 				imageParameters: { ...toJS(editState.imageParameters) },

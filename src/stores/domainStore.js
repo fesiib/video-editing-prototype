@@ -680,7 +680,12 @@ class DomainStore {
 								spatial: relevantText.spatial,
 								edit: relevantText.edit,
 								custom: Object.values(relevantText.parameters).flat().map(
-									(item) => [item.offset, item.offset + item.reference.length]
+									(item) => {
+										return {
+											start: item.offset,
+											end: item.offset + item.reference.length,
+										};
+									}
 								),
 							};
 							newEditBubble.edit.setResponseBody({
