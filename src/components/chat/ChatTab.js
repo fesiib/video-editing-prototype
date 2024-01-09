@@ -444,6 +444,7 @@ const SummaryMessageBubble = observer(function SummaryMessageBubble({
 
 	const scrollToPrevCommand = action((event) => {
 		const chatTab = document.getElementById("chat-tab");
+		console.log(chatTab)
 		if (chatTab) {
 			let newScrollTop = -2;
 			for (let child of chatTab.children) {
@@ -642,6 +643,7 @@ const ChatTab = observer(function ChatTab() {
         <div>
 			<CommandSpace />
             <div 
+				id="chat-tab"
 				className="relative overflow-auto mt-3 flex flex-col gap-3"
 				style={{ maxHeight: uiStore.chatConst.maxHeight }}
 				onScroll={onScroll}
